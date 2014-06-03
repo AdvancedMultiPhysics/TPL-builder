@@ -1,0 +1,106 @@
+# This will configure and build libmesh
+# User can configure the source path by speficfying LIBMESH_SRC_DIR,
+#    the download path by specifying LIBMESH_URL, or the installed 
+#    location by specifying LIBMESH_INSTALL_DIR
+
+
+# Intialize download/src/install vars
+SET( LIBMESH_BUILD_DIR "${CMAKE_BINARY_DIR}/LIBMESH-prefix/src/LIBMESH-build" )
+IF ( LIBMESH_URL ) 
+    MESSAGE_TPL("   LIBMESH_URL = ${LIBMESH_URL}")
+    SET( LIBMESH_CMAKE_URL            "${LIBMESH_URL}"       )
+    SET( LIBMESH_CMAKE_DOWNLOAD_DIR   "${LIBMESH_BUILD_DIR}" )
+    SET( LIBMESH_CMAKE_SOURCE_DIR     "${LIBMESH_BUILD_DIR}" )
+    SET( LIBMESH_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/libmesh" )
+    SET( CMAKE_BUILD_LIBMESH TRUE )
+ELSEIF ( LIBMESH_SRC_DIR )
+    VERIFY_PATH("${LIBMESH_SRC_DIR}")
+    MESSAGE_TPL("   LIBMESH_SRC_DIR = ${LIBMESH_SRC_DIR}")
+    SET( LIBMESH_CMAKE_URL            "${LIBMESH_SRC_DIR}"   )
+    SET( LIBMESH_CMAKE_DOWNLOAD_DIR   "${LIBMESH_BUILD_DIR}" )
+    SET( LIBMESH_CMAKE_SOURCE_DIR     "${LIBMESH_BUILD_DIR}" )
+    SET( LIBMESH_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/libmesh" )
+    SET( CMAKE_BUILD_LIBMESH TRUE )
+ELSEIF ( LIBMESH_INSTALL_DIR ) 
+    SET( LIBMESH_CMAKE_INSTALL_DIR "${LIBMESH_INSTALL_DIR}" )
+    SET( CMAKE_BUILD_LIBMESH FALSE )
+ELSE()
+    MESSAGE(FATAL_ERROR "Please specify LIBMESH_SRC_DIR, LIBMESH_URL, or LIBMESH_INSTALL_DIR")
+ENDIF()
+IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
+    SET( LIBMESH_METHOD dbg )
+ELSEIF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" )
+    SET( LIBMESH_METHOD opt )
+ELSE()
+    MESSAGE ( FATAL_ERROR "Unknown CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" )
+ENDIF()
+SET( LIBMESH_HOSTTYPE x86_64-unknown-linux-gnu )
+SET( LIBMESH_INSTALL_DIR "${LIBMESH_CMAKE_INSTALL_DIR}" )
+MESSAGE_TPL( "   LIBMESH_INSTALL_DIR = ${LIBMESH_INSTALL_DIR}" )
+FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(LIBMESH_INSTALL_DIR \"${LIBMESH_INSTALL_DIR}\")\n" )
+FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(LIBMESH_HOST_TYPE ${LIBMESH_HOSTTYPE} )\n" )
+FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(LIBMESH_COMPILE_TYPE ${LIBMESH_METHOD} )\n" )
+
+
+# Configure libmesh
+IF ( CMAKE_BUILD_LIBMESH )
+    SET( CONFIGURE_OPTIONS )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --prefix=${CMAKE_INSTALL_PREFIX}/libmesh )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-cc=${CMAKE_C_COMPILER} )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-cxx=${CMAKE_CXX_COMPILER} )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-f77=${CMAKE_Fortran_COMPILER} )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-pfem )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-second )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-parmetis )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-petsc )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-trilinos )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-pfem )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-pfem )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --host=x86_64-unknown-linux-gnu )
+    IF ( ENABLE_SHARED AND ENABLE_STATIC )
+        MESSAGE(FATAL_ERROR "Compiling libmesh with both static and shared libraries is not supported")
+    ELSEIF ( ENABLE_SHARED )
+        SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-shared )
+    ELSEIF ( ENABLE_STATIC )
+        SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-shared )
+    ENDIF()
+ENDIF()
+
+
+# Build libmesh
+IF ( CMAKE_BUILD_LIBMESH )
+    EXTERNALPROJECT_ADD( 
+        LIBMESH
+        URL                 "${LIBMESH_CMAKE_URL}"
+        DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CONFIGURE_COMMAND   ${LIBMESH_BUILD_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}/libmesh METHOD=${LIBMESH_METHOD} ${CONFIGURE_OPTIONS}
+        BUILD_COMMAND       make -j ${PROCS_INSTALL} METHOD=${LIBMESH_METHOD} VERBOSE=1
+        BUILD_IN_SOURCE     1
+        INSTALL_COMMAND     ""
+        DEPENDS             
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+    EXTERNALPROJECT_ADD_STEP(
+        LIBMESH
+        copy-libs
+        COMMENT             "Installing"
+        COMMAND             ${CMAKE_COMMAND} -E copy_directory include "${CMAKE_INSTALL_PREFIX}/libmesh/include"
+        COMMAND             ${CMAKE_COMMAND} -E copy_directory lib "${CMAKE_INSTALL_PREFIX}/libmesh/lib"
+        COMMAND             ${CMAKE_COMMAND} -E copy_directory contrib "${CMAKE_INSTALL_PREFIX}/libmesh/contrib"
+        #COMMAND             ${CMAKE_COMMAND} -E copy_directory contrib/lib "${CMAKE_INSTALL_PREFIX}/libmesh/contrib/lib"
+        #COMMAND             ${CMAKE_COMMAND} -E copy_directory contrib/include "${CMAKE_INSTALL_PREFIX}/libmesh/contrib/include"
+        COMMENT             ""
+        DEPENDEES           build
+        DEPENDERS           install
+        WORKING_DIRECTORY   "${LIBMESH_BUILD_DIR}"
+        LOG                 1
+    )
+    ADD_TPL_SAVE_LOGS( LIBMESH )
+    ADD_TPL_CLEAN( LIBMESH )
+ELSE()
+    ADD_TPL_EMPTY( LIBMESH )
+ENDIF()
+
+

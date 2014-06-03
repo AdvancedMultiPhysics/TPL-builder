@@ -1,0 +1,30 @@
+export SAMR_BUILDER=/projects/samrbuilder/src
+export TPL_ROOT=/projects/samrbuilder/tpls
+export INSTALL_DIR=/projects/samrbuilder/install/opt
+
+cmake                                                       \
+    -D CMAKE_BUILD_TYPE=Release                             \
+    -D C_COMPILER=mpicc                                     \
+    -D CXX_COMPILER=mpic++                                  \
+    -D Fortran_COMPILER=mpif90                              \
+        -D FFLAGS="-fPIC"                                   \
+        -D CFLAGS="-fPIC"                                   \
+        -D CXXFLAGS="-fPIC"                                 \
+        -D LDFLAGS=""                                       \
+    -D ENABLE_STATIC:BOOL=ON                                \
+    -D ENABLE_SHARED:BOOL=OFF                               \
+    -D INSTALL_DIR:PATH=${INSTALL_DIR}                      \
+    -D PROCS_INSTALL=4                                      \
+    -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;SAMRAI" \
+        -D BOOST-HEADERS_URL="${TPL_ROOT}/boost-1.47.0-headers.tar.gz" \
+        -D BLAS_INSTALL_DIR="${TPL_ROOT}/acml-5.3.1/gfortran64/lib" \
+        -D LAPACK_INSTALL_DIR="${TPL_ROOT}/acml-5.3.1/gfortran64/lib" \
+        -D BLAS_LIB=libacml.a                               \
+        -D LAPACK_LIB=libacml.a                             \
+        -D ZLIB_INSTALL_DIR="/usr/local/lib"                \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.2"                \
+        -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"        \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"      \
+        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.4.1"       \
+    ${SAMR_BUILDER}
+
