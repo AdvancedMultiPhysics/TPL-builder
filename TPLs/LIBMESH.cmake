@@ -15,10 +15,10 @@ IF ( LIBMESH_URL )
     SET( CMAKE_BUILD_LIBMESH TRUE )
 ELSEIF ( LIBMESH_SRC_DIR )
     VERIFY_PATH("${LIBMESH_SRC_DIR}")
-    MESSAGE_TPL("   LIBMESH_SRC_DIR = ${LIBMESH_SRC_DIR}")
-    SET( LIBMESH_CMAKE_URL            "${LIBMESH_SRC_DIR}"   )
-    SET( LIBMESH_CMAKE_DOWNLOAD_DIR   "${LIBMESH_BUILD_DIR}" )
-    SET( LIBMESH_CMAKE_SOURCE_DIR     "${LIBMESH_BUILD_DIR}" )
+    MESSAGE_TPL("   LIBMESH_SRC_DIR = ${LIBMESH_SRC_DIR}" )
+    SET( LIBMESH_CMAKE_URL            ""                  )
+    SET( LIBMESH_CMAKE_DOWNLOAD_DIR   ""                  )
+    SET( LIBMESH_CMAKE_SOURCE_DIR     "${LIBMESH_SRC_DIR}" )
     SET( LIBMESH_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/libmesh" )
     SET( CMAKE_BUILD_LIBMESH TRUE )
 ELSEIF ( LIBMESH_INSTALL_DIR ) 
@@ -49,6 +49,7 @@ IF ( CMAKE_BUILD_LIBMESH )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-cc=${CMAKE_C_COMPILER} )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-cxx=${CMAKE_CXX_COMPILER} )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-f77=${CMAKE_Fortran_COMPILER} )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-methods=${LIBMESH_METHOD} )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-pfem )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-mpi )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-gzstreams )
@@ -57,7 +58,9 @@ IF ( CMAKE_BUILD_LIBMESH )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-parmetis )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-petsc )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-trilinos )
-    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --host=x86_64-unknown-linux-gnu )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-examples )
+    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-glibcxx-debugging )
+    # SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --host=x86_64-unknown-linux-gnu )
     IF ( ENABLE_SHARED AND ENABLE_STATIC )
         MESSAGE(FATAL_ERROR "Compiling libmesh with both static and shared libraries is not supported")
     ELSEIF ( ENABLE_SHARED )
@@ -76,27 +79,12 @@ IF ( CMAKE_BUILD_LIBMESH )
         DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ${LIBMESH_BUILD_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}/libmesh METHOD=${LIBMESH_METHOD} ${CONFIGURE_OPTIONS}
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} METHOD=${LIBMESH_METHOD} VERBOSE=1
-        BUILD_IN_SOURCE     1
-        INSTALL_COMMAND     ""
+        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${CONFIGURE_OPTIONS}
+        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     make install
         DEPENDS             
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    EXTERNALPROJECT_ADD_STEP(
-        LIBMESH
-        copy-libs
-        COMMENT             "Installing"
-        COMMAND             ${CMAKE_COMMAND} -E copy_directory include "${CMAKE_INSTALL_PREFIX}/libmesh/include"
-        COMMAND             ${CMAKE_COMMAND} -E copy_directory lib "${CMAKE_INSTALL_PREFIX}/libmesh/lib"
-        COMMAND             ${CMAKE_COMMAND} -E copy_directory contrib "${CMAKE_INSTALL_PREFIX}/libmesh/contrib"
-        #COMMAND             ${CMAKE_COMMAND} -E copy_directory contrib/lib "${CMAKE_INSTALL_PREFIX}/libmesh/contrib/lib"
-        #COMMAND             ${CMAKE_COMMAND} -E copy_directory contrib/include "${CMAKE_INSTALL_PREFIX}/libmesh/contrib/include"
-        COMMENT             ""
-        DEPENDEES           build
-        DEPENDERS           install
-        WORKING_DIRECTORY   "${LIBMESH_BUILD_DIR}"
-        LOG                 1
     )
     ADD_TPL_SAVE_LOGS( LIBMESH )
     ADD_TPL_CLEAN( LIBMESH )
