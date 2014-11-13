@@ -158,6 +158,7 @@ The important variables are:
     ENABLE_STATIC    - Do we want to compile static libraries (default)
     ENABLE_SHARED    - Do we want to compile shared libraries
                        Note: we can only build one type of library (shared or static) at this time
+    ENABLE_GXX_DEBUG - Do we want to enable GLIBCXX_DEBUG flags (disabled by default)
     INSTALL_DIR      - The install path where we want to install the libraries
     PROCS_INSTALL    - The number of processors to use to compile each TPL.
                        Note: we specify the number of processors to use for parallel build
