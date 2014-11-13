@@ -1,0 +1,31 @@
+export TPL_ROOT=/lustre/atlas/proj-shared/csc142/qbp/packages/src
+export SAMR_BUILDER=${TPL_ROOT}/samrbuilder
+
+cmake                                               \
+    -D CMAKE_BUILD_TYPE=Release                     \
+    -D TPL_INSTALL_DIR:PATH="/lustre/atlas/proj-shared/csc142/qbp/packages/install/gcc-4.8.1-opt" \
+    -D C_COMPILER=cc                      \
+    -D CXX_COMPILER=CC                    \
+    -D Fortran_COMPILER=ftn                \
+    -D FFLAGS="-fPIC"                           \
+    -D CFLAGS="-fPIC"                           \
+    -D CXXFLAGS="-fPIC"                         \
+    -D LDFLAGS=""                               \
+    -D ENABLE_STATIC:BOOL=ON                        \
+    -D ENABLE_SHARED:BOOL=OFF                       \
+    -D PROCS_INSTALL=16                                             \
+    -D TPL_LIST:STRING="BOOST;TIMER;LAPACK;PETSC;ZLIB;HDF5;HYPRE;SAMRAI" \
+    -D BLAS_INSTALL_DIR="/opt/cray/libsci/12.1.01/GNU/48/sandybridge/lib"            \
+    -D BLAS_LIB="libsci_gnu.a"                                                                                                        \
+    -D LAPACK_INSTALL_DIR="/opt/cray/libsci/12.1.01/GNU/48/sandybridge/lib"          \
+    -D LAPACK_LIB="libsci_gnu.a"                                 \
+    -D ZLIB_INSTALL_DIR="/usr/lib64"                 \
+    -D HDF5_INSTALL_DIR="/opt/cray/hdf5-parallel/1.8.11/GNU/48"                    \
+    -D BOOST_URL="${TPL_ROOT}/boost-1_52_0.tar.gz"                          \
+    -D BOOST_ONLY_COPY_HEADERS:BOOL=true                           \
+    -D HYPRE_SRC_DIR="${TPL_ROOT}/hypre-2.4.0b"                  \
+    -D PETSC_SRC_DIR="${TPL_ROOT}/petsc-3.2"                            \
+    -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src"                         \
+    -D SAMRAI_SRC_DIR="${TPL_ROOT}/samrai-v3.7.3/SAMRAI"    \
+    ${SAMR_BUILDER}
+

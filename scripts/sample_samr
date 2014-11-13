@@ -15,7 +15,7 @@ cmake                                                       \
     -D ENABLE_SHARED:BOOL=OFF                               \
     -D INSTALL_DIR:PATH=${INSTALL_DIR}                      \
     -D PROCS_INSTALL=4                                      \
-    -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;SAMRAI" \
+    -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
         -D BOOST-HEADERS_URL="${TPL_ROOT}/boost-1.47.0-headers.tar.gz" \
         -D BLAS_INSTALL_DIR="${TPL_ROOT}/acml-5.3.1/gfortran64/lib" \
         -D LAPACK_INSTALL_DIR="${TPL_ROOT}/acml-5.3.1/gfortran64/lib" \
@@ -26,5 +26,6 @@ cmake                                                       \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"        \
         -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"      \
         -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.4.1"       \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src"     \
     ${SAMR_BUILDER}
 

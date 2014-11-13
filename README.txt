@@ -1,6 +1,7 @@
 This project is a CMake wrapper that will download and build the
-dependencies for AMP.  
-Note: the user can choose to build or not build AMP in addtion to the TPLs.
+dependencies for SAMRApps and AMP.  
+This may include SAMRAI or AMP and it's dependencies.
+Note: the user can choose to build or not build AMP/SAMRUtils in addtion to the TPLs.
 
 This help file can be viewed by any text editor or by passing "-D HELP=1"
 to CMake as one of the arguments in the configure scripts (discussed later).
@@ -27,7 +28,8 @@ The current TPL list and tested versions are:
     ZLIB
     HDF5
     HYPRE
-    PETSc (3.0,3.2)
+    PETSc (3.2)
+    SAMRAI (3.7.3-modified)
     LIBMESH (custom version availible on bitbucket)
     TRILINOS
 
@@ -40,7 +42,7 @@ are supported by specifying their installed location through LAPACK_INSTALL_DIR.
 
 
 To begin the configure/build process there are 4 paths that we will refer to in this document:
-1) AMP_BUILDER - The source tree for the AMP_BUILDER project (path to this file)
+1) TPL_BUILDER - The source tree for the TPL_BUILDER project (path to this file)
 2) TPL_SRC_DIR - The source tree for each TPL if provided.  If we are using the automatic
                  download, this will be created by the builder.  
                  There are 3 variations on this variable (TPL_SRC_DIR, TPL_URL, TPL_INSTALL_DIR)
@@ -48,7 +50,7 @@ To begin the configure/build process there are 4 paths that we will refer to in 
                  Note: replace TPL with the TPL name (e.g. BOOST_SRC_DIR). 
 3) BUILD_DIR   - The build directory where we will execute the cmake command and 
                  build all TPLs.  This should NOT be in any of the source directories
-                 including the AMP_BUILDER directory.  
+                 including the TPL_BUILDER directory.  
                  Note: this is always the current directory where we call the cmake command.
                  It is NOT set in the configure script, but is the directory from which 
                  we call the script.  It is also the directory where we will call make.
@@ -57,9 +59,10 @@ To begin the configure/build process there are 4 paths that we will refer to in 
 
 An example folder layout is:
 root_dir
-    | -- AMP-builder
+    | -- TPL_BUILDER
     | -- TPL_ROOT
     |       | -- boost_1_47_0.tar.gz
+    |       | -- SAMRAI_v3.7.3
     |       | -- AMP
     |       | ...
     | -- build
@@ -68,13 +71,41 @@ root_dir
     | -- install
             | -- debug
             | -- opt
-In this example layout if we are creating an opt install, AMP_BUILDER=root_dir/AMP-builder,
-TPL_SRC_DIR=root_dir/AMP-builder, BOOST_URL=root_dir/TPL_ROOT/boost_1_47_0.tar.gz,
+In this example layout if we are creating an opt install, TPL_BUILDER=root_dir/TPL_BUILDER,
+TPL_SRC_DIR=root_dir/TPL_BUILDER, BOOST_URL=root_dir/TPL_ROOT/boost_1_47_0.tar.gz,
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.7.3, AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
 BUILD_DIR=root_dir/build/opt, and INSTALL_DIR=root_dir/install/opt.  
 We would be operating from root_dir/build/opt.
 
 
-A sample configure script for this project is:
+A sample configure script for SAMRAI is:
+    cmake                                               \
+        -D CMAKE_BUILD_TYPE=Release                     \
+        -D C_COMPILER=mpicc                             \
+        -D CXX_COMPILER=mpic++                          \
+        -D Fortran_COMPILER=mpif90                      \
+            -D CFLAGS="-fPIC"                           \
+            -D CXXFLAGS="-fPIC"                         \
+            -D FFLAGS="-fPIC"                           \
+            -D LDFLAGS=""                               \
+        -D ENABLE_STATIC:BOOL=ON                        \
+        -D ENABLE_SHARED:BOOL=OFF                       \
+        -D INSTALL_DIR:PATH=${INSTALL_DIR}              \
+        -D PROCS_INSTALL=4                              \
+        -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
+           -D BOOST_URL="${TPL_ROOT}/boost-1.47.0-headers.tar.gz" \
+           -D BOOST_ONLY_COPY_HEADERS:BOOL=true         \
+           -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"       \
+           -D ZLIB_INSTALL_DIR="/usr/local/lib"         \
+           -D PETSC_URL="${TPL_ROOT}/petsc-3.2"         \
+           -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz" \
+           -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz" \
+           -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.4.1" \
+           -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
+        ${SAMR_BUILDER}
+
+
+A sample configure script for AMP is:
     export AMP_BUILDER=/projects/AMP/TPLs/TPL-builder
     export TPL_ROOT=/packages/TPLs/src
     export INSTALL_DIR=/projects/AMP/TPLs/install/debug
@@ -108,6 +139,9 @@ A sample configure script for this project is:
         ${AMP_BUILDER}
 
 
+More sample script may be found in the scripts subdirectory.
+
+
 There are a number of variables that can be passed to the configure process.
 Unless otherwise noted, all variables are optional.  
 The important variables are:
@@ -138,7 +172,7 @@ The important variables are:
                            get_property could not find TARGET LAPACK.  Perhaps it has not yet been created.
                        The order of the subsequent TPL_VARIABLES does not matter.
 
-The final argument must always point to the AMP_BUILDER directory.  
+The final argument must always point to the TPL_BUILDER directory.  
 
 
 For each TPL, there are additional arguments that may be provided.  These arguments control
@@ -159,6 +193,7 @@ how that that TPL is built.
     TPL_TEST         - Run the TPL tests as part of the build (if they exist).  Default is false. 
 
 
+
 Special TPL FLAGS:
 BOOST:
     BOOST_ONLY_COPY_HEADERS - Only copy the headers from the URL/SRC/INSTALL location.
@@ -176,6 +211,9 @@ LAPACK:
     LAPACK_LIB       - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. liblapack.a)
 HDF5:
     HDF5_DISABLE_CXX - Disable cxx support in hdf5
+SAMRUTILS:
+    DISABLE_THREAD_CHANGES - Disable all threading support
+    TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
 AMP:
     AMP_Data         - Path to the data directory for AMP
 
@@ -195,8 +233,7 @@ To rebuild a TPL, use "make TPL-clean" followed by "make TPL"
 Additionally all TPLs are setup to perform out of source builds.  If a given TPL does not
 support out of source builds (e.g. boost), then the source directory will be copied to a
 temporary directory for building.  This insures that we can perform multiple builds in 
-parallel (e.g. Debug and Release) without corrupting the build or src trees.  
-
+parallel (e.g. Debug and Release) without corrupting the build or src trees.
 
 
 
