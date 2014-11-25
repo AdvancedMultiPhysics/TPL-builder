@@ -65,9 +65,9 @@ ENDMACRO()
 MACRO( ADD_TPL_SAVE_LOGS TPL )
     FILE( MAKE_DIRECTORY "${${TPL}_INSTALL_DIR}" )
     FILE( MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/logs/${TPL}" )
-    SET( tpl_cmds ${TPL}-build ${TPL}-pre-configure ${TPL}-configure ${TPL}-done 
+    SET( tpl_cmds extract-${TPL} ${TPL}-build ${TPL}-pre-configure ${TPL}-configure ${TPL}-done 
         ${TPL}-download ${TPL}-download-impl ${TPL}-mkdir ${TPL}-patch ${TPL}-install 
-        ${TPL}-build-test ${TPL}-test ${TPL}-check-test ${TPL}-update ${TPL}-post-install )
+        ${TPL}-build-test ${TPL}-test ${TPL}-check-test ${TPL}-update ${TPL}-post-install verify-${TPL} )
     SET( RM_LIST )
     FOREACH( tmp ${tpl_cmds} )
         SET( RM_LIST ${RM_LIST} ${tmp} ${tmp}.cmake )
