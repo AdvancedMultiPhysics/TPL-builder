@@ -68,10 +68,32 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
     SET( tpl_cmds extract-${TPL} ${TPL}-build ${TPL}-pre-configure ${TPL}-configure ${TPL}-done 
         ${TPL}-download ${TPL}-download-impl ${TPL}-mkdir ${TPL}-patch ${TPL}-install 
         ${TPL}-build-test ${TPL}-test ${TPL}-check-test ${TPL}-update ${TPL}-post-install verify-${TPL} )
-    SET( RM_LIST )
+    SET( RM_LIST start )
     FOREACH( tmp ${tpl_cmds} )
         SET( RM_LIST ${RM_LIST} ${tmp} ${tmp}.cmake )
     ENDFOREACH()
+    EXTERNALPROJECT_ADD_STEP(
+        ${TPL}
+        start-stamp
+        COMMAND             ${CMAKE_COMMAND} -Dfilename=start -P "${CMAKE_CURRENT_SOURCE_DIR}/write_stamp.cmake"
+        COMMENT             ""
+        DEPENDEES           
+        DEPENDERS           configure
+        ALWAYS              1
+        WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
+        LOG                 0
+    )
+    EXTERNALPROJECT_ADD_STEP(
+        ${TPL}
+        stop-stamp
+        COMMAND             ${CMAKE_COMMAND} -Dfilename=start -P "${CMAKE_CURRENT_SOURCE_DIR}/print_elapsed.cmake"
+        COMMENT             ""
+        DEPENDEES           install
+        DEPENDERS           
+        ALWAYS              1
+        WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
+        LOG                 0
+    )
     EXTERNALPROJECT_ADD_STEP(
         ${TPL}
         post-install
@@ -79,7 +101,7 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
         COMMAND             ${CMAKE_COMMAND} -E remove ${RM_LIST}  ${TPL}-urlinfo.txt
         COMMAND             ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
         COMMENT             ""
-        DEPENDEES           install
+        DEPENDEES           stop-stamp
         WORKING_DIRECTORY   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
         LOG                 0
     )
