@@ -10,8 +10,8 @@ MACRO( ADD_DISTCLEAN )
         distclean
         ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs"
         COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/TPLs.cmake"
-        COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
-        COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake  Makefile
+        COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles Testing
+        COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake CTestTestfile.cmake DartConfiguration.tcl Makefile
         ${DISTCLEAN_CMDS}
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" 
     )
@@ -68,29 +68,29 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
     SET( tpl_cmds extract-${TPL} ${TPL}-build ${TPL}-pre-configure ${TPL}-configure ${TPL}-done 
         ${TPL}-download ${TPL}-download-impl ${TPL}-mkdir ${TPL}-patch ${TPL}-install 
         ${TPL}-build-test ${TPL}-test ${TPL}-check-test ${TPL}-update ${TPL}-post-install verify-${TPL} )
-    SET( RM_LIST start )
     FOREACH( tmp ${tpl_cmds} )
         SET( RM_LIST ${RM_LIST} ${tmp} ${tmp}.cmake )
     ENDFOREACH()
     EXTERNALPROJECT_ADD_STEP(
         ${TPL}
         start-stamp
-        COMMAND             ${CMAKE_COMMAND} -Dfilename=start -P "${CMAKE_CURRENT_SOURCE_DIR}/write_stamp.cmake"
+        COMMAND             ${CMAKE_COMMAND} -Dfilename=time -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_stamp.cmake"
         COMMENT             ""
         DEPENDEES           
         DEPENDERS           configure
-        ALWAYS              1
+        ALWAYS              0
         WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
         LOG                 0
     )
     EXTERNALPROJECT_ADD_STEP(
         ${TPL}
         stop-stamp
-        COMMAND             ${CMAKE_COMMAND} -Dfilename=start -P "${CMAKE_CURRENT_SOURCE_DIR}/print_elapsed.cmake"
+        COMMAND             ${CMAKE_COMMAND} -Dfilename=time -Dappend=1 -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_stamp.cmake"
+        COMMAND             ${CMAKE_COMMAND} -Dfilename=time -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/print_elapsed.cmake"
         COMMENT             ""
         DEPENDEES           install
         DEPENDERS           
-        ALWAYS              1
+        ALWAYS              0
         WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
         LOG                 0
     )
@@ -102,6 +102,7 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
         COMMAND             ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
         COMMENT             ""
         DEPENDEES           stop-stamp
+        ALWAYS              0
         WORKING_DIRECTORY   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
         LOG                 0
     )
@@ -113,6 +114,13 @@ MACRO( MESSAGE_TPL MSG )
     MESSAGE( "${MSG}" )
     FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# ${MSG}\n" )
 ENDMACRO() 
+
+
+# Macro to create a test to print the results of the build
+MACRO( ADD_BUILD_TEST TPL )
+    ADD_TEST( ${TPL}-build ${CMAKE_COMMAND} -DTPL=${TPL} -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/check_build.cmake" )
+    SET_TESTS_PROPERTIES( ${TPL}-build PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" )
+ENDMACRO()
 
 
 

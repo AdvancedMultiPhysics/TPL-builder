@@ -94,6 +94,16 @@ ENDFOREACH()
 FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
 
 
+# Add build-test target to print results of build process
+INCLUDE(CTest)
+ADD_TEST( echo-build ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/echo_last_build.cmake" )
+SET_TESTS_PROPERTIES( echo-build PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" )
+FOREACH( TPL ${TPL_LIST} )
+    ADD_BUILD_TEST( ${TPL} )
+ENDFOREACH()
+FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
+
+
 # Add distclean
 ADD_DISTCLEAN()
 
