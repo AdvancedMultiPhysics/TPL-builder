@@ -207,6 +207,7 @@ CTEST_CONFIGURE(
 
 # Run the configure/build 
 CTEST_BUILD()
+CTEST_TEST()
 
 
 
