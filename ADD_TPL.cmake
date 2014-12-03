@@ -10,7 +10,8 @@ MACRO( ADD_DISTCLEAN )
         distclean
         ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs"
         COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/TPLs.cmake"
-        COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles Testing
+        COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
+        COMMAND ${CMAKE_COMMAND} -E remove_directory Testing
         COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake CTestTestfile.cmake DartConfiguration.tcl Makefile
         ${DISTCLEAN_CMDS}
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" 
