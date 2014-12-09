@@ -212,6 +212,11 @@ LAPACK:
     LAPACK_LIB       - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. liblapack.a)
 HDF5:
     HDF5_DISABLE_CXX - Disable cxx support in hdf5
+TRILINOS:
+    TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
+    TRILINOS_PACKAGES_EXTRA - List of extra pacakges (e.g. EPETRA)
+    TRILINOS_REPOSITORIES_EXTRA - List of extra repositories
+    TRILINOS_FLAGS_EXTRA - List of extra flags (e.g. "-DBUILD_SHARED_LIBS=OFF;-DTPL_ENABLE_MPI=ON" )
 SAMRUTILS:
     DISABLE_THREAD_CHANGES - Disable all threading support
     TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
