@@ -29,6 +29,7 @@ IF(CMAKE_BUILD_DTK)
         GIT_REPOSITORY      https://github.com/ORNL-CEES/DataTransferKit.git
         GIT_TAG             master
         DOWNLOAD_DIR        ${DTK_SRC_DIR}
+        SOURCE_DIR        ${DTK_SRC_DIR}
         CONFIGURE_COMMAND   ""
         BUILD_COMMAND       ""
         BUILD_IN_SOURCE     0
