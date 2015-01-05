@@ -19,7 +19,9 @@ cmake                                               \
     -D BLAS_LIB="libsci_gnu.a"                                                                                                        \
     -D LAPACK_INSTALL_DIR="/opt/cray/libsci/12.1.01/GNU/48/sandybridge/lib"          \
     -D LAPACK_LIB="libsci_gnu.a"                                 \
-    -D ZLIB_INSTALL_DIR="/usr/lib64"                 \
+    -D ZLIB_INSTALL_DIR="/usr"                                         \
+    -D ZLIB_INCLUDE_DIR="/usr/include"                                         \
+    -D ZLIB_LIB_DIR="/usr/lib64"                                         \
     -D HDF5_INSTALL_DIR="/opt/cray/hdf5-parallel/1.8.11/GNU/48"                    \
     -D BOOST_URL="${TPL_ROOT}/boost-1_52_0.tar.gz"                          \
     -D BOOST_ONLY_COPY_HEADERS:BOOL=true                           \
