@@ -54,15 +54,28 @@ FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# It may also include comment
 
 
 # Enable the desired languages
-ENABLE_LANGUAGE(C)
-ENABLE_LANGUAGE(CXX)
-ENABLE_LANGUAGE(Fortran)
+IF ( LANGUAGES )
+    STRING( REPLACE "," ";" LANGUAGES "${LANGUAGES}" )
+    FOREACH( lang ${LANGUAGES} )
+        ENABLE_LANGUAGE(${lang})
+    ENDFOREACH()
+ELSE()
+    ENABLE_LANGUAGE(C)
+    ENABLE_LANGUAGE(CXX)
+    ENABLE_LANGUAGE(Fortran)
+ENDIF()
 
 
 # Include CMake files
 INCLUDE(ExternalProject)
 INCLUDE(macros.cmake)
 
+# Set the system name
+IF (CMAKE_SIZEOF_VOID_P MATCHES 8) 
+    SET( SYSTEM_NAME "${CMAKE_SYSTEM_NAME}_64" ) 
+ELSE()
+    SET( SYSTEM_NAME "${CMAKE_SYSTEM_NAME}_32" ) 
+ENDIF() 
 
 # SET the global compile and link flags
 IDENTIFY_COMPILER()
