@@ -68,6 +68,7 @@ IF ( CMAKE_BUILD_SAMRAI )
     SET( ENV_SAMR ${ENV_SAMR} F77=${CMAKE_Fortran_COMPILER} FFLAGS=${CMAKE_Fortran_FLAGS} )
     SET( ENV_SAMR ${ENV_SAMR} FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${CMAKE_Fortran_FLAGS} )
     SET( ENV_SAMR ${ENV_SAMR} LDFLAGS=${SAMR_LDFLAGS} LIBS=${SAMR_LDLIBS} )
+    CHECK_ENABLE_FLAG( SAMRAI_DOCS 1 )
 ENDIF()
 
 
@@ -103,8 +104,6 @@ IF ( CMAKE_BUILD_SAMRAI )
             WORKING_DIRECTORY   "${SAMRAI_BUILD_DIR}"
             LOG                 1
         )
-    ENDIF()
-    IF ( SAMRAI_TEST )
         EXTERNALPROJECT_ADD_STEP(
             SAMRAI
             check-test
@@ -115,6 +114,21 @@ IF ( CMAKE_BUILD_SAMRAI )
             WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/SAMRAI-prefix/src/SAMRAI-stamp"
             LOG                 0
         )
+    ENDIF()
+    IF ( SAMRAI_DOCS )
+        EXTERNALPROJECT_ADD_STEP(
+            SAMRAI
+            build-docs
+            COMMENT             "Compiling documentation"
+            COMMAND             make dox -j ${PROCS_INSTALL} VERBOSE=1
+            COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/samrai-dox/html "${SAMRAI_INSTALL_DIR}/doxygen"
+            COMMENT             ""
+            DEPENDEES           install
+            DEPENDERS           
+            WORKING_DIRECTORY   "${SAMRAI_BUILD_DIR}"
+            LOG                 1
+        )
+
     ENDIF()
     ADD_TPL_SAVE_LOGS( SAMRAI )
     ADD_TPL_CLEAN( SAMRAI )

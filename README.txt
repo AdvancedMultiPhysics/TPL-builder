@@ -217,6 +217,9 @@ TRILINOS:
     TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
     TRILINOS_EXTRA_REPOSITORIES - List of extra repositories
     TRILINOS_EXTRA_FLAGS - List of extra flags (e.g. "-DBUILD_SHARED_LIBS=OFF;-DTPL_ENABLE_MPI=ON" )
+SAMRAI:
+    SAMRAI_TEST - Enable samrai tests (may take a while to complete)
+    SAMRAI_DOCS - Enable/disable building and installing the SAMRAI doxygen documentation (enabled by default)
 SAMRUTILS:
     DISABLE_THREAD_CHANGES - Disable all threading support
     TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
