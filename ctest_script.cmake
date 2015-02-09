@@ -159,6 +159,9 @@ IF ( N_PARALLEL_BUILD )
 ELSE()
     SET( CTEST_BUILD_COMMAND "${CMAKE_MAKE_PROGRAM}" )
 ENDIF()
+SET( CTEST_CUSTOM_WARNING_EXCEPTION 
+    "Manually-specified variables were not used by the project" 
+)
 
 
 # Set timeouts: 1 hour to build the project
