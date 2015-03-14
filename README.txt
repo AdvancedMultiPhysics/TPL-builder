@@ -211,7 +211,8 @@ LAPACK:
     BLAS_LIB         - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. libblas.a)
     LAPACK_LIB       - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. liblapack.a)
 HDF5:
-    HDF5_DISABLE_CXX - Disable cxx support in hdf5
+    HDF5_ENABLE_CXX - Enable cxx support in hdf5 (default is disabled)
+    HDF5_ENABLE_UNSUPPORTED - Enable unsupported options in hdf5
 TRILINOS:
     TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
     TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
