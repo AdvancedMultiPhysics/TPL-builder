@@ -159,6 +159,8 @@ The important variables are:
     ENABLE_SHARED    - Do we want to compile shared libraries
                        Note: we can only build one type of library (shared or static) at this time
     ENABLE_GXX_DEBUG - Do we want to enable GLIBCXX_DEBUG flags (disabled by default)
+    CMAKE_SYSTEM_NAME - The system type: Linux, Generic, etc.
+    CMAKE_SHARED_LINKER_FLAGS - Linker flags for shared libraries
     INSTALL_DIR      - The install path where we want to install the libraries
     PROCS_INSTALL    - The number of processors to use to compile each TPL.
                        Note: we specify the number of processors to use for parallel build
