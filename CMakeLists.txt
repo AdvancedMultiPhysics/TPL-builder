@@ -78,8 +78,7 @@ ELSE()
 ENDIF() 
 
 # SET the global compile and link flags
-IDENTIFY_COMPILER()
-SET_COMPILE_FLAGS()
+SET_COMPILER_FLAGS()
 
 
 # Set TPL list

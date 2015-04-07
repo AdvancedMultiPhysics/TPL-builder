@@ -112,12 +112,13 @@ A sample configure script for AMP is:
     cmake                                                       \
         -D CMAKE_BUILD_TYPE=Debug                               \
         -D C_COMPILER=mpicc                                     \
+            -D CFLAGS="-fPIC"                                   \
         -D CXX_COMPILER=mpic++                                  \
+            -D CXXFLAGS="-fPIC"                                 \
+            -D CXX_STD=c++11                                    \
         -D Fortran_COMPILER=mpif90                              \
             -D FFLAGS="-fPIC"                                   \
-            -D CFLAGS="-fPIC"                                   \
-            -D CXXFLAGS="-fPIC"                                 \
-            -D LDFLAGS=""                                       \
+        -D LDFLAGS=""                                           \
         -D ENABLE_STATIC:BOOL=ON                                \
         -D ENABLE_SHARED:BOOL=OFF                               \
         -D INSTALL_DIR:PATH=${INSTALL_DIR}                      \
@@ -153,6 +154,7 @@ The important variables are:
     Fortran_COMPILER - The compiler to use for compiling Fortran code
     CFLAGS           - Any user-defined flags for C code
     CXXFLAGS         - Any user-defined flags for C++ code
+    CXX_STD          - Specify the C++ standard to use (98, 11, 14, NONE)
     FFLAGS           - Any user-defined flags for Fortran code
     LDFLAGS          - Any user-defined flags for linking
     ENABLE_STATIC    - Do we want to compile static libraries (default)
