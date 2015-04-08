@@ -34,7 +34,7 @@ LOAD_VAR( N_PARALLEL_BUILD )
 LOAD_VAR( LANGUAGES )
 IF ( NOT CXX_STD )
     SET( CXX_STD 11 )
-ENDIF
+ENDIF()
 
 
 # Get the list of projects assuming a comma seperate list (we will convert to CMake list)
