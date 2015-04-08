@@ -8,6 +8,10 @@
 MACRO( LOAD_VAR VAR )
     SET( ${VAR} $ENV{${VAR}} )
 ENDMACRO()
+MACRO( LOAD_LIST VAR )
+    SET( ${VAR} $ENV{${VAR}} )
+    STRING( REPLACE "," ";" ${VAR} ${${VAR}} )
+ENDMACRO()
 
 
 
@@ -37,9 +41,8 @@ IF ( NOT CXX_STD )
 ENDIF()
 
 
-# Get the list of projects assuming a comma seperate list (we will convert to CMake list)
-LOAD_VAR( TPL_LIST )
-STRING( REPLACE "," ";" TPL_LIST ${TPL_LIST} )
+# Get the list of projects
+LOAD_LIST( TPL_LIST )
 
 
 # For each TPL load default variables
@@ -57,10 +60,10 @@ LOAD_VAR( BLAS_INSTALL_DIR)
 LOAD_VAR( LAPACK_INSTALL_DIR )
 LOAD_VAR( BLAS_LIB )
 LOAD_VAR( LAPACK_LIB )
-LOAD_VAR( TRILINOS_PACKAGES )
-LOAD_VAR( TRILINOS_EXTRA_PACKAGES )
-LOAD_VAR( TRILINOS_EXTRA_REPOSITORIES )
-LOAD_VAR( TRILINOS_EXTRA_FLAGS )
+LOAD_LIST( TRILINOS_PACKAGES )
+LOAD_LIST( TRILINOS_EXTRA_PACKAGES )
+LOAD_LIST( TRILINOS_EXTRA_REPOSITORIES )
+LOAD_LIST( TRILINOS_EXTRA_FLAGS )
 
 
 # Get the source directory based on the current directory
