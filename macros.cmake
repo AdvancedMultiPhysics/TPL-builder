@@ -6,10 +6,53 @@ INCLUDE(CheckCXXSourceCompiles)
 INCLUDE( ADD_TPL.cmake )
 
 
+
+# Dummy use to prevent unused cmake variable warning
+MACRO( NULL_USE VAR )
+    FOREACH( var ${VAR} )
+        IF ( "${${var}}" STREQUAL "dummy_string" )
+            MESSAGE( FATAL_ERROR "NULL_USE fail" )
+        ENDIF()
+    ENDFOREACH()
+ENDMACRO()
+NULL_USE( CMAKE_C_FLAGS )
+
+
+# Macro to set a global variable
+MACRO(GLOBAL_SET VARNAME)
+  SET(${VARNAME} ${ARGN} CACHE INTERNAL "")
+ENDMACRO()
+
+
+# Macro to print all variables
+MACRO( PRINT_ALL_VARIABLES )
+    GET_CMAKE_PROPERTY(_variableNames VARIABLES)
+    FOREACH(_variableName ${_variableNames})
+        message(STATUS "${_variableName}=${${_variableName}}")
+    ENDFOREACH()
+ENDMACRO()
+
+
+# CMake assert
+MACRO(ASSERT test comment)
+    IF (NOT ${test})
+        MESSSAGE(FATAL_ERROR "Assertion failed: ${comment}")
+    ENDIF(NOT ${test})
+ENDMACRO(ASSERT)
+
+
 # Macro to set the compile/link flags
 MACRO( SET_DEFAULT_TPL TPL VAR VAL )
     IF ( (NOT ${TPL}_URL) AND (NOT ${TPL}_SRC_DIR) AND (NOT ${TPL}_INSTALL_DIR) )
         SET( ${TPL}_${VAR} "${VAL}" )
+    ENDIF()
+ENDMACRO()
+
+
+# Macro to verify that a variable has been set
+MACRO( VERIFY_VARIABLE VARIABLE_NAME )
+    IF ( NOT ${VARIABLE_NAME} )
+        MESSAGE( FATAL_ERROR "PLease set: " ${VARIABLE_NAME} )
     ENDIF()
 ENDMACRO()
 
@@ -19,8 +62,8 @@ MACRO( VERIFY_PATH PATH_NAME )
     IF ("${PATH_NAME}" STREQUAL "")
         MESSAGE ( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
     ENDIF()
-    IF ( NOT EXISTS ${PATH_NAME} )
-        MESSAGE ( FATAL_ERROR "Path does not exist: ${PATH_NAME}" )
+    IF ( NOT EXISTS "${PATH_NAME}" )
+        MESSAGE( FATAL_ERROR "Path does not exist: ${PATH_NAME}" )
     ENDIF()
 ENDMACRO()
 
@@ -31,32 +74,32 @@ MACRO( IDENTIFY_COMPILER )
     IF ( CMAKE_C_COMPILER_WORKS OR CMAKE_C_COMPILER_WORKS )
         IF( CMAKE_COMPILE_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
             SET( USING_GCC TRUE )
-            ADD_DEFINITIONS( "-D USING_GCC" )
+            ADD_DEFINITIONS( -DUSING_GCC )
             MESSAGE("Using gcc")
         ELSEIF( MSVC OR MSVC_IDE OR MSVC60 OR MSVC70 OR MSVC71 OR MSVC80 OR CMAKE_COMPILER_2005 OR MSVC90 OR MSVC10 )
             IF( NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
                 MESSAGE( FATAL_ERROR "Using microsoft compilers on non-windows system?" )
             ENDIF()
             SET( USING_MSVC TRUE )
-            ADD_DEFINITIONS( "-D USING_MSVC" )
+            ADD_DEFINITIONS( -DUSING_MSVC )
             MESSAGE("Using Microsoft")
         ELSEIF( (${CMAKE_C_COMPILER_ID} MATCHES "Intel") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel") ) 
             SET(USING_ICC TRUE)
-            ADD_DEFINITIONS( "-D USING_ICC" )
+            ADD_DEFINITIONS( -DUSING_ICC )
             MESSAGE("Using icc")
         ELSEIF( (${CMAKE_C_COMPILER_ID} MATCHES "PGI") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "PGI") )
             SET(USING_PGCC TRUE)
-            ADD_DEFINITIONS( "-D USING_PGCC" )
+            ADD_DEFINITIONS( -DUSING_PGCC )
             MESSAGE("Using pgCC")
         ELSEIF( (${CMAKE_C_COMPILER_ID} MATCHES "CRAY") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "CRAY") OR
                 (${CMAKE_C_COMPILER_ID} MATCHES "Cray") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Cray") )
             SET(USING_CRAY TRUE)
-            ADD_DEFINITIONS( "-D USING_CRAY" )
+            ADD_DEFINITIONS( -DUSING_CRAY )
             MESSAGE("Using Cray")
         ELSEIF( (${CMAKE_C_COMPILER_ID} MATCHES "CLANG") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "CLANG") OR
                 (${CMAKE_C_COMPILER_ID} MATCHES "Clang") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") )
             SET(USING_CLANG TRUE)
-            ADD_DEFINITIONS( "-D USING_CLANG" )
+            ADD_DEFINITIONS( -DUSING_CLANG )
             MESSAGE("Using Clang")
         ELSE()
             SET(USING_DEFAULT TRUE)
@@ -106,27 +149,50 @@ MACRO( ADD_CXX_STD )
     # Add the flags
     SET( CMAKE_CXX_STANDARD ${CXX_STD} )
     MESSAGE( "C++ standard: ${CXX_STD}" )
+    SET( CXX_STD_FLAG )
     IF ( USING_GCC )
         # GNU: -std=
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STD}")
+        IF ( ${CXX_STD} STREQUAL "98" )
+            SET( CXX_STD_FLAG -std=c++98 )
+        ELSEIF ( ${CXX_STD} STREQUAL "11" )
+            SET( CXX_STD_FLAG -std=c++11 )
+        ELSEIF ( ${CXX_STD} STREQUAL "14" )
+            SET( CXX_STD_FLAG -std=c++1y )
+        ELSE()
+            MESSAGE(FATAL_ERROR "Unknown standard")
+        ENDIF()
     ELSEIF ( USING_MSVC )
-        # Microsoft: 
+        # Microsoft: Does not support this level of control
     ELSEIF ( USING_ICC )
         # ICC: -std=
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STD}")
+        SET( CXX_STD_FLAG -std=c++${CXX_STD} )
     ELSEIF ( USING_CRAY )
-        # Cray: -std=
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STD}")
+        # Cray: Does not seem to support controlling the std?
     ELSEIF ( USING_PGCC )
         # PGI: -std=
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STD}")
+        IF ( ${CXX_STD} STREQUAL "98" )
+            SET( CXX_STD_FLAG --c++0x )
+        ELSEIF ( ${CXX_STD} STREQUAL "11" )
+            SET( CXX_STD_FLAG --c++11 )
+        ELSEIF ( ${CXX_STD} STREQUAL "14" )
+            MESSAGE( FATAL_ERROR "C++14 features are not availible yet for PGI" )
+        ELSE()
+            MESSAGE(FATAL_ERROR "Unknown standard")
+        ENDIF()
     ELSEIF ( USING_CLANG )
-        # ICC: -std=
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STD}")
+        # Clang: -std=
+        IF ( ( ${CXX_STD} STREQUAL "98") OR ( ${CXX_STD} STREQUAL "11" ) )
+            SET( CXX_STD_FLAG -std=c++${CXX_STD} )
+        ELSEIF ( ${CXX_STD} STREQUAL "14" )
+            SET( CXX_STD_FLAG -std=c++1y )
+        ELSE()
+            MESSAGE(FATAL_ERROR "Unknown standard")
+        ENDIF()
     ELSEIF ( USING_DEFAULT )
-        # Default: -std=
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CXX_STD}")
+        # Default: do nothing
     ENDIF()
+    ADD_DEFINITIONS( -DCXX_STD=${CXX_STD} )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_STD_FLAG}")
 ENDMACRO()
 
 
