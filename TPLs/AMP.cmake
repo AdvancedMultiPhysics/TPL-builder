@@ -49,6 +49,7 @@ IF ( CMAKE_BUILD_AMP )
         MESSAGE ( FATAL_ERROR "Unknown CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" )
     ENDIF()
     STRING(REGEX REPLACE ";AMP.*" "" AMP_DEPENDS "${TPL_LIST}" )
+    CHECK_ENABLE_FLAG( AMP_DOCS 1 )
 ENDIF()
 
 
@@ -67,6 +68,20 @@ IF ( CMAKE_BUILD_AMP )
         DEPENDS             ${AMP_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
+    IF ( AMP_DOCS )
+        EXTERNALPROJECT_ADD_STEP(
+            AMP
+            build-docs
+            COMMENT             "Compiling documentation"
+            COMMAND             make doc -j ${PROCS_INSTALL}
+            COMMENT             ""
+            DEPENDEES           install
+            DEPENDERS           
+            WORKING_DIRECTORY   "${AMP_BUILD_DIR}"
+            LOG                 1
+        )
+
+    ENDIF()
     ADD_TPL_SAVE_LOGS( AMP )
     ADD_TPL_CLEAN( AMP )
 ELSE()
