@@ -115,7 +115,7 @@ A sample configure script for AMP is:
             -D CFLAGS="-fPIC"                                   \
         -D CXX_COMPILER=mpic++                                  \
             -D CXXFLAGS="-fPIC"                                 \
-            -D CXX_STD=c++11                                    \
+            -D CXX_STD=11                                    \
         -D Fortran_COMPILER=mpif90                              \
             -D FFLAGS="-fPIC"                                   \
         -D LDFLAGS=""                                           \
@@ -248,6 +248,3 @@ Additionally all TPLs are setup to perform out of source builds.  If a given TPL
 support out of source builds (e.g. boost), then the source directory will be copied to a
 temporary directory for building.  This insures that we can perform multiple builds in 
 parallel (e.g. Debug and Release) without corrupting the build or src trees.
-
-
-

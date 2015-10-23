@@ -73,6 +73,8 @@ ENDIF()
 # Include CMake files
 INCLUDE(ExternalProject)
 INCLUDE(macros.cmake)
+NULL_USE( USE_MATLAB MATLAB_DIRECTORY )
+
 
 # Set the system name
 IF (CMAKE_SIZEOF_VOID_P MATCHES 8) 
@@ -80,6 +82,7 @@ IF (CMAKE_SIZEOF_VOID_P MATCHES 8)
 ELSE()
     SET( SYSTEM_NAME "${CMAKE_SYSTEM_NAME}_32" ) 
 ENDIF() 
+
 
 # SET the global compile and link flags
 SET_COMPILER_FLAGS()
