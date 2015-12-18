@@ -24,13 +24,13 @@ locate using TPL_URL.
 
 The current TPL list and tested versions are:
     BLAS/LAPACK (any version)
-    BOOST (1.47-1.52)
+    BOOST (1.47-1.55)
     ZLIB
     HDF5
     HYPRE
     PETSc (3.2)
-    SAMRAI (3.7.3-modified)
-    LIBMESH (custom version availible on bitbucket)
+    SAMRAI (3.10.0-modified)
+    LIBMESH (custom version available on bitbucket)
     TRILINOS
 
 Note:  For the purposes of the TPL builder BLAS/LAPACK are configured as one TPL (LAPACK).
@@ -61,8 +61,8 @@ An example folder layout is:
 root_dir
     | -- TPL_BUILDER
     | -- TPL_ROOT
-    |       | -- boost_1_47_0.tar.gz
-    |       | -- SAMRAI_v3.7.3
+    |       | -- boost_1_55_0.tar.gz
+    |       | -- SAMRAI_v3.10.0
     |       | -- AMP
     |       | ...
     | -- build
@@ -72,8 +72,8 @@ root_dir
             | -- debug
             | -- opt
 In this example layout if we are creating an opt install, TPL_BUILDER=root_dir/TPL_BUILDER,
-TPL_SRC_DIR=root_dir/TPL_BUILDER, BOOST_URL=root_dir/TPL_ROOT/boost_1_47_0.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.7.3, AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
+TPL_SRC_DIR=root_dir/TPL_BUILDER, BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.10.0, AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
 BUILD_DIR=root_dir/build/opt, and INSTALL_DIR=root_dir/install/opt.  
 We would be operating from root_dir/build/opt.
 
@@ -93,14 +93,14 @@ A sample configure script for SAMRAI is:
         -D INSTALL_DIR:PATH=${INSTALL_DIR}              \
         -D PROCS_INSTALL=4                              \
         -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
-           -D BOOST_URL="${TPL_ROOT}/boost-1.47.0-headers.tar.gz" \
+           -D BOOST_URL="${TPL_ROOT}/boost-1.55.0-headers.tar.gz" \
            -D BOOST_ONLY_COPY_HEADERS:BOOL=true         \
            -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"       \
            -D ZLIB_INSTALL_DIR="/usr/local/lib"         \
            -D PETSC_URL="${TPL_ROOT}/petsc-3.2"         \
            -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz" \
            -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz" \
-           -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.4.1" \
+           -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.10.0" \
            -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${SAMR_BUILDER}
 
@@ -123,20 +123,20 @@ A sample configure script for AMP is:
         -D ENABLE_SHARED:BOOL=OFF                               \
         -D INSTALL_DIR:PATH=${INSTALL_DIR}                      \
         -D PROCS_INSTALL=4                                      \
-        -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS;AMP" \
-            -D BOOST_URL="${TPL_ROOT}/boost-1.47.0-headers.tar.gz" \
-            -D BOOST_ONLY_COPY_HEADERS:BOOL=true                \
+        -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS;AMP" \
             -D LAPACK_INSTALL_DIR="/packages/acml-5.3.1/gfortran64" \
             -D ZLIB_INSTALL_DIR="/usr/local/lib"                \
-            -D PETSC_URL="${TPL_ROOT}/petsc-3.2"                \
+            -D PETSC_URL="${TPL_ROOT}/petsc-3.2.tar.gz"                \
             -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"        \
             -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"         \
             -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"      \
-            -D LIBMESH_SRC_DIR="${TPL_ROOT}/libmesh"            \
-            -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.8.1-Source.tar.gz" \
-            -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.4.0.tar.gz" \
+            -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"            \
+            -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.14.1-Source.tar.gz" \
+              -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos" \
+            -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz" \
             -D AMP_SRC_DIR="/projects/AMP/AMP"                  \
-                -D AMP_DATA:PATH=/projects/AMP/AMP-Data         \
+            -D AMP_DATA:PATH=/projects/AMP/AMP-Data         \
+            -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${AMP_BUILDER}
 
 
