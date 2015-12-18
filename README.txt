@@ -9,7 +9,7 @@ to CMake as one of the arguments in the configure scripts (discussed later).
 This assumes the users is familiar with basic builds on their system and
 CMake is already installed.  If CMake is required it can be obtained from
    http://www.cmake.org/cmake/resources/software.html
-Note that we require CMake 2.8 or higher.
+Note that we require CMake 3.1 or higher.
 
 To begin there are 3 download/install paths for each third party library (TPL).
 The TPL can be downloaded from bitbucket as part of the configure/build 
