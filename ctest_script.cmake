@@ -8,6 +8,11 @@
 MACRO( LOAD_VAR VAR )
     SET( ${VAR} $ENV{${VAR}} )
 ENDMACRO()
+MACRO( LOAD_LIST VAR )
+    SET( ${VAR} $ENV{${VAR}} )
+    STRING( REPLACE "," ";" ${VAR} ${${VAR}} )
+ENDMACRO()
+
 
 
 # Set platform specific variables
@@ -37,7 +42,8 @@ ENDIF()
 
 
 # Get the list of projects
-LOAD_VAR( TPL_LIST )
+LOAD_LIST( TPL_LIST )
+STRING( REPLACE ";" "," TPL_LIST2 "${TPL_LIST}" )
 
 
 # For each TPL load default variables
