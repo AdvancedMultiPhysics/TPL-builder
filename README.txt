@@ -1,7 +1,7 @@
 This project is a CMake wrapper that will download and build the
 dependencies for SAMRApps and AMP.  
-This may include SAMRAI or AMP and it's dependencies.
-Note: the user can choose to build or not build AMP/SAMRUtils in addtion to the TPLs.
+This may include AMP or SAMRAI and it's dependencies.
+Note: the user can choose to build or not build AMP/SAMRUtils in addition to the TPLs.
 
 This help file can be viewed by any text editor or by passing "-D HELP=1"
 to CMake as one of the arguments in the configure scripts (discussed later).
@@ -9,7 +9,10 @@ to CMake as one of the arguments in the configure scripts (discussed later).
 This assumes the users is familiar with basic builds on their system and
 CMake is already installed.  If CMake is required it can be obtained from
    http://www.cmake.org/cmake/resources/software.html
-Note that we require CMake 3.1 or higher.
+Note that we require CMake 3.1 or higher. 
+
+If the recommended versions of the TPLs are required they can be obtained from
+https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads
 
 To begin there are 3 download/install paths for each third party library (TPL).
 The TPL can be downloaded from bitbucket as part of the configure/build 
@@ -71,12 +74,18 @@ root_dir
     | -- install
             | -- debug
             | -- opt
-In this example layout if we are creating an opt install, TPL_BUILDER=root_dir/TPL_BUILDER,
-TPL_SRC_DIR=root_dir/TPL_BUILDER, BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.10.0, AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
-BUILD_DIR=root_dir/build/opt, and INSTALL_DIR=root_dir/install/opt.  
-We would be operating from root_dir/build/opt.
 
+In this example layout if we are creating an opt install, 
+
+TPL_BUILDER=root_dir/TPL_BUILDER,
+TPL_SRC_DIR=root_dir/TPL_BUILDER, 
+BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.10.0, 
+AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
+BUILD_DIR=root_dir/build/opt, 
+and INSTALL_DIR=root_dir/install/opt.  
+
+We would be operating from root_dir/build/opt.
 
 A sample configure script for SAMRAI is:
     cmake                                               \
@@ -84,59 +93,60 @@ A sample configure script for SAMRAI is:
         -D C_COMPILER=mpicc                             \
         -D CXX_COMPILER=mpic++                          \
         -D Fortran_COMPILER=mpif90                      \
-            -D CFLAGS="-fPIC"                           \
-            -D CXXFLAGS="-fPIC"                         \
-            -D FFLAGS="-fPIC"                           \
-            -D LDFLAGS=""                               \
+        -D CFLAGS="-fPIC"                               \
+        -D CXXFLAGS="-fPIC"                             \
+        -D FFLAGS="-fPIC"                               \
+        -D LDFLAGS=""                                   \
         -D ENABLE_STATIC:BOOL=ON                        \
         -D ENABLE_SHARED:BOOL=OFF                       \
         -D INSTALL_DIR:PATH=${INSTALL_DIR}              \
         -D PROCS_INSTALL=4                              \
         -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
-           -D BOOST_URL="${TPL_ROOT}/boost-1.55.0-headers.tar.gz" \
-           -D BOOST_ONLY_COPY_HEADERS:BOOL=true         \
-           -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"       \
-           -D ZLIB_INSTALL_DIR="/usr/local/lib"         \
-           -D PETSC_URL="${TPL_ROOT}/petsc-3.2"         \
-           -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz" \
-           -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz" \
-           -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.10.0" \
-           -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
+        -D BOOST_URL="${TPL_ROOT}/boost-1.55.0-headers.tar.gz" \
+        -D BOOST_ONLY_COPY_HEADERS:BOOL=true            \
+        -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"      \
+        -D ZLIB_INSTALL_DIR="/usr/local/lib"            \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.2"            \
+        -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"    \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"  \
+        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.10.0"  \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${SAMR_BUILDER}
 
 
-A sample configure script for AMP is:
+A sample debug configure script for AMP is:
     export AMP_BUILDER=/projects/AMP/TPLs/TPL-builder
     export TPL_ROOT=/packages/TPLs/src
     export INSTALL_DIR=/projects/AMP/TPLs/install/debug
-    cmake                                                       \
-        -D CMAKE_BUILD_TYPE=Debug                               \
-        -D C_COMPILER=mpicc                                     \
-            -D CFLAGS="-fPIC"                                   \
-        -D CXX_COMPILER=mpic++                                  \
-            -D CXXFLAGS="-fPIC"                                 \
-            -D CXX_STD=11                                    \
-        -D Fortran_COMPILER=mpif90                              \
-            -D FFLAGS="-fPIC"                                   \
-        -D LDFLAGS=""                                           \
-        -D ENABLE_STATIC:BOOL=ON                                \
-        -D ENABLE_SHARED:BOOL=OFF                               \
-        -D INSTALL_DIR:PATH=${INSTALL_DIR}                      \
-        -D PROCS_INSTALL=4                                      \
-        -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS;AMP" \
-            -D LAPACK_INSTALL_DIR="/packages/acml-5.3.1/gfortran64" \
-            -D ZLIB_INSTALL_DIR="/usr/local/lib"                \
-            -D PETSC_URL="${TPL_ROOT}/petsc-3.2.tar.gz"                \
-            -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"        \
-            -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"         \
-            -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"      \
-            -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"            \
-            -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.14.1-Source.tar.gz" \
-              -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos" \
-            -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz" \
-            -D AMP_SRC_DIR="/projects/AMP/AMP"                  \
-            -D AMP_DATA:PATH=/projects/AMP/AMP-Data         \
-            -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
+
+    cmake                                                            \
+        -D CMAKE_BUILD_TYPE=Debug                                    \
+        -D C_COMPILER=mpicc                                          \
+        -D CFLAGS="-fPIC"                                            \
+        -D CXX_COMPILER=mpic++                                       \
+        -D CXXFLAGS="-fPIC"                                          \
+        -D CXX_STD=11                                                \
+        -D Fortran_COMPILER=mpif90                                   \
+        -D FFLAGS="-fPIC"                                            \
+        -D LDFLAGS=""                                                \
+        -D ENABLE_STATIC:BOOL=ON                                     \
+        -D ENABLE_SHARED:BOOL=OFF                                    \
+        -D INSTALL_DIR:PATH=${INSTALL_DIR}                           \
+        -D PROCS_INSTALL=4                                           \
+        -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS" \
+        -D LAPACK_INSTALL_DIR="/packages/acml-5.3.1/gfortran64"      \
+        -D ZLIB_INSTALL_DIR="/usr/local/lib"                         \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.2.tar.gz"                  \
+        -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                 \
+        -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                  \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.10.0b.tar.gz"              \
+        -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                  \
+        -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.14.1-Source.tar.gz" \
+        -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos"                \
+        -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz"          \
+        -D AMP_SRC_DIR="/projects/AMP/AMP"                           \
+        -D AMP_DATA:PATH=/projects/AMP/AMP-Data                      \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src"              \
         ${AMP_BUILDER}
 
 
@@ -248,3 +258,8 @@ Additionally all TPLs are setup to perform out of source builds.  If a given TPL
 support out of source builds (e.g. boost), then the source directory will be copied to a
 temporary directory for building.  This insures that we can perform multiple builds in 
 parallel (e.g. Debug and Release) without corrupting the build or src trees.
+
+Once the TPLs are successfully built it is time to build 
+AMP: https://bitbucket.org/AdvancedMultiPhysics/amp/wiki/AMP_Build_Instructions
+or 
+SAMRUtils: https://bitbucket.org/SAMRApps/samrutils
