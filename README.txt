@@ -75,10 +75,22 @@ root_dir
             | -- debug
             | -- opt
 
-In this example layout if we are creating an opt install, TPL_BUILDER=root_dir/TPL_BUILDER,
-TPL_SRC_DIR=root_dir/TPL_BUILDER, BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.10.0, AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
-BUILD_DIR=root_dir/build/opt, and INSTALL_DIR=root_dir/install/opt.  
+In this example layout if we are creating an opt install, 
+
+TPL_BUILDER=root_dir/TPL_BUILDER,
+
+TPL_SRC_DIR=root_dir/TPL_BUILDER, 
+
+BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
+
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.10.0, 
+
+AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
+
+BUILD_DIR=root_dir/build/opt, 
+
+and INSTALL_DIR=root_dir/install/opt.  
+
 We would be operating from root_dir/build/opt.
 
 
