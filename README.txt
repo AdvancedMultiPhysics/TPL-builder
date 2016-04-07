@@ -9,7 +9,9 @@ to CMake as one of the arguments in the configure scripts (discussed later).
 This assumes the users is familiar with basic builds on their system and
 CMake is already installed.  If CMake is required it can be obtained from
    http://www.cmake.org/cmake/resources/software.html
-Note that we require CMake 3.1 or higher. If the TPLs are required they can be obtained from
+Note that we require CMake 3.1 or higher. 
+
+If the recommended versions of the TPLs are required they can be obtained from
 https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads
 
 To begin there are 3 download/install paths for each third party library (TPL).
