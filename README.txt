@@ -1,7 +1,7 @@
 This project is a CMake wrapper that will download and build the
 dependencies for SAMRApps and AMP.  
-This may include SAMRAI or AMP and it's dependencies.
-Note: the user can choose to build or not build AMP/SAMRUtils in addtion to the TPLs.
+This may include AMP or SAMRAI and it's dependencies.
+Note: the user can choose to build or not build AMP/SAMRUtils in addition to the TPLs.
 
 This help file can be viewed by any text editor or by passing "-D HELP=1"
 to CMake as one of the arguments in the configure scripts (discussed later).
@@ -71,6 +71,7 @@ root_dir
     | -- install
             | -- debug
             | -- opt
+
 In this example layout if we are creating an opt install, TPL_BUILDER=root_dir/TPL_BUILDER,
 TPL_SRC_DIR=root_dir/TPL_BUILDER, BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
 SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.10.0, AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
@@ -84,24 +85,24 @@ A sample configure script for SAMRAI is:
         -D C_COMPILER=mpicc                             \
         -D CXX_COMPILER=mpic++                          \
         -D Fortran_COMPILER=mpif90                      \
-            -D CFLAGS="-fPIC"                           \
-            -D CXXFLAGS="-fPIC"                         \
-            -D FFLAGS="-fPIC"                           \
-            -D LDFLAGS=""                               \
+        -D CFLAGS="-fPIC"                               \
+        -D CXXFLAGS="-fPIC"                             \
+        -D FFLAGS="-fPIC"                               \
+        -D LDFLAGS=""                                   \
         -D ENABLE_STATIC:BOOL=ON                        \
         -D ENABLE_SHARED:BOOL=OFF                       \
         -D INSTALL_DIR:PATH=${INSTALL_DIR}              \
         -D PROCS_INSTALL=4                              \
         -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
-           -D BOOST_URL="${TPL_ROOT}/boost-1.55.0-headers.tar.gz" \
-           -D BOOST_ONLY_COPY_HEADERS:BOOL=true         \
-           -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"       \
-           -D ZLIB_INSTALL_DIR="/usr/local/lib"         \
-           -D PETSC_URL="${TPL_ROOT}/petsc-3.2"         \
-           -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz" \
-           -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz" \
-           -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.10.0" \
-           -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
+        -D BOOST_URL="${TPL_ROOT}/boost-1.55.0-headers.tar.gz" \
+        -D BOOST_ONLY_COPY_HEADERS:BOOL=true            \
+        -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"      \
+        -D ZLIB_INSTALL_DIR="/usr/local/lib"            \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.2"            \
+        -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"    \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"  \
+        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.10.0"  \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${SAMR_BUILDER}
 
 
