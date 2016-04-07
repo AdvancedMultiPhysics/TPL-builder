@@ -106,38 +106,39 @@ A sample configure script for SAMRAI is:
         ${SAMR_BUILDER}
 
 
-A sample configure script for AMP is:
+A sample debug configure script for AMP is:
     export AMP_BUILDER=/projects/AMP/TPLs/TPL-builder
     export TPL_ROOT=/packages/TPLs/src
     export INSTALL_DIR=/projects/AMP/TPLs/install/debug
-    cmake                                                       \
-        -D CMAKE_BUILD_TYPE=Debug                               \
-        -D C_COMPILER=mpicc                                     \
-            -D CFLAGS="-fPIC"                                   \
-        -D CXX_COMPILER=mpic++                                  \
-            -D CXXFLAGS="-fPIC"                                 \
-            -D CXX_STD=11                                    \
-        -D Fortran_COMPILER=mpif90                              \
-            -D FFLAGS="-fPIC"                                   \
-        -D LDFLAGS=""                                           \
-        -D ENABLE_STATIC:BOOL=ON                                \
-        -D ENABLE_SHARED:BOOL=OFF                               \
-        -D INSTALL_DIR:PATH=${INSTALL_DIR}                      \
-        -D PROCS_INSTALL=4                                      \
-        -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS;AMP" \
-            -D LAPACK_INSTALL_DIR="/packages/acml-5.3.1/gfortran64" \
-            -D ZLIB_INSTALL_DIR="/usr/local/lib"                \
-            -D PETSC_URL="${TPL_ROOT}/petsc-3.2.tar.gz"                \
-            -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"        \
-            -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"         \
-            -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"      \
-            -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"            \
-            -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.14.1-Source.tar.gz" \
-              -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos" \
-            -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz" \
-            -D AMP_SRC_DIR="/projects/AMP/AMP"                  \
-            -D AMP_DATA:PATH=/projects/AMP/AMP-Data         \
-            -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
+
+    cmake                                                            \
+        -D CMAKE_BUILD_TYPE=Debug                                    \
+        -D C_COMPILER=mpicc                                          \
+        -D CFLAGS="-fPIC"                                            \
+        -D CXX_COMPILER=mpic++                                       \
+        -D CXXFLAGS="-fPIC"                                          \
+        -D CXX_STD=11                                                \
+        -D Fortran_COMPILER=mpif90                                   \
+        -D FFLAGS="-fPIC"                                            \
+        -D LDFLAGS=""                                                \
+        -D ENABLE_STATIC:BOOL=ON                                     \
+        -D ENABLE_SHARED:BOOL=OFF                                    \
+        -D INSTALL_DIR:PATH=${INSTALL_DIR}                           \
+        -D PROCS_INSTALL=4                                           \
+        -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS" \
+        -D LAPACK_INSTALL_DIR="/packages/acml-5.3.1/gfortran64"      \
+        -D ZLIB_INSTALL_DIR="/usr/local/lib"                         \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.2.tar.gz"                  \
+        -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                 \
+        -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                  \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.10.0b.tar.gz"               \
+        -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                  \
+        -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.14.1-Source.tar.gz" \
+        -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos" \
+        -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz" \
+        -D AMP_SRC_DIR="/projects/AMP/AMP"                  \
+        -D AMP_DATA:PATH=/projects/AMP/AMP-Data         \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${AMP_BUILDER}
 
 
