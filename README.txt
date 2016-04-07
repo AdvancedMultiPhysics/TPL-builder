@@ -87,7 +87,6 @@ and INSTALL_DIR=root_dir/install/opt.
 
 We would be operating from root_dir/build/opt.
 
-
 A sample configure script for SAMRAI is:
     cmake                                               \
         -D CMAKE_BUILD_TYPE=Release                     \
