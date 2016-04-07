@@ -131,14 +131,14 @@ A sample debug configure script for AMP is:
         -D PETSC_URL="${TPL_ROOT}/petsc-3.2.tar.gz"                  \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                 \
         -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                  \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.10.0b.tar.gz"               \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.10.0b.tar.gz"              \
         -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                  \
         -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.14.1-Source.tar.gz" \
-        -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos" \
-        -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz" \
-        -D AMP_SRC_DIR="/projects/AMP/AMP"                  \
-        -D AMP_DATA:PATH=/projects/AMP/AMP-Data         \
-        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
+        -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos"                \
+        -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz"          \
+        -D AMP_SRC_DIR="/projects/AMP/AMP"                           \
+        -D AMP_DATA:PATH=/projects/AMP/AMP-Data                      \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src"              \
         ${AMP_BUILDER}
 
 
