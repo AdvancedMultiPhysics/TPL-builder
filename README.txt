@@ -250,3 +250,5 @@ Additionally all TPLs are setup to perform out of source builds.  If a given TPL
 support out of source builds (e.g. boost), then the source directory will be copied to a
 temporary directory for building.  This insures that we can perform multiple builds in 
 parallel (e.g. Debug and Release) without corrupting the build or src trees.
+
+Once the TPLs are successfully built it is time to build AMP ( https://bitbucket.org/AdvancedMultiPhysics/amp) or SAMRUtils (https://bitbucket.org/SAMRApps/samrutils)
