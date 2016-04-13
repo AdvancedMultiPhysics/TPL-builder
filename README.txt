@@ -75,8 +75,7 @@ root_dir
             | -- debug
             | -- opt
 
-In this example layout if we are creating an opt install, 
-
+In this example layout if we are creating an opt installation where
 TPL_BUILDER=root_dir/TPL_BUILDER,
 TPL_SRC_DIR=root_dir/TPL_BUILDER, 
 BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
