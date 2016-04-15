@@ -90,7 +90,7 @@ SET_COMPILER_FLAGS()
 
 # Set TPL list
 IF ( NOT TPL_LIST )
-    SET( TPL_LIST "BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;SAMRAI" )
+    SET( TPL_LIST "LAPACK;ZLIB;PETSC;HDF5;HYPRE;SAMRAI" )
 ENDIF()
 STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n# TPL_LIST\nSET(TPL_LIST \"${TPL_LIST}\")\n")
@@ -98,9 +98,9 @@ FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n# TPL_LIST\nSET(TPL_LIST \"
 
 # Set TPL defaults
 SET_DEFAULT_TPL( ZLIB  URL http://zlib.net/zlib-1.2.8.tar.gz )
-SET_DEFAULT_TPL( BOOST URL https://bitbucket.org/samrapps/samrbuilder/downloads/boost_1_47_0.tar.gz )
-SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/samrapps/samrbuilder/downloads/hdf5-1.8.12.tar.gz  )
-SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/samrapps/samrbuilder/downloads/hypre-2.4.0b.tar.gz )
+SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.8.12.tar.gz  )
+SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hypre-2.10.0b.tar.gz )
+SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/petsc-3.2.tar.gz )
 
 
 # Configure TPLs
