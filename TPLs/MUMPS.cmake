@@ -71,7 +71,8 @@ IF ( CMAKE_BUILD_MUMPS )
     FILE( APPEND "${MUMPS_Makefile}" "INCPAR  = -I/usr/include\n" )
     FILE( APPEND "${MUMPS_Makefile}" "INCSEQ  = -I$(topdir)/libseq\n" )
     FILE( APPEND "${MUMPS_Makefile}" "LIBSEQ  = -L$(topdir)/libseq -lmpiseq\n" )
-    FILE( APPEND "${MUMPS_Makefile}" "LIBBLAS = ${BLAS_LAPACK_LINK}\n" )
+#    FILE( APPEND "${MUMPS_Makefile}" "LIBBLAS = ${BLAS_LAPACK_LINK}\n" )
+    FILE( APPEND "${MUMPS_Makefile}" "LIBBLAS = ${BLAS_LIBS}\n" )
     FILE( APPEND "${MUMPS_Makefile}" "\n" )
     FILE( APPEND "${MUMPS_Makefile}" "LIBOTHERS = -lpthread\n" )
     FILE( APPEND "${MUMPS_Makefile}" "CDEFS = -DAdd_\n" )
@@ -96,12 +97,12 @@ ENDIF()
 
 # Build MUMPS
 IF ( CMAKE_BUILD_MUMPS )
-    FOREACH( TPL ${MUMPS_DEPENDENCIES} )
-        LIST(FIND TPL_LIST "${TPL}" index)
-        IF (${index} EQUAL -1)
-            MESSAGE(FATAL_ERROR "MUMPS depends on ${TPL}, but it is not configured")
-        ENDIF()
-    ENDFOREACH()
+	#    FOREACH( TPL ${MUMPS_DEPENDENCIES} )
+	#        LIST(FIND TPL_LIST "${TPL}" index)
+	#        IF (${index} EQUAL -1)
+	#            MESSAGE(FATAL_ERROR "MUMPS depends on ${TPL}, but it is not configured")
+	#        ENDIF()
+	#    ENDFOREACH()
     EXTERNALPROJECT_ADD( 
         MUMPS
         URL                 "${MUMPS_CMAKE_URL}"
