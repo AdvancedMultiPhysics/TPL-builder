@@ -1,4 +1,4 @@
-# This will configure and build kokkos
+# This will configure and build MUMPS
 # User can configure the source path by specifying MUMPS_SRC_DIR,
 #    the download path by specifying MUMPS_URL, or the installed 
 #    location by specifying MUMPS_INSTALL_DIR
@@ -35,9 +35,10 @@ FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(MUMPS_INSTALL_DIR \"${MUM
 # Configure mumps
 IF ( CMAKE_BUILD_MUMPS )
     # Set variables based on TPLs
-    SET( MUMPS_PARALLEL OFF )
+    SET( MUMPS_PARALLEL "${MUMPS_PARALLEL}" )
     SET( MUMPS_DEPENDENCIES LAPACK )
     IF ( MUMPS_PARALLEL )
+        MESSAGE("Enabling parallel mumps")
         SET( MUMPS_DEPENDENCIES ${MUMPS_DEPENDENCIES} SCALAPACK )
     ENDIF()
     LIST(FIND TPL_LIST "METIS" index)
@@ -78,8 +79,9 @@ IF ( CMAKE_BUILD_MUMPS )
     FILE( APPEND "${MUMPS_Makefile}" "OPTC    = ${CMAKE_C_FLAGS} -I.\n" )
     FILE( APPEND "${MUMPS_Makefile}" "OPTL    = -O\n" )
     IF ( MUMPS_PARALLEL )
-        FILE( APPEND "${MUMPS_Makefile}" "SCALAP  = -lscalapack -lblacs\n" )
+        FILE( APPEND "${MUMPS_Makefile}" "SCALAP  = -L${SCALAPACK_INSTALL_DIR}/lib -lscalapack\n" )
         FILE( APPEND "${MUMPS_Makefile}" "INCS = $(INCPAR)\n" )
+        FILE( APPEND "${MUMPS_Makefile}" "LIBPAR = $(SCALAP)\n" )
         FILE( APPEND "${MUMPS_Makefile}" "LIBS = $(LIBPAR)\n" )
         FILE( APPEND "${MUMPS_Makefile}" "LIBSEQNEEDED = \n" )
         SET( MUMPS_COPY_LIBSEQ ${CMAKE_COMMAND} -E echo "" )
@@ -92,7 +94,7 @@ IF ( CMAKE_BUILD_MUMPS )
 ENDIF()
 
 
-# Build kokkos
+# Build MUMPS
 IF ( CMAKE_BUILD_MUMPS )
     FOREACH( TPL ${MUMPS_DEPENDENCIES} )
         LIST(FIND TPL_LIST "${TPL}" index)
