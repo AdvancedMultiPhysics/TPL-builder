@@ -61,7 +61,7 @@ IF ( CMAKE_BUILD_PARMETIS )
         SOURCE_DIR          "${PARMETIS_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
         CONFIGURE_COMMAND   make config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
-                            FC=${CMAKE_Fortran_COMPILER} prefix=${PARMETIS_SRC_DIR}/parmetis VERBOSE=1
+                            FC=${CMAKE_Fortran_COMPILER} prefix=${PARMETIS_INSTALL_DIR} VERBOSE=1
         BUILD_COMMAND       make ${PARMETIS_VARS} -i
         BUILD_IN_SOURCE     1
         INSTALL_COMMAND     make install -i
