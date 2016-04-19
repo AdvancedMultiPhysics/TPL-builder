@@ -97,6 +97,8 @@ ENDIF()
 
 # Build MUMPS
 IF ( CMAKE_BUILD_MUMPS )
+    # commenting out the lines below for now. LAPACK is a dependency but the TPL_LIST may contain OPENBLAS in place of LAPACK and the calls below fail
+    # just need to add the special case
 	#    FOREACH( TPL ${MUMPS_DEPENDENCIES} )
 	#        LIST(FIND TPL_LIST "${TPL}" index)
 	#        IF (${index} EQUAL -1)
