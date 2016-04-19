@@ -1,5 +1,5 @@
 # This will configure and build trilinos
-# User can configure the source path by speficfying TRILINOS_SRC_DIR,
+# User can configure the source path by specifying TRILINOS_SRC_DIR,
 #    the download path by specifying TRILINOS_URL, or the installed 
 #    location by specifying TRILINOS_INSTALL_DIR
 

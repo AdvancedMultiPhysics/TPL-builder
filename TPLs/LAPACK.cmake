@@ -1,5 +1,5 @@
 # This will configure and build lapack
-# User can configure the source path by speficfying LAPACK_SRC_DIR
+# User can configure the source path by specifying LAPACK_SRC_DIR
 #    the download path by specifying LAPACK_URL, or the installed 
 #    location by specifying LAPACK_INSTALL_DIR
 

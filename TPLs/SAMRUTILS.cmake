@@ -1,5 +1,5 @@
 # This will configure and build SAMRUtils
-# User can configure the source path by speficfying SAMRUTILS_SRC_DIR,
+# User can configure the source path by specifying SAMRUTILS_SRC_DIR,
 #    the download path by specifying SAMRUTILS_URL, or the installed 
 #    location by specifying SAMRUTILS_INSTALL_DIR
 

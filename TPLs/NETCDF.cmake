@@ -1,5 +1,5 @@
 # This will configure and build netcdf
-# User can configure the source path by speficfying NETCDF_SRC_DIR,
+# User can configure the source path by specifying NETCDF_SRC_DIR,
 #    the download path by specifying NETCDF_URL, or the installed 
 #    location by specifying NETCDF_INSTALL_DIR
 

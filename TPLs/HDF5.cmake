@@ -1,5 +1,5 @@
 # This will configure and build hdf5
-# User can configure the source path by speficfying HDF5_SRC_DIR
+# User can configure the source path by specifying HDF5_SRC_DIR
 #    the download path by specifying HDF5_URL, or the installed 
 #    location by specifying HDF5_INSTALL_DIR
 

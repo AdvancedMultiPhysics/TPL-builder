@@ -1,5 +1,5 @@
 # This will configure and build sundials
-# User can configure the source path by speficfying SUNDIALS_SRC_DIR,
+# User can configure the source path by specifying SUNDIALS_SRC_DIR,
 #    the download path by specifying SUNDIALS_URL, or the installed 
 #    location by specifying SUNDIALS_INSTALL_DIR
 

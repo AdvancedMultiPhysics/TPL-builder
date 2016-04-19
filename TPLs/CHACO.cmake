@@ -1,5 +1,5 @@
 # This will configure and build chaco
-# User can configure the source path by speficfying CHACO_SRC_DIR
+# User can configure the source path by specifying CHACO_SRC_DIR
 #    the download path by specifying CHACO_URL, or the installed 
 #    location by specifying CHACO_INSTALL_DIR
 

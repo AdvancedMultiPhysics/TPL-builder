@@ -1,5 +1,5 @@
 # This will configure and build Timer
-# User can configure the source path by speficfying TIMER_SRC_DIR,
+# User can configure the source path by specifying TIMER_SRC_DIR,
 #    the download path by specifying TIMER_URL, or the installed 
 #    location by specifying TIMER_INSTALL_DIR
 

@@ -1,5 +1,5 @@
 # This will configure and build petsc
-# User can configure the source path by speficfying PETSC_SRC_DIR,
+# User can configure the source path by specifying PETSC_SRC_DIR,
 #    the download path by specifying PETSC_URL, or the installed 
 #    location by specifying PETSC_INSTALL_DIR
 

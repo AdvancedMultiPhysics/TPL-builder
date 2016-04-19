@@ -1,5 +1,5 @@
 # This will configure and build samrai
-# User can configure the source path by speficfying SAMRAI_SRC_DIR,
+# User can configure the source path by specifying SAMRAI_SRC_DIR,
 #    the download path by specifying SAMRAI_URL, or the installed 
 #    location by specifying SAMRAI_INSTALL_DIR
 

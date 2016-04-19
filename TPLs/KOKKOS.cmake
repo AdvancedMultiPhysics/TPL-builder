@@ -1,5 +1,5 @@
 # This will configure and build kokkos
-# User can configure the source path by speficfying KOKKOS_SRC_DIR,
+# User can configure the source path by specifying KOKKOS_SRC_DIR,
 #    the download path by specifying KOKKOS_URL, or the installed 
 #    location by specifying KOKKOS_INSTALL_DIR
 

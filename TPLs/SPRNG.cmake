@@ -1,5 +1,5 @@
 # This will configure and build sprng
-# User can configure the source path by speficfying SPRNG_SRC_DIR,
+# User can configure the source path by specifying SPRNG_SRC_DIR,
 #    the download path by specifying SPRNG_URL, or the installed 
 #    location by specifying SPRNG_INSTALL_DIR
 

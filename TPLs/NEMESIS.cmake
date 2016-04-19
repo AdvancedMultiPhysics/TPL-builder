@@ -1,5 +1,5 @@
 # This will configure and build nemesis
-# User can configure the source path by speficfying NEMESIS_SRC_DIR,
+# User can configure the source path by specifying NEMESIS_SRC_DIR,
 #    the download path by specifying NEMESIS_URL, or the installed 
 #    location by specifying NEMESIS_INSTALL_DIR
 

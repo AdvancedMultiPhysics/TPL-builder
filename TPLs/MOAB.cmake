@@ -1,5 +1,5 @@
 # This will configure and build moab
-# User can configure the source path by speficfying MOAB_SRC_DIR,
+# User can configure the source path by specifying MOAB_SRC_DIR,
 #    the download path by specifying MOAB_URL, or the installed 
 #    location by specifying MOAB_INSTALL_DIR
 

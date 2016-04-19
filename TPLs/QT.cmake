@@ -1,5 +1,5 @@
 # This will configure and build qt
-# User can configure the source path by speficfying QT_SRC_DIR,
+# User can configure the source path by specifying QT_SRC_DIR,
 #    the download path by specifying QT_URL, or the installed 
 #    location by specifying QT_INSTALL_DIR
 

@@ -1,5 +1,5 @@
 # This will configure and build PIXIE3D
-# User can configure the source path by speficfying PIXIE3D_SRC_DIR,
+# User can configure the source path by specifying PIXIE3D_SRC_DIR,
 #    the download path by specifying PIXIE3D_URL, or the installed 
 #    location by specifying PIXIE3D_INSTALL_DIR
 

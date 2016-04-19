@@ -1,5 +1,5 @@
 # This will configure and build exodusii
-# User can configure the source path by speficfying EXODUSII_SRC_DIR,
+# User can configure the source path by specifying EXODUSII_SRC_DIR,
 #    the download path by specifying EXODUSII_URL, or the installed 
 #    location by specifying EXODUSII_INSTALL_DIR
 

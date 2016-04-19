@@ -1,5 +1,5 @@
 # This will configure and build SAMRSolvers
-# User can configure the source path by speficfying SAMRSOLVERS_SRC_DIR,
+# User can configure the source path by specifying SAMRSOLVERS_SRC_DIR,
 #    the download path by specifying SAMRSOLVERS_URL, or the installed 
 #    location by specifying SAMRSOLVERS_INSTALL_DIR
 

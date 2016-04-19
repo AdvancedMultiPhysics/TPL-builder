@@ -1,5 +1,5 @@
 # This will configure and build amp
-# User can configure the source path by speficfying AMP_SRC_DIR,
+# User can configure the source path by specifying AMP_SRC_DIR,
 #    the download path by specifying AMP_URL, or the installed 
 #    location by specifying AMP_INSTALL_DIR
 

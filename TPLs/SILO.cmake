@@ -1,5 +1,5 @@
 # This will configure and build silo
-# User can configure the source path by speficfying SILO_SRC_DIR,
+# User can configure the source path by specifying SILO_SRC_DIR,
 #    the download path by specifying SILO_URL, or the installed 
 #    location by specifying SILO_INSTALL_DIR
 

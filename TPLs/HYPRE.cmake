@@ -1,5 +1,5 @@
 # This will configure and build hypre
-# User can configure the source path by speficfying HYPRE_SRC_DIR
+# User can configure the source path by specifying HYPRE_SRC_DIR
 #    the download path by specifying HYPRE_URL, or the installed 
 #    location by specifying HYPRE_INSTALL_DIR
 

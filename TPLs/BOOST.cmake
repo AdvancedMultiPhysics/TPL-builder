@@ -1,5 +1,5 @@
 # This will configure and build boost
-# User can configure the source path by speficfying BOOST_SRC_DIR,
+# User can configure the source path by specifying BOOST_SRC_DIR,
 #    the download path by specifying BOOST_URL, or the installed 
 #    location by specifying BOOST_INSTALL_DIR
 

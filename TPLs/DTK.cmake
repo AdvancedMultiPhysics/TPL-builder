@@ -1,5 +1,5 @@
 # This will configure and build DTK
-# User can configure the source path by speficfying DTK_SRC_DIR,
+# User can configure the source path by specifying DTK_SRC_DIR,
 
 IF(DTK_URL OR DTK_INSTALL_DIR) 
     MESSAGE(FATAL_ERROR "Please specify DTK_SRC_DIR rather than DTK_URL or DTK_INSTALL_DIR")

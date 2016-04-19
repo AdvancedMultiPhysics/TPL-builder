@@ -1,5 +1,5 @@
 # This will configure and build kokkos
-# User can configure the source path by speficfying MUMPS_SRC_DIR,
+# User can configure the source path by specifying MUMPS_SRC_DIR,
 #    the download path by specifying MUMPS_URL, or the installed 
 #    location by specifying MUMPS_INSTALL_DIR
 

@@ -1,5 +1,5 @@
 # This will configure and build zlib
-# User can configure the source path by speficfying ZLIB_SRC_DIR
+# User can configure the source path by specifying ZLIB_SRC_DIR
 #    the download path by specifying ZLIB_URL, or the installed 
 #    location by specifying ZLIB_INSTALL_DIR
 

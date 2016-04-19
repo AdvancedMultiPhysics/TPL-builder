@@ -1,5 +1,5 @@
 # This will configure and build parmetis
-# User can configure the source path by speficfying PARMETIS_SRC_DIR,
+# User can configure the source path by specifying PARMETIS_SRC_DIR,
 #    the download path by specifying PARMETIS_URL, or the installed 
 #    location by specifying PARMETIS_INSTALL_DIR
 
