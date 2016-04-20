@@ -38,6 +38,8 @@ The current TPL list and tested versions are:
     SCALAPACK (2.0.2)
     MUMPS (5.0.1)
     METIS (5.1.0)
+    PARMETIS (4.0.3)
+    SUPERLU_DIST (5.0.0)
 
 Note:  For the purposes of the TPL builder BLAS/LAPACK are configured as one TPL (LAPACK).
 A user may still provided their own libraries to use for blas/lapack which may
