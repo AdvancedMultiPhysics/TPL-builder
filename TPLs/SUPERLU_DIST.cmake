@@ -1,4 +1,4 @@
-# This will configure and build superlu
+# This will configure and build superlu_dist
 # User can configure the source path by specifying SUPERLU_DIST_SRC_DIR,
 #    the download path by specifying SUPERLU_DIST_URL, or the installed 
 #    location by specifying SUPERLU_DIST_INSTALL_DIR
