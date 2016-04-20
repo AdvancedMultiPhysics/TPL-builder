@@ -54,7 +54,7 @@ ENDIF()
 # Build parmetis
 # Note: a bug in the parmetis cmake scripts results in parmetis not installing the metis headers and libs
 # The current fix is to modify the Parmetis CMakeLists.txt to run the metis install also
-# Currentlyt this might not be portable due to the use of sed
+# Currently this might not be portable due to the use of sed
 IF ( CMAKE_BUILD_PARMETIS )
     EXTERNALPROJECT_ADD(
         PARMETIS
