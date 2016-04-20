@@ -31,6 +31,13 @@ SET( PARMETIS_INSTALL_DIR "${PARMETIS_CMAKE_INSTALL_DIR}" )
 MESSAGE_TPL( "   PARMETIS_INSTALL_DIR = ${PARMETIS_INSTALL_DIR}" )
 FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(PARMETIS_INSTALL_DIR \"${PARMETIS_INSTALL_DIR}\")\n" )
 
+EXECUTE_PROCESS( COMMAND uname -m OUTPUT_VARIABLE PARMETIS_CPU_TYPE OUTPUT_STRIP_TRAILING_WHITESPACE)
+STRING(REGEX REPLACE " " "_" PARMETIS_CPU_TYPE ${PARMETIS_CPU_TYPE} )
+MESSAGE("THE PARMETIS_CPU_TYPE IS ${PARMETIS_CPU_TYPE}")
+EXECUTE_PROCESS( COMMAND uname -s OUTPUT_VARIABLE PARMETIS_SYS_TYPE OUTPUT_STRIP_TRAILING_WHITESPACE)
+MESSAGE("THE PARMETIS_SYS_TYPE IS ${PARMETIS_SYS_TYPE}")
+SET(PARMETIS_BUILD_SUBDIR "build/${PARMETIS_SYS_TYPE}-${PARMETIS_CPU_TYPE}")
+MESSAGE("The build subdir is ${PARMETIS_BUILD_SUBDIR}")
 
 # Configure parmetis
 IF ( CMAKE_BUILD_PARMETIS )
@@ -53,6 +60,9 @@ ENDIF()
 
 
 # Build parmetis
+# Note: a bug in the parmetis cmake scripts results in parmetis not installing the metis headers and libs
+# The current fix is to modify the Parmetis CMakeLists.txt to run the metis install also
+# Currentlyt this might not be portable due to the use of sed
 IF ( CMAKE_BUILD_PARMETIS )
     EXTERNALPROJECT_ADD(
         PARMETIS
@@ -60,6 +70,8 @@ IF ( CMAKE_BUILD_PARMETIS )
         DOWNLOAD_DIR        "${PARMETIS_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${PARMETIS_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
+        PATCH_COMMAND       sed -e "s|add_subdirectory\(\${METIS_PATH}\\/libmetis \${CMAKE_BINARY_DIR}\\/libmetis\)|add_subdirectory\(\${METIS_PATH}\)|" ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt > tmp
+                            COMMAND mv tmp ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt
         CONFIGURE_COMMAND   make config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
                             FC=${CMAKE_Fortran_COMPILER} prefix=${PARMETIS_INSTALL_DIR} VERBOSE=1
         BUILD_COMMAND       make ${PARMETIS_VARS} -i
