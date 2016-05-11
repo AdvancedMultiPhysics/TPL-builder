@@ -37,6 +37,9 @@ IF ( CMAKE_BUILD_SUNDIALS )
     SET( CONFIGURE_OPTIONS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/sundials" )
     SET( CONFIGURE_OPTIONS "${CONFIGURE_OPTIONS};-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" )
     SET( CONFIGURE_OPTIONS "${CONFIGURE_OPTIONS};-DMPI_ENABLE:BOOL=ON" )
+    # the mpi compiler needs to be explicitly set else the parallel nvec libraries are not built
+    # for now assuming the C compiler is the MPI compiler
+    SET( CONFIGURE_OPTIONS "${CONFIGURE_OPTIONS};-DMPI_MPICC=${CMAKE_C_COMPILER}" )
     IF ( ENABLE_SHARED AND ENABLE_STATIC )
         MESSAGE(FATAL_ERROR "Compiling sundials with both static and shared libraries is not yet supported")
     ELSEIF ( ENABLE_SHARED )
