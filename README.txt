@@ -9,7 +9,7 @@ to CMake as one of the arguments in the configure scripts (discussed later).
 This assumes the users is familiar with basic builds on their system and
 CMake is already installed.  If CMake is required it can be obtained from
    http://www.cmake.org/cmake/resources/software.html
-Note that we require CMake 3.1 or higher. 
+Note that we require CMake 3.2 or higher. 
 
 If the recommended versions of the TPLs are required they can be obtained from
 https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads
@@ -29,12 +29,13 @@ The current TPL list and tested versions are:
     BLAS/LAPACK (any version)
     BOOST (1.47-1.55)
     ZLIB
-    HDF5
-    HYPRE
+    HDF5 (1.8.12)
+    HYPRE (2.11)
     PETSc (3.2)
-    TRILINOS
+    TRILINOS (12.6.1)
     SAMRAI (3.10.0-modified)
     LIBMESH (custom version available on bitbucket)
+    SUNDIALS (2.6.2)
     SCALAPACK (2.0.2)
     MUMPS (5.0.1)
     METIS (5.1.0)
