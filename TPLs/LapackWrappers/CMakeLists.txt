@@ -12,7 +12,6 @@ MESSAGE("================")
 
 
 # Set the project name
-PROJECT( LapackWrappers )
 SET( PROJ LapackWrappers )
 
 
@@ -27,6 +26,7 @@ ELSE()
     SET( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 ENDIF()
 SET( ${PROJ}_INSTALL_DIR ${CMAKE_INSTALL_PREFIX} )
+SET( ${PROJ}_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 MESSAGE("Installing LapackWrappers in: ${CMAKE_INSTALL_PREFIX}")
 
 
@@ -36,6 +36,10 @@ IF ( NOT TPL_DIRECTORY )
 ENDIF()
 SET( CMAKE_MODULE_PATH "${TPL_DIRECTORY}" ${CMAKE_MODULE_PATH} )
 FIND_PACKAGE( TPLs REQUIRED COMPONENTS LAPACK )
+
+
+# Initialize the project (should disable langagues that the TPL builder will enable)
+PROJECT( ${PROJ} LANGUAGES )
 
 
 # Enable tests
