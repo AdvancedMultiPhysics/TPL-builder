@@ -1,10 +1,8 @@
 # Set some CMake properties
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 CMAKE_POLICY(SET CMP0014 OLD)
-IF ( ${CMAKE_MAJOR_VERSION} EQUAL 3 )
-    CMAKE_POLICY(SET CMP0026 OLD)
-    CMAKE_POLICY(SET CMP0042 NEW)
-ENDIF()
+CMAKE_POLICY(SET CMP0026 OLD)
+CMAKE_POLICY(SET CMP0042 NEW)
 
 
 MESSAGE("================")
@@ -50,12 +48,8 @@ ELSEIF( TPL_INSTALL_DIR )
 ELSE()
     SET( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 ENDIF()
+INCLUDE_DIRECTORIES( "${CMAKE_INSTALL_PREFIX}" )
 MESSAGE("Installing TPLs in: ${CMAKE_INSTALL_PREFIX}")
-
-
-# Create a cmake file that can be included from other projects
-FILE( WRITE "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# This file sets cmake variables that specify the locations of TPLs\n")
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# It may also include comments for record information on how the TPLs were compiled\n")
 
 
 # Enable the desired languages
@@ -85,6 +79,11 @@ ELSE()
 ENDIF() 
 
 
+# Create a cmake file that can be included from other projects (obsolete)
+FILE( WRITE "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# This file sets cmake variables that specify the locations of TPLs\n")
+FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# It may also include comments for record information on how the TPLs were compiled\n")
+
+
 # SET the global compile and link flags
 SET_COMPILER_FLAGS()
 
@@ -94,6 +93,16 @@ IF ( NOT TPL_LIST )
     SET( TPL_LIST "LAPACK;ZLIB;PETSC;HDF5;HYPRE;SAMRAI" )
 ENDIF()
 STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
+
+
+# Add the lapack wrappers if LAPACK
+IF ( ";${TPL_LIST};" MATCHES "LAPACK" AND NOT ";${TPL_LIST};" MATCHES "LAPACK_WRAPPERS" )
+    STRING( REPLACE "LAPACK" "LAPACK;LAPACK_WRAPPERS" TPL_LIST "${TPL_LIST}" )
+ENDIF()
+
+
+# Save the TPL list
+MESSAGE( "TPL_LIST = ${TPL_LIST}" )
 FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n# TPL_LIST\nSET(TPL_LIST \"${TPL_LIST}\")\n")
 
 
@@ -102,6 +111,16 @@ SET_DEFAULT_TPL( ZLIB  URL http://zlib.net/zlib-1.2.8.tar.gz )
 SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.8.12.tar.gz  )
 SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hypre-2.10.0b.tar.gz )
 SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/petsc-3.2.tar.gz )
+
+
+# Copy cmake/macros.cmake to install dir
+CONFIGURE_FILE( cmake/macros.cmake "${CMAKE_INSTALL_PREFIX}/macros.cmake" COPYONLY )
+
+
+# Create a FindTPLs.cmake file for subsequent projects that sets the compilers,
+#    TPLs, links commands, and provides a macros file with additional cmake functions
+SET( FIND_TPLS_CMAKE "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" )
+CONFIGURE_FILE( cmake/FindTPLs.template.cmake "${FIND_TPLS_CMAKE}" @ONLY )
 
 
 # Configure TPLs
@@ -115,6 +134,7 @@ FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
 
 
 # Add build-test target to print results of build process
+ENABLE_TESTING()
 INCLUDE(CTest)
 ADD_TEST( echo-build ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/echo_last_build.cmake" )
 SET_TESTS_PROPERTIES( echo-build PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" )
@@ -127,4 +147,58 @@ FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
 # Add distclean
 ADD_DISTCLEAN()
 
+
+# Run the test project as an external project
+CHECK_ENABLE_FLAG( ENABLE_TESTS FALSE )
+IF ( ENABLE_TESTS )
+    SET( TPLS_Test_INSTALL_DIR "${INSTALL_DIR}/tests" )
+    EXTERNALPROJECT_ADD(
+        TPLS_Test
+        SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+        BUILD_IN_SOURCE     0
+        CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
+        BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
+        INSTALL_COMMAND     make install
+        TEST_AFTER_INSTALL  ${CMAKE_COMMAND} -E echo "Installing"
+        TEST_COMMAND        ctest -VV
+        DEPENDS             ${TPL_LIST}
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+    ExternalProject_Add_Step(
+        TPLS_Test
+        force_reconfigure
+        COMMAND ${CMAKE_COMMAND} -E echo "Force configure of libhello"
+        DEPENDEES update
+        DEPENDERS configure
+        ALWAYS 1
+    )
+    ADD_TPL_SAVE_LOGS( TPLS_Test )
+    ADD_TPL_CLEAN( TPLS_Test )
+ENDIF()
+
+
+### Add final lines to FindTPLs.cmake
+
+# Add a check to the FindTPLs.cmake to ensure all TPLs were found
+FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Check that all desired TPLs were found\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH ( tmp $\{TPL_LIST} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( NOT TPL_FOUND_$\{tmp} AND TPLs_FIND_$\{tmp})\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "        MESSAGE( WARNING \"$\{tmp} not found\" )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
+
+# Write the TPLs.h file for the TPLs we will 
+FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Write the TPLs.h\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPLs_HEADER \"$\{$\{PROJ}_INSTALL_DIR}/include/TPLs.h\" )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( WRITE \"$\{TPLs_HEADER}\" \"// This file sets the TPL list for C/C++ codes\\n\")\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#define TPL_LIST \\\"${TPL_LIST}\\\"\\n\")\n")
+FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH( TPL $\{TPL_LIST} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( TPL_FOUND_$\{TPL} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "        SET( USE_$\{TPL} TRUE )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "        ADD_DEFINITIONS( -DUSE_$\{TPL} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "        FILE( APPEND \"$\{$\{PROJ}_INSTALL_DIR}/include/TPLs.h\" \"#ifndef USE_$\{TPL}\\n\")\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "        FILE( APPEND \"$\{$\{PROJ}_INSTALL_DIR}/include/TPLs.h\" \"   #define USE_$\{TPL}\\n\")\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "        FILE( APPEND \"$\{$\{PROJ}_INSTALL_DIR}/include/TPLs.h\" \"#endif\\n\")\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 

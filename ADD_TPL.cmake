@@ -8,10 +8,18 @@ MACRO( ADD_DISTCLEAN )
     ENDFOREACH()
     ADD_CUSTOM_TARGET(
         distclean
-        ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs"
-        COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/TPLs.cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLs.h"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/macros.cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/LapackWrappers"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLs.cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/tests"
         COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
         COMMAND ${CMAKE_COMMAND} -E remove_directory Testing
+        COMMAND ${CMAKE_COMMAND} -E remove_directory LAPACK_WRAPPERS-prefix
+        COMMAND ${CMAKE_COMMAND} -E remove_directory TPLS_Test-prefix
         COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake CTestTestfile.cmake DartConfiguration.tcl Makefile
         ${DISTCLEAN_CMDS}
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" 
