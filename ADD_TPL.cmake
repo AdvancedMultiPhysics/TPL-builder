@@ -128,7 +128,8 @@ ENDMACRO()
 # Macro to create a test to print the results of the build
 MACRO( ADD_BUILD_TEST TPL )
     ADD_TEST( ${TPL}-build ${CMAKE_COMMAND} -DTPL=${TPL} -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/check_build.cmake" )
-    SET_TESTS_PROPERTIES( ${TPL}-build PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" )
+    SET_TESTS_PROPERTIES( ${TPL}-build PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
+         PASS_REGULAR_EXPRESSION "completed:" FAIL_REGULAR_EXPRESSION "did not complete" )
 ENDMACRO()
 
 
