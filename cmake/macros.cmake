@@ -212,7 +212,7 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
     # Find all files in the current directory
     FIND_FILES()
     # Create the copy target
-    STRING(REGEX REPLACE "${${PROJ}_SOURCE_DIR}/src/" "" COPY_TARGET "copy-${PROJ}-${CMAKE_CURRENT_SOURCE_DIR}-include" )
+    STRING(REGEX REPLACE "${${PROJ}_SOURCE_DIR}/" "" COPY_TARGET "copy-${PROJ}-${CMAKE_CURRENT_SOURCE_DIR}-include" )
     STRING(REGEX REPLACE "/" "-" COPY_TARGET ${COPY_TARGET} )
     IF( NOT TARGET ${COPY_TARGET} )
         ADD_CUSTOM_TARGET( ${COPY_TARGET} ALL )
@@ -220,9 +220,9 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
     ENDIF()
     # Copy the header files to the include path
     IF ( HEADERS )
-        FILE( GLOB HFILES RELATIVE "${${PROJ}_SOURCE_DIR}/src" ${HEADERS} )
+        FILE( GLOB HFILES RELATIVE "${${PROJ}_SOURCE_DIR}" ${HEADERS} )
         FOREACH( HFILE ${HFILES} )
-            SET( SRC_FILE "${${PROJ}_SOURCE_DIR}/src/${HFILE}" )
+            SET( SRC_FILE "${${PROJ}_SOURCE_DIR}/${HFILE}" )
             SET( DST_FILE "${${PROJ}_INSTALL_DIR}/include/${HFILE}" )
             # Only copy the headers if the exisit in the project source directory
             IF ( EXISTS "${SRC_FILE}" )

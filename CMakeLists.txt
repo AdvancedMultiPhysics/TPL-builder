@@ -113,14 +113,22 @@ SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builde
 SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/petsc-3.2.tar.gz )
 
 
-# Copy cmake/macros.cmake to install dir
+# Copy cmake files to install dir
 CONFIGURE_FILE( cmake/macros.cmake "${CMAKE_INSTALL_PREFIX}/macros.cmake" COPYONLY )
+CONFIGURE_FILE( cmake/WriteRepoVersion.cmake "${CMAKE_INSTALL_PREFIX}/WriteRepoVersion.cmake" COPYONLY )
 
 
 # Create a FindTPLs.cmake file for subsequent projects that sets the compilers,
 #    TPLs, links commands, and provides a macros file with additional cmake functions
 SET( FIND_TPLS_CMAKE "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" )
 CONFIGURE_FILE( cmake/FindTPLs.template.cmake "${FIND_TPLS_CMAKE}" @ONLY )
+IF ( USE_MATLAB )
+    FILE( APPEND "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" "# Set MATLAB flags\n")
+    FILE( APPEND "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" "SET( USE_MATLAB ${USE_MATLAB})\n")
+    FILE( APPEND "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" "SET( MATLAB_DIRECTORY  \"${MATLAB_DIRECTORY}\")\n")
+    FILE( APPEND "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" "SET( USE_MATLAB_LAPACK \"${USE_MATLAB_LAPACK}\")\n")
+    FILE( APPEND "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" "SET( CMAKE_INSTALL_RPATH $\{CMAKE_INSTALL_RPATH} \"${MATLAB_DIRECTORY}/sys/os/glnxa64\")\n\n")
+ENDIF()
 
 
 # Configure TPLs

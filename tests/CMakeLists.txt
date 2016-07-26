@@ -15,6 +15,10 @@ MESSAGE("================")
 SET( PROJ TPLS_Tests )
 
 
+# Initialize the project (should disable langagues that the TPL builder will enable)
+PROJECT( ${PROJ} LANGUAGES )
+
+
 # Set the install path
 IF( PREFIX )
     SET( CMAKE_INSTALL_PREFIX ${PREFIX} )
@@ -40,10 +44,6 @@ MESSAGE("TPLs Found")
 MESSAGE("  TPLs List: ${TPL_LIST}")
 MESSAGE("  Include Paths: ${TPL_INCLUDE_DIRS}")
 MESSAGE("  Libraries: ${TPL_LIBRARIES}")
-
-
-# Initialize the project (should disable langagues that the TPL builder will enable)
-PROJECT( ${PROJ} LANGUAGES )
 
 
 # Enable tests

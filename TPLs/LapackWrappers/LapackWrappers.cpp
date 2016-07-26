@@ -377,7 +377,7 @@ static bool test_daxpy( int N, double &error )
         double err = L2Error( K, y1, y2 );
         error      = std::max( error, err );
     }
-    bool fail = error > 1e-15;
+    bool fail = error > 1e-13;
     NULL_USE( y1 );
     delete[] x;
     delete[] y0;
@@ -695,7 +695,7 @@ static bool test_dgttrf( int N, double &error )
     Lapack::dgttrs( 'N', K, 1, DL2, D2, DU2, DU3, IPIV, x2, K, err );
     double norm = L2Norm( K, x1 );
     double err2 = L2Error( K, x1, x2 );
-    if ( err2 > 1e-14 * norm )
+    if ( err2 > 5e-13 * norm )
         N_errors++;
     error = err2 / norm;
     delete[] D;
@@ -832,7 +832,7 @@ static bool test_dgttrs( int N, double &error )
         N_errors += err == 0 ? 0 : 1;
         double norm = L2Norm( K, x1 );
         double err2 = L2Error( K, x1, x2 );
-        if ( err2 > 1e-14 * norm )
+        if ( err2 > 1e-13 * norm )
             N_errors++;
         error = std::max( error, err2 / norm );
     }
