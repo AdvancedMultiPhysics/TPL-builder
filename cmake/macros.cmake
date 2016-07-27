@@ -223,7 +223,7 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
         FILE( GLOB HFILES RELATIVE "${${PROJ}_SOURCE_DIR}" ${HEADERS} )
         FOREACH( HFILE ${HFILES} )
             SET( SRC_FILE "${${PROJ}_SOURCE_DIR}/${HFILE}" )
-            SET( DST_FILE "${${PROJ}_INSTALL_DIR}/include/${HFILE}" )
+            SET( DST_FILE "${${PROJ}_INSTALL_DIR}/include/${${PROJ}_INC}/${HFILE}" )
             # Only copy the headers if the exisit in the project source directory
             IF ( EXISTS "${SRC_FILE}" )
                 ADD_CUSTOM_COMMAND(TARGET ${COPY_TARGET} 
