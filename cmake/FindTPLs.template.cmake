@@ -31,6 +31,12 @@ IF ( NOT ${PROJ}_INSTALL_DIR )
 ENDIF()
 
 
+# Print a message to indeicate we started looking for TPLs
+IF ( NOT TPLs_FIND_QUIETLY )
+    MESSAGE( "Running FindTPLs" )
+ENDIF()
+
+
 # Set some basic information (should only be called once regardless of the number of calls to find_package(FindTPLs)
 IF ( NOT TPLs_FOUND )
 
@@ -78,12 +84,15 @@ IF ( NOT TPLs_FOUND )
     IF ( CMAKE_Fortran_COMPILER )
         ENABLE_LANGUAGE( Fortran )
     ENDIF()
-    SET( LDFLAGS @LDFLAGS@ )
+    SET( LDFLAGS "@LDFLAGS@ ${LDFLAGS}" )
+    SET( LDLIBS "@LDLIBS@ ${LDLIBS}" )
     SET( ENABLE_GXX_DEBUG @ENABLE_GXX_DEBUG@ )
     SET( DISABLE_GXX_DEBUG @DISABLE_GXX_DEBUG@ )
-    MESSAGE("CMAKE_C_COMPILER = ${CMAKE_C_COMPILER}")
-    MESSAGE("CMAKE_CXX_COMPILER = ${CMAKE_CXX_COMPILER}")
-    MESSAGE("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
+    IF ( NOT TPLs_FIND_QUIETLY )
+        MESSAGE( STATUS "CMAKE_C_COMPILER = ${CMAKE_C_COMPILER}")
+        MESSAGE( STATUS "CMAKE_CXX_COMPILER = ${CMAKE_CXX_COMPILER}")
+        MESSAGE( STATUS "CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
+    ENDIF()
 
     # Initialize the include paths / libraries
     SET( TPL_INCLUDE_DIRS )
@@ -94,7 +103,6 @@ IF ( NOT TPLs_FOUND )
     INCLUDE( "${TPL_MACRO_CMAKE}" )
 
     # Get the compiler and set the compiler flags
-    IDENTIFY_COMPILER()
     CHECK_ENABLE_FLAG( USE_STATIC 0 )
     SET_COMPILER_FLAGS()
     IF ( USE_STATIC )
@@ -102,7 +110,7 @@ IF ( NOT TPLs_FOUND )
     ENDIF()
 
     # Add system dependent flags that are commonly used
-    MESSAGE("System is: ${CMAKE_SYSTEM_NAME}")
+    MESSAGE( STATUS "System is: ${CMAKE_SYSTEM_NAME}" )
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
         # Windows specific system libraries
         SET( SYSTEM_PATHS "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/Lib/x64" 
@@ -121,7 +129,7 @@ IF ( NOT TPLs_FOUND )
         ELSE()
             MESSAGE( WARNING "Did not find DbgHelp, stack trace will not be availible" )
         ENDIF()
-        MESSAGE("System libs: ${SYSTEM_LIBS}")
+        MESSAGE( STATUS "System libs: ${SYSTEM_LIBS}" )
     ELSEIF( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
         # Linux specific system libraries
         SET( SYSTEM_LIBS -lz -lpthread -ldl )
@@ -147,10 +155,14 @@ IF ( NOT TPLs_FOUND )
         MESSAGE( FATAL_ERROR "OS not detected" )
     ENDIF()
     # Print some flags
-    MESSAGE( "LDLIBS = ${LDLIBS}" )
-    MESSAGE( "SYSTEM_LIBS = ${SYSTEM_LIBS}" )
-    MESSAGE( "CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}" )
-    MESSAGE( "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}" )
+    IF ( NOT TPLs_FIND_QUIETLY )
+        MESSAGE( STATUS "LDLIBS = ${LDLIBS}" )
+        MESSAGE( STATUS "LDFLAGS = ${LDFLAGS}" )
+        MESSAGE( STATUS "SYSTEM_LIBS = ${SYSTEM_LIBS}" )
+        MESSAGE( STATUS "CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}" )
+        MESSAGE( STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}" )
+        MESSAGE( STATUS "CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}" )
+    ENDIF()
 
 ENDIF()
 

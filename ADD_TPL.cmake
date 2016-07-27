@@ -8,7 +8,6 @@ MACRO( ADD_DISTCLEAN )
     ENDFOREACH()
     ADD_CUSTOM_TARGET(
         distclean
-        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/tmp"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/cmake"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLs.h"
@@ -17,6 +16,7 @@ MACRO( ADD_DISTCLEAN )
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/LapackWrappers"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLs.cmake"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/tests"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory tmp
         COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
         COMMAND ${CMAKE_COMMAND} -E remove_directory Testing
         COMMAND ${CMAKE_COMMAND} -E remove_directory LAPACK_WRAPPERS-prefix
