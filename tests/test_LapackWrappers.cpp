@@ -105,9 +105,9 @@ int main( int, char *[] )
     int N_threads = 8;
     for ( size_t i = 0; i < sizeof( tests ) / sizeof( char * ); i++ ) {
         double t1 = time();
-        std::thread threads[N_threads];
-        int N_errors_thread[N_threads];
-        double error_thread[N_threads];
+        std::thread threads[128];
+        int N_errors_thread[128];
+        double error_thread[128];
         for ( int j = 0; j < N_threads; j++ )
             threads[j] = std::thread( run_test, tests[i], N[i], std::ref(N_errors_thread[j]), std::ref(error_thread[j]) );
         for ( int j = 0; j < N_threads; j++ )
