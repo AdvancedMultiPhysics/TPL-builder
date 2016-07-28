@@ -187,6 +187,14 @@ ENDIF()
 
 ### Add final lines to FindTPLs.cmake
 
+# Add the timer if it is not installed
+IF ( NOT TIMER_INSTALL_DIR )
+    CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTimer.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake" COPYONLY )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "# Configure timer\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "INCLUDE( \"${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake\" )\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "CONFIGURE_TIMER( FALSE \"$\{$\{PROJ}_INSTALL_DIR}/include\" TRUE )\n\n" )
+ENDIF()
+
 # Add a check to the FindTPLs.cmake to ensure all TPLs were found
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Check that all desired TPLs were found\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH ( tmp $\{TPL_LIST} )\n" )
