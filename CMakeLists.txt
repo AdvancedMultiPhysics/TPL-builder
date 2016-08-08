@@ -159,7 +159,7 @@ ADD_DISTCLEAN()
 # Run the test project as an external project
 CHECK_ENABLE_FLAG( ENABLE_TESTS FALSE )
 IF ( ENABLE_TESTS )
-    SET( TPLS_Test_INSTALL_DIR "${INSTALL_DIR}/tests" )
+    SET( TPLS_Test_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/tests" )
     EXTERNALPROJECT_ADD(
         TPLS_Test
         SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
