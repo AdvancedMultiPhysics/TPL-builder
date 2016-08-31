@@ -237,3 +237,9 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "        FILE( APPEND \"$\{$\{PROJ}_INSTALL_DI
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 
+# Copy cmake files for cppcheck and cppclean
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCppcheck.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCppcheck.cmake" COPYONLY )
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run.cppclean.template.cmake "${CMAKE_INSTALL_PREFIX}/cmake/run.cppclean.template.cmake" COPYONLY )
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCppclean.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCppclean.cmake" COPYONLY )
+
+

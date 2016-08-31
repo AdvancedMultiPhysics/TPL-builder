@@ -20,6 +20,8 @@
 #   TPL_LIBRARIES         - TPL Libraries
 #   TPL_INCLUDE_DIRS      - TPL Include paths
 #   TPL_MACRO_CMAKE       - File to macros.cmake provided by the TPL install
+#   TPL_CPPCHECK_CMAKE    - File to cppcheck.cmake provided by the TPL install
+#   TPL_CPPCLEAN_CMAKE    - File to cppclean.cmake provided by the TPL install
 
 
 # Check that PROJ and ${PROJ}_INSTALL_DIR have been set
