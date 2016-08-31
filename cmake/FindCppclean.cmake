@@ -23,6 +23,7 @@
 #   CPPCLEAN_DECLARED           - Enable warnings about declared but not defined
 #   CPPCLEAN_STATIC             - Enable warnings about static data
 #   CPPCLEAN_UNUSED_VARIABLE    - Enable warnings about unused variables
+#   CPPCLEAN_FORWARD_DECLARE    - Enable messages for forward decelerations
 #   CPPCLEAN_UNKNOWN            - Enable unknown messages
 #   CPPCLEAN_SOURCE             - Source path to check
 #
