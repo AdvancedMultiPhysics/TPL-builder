@@ -52,7 +52,7 @@ IF ( NOT TPLs_FOUND )
     INCLUDE_DIRECTORIES( "${${PROJ}_INSTALL_DIR}/include" )
 
     # Set CMAKE_MODULE_PATH
-    SET( CMAKE_MODULE_PATH "${TPL_DIRECTORY}/cmake" ${CMAKE_MODULE_PATH} )
+    SET( CMAKE_MODULE_PATH "@CMAKE_INSTALL_PREFIX@/cmake" ${CMAKE_MODULE_PATH} )
 
     # Set the compilers and compile flags
     SET( CMAKE_BUILD_TYPE   @CMAKE_BUILD_TYPE@  CACHE STRING "documentation for this variable")
