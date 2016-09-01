@@ -958,6 +958,21 @@ void Lapack::print_machine_parameters()
     printf( "emax  = %13.6e    largest exponent before overflow\n", dlamch( 'L' ) );
     printf( "rmax  = %13.6e    overflow threshold - (base**emax)*(1-eps)\n", dlamch( 'O' ) );
 }
+void Lapack::print_lapack_version()
+{
+    #ifdef USE_ATLAS
+        printf("Using ATLAS\n");
+    #elif defined(USE_ACML)
+        printf("Using ACML:\n");
+        acmlinfo();
+    #elif defined(USE_MKL)
+        printf("Using MKL\n");
+    #elif defined(USE_MATLAB_LAPACK)
+        printf("Using MATLAB LAPACK\n");
+    #else
+        printf("Using unknown LAPACK library\n");
+    #endif
+}
 
 
 /******************************************************************

@@ -633,6 +633,10 @@ public:
     static void print_machine_parameters();
 
 
+    //! Print information about the lapack version/package
+    static void print_lapack_version();
+
+
 private:
     /*!
      * \brief   Get the lock

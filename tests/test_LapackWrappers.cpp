@@ -73,6 +73,10 @@ int main( int, char *[] )
 {
     int N_errors = 0;
 
+    // Print the lapack version
+    Lapack::print_lapack_version();
+    printf("\n");
+
     // Print the machine specifics
     Lapack::print_machine_parameters();
 

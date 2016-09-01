@@ -213,6 +213,10 @@ inline void Lapack::dgbsv( int N, int KL, int KU, int NRHS, double *AB, int LDAB
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgbsv" );
+#elif defined( USE_ACML )
+    get_lock();
+    FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
+    release_lock();
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
