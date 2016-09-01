@@ -15,6 +15,7 @@
 #   CPPCLEAN_INCLUDE            - List of include folders
 #   CPPCLEAN_OPTIONS            - List of cppclean options
 #   CPPCLEAN_EXCLUDE            - List of files to exclude
+#   CPPCLEAN_SUPPRESSIONS       - List of messages to suppress (based on partial string matching)
 #   CPPCLEAN_UNNECESSARY_INCLUDE- Enable warnings about unnecessary includes
 #   CPPCLEAN_EXTRA_INCLUDE      - Enable warnings about extra includes
 #   CPPCLEAN_SHOULD_INCLUDE     - Enable warnings about should includes
@@ -26,6 +27,7 @@
 #   CPPCLEAN_FORWARD_DECLARE    - Enable messages for forward decelerations
 #   CPPCLEAN_UNKNOWN            - Enable unknown messages
 #   CPPCLEAN_SOURCE             - Source path to check
+#   CPPCLEAN_FAIL_ON_WARNINGS   - Cause the test to fail if warnings are detected (default is false)
 #
 # The following variables are set by find_package( Cppclean )
 #
@@ -48,6 +50,9 @@ ELSEIF ( CPPCLEAN_FIND_REQUIRED )
     MESSAGE( FATAL_ERROR "cppclean not found")
 ELSE()
     MESSAGE( STATUS "cppclean not found")
+ENDIF()
+IF ( NOT DEFINED CPPCLEAN_FAIL_ON_WARNINGS )
+    SET( CPPCLEAN_FAIL_ON_WARNINGS 0 )
 ENDIF()
 
 
@@ -94,6 +99,10 @@ IF ( CPPCLEAN )
     CONFIGURE_FILE( "${CMAKE_CURRENT_LIST_DIR}/run.cppclean.template.cmake" "${FILENAME}" @ONLY )
     # Create the test
     ADD_TEST( cppclean ${CMAKE_COMMAND} -P "${FILENAME}" )
-    SET_TESTS_PROPERTIES( cppclean PROPERTIES PROCESSORS 1 )
+    IF ( ${CPPCLEAN_FAIL_ON_WARNINGS} )
+        SET_TESTS_PROPERTIES( cppclean PROPERTIES PROCESSORS 1 PASS_REGULAR_EXPRESSION "All tests passed" )
+    ELSE()
+        SET_TESTS_PROPERTIES( cppclean PROPERTIES PROCESSORS 1 )
+    ENDIF()
 ENDIF()
 

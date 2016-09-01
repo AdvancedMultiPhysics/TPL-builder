@@ -5,6 +5,7 @@ SET( CPPCLEAN_EXCLUDE @CPPCLEAN_EXCLUDE@ )
 SET( CPPCLEAN_SOURCE  @CPPCLEAN_SOURCE@ )
 SET( CPPCLEAN_OUTPUT  @CPPCLEAN_OUTPUT@ )
 SET( CPPCLEAN_ERROR   @CPPCLEAN_ERROR@ )
+SET( CPPCLEAN_SUPPRESSIONS "@CPPCLEAN_SUPPRESSIONS@" )
 SET( CPPCLEAN_UNNECESSARY_INCLUDE @CPPCLEAN_UNNECESSARY_INCLUDE@ )
 SET( CPPCLEAN_EXTRA_INCLUDE @CPPCLEAN_EXTRA_INCLUDE@ )
 SET( CPPCLEAN_SHOULD_INCLUDE @CPPCLEAN_SHOULD_INCLUDE@ )
@@ -24,6 +25,13 @@ ENDFOREACH()
 FOREACH(file ${CPPCLEAN_EXCLUDE})
     SET( CPPCLEAN_OPTIONS ${CPPCLEAN_OPTIONS} "--exclude '${file}'" )
 ENDFOREACH()
+
+
+# Get the final list of suppressions
+SET( SUPPRESSIONS ${CPPCLEAN_SUPPRESSIONS} 
+    "'shared_ptr.h' does not need to be #included"
+    "'ProfilerApp.h' does not need to be #included"
+)
 
 
 # Run cppclean
@@ -71,9 +79,16 @@ SET( STATIC )
 SET( UNKNOWN )
 SET( FORWARD_DECLARE )
 FOREACH( line ${OUTPUT} )
-    IF ( 0 )
-    ELSEIF ( "${line}" MATCHES "'shared_ptr.h' does not need to be #included" )
-    ELSEIF ( "${line}" MATCHES "'ProfilerApp.h' does not need to be #included" )
+    SET( FOUND_IN_SUPPRESSIONS 0 )
+    FOREACH( tmp ${SUPPRESSIONS} )
+        IF ( "${line}" MATCHES "${tmp}" )
+           SET( FOUND_IN_SUPPRESSIONS 1 ) 
+        ENDIF()
+    ENDFOREACH()
+    IF ( ${FOUND_IN_SUPPRESSIONS} )
+        # Suppress message
+    ELSEIF ( "${line}" MATCHES "" )
+        # Empty line
     ELSEIF ( ( "${line}" MATCHES "use a forward declaration instead" ) OR
              ( "${line}" MATCHES "forward declaration not expected" ) )
         SET( FORWARD_DECLARE ${FORWARD_DECLARE} "${line}" )
@@ -164,7 +179,7 @@ IF ( CPPCLEAN_FORWARD_DECLARE )
         MESSAGE(${line})
     ENDFOREACH()
     MESSAGE("")
-    LIST(LENGTH CPPCLEAN_FORWARD_DECLARE len)
+    LIST(LENGTH FORWARD_DECLARE len)
     MATH(EXPR ERR "${ERR}+${len}")
 ENDIF()
 IF ( CPPCLEAN_UNKNOWN )
@@ -179,4 +194,9 @@ ENDIF()
 
 
 # Return
+IF ( "${ERR}" STREQUAL "0" )
+    MESSAGE("All tests passed")
+ELSE()
+    MESSAGE("${ERR} warnings detected")
+ENDIF()
 RETURN()
