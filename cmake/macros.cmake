@@ -405,28 +405,34 @@ MACRO( SET_WARNINGS )
     # Add gcc specific compiler options
     # Note: adding -Wlogical-op causes a wierd linking error on Titan using the nvcc wrapper:
     #    /usr/bin/ld: cannot find gical-op: No such file or directory
+    ADD_DEFINITIONS( -DUSE_GCC )
     SET(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra") 
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Woverloaded-virtual")
   ELSEIF ( USING_MSVC )
     # Add Microsoft specifc compiler options
+    ADD_DEFINITIONS( -DUSE_MSVC )
     SET(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _ITERATOR_DEBUG_LEVEL=0 /wd4267" )
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _ITERATOR_DEBUG_LEVEL=0 /wd4267" )
   ELSEIF ( USING_ICC )
     # Add Intel specifc compiler options
+    ADD_DEFINITIONS( -DUSE_ICC )
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall" )
     SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall" )
   ELSEIF ( USING_CRAY )
     # Add default compiler options
+    ADD_DEFINITIONS( -DUSE_CRAY )
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS}")
     SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
   ELSEIF ( USING_PGCC )
     # Add default compiler options
+    ADD_DEFINITIONS( -DUSE_PGCC )
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -lpthread")
     SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -lpthread -Minform=inform -Mlist --display_error_number")
     # Suppress unreachable code warning, it causes non-useful warnings with some tests/templates
     SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} --diag_suppress 111,128,185")
   ELSEIF ( USING_CLANG )
     # Add default compiler options
+    ADD_DEFINITIONS( -DUSE_CLANG )
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall")
     SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -Wno-missing-braces -Wmissing-field-initializers -ftemplate-depth=1024")
   ELSE ( )
