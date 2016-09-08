@@ -73,3 +73,11 @@ IF ( USE_LAPACK )
 ENDIF()
 
 
+# Copy the tests to TPL project
+IF ( TPL_TEST_DIR )
+    FILE( APPEND "${TPL_TEST_DIR}/CTestTestfile.cmake" "\n" )
+    FILE( APPEND "${TPL_TEST_DIR}/CTestTestfile.cmake" "IF ( NOT INCLUDED_TPL_TESTS )\n" )
+    FILE( APPEND "${TPL_TEST_DIR}/CTestTestfile.cmake" "    SET( INCLUDED_TPL_TESTS 1 )\n" )
+    FILE( APPEND "${TPL_TEST_DIR}/CTestTestfile.cmake" "    INCLUDE( \"${CMAKE_BINARY_DIR}/CTestTestfile.cmake\" )\n" )
+    FILE( APPEND "${TPL_TEST_DIR}/CTestTestfile.cmake" "ENDIF()\n" )
+ENDIF()

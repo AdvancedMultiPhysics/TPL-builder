@@ -68,7 +68,7 @@ ENDIF()
 # Include CMake files
 INCLUDE(ExternalProject)
 INCLUDE(macros.cmake)
-NULL_USE( USE_MATLAB MATLAB_DIRECTORY )
+NULL_USE( USE_MATLAB MATLAB_DIRECTORY BOOST_SRC_DIR BLAS_LIB LAPACK_LIB )
 
 
 # Set the system name
@@ -168,7 +168,7 @@ IF ( ENABLE_TESTS )
             TPLS_Test
             SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
             BUILD_IN_SOURCE     0
-            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
+            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DTPL_TEST_DIR=${CMAKE_BINARY_DIR};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
             BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
             INSTALL_COMMAND     make install
             DEPENDS             ${TPL_LIST}
@@ -179,7 +179,7 @@ IF ( ENABLE_TESTS )
             TPLS_Test
             SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
             BUILD_IN_SOURCE     0
-            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
+            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DTPL_TEST_DIR=${CMAKE_BINARY_DIR};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
             BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
             INSTALL_COMMAND     make install
             TEST_AFTER_INSTALL  ${CMAKE_COMMAND} -E echo "Installing"
@@ -199,8 +199,6 @@ IF ( ENABLE_TESTS )
     ADD_TPL_SAVE_LOGS( TPLS_Test )
     ADD_TPL_CLEAN( TPLS_Test )
     ADD_BUILD_TEST( TPLS_Test )
-    # Add the tests to this project as well
-    INCLUDE( "${CMAKE_BINARY_DIR}/TPLS_Test-prefix/src/TPLS_Test-build/CTestTestfile.cmake" )
 ENDIF()
 
 
