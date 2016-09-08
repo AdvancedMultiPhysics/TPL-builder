@@ -162,18 +162,32 @@ ADD_DISTCLEAN()
 CHECK_ENABLE_FLAG( ENABLE_TESTS FALSE )
 IF ( ENABLE_TESTS )
     SET( TPLS_Test_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/tests" )
-    EXTERNALPROJECT_ADD(
-        TPLS_Test
-        SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
-        BUILD_IN_SOURCE     0
-        CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
-        BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
-        INSTALL_COMMAND     make install
-        TEST_AFTER_INSTALL  ${CMAKE_COMMAND} -E echo "Installing"
-        TEST_COMMAND        ctest -VV
-        DEPENDS             ${TPL_LIST}
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
+    CHECK_ENABLE_FLAG( DISABLE_TESTS_AFTER_INSTALL FALSE )
+    IF ( DISABLE_TESTS_AFTER_INSTALL )
+        EXTERNALPROJECT_ADD(
+            TPLS_Test
+            SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+            BUILD_IN_SOURCE     0
+            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
+            BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
+            INSTALL_COMMAND     make install
+            DEPENDS             ${TPL_LIST}
+            LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_INSTALL 1
+        )
+    ELSE()
+        EXTERNALPROJECT_ADD(
+            TPLS_Test
+            SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+            BUILD_IN_SOURCE     0
+            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
+            BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
+            INSTALL_COMMAND     make install
+            TEST_AFTER_INSTALL  ${CMAKE_COMMAND} -E echo "Installing"
+            TEST_COMMAND        ctest -VV
+            DEPENDS             ${TPL_LIST}
+            LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+        )
+    ENDIF()
     ExternalProject_Add_Step(
         TPLS_Test
         force_reconfigure
@@ -184,6 +198,9 @@ IF ( ENABLE_TESTS )
     )
     ADD_TPL_SAVE_LOGS( TPLS_Test )
     ADD_TPL_CLEAN( TPLS_Test )
+    ADD_BUILD_TEST( TPLS_Test )
+    # Add the tests to this project as well
+    INCLUDE( "${CMAKE_BINARY_DIR}/TPLS_Test-prefix/src/TPLS_Test-build/CTestTestfile.cmake" )
 ENDIF()
 
 
