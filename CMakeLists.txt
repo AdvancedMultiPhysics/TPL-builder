@@ -256,5 +256,6 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCppcheck.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCppcheck.cmake" COPYONLY )
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run.cppclean.template.cmake "${CMAKE_INSTALL_PREFIX}/cmake/run.cppclean.template.cmake" COPYONLY )
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCppclean.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCppclean.cmake" COPYONLY )
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCoverage.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCoverage.cmake" COPYONLY )
 
 
