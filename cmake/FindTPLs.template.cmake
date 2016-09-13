@@ -190,6 +190,23 @@ IF ( TPLs_FIND_QUIETLY )
 ENDIF()
 
 
+# Function to configure coverage (definition only)
+FUNCTION( CONFIGURE_LINE_COVERAGE )
+    IF ( ENABLE_GCOV OR ENABLE_COVERAGE )
+        FIND_PACKAGE( Coverage )
+    ENDIF()
+    IF ( COVERAGE_FOUND )
+        SET( ENABLE_COVERAGE true PARENT_SCOPE )
+        ADD_DEFINITIONS( ${COVERAGE_FLAGS} )
+        SET( COVERAGE_FLAGS ${COVERAGE_FLAGS} PARENT_SCOPE )
+        SET( COVERAGE_LIBS  ${COVERAGE_LIBS}  PARENT_SCOPE )
+    ELSE() 
+        SET( ENABLE_COVERAGE false PARENT_SCOPE )
+        SET( ENABLE_GCOV false PARENT_SCOPE )
+    ENDIF()
+ENDFUNCTION()
+
+
 ## Begin individual TPL configuration
 
 
