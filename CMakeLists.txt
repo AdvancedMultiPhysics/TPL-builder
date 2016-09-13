@@ -133,6 +133,26 @@ IF ( USE_MATLAB )
 ENDIF()
 
 
+# Configure MPI
+CHECK_ENABLE_FLAG( USE_MPI 1 )
+IF ( USE_MPI )
+    FIND_PACKAGE( MPI )
+    SET( MPI_LANG C CXX Fortran )
+    MESSAGE( "Configuring MPI" )
+    FOREACH( tmp ${MPI_LANG} )
+        MESSAGE( "   MPI_${tmp}_FOUND = ${MPI_${tmp}_FOUND}" )
+        MESSAGE( "   MPI_${tmp}_COMPILER = ${MPI_${tmp}_COMPILER}" )
+        MESSAGE( "   MPI_${tmp}_COMPILE_FLAGS = ${MPI_${tmp}_COMPILE_FLAGS}" )
+        MESSAGE( "   MPI_${tmp}_INCLUDE_PATH = ${MPI_${tmp}_INCLUDE_PATH}" )
+        MESSAGE( "   MPI_${tmp}_LINK_FLAGS = ${MPI_${tmp}_LINK_FLAGS}" )
+        MESSAGE( "   MPI_${tmp}_LIBRARIES = ${MPI_${tmp}_LIBRARIES}" )
+    ENDFOREACH()
+    IF ( NOT MPI_C_FOUND OR NOT MPI_CXX_FOUND OR NOT MPI_Fortran_FOUND )
+        MESSAGE( FATAL_ERROR "MPI not found" )
+    ENDIF()
+ENDIF()
+
+
 # Configure TPLs
 FOREACH( TPL ${TPL_LIST} )
     FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
