@@ -101,6 +101,9 @@ IF ( USE_MPI )
         MESSAGE( FATAL_ERROR "MPI not found" )
     ENDIF()
 ENDIF()
+IF ( USE_MPI AND NOT MPIEXEC )
+    MESSAGE( FATAL_ERROR "Unable to find MPIEXEC, please set it before continuing" )
+ENDIF()
 
 
 # Create a cmake file that can be included from other projects (obsolete)
