@@ -196,7 +196,7 @@ EXTERNALPROJECT_ADD(
     LOG_DOWNLOAD 0   LOG_UPDATE 0   LOG_CONFIGURE 0   LOG_BUILD 0   LOG_INSTALL 1
 )
 ADD_TPL_SAVE_LOGS( environment )
-
+ADD_TPL_CLEAN( environment )
 
 # Run the test project as an external project
 CHECK_ENABLE_FLAG( ENABLE_TESTS FALSE )

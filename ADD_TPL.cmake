@@ -37,18 +37,31 @@ MACRO( ADD_TPL_CLEAN TPL )
     FOREACH( tmp ${tpl_cmds} )
         SET( RM_LIST ${RM_LIST} ${tmp} ${tmp}-err.log ${tmp}-out.log )
     ENDFOREACH()
-    ADD_CUSTOM_TARGET(
-        ${TPL}-clean
-        ${CMAKE_COMMAND}         -E remove_directory ../${TPL}-build
-        COMMAND ${CMAKE_COMMAND} -E make_directory   ../${TPL}-build
-        COMMAND ${CMAKE_COMMAND} -E remove ${RM_LIST}
-        COMMAND ${CMAKE_COMMAND} -E remove_directory "${${TPL}_INSTALL_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory   "${${TPL}_INSTALL_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
-        COMMAND ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" 
-    )
+    IF ( ${TPL}_INSTALL_DIR )
+        ADD_CUSTOM_TARGET( 
+            ${TPL}-clean
+            ${CMAKE_COMMAND}         -E remove_directory ../${TPL}-build
+            COMMAND ${CMAKE_COMMAND} -E make_directory   ../${TPL}-build
+            COMMAND ${CMAKE_COMMAND} -E remove ${RM_LIST}
+            COMMAND ${CMAKE_COMMAND} -E remove_directory "${${TPL}_INSTALL_DIR}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory   "${${TPL}_INSTALL_DIR}"
+            COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" 
+        )
+    ELSE()
+        ADD_CUSTOM_TARGET( 
+            ${TPL}-clean
+            ${CMAKE_COMMAND}         -E remove_directory ../${TPL}-build
+            COMMAND ${CMAKE_COMMAND} -E make_directory   ../${TPL}-build
+            COMMAND ${CMAKE_COMMAND} -E remove ${RM_LIST}
+            COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" 
+        )
+    ENDIF()
 ENDMACRO()
 
 
