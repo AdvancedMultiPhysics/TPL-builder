@@ -19,7 +19,8 @@ MACRO( ADD_DISTCLEAN )
         COMMAND ${CMAKE_COMMAND} -E remove_directory tmp
         COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
         COMMAND ${CMAKE_COMMAND} -E remove_directory Testing
-        COMMAND ${CMAKE_COMMAND} -E remove_directory LAPACK_WRAPPERS-prefix
+        COMMAND ${CMAKE_COMMAND} -E remove_directory environment-prefix
+	COMMAND ${CMAKE_COMMAND} -E remove_directory LAPACK_WRAPPERS-prefix
         COMMAND ${CMAKE_COMMAND} -E remove_directory TPLS_Test-prefix
         COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake CTestTestfile.cmake DartConfiguration.tcl Makefile
         ${DISTCLEAN_CMDS}
