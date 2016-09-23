@@ -185,6 +185,19 @@ FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
 ADD_DISTCLEAN()
 
 
+# Add target to list environment
+EXTERNALPROJECT_ADD(
+    environment
+    DOWNLOAD_COMMAND    ${CMAKE_COMMAND} -E echo "Dummy download"
+    CONFIGURE_COMMAND   ${CMAKE_COMMAND} -E echo "Dummy configure"
+    BUILD_COMMAND       ${CMAKE_COMMAND} -E echo "Dummy build"
+    INSTALL_COMMAND     ${CMAKE_COMMAND} -E environment
+    DEPENDS             ${TPL_LIST}
+    LOG_DOWNLOAD 0   LOG_UPDATE 0   LOG_CONFIGURE 0   LOG_BUILD 0   LOG_INSTALL 1
+)
+ADD_TPL_SAVE_LOGS( environment )
+
+
 # Run the test project as an external project
 CHECK_ENABLE_FLAG( ENABLE_TESTS FALSE )
 IF ( ENABLE_TESTS )
