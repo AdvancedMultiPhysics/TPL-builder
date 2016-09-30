@@ -16,6 +16,7 @@
     #include "LapackWrappers.h"
 #endif
 #ifdef USE_PETSC
+    #define __MPIUNI_H
     #include "petsc.h"
 #endif
 #ifdef USE_HDF5

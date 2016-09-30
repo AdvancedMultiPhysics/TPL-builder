@@ -60,6 +60,9 @@ IF ( CMAKE_BUILD_HYPRE )
     ELSE()
         SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --enable-shared )
     ENDIF()
+    IF ( NOT USE_MPI )
+        SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --without-MPI )
+    ENDIF()
 ENDIF()
 
 
