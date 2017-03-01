@@ -20,7 +20,7 @@ SET( CPPCLEAN_UNKNOWN @CPPCLEAN_UNKNOWN@ )
 
 # Set include/exclude options
 FOREACH(dir ${CPPCLEAN_INCLUDE})
-    SET( CPPCLEAN_OPTIONS ${CPPCLEAN_OPTIONS} "--include-path '${dir}'" )
+    SET( CPPCLEAN_OPTIONS ${CPPCLEAN_OPTIONS} "--include-path='${dir}'" )
 ENDFOREACH()
 FOREACH(file ${CPPCLEAN_EXCLUDE})
     SET( CPPCLEAN_OPTIONS ${CPPCLEAN_OPTIONS} "--exclude '${file}'" )

@@ -197,78 +197,91 @@ MACRO( CONFIGURE_BLAS )
     # Determine if we want to use BLAS
     CHECK_ENABLE_FLAG( USE_BLAS 1 )
     IF ( USE_BLAS )
-        IF ( BLAS_LIBRARIES )
-            # The user is specifying the blas command directly
-        ELSEIF ( BLAS_DIRECTORY )
+        IF ( BLAS_DIRECTORY )
             # The user is specifying the blas directory
+            # BP: If we use the variable BLAS_LIBRARIES instead of USER_BLAS in the
+            # section immediately below for some reason the FIND_LIBRARY calls
+            # fail
             IF ( BLAS_LIB )
                 # The user is specifying both the blas directory and the blas library
-                FIND_LIBRARY ( BLAS_LIBRARIES NAMES ${BLAS_LIB} PATHS ${BLAS_DIRECTORY}  NO_DEFAULT_PATH )
-                IF ( NOT BLAS_LIBRARIES )
+                FIND_LIBRARY ( USER_BLAS NAMES ${BLAS_LIB} PATHS ${BLAS_DIRECTORY}  NO_DEFAULT_PATH )
+                IF ( NOT USER_BLAS )
                     MESSAGE ( FATAL_ERROR "BLAS library not found in ${BLAS_DIRECTORY}" )
                 ENDIF()
             ELSE()
-                # The user did not specify the library serach for a blas library
-                FIND_LIBRARY ( BLAS_LIBRARIES NAMES blas PATHS ${BLAS_DIRECTORY}  NO_DEFAULT_PATH )
-                IF ( NOT BLAS_LIBRARIES )
+                # The user did not specify the library search for a blas library
+                FIND_LIBRARY ( USER_BLAS NAMES blas PATHS ${BLAS_DIRECTORY}  NO_DEFAULT_PATH )
+                IF ( NOT USER_BLAS )
                     MESSAGE ( FATAL_ERROR "BLAS library not found in ${BLAS_DIRECTORY}" )
                 ENDIF()
             ENDIF()
         ELSEIF ( BLAS_LIB )
             # The user is specifying the blas library (search for the file)
-            FIND_LIBRARY ( BLAS_LIBRARIES NAMES ${BLAS_LIB} )
-            IF ( NOT BLAS_LIBRARIES )
+            FIND_LIBRARY ( USER_BLAS NAMES ${BLAS_LIB} )
+            IF ( NOT USER_BLAS )
                 MESSAGE ( FATAL_ERROR "BLAS library not found" )
             ENDIF()
+        ELSEIF ( BLAS_LIBRARIES )
+            # The user is specifying the blas command directly
+            # BP: This check is made after the checks for user specified
+            # BLAS_DIRECTORY and/or BLAS_LIB as otherwise the system libraries are found!!
+            SET ( USER_BLAS ${BLAS_LIBRARIES})
         ELSE ()
             # The user did not include BLAS directly, perform a search
             INCLUDE ( FindBLAS )
             IF ( NOT BLAS_FOUND )
                 MESSAGE ( FATAL_ERROR "BLAS not found.  Try setting BLAS_DIRECTORY or BLAS_LIB" )
             ENDIF()
+            SET ( USER_BLAS ${BLAS_LIBRARIES})
         ENDIF()
-        SET ( BLAS_LIBS ${BLAS_LIBRARIES} )
+        SET ( BLAS_LIBS ${USER_BLAS} )
         MESSAGE ( "Using blas" )
         MESSAGE ( "   ${BLAS_LIBS}" )
     ENDIF()
 ENDMACRO ()
 
-
 # Macro to configure the LAPACK
 MACRO( CONFIGURE_LAPACK )
     # Determine if we want to use LAPACK
     IF ( USE_LAPACK )
-        IF ( LAPACK_LIBRARIES )
-            # The user is specifying the lapack command directly
-        ELSEIF ( LAPACK_DIRECTORY )
+        IF ( LAPACK_DIRECTORY )
             # The user is specifying the lapack directory
+            # BP: If we use the variable LAPACK_LIBRARIES instead of USER_BLAS in the
+            # section immediately below for some reason the FIND_LIBRARY calls
+            # fail
             IF ( LAPACK_LIB )
                 # The user is specifying both the lapack directory and the lapack library
-                FIND_LIBRARY ( LAPACK_LIBRARIES NAMES ${LAPACK_LIB} PATHS ${LAPACK_DIRECTORY}  NO_DEFAULT_PATH )
-                IF ( NOT LAPACK_LIBRARIES )
+                FIND_LIBRARY ( USER_LAPACK NAMES ${LAPACK_LIB} PATHS ${LAPACK_DIRECTORY}  NO_DEFAULT_PATH )
+                IF ( NOT USER_LAPACK )
                     MESSAGE ( FATAL_ERROR "LAPACK library not found in ${LAPACK_DIRECTORY}" )
                 ENDIF()
             ELSE()
                 # The user did not specify the library serach for a lapack library
-                FIND_LIBRARY ( LAPACK_LIBRARIES NAMES lapack PATHS ${LAPACK_DIRECTORY}  NO_DEFAULT_PATH )
-                IF ( NOT LAPACK_LIBRARIES )
+                FIND_LIBRARY ( USER_LAPACK NAMES lapack PATHS ${LAPACK_DIRECTORY}  NO_DEFAULT_PATH )
+                IF ( NOT USER_LAPACK )
                     MESSAGE ( FATAL_ERROR "LAPACK library not found in ${LAPACK_DIRECTORY}" )
                 ENDIF()
             ENDIF()
         ELSEIF ( LAPACK_LIB )
             # The user is specifying the lapack library (search for the file)
-            FIND_LIBRARY ( LAPACK_LIBRARIES NAMES ${LAPACK_LIB} )
-            IF ( NOT LAPACK_LIBRARIES )
+            FIND_LIBRARY ( USER_LAPACK NAMES ${LAPACK_LIB} )
+            IF ( NOT USER_LAPACK )
                 MESSAGE ( FATAL_ERROR "LAPACK library not found" )
             ENDIF()
+        ELSEIF ( LAPACK_LIBRARIES )
+            # The user is specifying the lapack command directly
+            # BP: This check is made after the checks for user specified
+            # LAPACK_DIRECTORY and/or LAPACK_LIB as otherwise the system libraries are found!!
+            SET ( USER_LAPACK ${LAPACK_LIBRARIES})
         ELSE ()
             # The user did not include lapack directly, perform a search
             INCLUDE ( FindLAPACK )
             IF ( NOT LAPACK_FOUND )
                 MESSAGE ( FATAL_ERROR "LAPACK not found.  Try setting LAPACK_DIRECTORY or LAPACK_LIB" )
             ENDIF()
+            SET ( USER_LAPACK ${LAPACK_LIBRARIES})
         ENDIF()
-        SET ( LAPACK_LIBS ${LAPACK_LIBRARIES} )
+        SET ( LAPACK_LIBS ${USER_LAPACK} )
         MESSAGE ( "Using lapack" )
         MESSAGE ( "   ${LAPACK_LIBS}" )
     ENDIF()
