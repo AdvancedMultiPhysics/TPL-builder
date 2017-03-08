@@ -26,7 +26,7 @@ Users should pre-download all TPLs into a common folder and then specify their
 locate using TPL_URL.  
 
 The current TPL list and tested versions are:
-    BLAS/LAPACK (any version)
+    BLAS/LAPACK (any version, NOTE: only netlib versions <= 3.5.0 work with Trilinos 12.10.1)
     BOOST (1.47-1.55)
     ZLIB
     HDF5 (1.8.12)
