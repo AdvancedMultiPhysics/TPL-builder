@@ -140,7 +140,7 @@ A sample debug configure script for AMP is:
         -D INSTALL_DIR:PATH=${INSTALL_DIR}                           \
         -D PROCS_INSTALL=4                                           \
         -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS" \
-        -D LAPACK_INSTALL_DIR="/packages/acml-5.3.1/gfortran64"      \
+        -D LAPACK_URL="http://www.netlib.org/lapack/lapack-3.5.0.tgz"         \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"                         \
         -D PETSC_URL="${TPL_ROOT}/petsc-3.7.5.tar.gz"                  \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                 \
