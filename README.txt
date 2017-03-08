@@ -30,10 +30,10 @@ The current TPL list and tested versions are:
     BOOST (1.47-1.55)
     ZLIB
     HDF5 (1.8.12)
-    HYPRE (2.11)
-    PETSc (3.2)
-    TRILINOS (12.6.1)
-    SAMRAI (3.10.0-modified)
+    HYPRE (2.11.1)
+    PETSc (3.7.5)
+    TRILINOS (12.10.1)
+    SAMRAI (3.11.2-modified)
     LIBMESH (custom version available on bitbucket)
     SUNDIALS (2.6.2)
     SCALAPACK (2.0.2)
@@ -72,7 +72,7 @@ root_dir
     | -- TPL_BUILDER
     | -- TPL_ROOT
     |       | -- boost_1_55_0.tar.gz
-    |       | -- SAMRAI_v3.10.0
+    |       | -- SAMRAI_v3.11.2
     |       | -- AMP
     |       | ...
     | -- build
@@ -86,7 +86,7 @@ In this example layout if we are creating an opt installation where
 TPL_BUILDER=root_dir/TPL_BUILDER,
 TPL_SRC_DIR=root_dir/TPL_BUILDER, 
 BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.10.0, 
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.11.2, 
 AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
 BUILD_DIR=root_dir/build/opt, 
 and INSTALL_DIR=root_dir/install/opt.  
@@ -112,10 +112,10 @@ A sample configure script for SAMRAI is:
         -D BOOST_ONLY_COPY_HEADERS:BOOL=true            \
         -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"      \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"            \
-        -D PETSC_URL="${TPL_ROOT}/petsc-3.2"            \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.7.5.tar.gz"            \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"    \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.4.0b.tar.gz"  \
-        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.10.0"  \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.1.tar.gz"  \
+        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.11.2"  \
         -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${SAMR_BUILDER}
 
@@ -142,14 +142,14 @@ A sample debug configure script for AMP is:
         -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS" \
         -D LAPACK_INSTALL_DIR="/packages/acml-5.3.1/gfortran64"      \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"                         \
-        -D PETSC_URL="${TPL_ROOT}/petsc-3.2.tar.gz"                  \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.7.5.tar.gz"                  \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                 \
         -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                  \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.10.0b.tar.gz"              \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.1.tar.gz"              \
         -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                  \
-        -D TRILINOS_URL="${TPL_ROOT}/trilinos-11.14.1-Source.tar.gz" \
-        -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos"                \
-        -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.5.0.tar.gz"          \
+        -D TRILINOS_URL="${TPL_ROOT}/trilinos-12.10.1-Source.tar.gz" \
+        -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos;Amesos"                \
+        -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.6.2.tar.gz"          \
         -D AMP_SRC_DIR="/projects/AMP/AMP"                           \
         -D AMP_DATA:PATH=/projects/AMP/AMP-Data                      \
         -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src"              \
