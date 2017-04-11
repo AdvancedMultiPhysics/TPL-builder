@@ -100,9 +100,10 @@ IF ( NOT TPLs_FOUND )
     SET( TPL_INCLUDE_DIRS )
     SET( TPL_LIBRARIES )
 
-    # Set the path to macros.cmake
-    SET( TPL_MACRO_CMAKE "@CMAKE_INSTALL_PREFIX@/macros.cmake" )
+    # Include additional cmake files
+    SET( TPL_MACRO_CMAKE "@CMAKE_INSTALL_PREFIX@/cmake/macros.cmake" )
     INCLUDE( "${TPL_MACRO_CMAKE}" )
+    INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/WriteRepoVersion.cmake" )
 
     # Get the compiler and set the compiler flags
     CHECK_ENABLE_FLAG( USE_STATIC 0 )

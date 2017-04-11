@@ -143,8 +143,8 @@ SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builde
 
 
 # Copy cmake files to install dir
-CONFIGURE_FILE( cmake/macros.cmake "${CMAKE_INSTALL_PREFIX}/macros.cmake" COPYONLY )
-CONFIGURE_FILE( cmake/WriteRepoVersion.cmake "${CMAKE_INSTALL_PREFIX}/WriteRepoVersion.cmake" COPYONLY )
+CONFIGURE_FILE( cmake/macros.cmake "${CMAKE_INSTALL_PREFIX}/cmake/macros.cmake" COPYONLY )
+CONFIGURE_FILE( cmake/WriteRepoVersion.cmake "${CMAKE_INSTALL_PREFIX}/cmake/WriteRepoVersion.cmake" COPYONLY )
 
 
 # Create a FindTPLs.cmake file for subsequent projects that sets the compilers,
