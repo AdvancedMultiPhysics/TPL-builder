@@ -668,21 +668,25 @@ ENDFUNCTION()
 MACRO( COPY_MESH_FILE MESHNAME )
     # Check the local data directory
     FILE( GLOB MESHPATH "${CMAKE_CURRENT_SOURCE_DIR}/data/${MESHNAME}" )
-    # Check the AMP_DATA directory
-    IF ( NOT MESHPATH )
-        FILE( GLOB MESHPATH "${AMP_DATA}/${MESHNAME}" )
-    ENDIF()
-    # Check the AMP_DATA/vvu directory
-    IF ( NOT MESHPATH )
-        FILE( GLOB MESHPATH "${AMP_DATA}/vvu/meshes/${MESHNAME}" )
-    ENDIF()
-    # Check the AMP_DATA/meshes directory
-    IF ( NOT MESHPATH )
-        FILE( GLOB MESHPATH "${AMP_DATA}/meshes/TestMeshes/${MESHNAME}" )
-    ENDIF()
-    IF ( NOT MESHPATH )
-        FILE( GLOB_RECURSE MESHPATH "${AMP_DATA}/meshes/*/${MESHNAME}" )
-    ENDIF()
+    # Search all data paths
+    FOREACH ( path ${${PROJ}_DATA} )
+        # Check the DATA directory
+        IF ( NOT MESHPATH )
+            FILE( GLOB MESHPATH "${path}/${MESHNAME}" )
+        ENDIF()
+        # Check the DATA/vvu directory
+        IF ( NOT MESHPATH )
+            FILE( GLOB MESHPATH "${path}/vvu/meshes/${MESHNAME}" )
+        ENDIF()
+        # Check the DATA/meshes directory
+        IF ( NOT MESHPATH )
+            FILE( GLOB_RECURSE MESHPATH "${path}/meshes/*/${MESHNAME}" )
+        ENDIF()
+        # Check the entire DATA directory
+        IF ( NOT MESHPATH )
+            FILE( GLOB_RECURSE MESHPATH "${path}/*/${MESHNAME}" )
+        ENDIF()
+    ENDFOREACH()
     # We have either found the mesh or failed
     IF ( NOT MESHPATH )
         MESSAGE ( WARNING "Cannot find mesh: " ${MESHNAME} )
