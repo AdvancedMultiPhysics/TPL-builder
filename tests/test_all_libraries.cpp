@@ -75,7 +75,8 @@ int testLAPACK_WRAPPERS( )
 {
     int N_errors = 0;
 #ifdef USE_LAPACK_WRAPPERS
-    N_errors = Lapack::run_all_test();
+    N_errors = Lapack<double>::run_all_test();
+    N_errors += Lapack<float>::run_all_test();
 #else
     std::cout << "   -- USE_LAPACK_WRAPPERS not defined\n";
     N_errors++;

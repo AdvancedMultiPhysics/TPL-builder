@@ -20,7 +20,7 @@ SET( CPPCLEAN_UNKNOWN @CPPCLEAN_UNKNOWN@ )
 
 # Set include/exclude options
 FOREACH(dir ${CPPCLEAN_INCLUDE})
-    SET( CPPCLEAN_OPTIONS ${CPPCLEAN_OPTIONS} "--include-path='${dir}'" )
+    SET( CPPCLEAN_OPTIONS ${CPPCLEAN_OPTIONS} "-I '${dir}'" )
 ENDFOREACH()
 FOREACH(file ${CPPCLEAN_EXCLUDE})
     SET( CPPCLEAN_OPTIONS ${CPPCLEAN_OPTIONS} "--exclude '${file}'" )
@@ -32,6 +32,12 @@ SET( SUPPRESSIONS ${CPPCLEAN_SUPPRESSIONS}
     "'shared_ptr.h' does not need to be #included"
     "'ProfilerApp.h' does not need to be #included"
 )
+
+
+# Print the command we will execute
+SET( CMD ${CPPCLEAN} ${CPPCLEAN_OPTIONS} "${CPPCLEAN_SOURCE}" )
+STRING( REPLACE ";" " " CMD "${CMD}" )
+MESSAGE( "${CMD}" )
 
 
 # Run cppclean
@@ -82,12 +88,12 @@ FOREACH( line ${OUTPUT} )
     SET( FOUND_IN_SUPPRESSIONS 0 )
     FOREACH( tmp ${SUPPRESSIONS} )
         IF ( "${line}" MATCHES "${tmp}" )
-           SET( FOUND_IN_SUPPRESSIONS 1 ) 
+            SET( FOUND_IN_SUPPRESSIONS 1 ) 
         ENDIF()
     ENDFOREACH()
     IF ( ${FOUND_IN_SUPPRESSIONS} )
         # Suppress message
-    ELSEIF ( "${line}" MATCHES "" )
+    ELSEIF ( "${line}" STREQUAL "" )
         # Empty line
     ELSEIF ( ( "${line}" MATCHES "use a forward declaration instead" ) OR
              ( "${line}" MATCHES "forward declaration not expected" ) )

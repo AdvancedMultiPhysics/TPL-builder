@@ -1,71 +1,70 @@
 #ifndef USE_LAPACK_WRAPPER
 #define USE_LAPACK_WRAPPER
 
-
-
 /*! \class Lapack
     \brief A wrapper class for BLAS/LAPACK routines
 
     \details  This class is a wrapper class to provide a common interface to
       BLAS and LAPACK routines.
 */
+template <typename TYPE>
 class Lapack
 {
 public:
     /*!
-     * \brief   dcopy
-     * \details  dcopy copies a vector x, to a vector y
+     * \brief   copy
+     * \details  copy copies a vector x, to a vector y
      * @param[in]  N        The number of values to copy
      * @param[in]  x        The source vector
      * @param[in]  INCX     The spacing between points in x
      * @param[in]  y        The destination vector
      * @param[out] INCY     The spacing between points in y
      */
-    static inline void dcopy( int N, const double *x, int INCX, double *y, int INCY );
+    static inline void copy( int N, const TYPE *x, int INCX, TYPE *y, int INCY );
 
     /*!
-     * \brief   dswap
-     * \details  dswap swaps two vectors
+     * \brief   swap
+     * \details  swap swaps two vectors
      * @param[in]     N     The number of values to copy
      * @param[in,out] x     The first vector
      * @param[in]  INCX     The spacing between points in x
      * @param[in,out] y     The second vector
      * @param[in]  INCY     The spacing between points in x
      */
-    static inline void dswap( int N, double *x, int INCX, double *y, int INCY );
+    static inline void swap( int N, TYPE *x, int INCX, TYPE *y, int INCY );
 
     /*!
-     * \brief   dscal
-     * \details  dscal scales a vector by a constant.  x = a*x
+     * \brief   scal
+     * \details  scal scales a vector by a constant.  x = a*x
      * @param[in]  N        The number of values to copy
      * @param[in]  a        The scale factor
      * @param[in,out] x     The vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline void dscal( int N, double a, double *x, int INCX );
+    static inline void scal( int N, TYPE a, TYPE *x, int INCX );
 
     /*!
-     * \brief   dnrm2
-     * \details  dnrm2 returns the euclidean norm of a vector via the function
+     * \brief   nrm2
+     * \details  nrm2 returns the euclidean norm of a vector via the function
      * @param[in]  N        The number of values to copy
      * @param[in]  x        The input vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline double dnrm2( int N, const double *x, int INCX );
+    static inline TYPE nrm2( int N, const TYPE *x, int INCX );
 
     /*!
-     * \brief   idamax
-     * \details  idamax finds the index of element having maximum absolute value.
+     * \brief   iamax
+     * \details  iamax finds the index of element having maximum absolute value.
      *    Note: the returned index is 0 (C++) based.
      * @param[in]  N        The number of values to copy
      * @param[in]  x        The input vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline int idamax( int N, const double *x, int INCX );
+    static inline int iamax( int N, const TYPE *x, int INCX );
 
     /*!
-     * \brief   daxpy
-     * \details  daxpy scales a vector by a constant plus a vector.  y = a*x + y
+     * \brief   axpy
+     * \details  axpy scales a vector by a constant plus a vector.  y = a*x + y
      * @param[in] N         The number of values to copy
      * @param[in] a         The scale factor
      * @param[in] x         The source vector
@@ -73,11 +72,11 @@ public:
      * @param[in,out] y     The destination vector
      * @param[in] INCY      The spacing between points in x
      */
-    static inline void daxpy( int N, double a, const double *x, int INCX, double *y, int INCY );
+    static inline void axpy( int N, TYPE a, const TYPE *x, int INCX, TYPE *y, int INCY );
 
     /*!
-     * \brief   dgemv
-     * \details  dgemv performs one of the matrix-vector operations
+     * \brief   gemv
+     * \details  gemv performs one of the matrix-vector operations
      *      y := alpha*A*x + beta*y, or y := alpha*A'*x + beta*y,
      *   where alpha and beta are scalars, x and y are vectors and A
      *   is an m by n matrix.
@@ -88,8 +87,7 @@ public:
      * @param[in] N         The number of rows of the matrix A.  M >= 0
      * @param[in] M         The number of columns of the matrix A.  N >= 0
      * @param[in] alpha     The scale factor alpha
-     * @param[in] A         The leading m by n part of the array A must contain the matrix of
-     * coefficients.
+     * @param[in] A         The leading m by n part of the array A must contain the matrix of coefficients.
      * @param[in] LDA       LDA specifies the first dimension of A as declared in the
      *                      calling (sub) program. LDA must be at least max( 1, m ).
      * @param[in] x         The source vector
@@ -98,12 +96,12 @@ public:
      * @param[in,out] y     The destination vector
      * @param[in] INCY      The spacing between points in x
      */
-    static inline void dgemv( char TRANS, int M, int N, double alpha, const double *A, int LDA,
-        const double *x, int INCX, double beta, double *y, int INCY );
+    static inline void gemv( char TRANS, int M, int N, TYPE alpha, const TYPE *A, int LDA, const TYPE *x, int INCX,
+        TYPE beta, TYPE *y, int INCY );
 
     /*!
-     * \brief   dgemm
-     * \details  dgemm performs one of the matrix-matrix operations
+     * \brief   gemm
+     * \details  gemm performs one of the matrix-matrix operations
      *       C := alpha*op( A )*op( B ) + beta*C,
      *    where  op( X ) is one of
      *       op( X ) = X   or   op( X ) = X',
@@ -147,8 +145,8 @@ public:
      *                      declared in the calling (sub) program. When  TRANSB =
      *                      'N' or 'n' then LDB must be at least  max( 1, k ),
      *                      otherwise  LDB must be at least  max( 1, n ).
-     * @param[in] beta      The scalar  beta.  When beta is supplied as zero then C need not be set
-     * on input.  Unchanged on exit.
+     * @param[in] beta      The scalar  beta.  When beta is supplied as zero then
+     *                      C need not be set on input.  Unchanged on exit.
      * @param[in,out] C     Array of DIMENSION ( LDC, n ).
      *                      Before entry, the leading  m by n  part of the array
      *                      C must contain the matrix  C,  except when  beta  is
@@ -160,32 +158,32 @@ public:
      *                      declared in  the  calling  (sub)  program.   LDC
      *                      must  be  at  least max( 1, m ).  Unchanged on exit.
      */
-    static inline void dgemm( char TRANSA, char TRANSB, int M, int N, int K, double alpha,
-        const double *A, int LDA, const double *B, int LDB, double beta, double *C, int LDC );
+    static inline void gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE alpha, const TYPE *A, int LDA,
+        const TYPE *B, int LDB, TYPE beta, TYPE *C, int LDC );
 
     /*!
-     * \brief   dasum
-     * \details  dasum sums a vector
+     * \brief   asum
+     * \details  asum sums a vector
      * @param[in]  N        The number of values to copy
      * @param[in]  x        The source vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline double dasum( int N, const double *x, int INCX );
+    static inline TYPE asum( int N, const TYPE *x, int INCX );
 
     /*!
-     * \brief   ddot
-     * \details  ddot computes the dot product between two vectors
+     * \brief   dot
+     * \details  dot computes the dot product between two vectors
      * @param[in]  N        The number of values to copy
      * @param[in]  x        The source vector x
      * @param[in]  INCX     The spacing between points in x
      * @param[in]  y        The source vector y
      * @param[in]  INCY     The spacing between points in y
      */
-    static inline double ddot( int N, const double *x, int INCX, const double *y, int INCY );
+    static inline TYPE dot( int N, const TYPE *x, int INCX, const TYPE *y, int INCY );
 
     /*!
-     * \brief   dger
-     * \details  dger performs the rank 1 operation
+     * \brief   ger
+     * \details  ger performs the rank 1 operation
      *     A := alpha*x*y' + A,
      *  where alpha is a scalar, x is an m element vector, y is an n element
      *  vector and A is an m by n matrix.
@@ -200,12 +198,12 @@ public:
      *                      On exit, the updated matrix.
      * @param[in]  LDA      The leading dimension of the array A.  LDA >= max(1,M).
      */
-    static inline void dger( int N, int M, double alpha, const double *x, int INCX, const double *y,
-        int INCY, double *A, int LDA );
+    static inline void ger(
+        int N, int M, TYPE alpha, const TYPE *x, int INCX, const TYPE *y, int INCY, TYPE *A, int LDA );
 
     /*!
-     * \brief   dgesv
-     * \details  dgesv computes the solution to a real system of linear equations
+     * \brief   gesv
+     * \details  gesv computes the solution to a real system of linear equations
      *       A * X = B,
      *    where A is an N-by-N matrix and X and B are N-by-NRHS matrices.
      *    The LU decomposition with partial pivoting and row interchanges is
@@ -234,12 +232,11 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void dgesv(
-        int N, int NRHS, double *A, int LDA, int *IPIV, double *B, int LDB, int &INFO );
+    static inline void gesv( int N, int NRHS, TYPE *A, int LDA, int *IPIV, TYPE *B, int LDB, int &INFO );
 
     /*!
-     * \brief   dgtsv
-     * \details  dgtsv computes the solution to a real system of linear equations
+     * \brief   gtsv
+     * \details  gtsv computes the solution to a real system of linear equations
      *       A * X = B,
      *    where A is an n by n tridiagonal matrix, by Gaussian elimination with
      *    partial pivoting.  Note that the equation  A**T*X = B  may be solved by interchanging the
@@ -267,12 +264,11 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void dgtsv(
-        int N, int NRHS, double *DL, double *D, double *DU, double *B, int LDB, int &INFO );
+    static inline void gtsv( int N, int NRHS, TYPE *DL, TYPE *D, TYPE *DU, TYPE *B, int LDB, int &INFO );
 
     /*!
-     * \brief   dgbsv
-     * \details  dgbsv computes the solution to a real system of linear equations
+     * \brief   gbsv
+     * \details  gbsv computes the solution to a real system of linear equations
      *       A * X = B,
      *    where A is a band matrix of order N with KL subdiagonals
      *    and KU superdiagonals, and X and B are N-by-NRHS matrices.
@@ -329,13 +325,13 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void dgbsv( int N, int KL, int KU, int NRHS, double *AB, int LDAB, int *IPIV,
-        double *B, int LDB, int &INFO );
+    static inline void gbsv(
+        int N, int KL, int KU, int NRHS, TYPE *AB, int LDAB, int *IPIV, TYPE *B, int LDB, int &INFO );
 
 
     /*!
-     * \brief   dgetrf
-     * \details  dgetrf computes an LU factorization of a real matrix A
+     * \brief   getrf
+     * \details  getrf computes an LU factorization of a real matrix A
      *    using elimination with partial pivoting and row interchanges.
      *    The factorization has the form:
      *       A = L * U
@@ -357,11 +353,11 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void dgetrf( int M, int N, double *A, int LDA, int *IPIV, int &INFO );
+    static inline void getrf( int M, int N, TYPE *A, int LDA, int *IPIV, int &INFO );
 
     /*!
-     * \brief   dgttrf
-     * \details  dgttrf computes an LU factorization of a real tridiagonal
+     * \brief   gttrf
+     * \details  gttrf computes an LU factorization of a real tridiagonal
      *    matrix A using elimination with partial pivoting and row interchanges.
      *    The factorization has the form
      *       A = L * U
@@ -391,12 +387,11 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void dgttrf(
-        int N, double *DL, double *D, double *DU, double *DU2, int *IPIV, int &INFO );
+    static inline void gttrf( int N, TYPE *DL, TYPE *D, TYPE *DU, TYPE *DU2, int *IPIV, int &INFO );
 
     /*!
-     * \brief   dgbtrf
-     * \details  dgbtrf computes an LU factorization of a real m-by-n band
+     * \brief   gbtrf
+     * \details  gbtrf computes an LU factorization of a real m-by-n band
      *    matrix A using partial pivoting with row interchanges.
      * @param[in]  M        The number of rows of the matrix A.  M >= 0.
      * @param[in]  N        The number of columns of the matrix A.  N >= 0.
@@ -421,12 +416,11 @@ public:
      *                            singular, and division by zero will occur if
      *                            it is used to solve a system of equations.
      */
-    static inline void dgbtrf(
-        int M, int N, int KL, int KU, double *AB, int LDAB, int *IPIV, int &INFO );
+    static inline void gbtrf( int M, int N, int KL, int KU, TYPE *AB, int LDAB, int *IPIV, int &INFO );
 
     /*!
-     * \brief   dgetrs
-     * \details  dgetrs solves a system of linear equations
+     * \brief   getrs
+     * \details  getrs solves a system of linear equations
      *       A*X = B  or  A'*X = B
      *    with a general N-by-N matrix A using the LU factorization computed by DGETRF.
      * @param[in] TRANS     Specifies the form of the system of equations:
@@ -447,12 +441,12 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static inline void dgetrs( char TRANS, int N, int NRHS, const double *A, int LDA,
-        const int *IPIV, double *B, int LDB, int &INFO );
+    static inline void getrs(
+        char TRANS, int N, int NRHS, const TYPE *A, int LDA, const int *IPIV, TYPE *B, int LDB, int &INFO );
 
     /*!
-     * \brief   dgttrs
-     * \details  dgttrs solves one of the systems of equations
+     * \brief   gttrs
+     * \details  gttrs solves one of the systems of equations
      *       A*X = B  or  A'*X = B, with a tridiagonal matrix A using
      *    the LU factorization computed by DGTTRF.
      * @param[in] TRANS     Specifies the form of the system of equations:
@@ -478,12 +472,12 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static inline void dgttrs( char TRANS, int N, int NRHS, const double *DL, const double *D,
-        const double *DU, const double *DU2, const int *IPIV, double *B, int LDB, int &INFO );
+    static inline void gttrs( char TRANS, int N, int NRHS, const TYPE *DL, const TYPE *D, const TYPE *DU,
+        const TYPE *DU2, const int *IPIV, TYPE *B, int LDB, int &INFO );
 
     /*!
-     * \brief   dgbtrs
-     * \details  dgbtrs solves a system of linear equations
+     * \brief   gbtrs
+     * \details  gbtrs solves a system of linear equations
      *       A * X = B  or  A' * X = B with a general band matrix A
      *    using the LU factorization computed by DGBTRF.
      * @param[in] TRANS     Specifies the form of the system of equations:
@@ -512,12 +506,12 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static inline void dgbtrs( char TRANS, int N, int KL, int KU, int NRHS, const double *AB,
-        int LDAB, const int *IPIV, double *B, int LDB, int &INFO );
+    static inline void gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const TYPE *AB, int LDAB, const int *IPIV,
+        TYPE *B, int LDB, int &INFO );
 
     /*!
-     * \brief   dgetri
-     * \details  dgetri computes the inverse of a matrix using the LU factorization
+     * \brief   getri
+     * \details  getri computes the inverse of a matrix using the LU factorization
      *    computed by DGETRF.
      * @param[in]  N        The order of the matrix A.  N >= 0.
      * @param[in,out] A     On entry, the factors L and U from the factorization
@@ -540,12 +534,11 @@ public:
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      *                      > 0:  if INFO = i, U(i,i) is exactly zero; the matrix is
      */
-    static inline void dgetri(
-        int N, double *A, int LDA, const int *IPIV, double *WORK, int LWORK, int &INFO );
+    static inline void getri( int N, TYPE *A, int LDA, const int *IPIV, TYPE *WORK, int LWORK, int &INFO );
 
     /*!
-     * \brief   dtrsm
-     * \details  dtrsm solves one of the matrix equations
+     * \brief   trsm
+     * \details  trsm solves one of the matrix equations
      *     op( A )*X = alpha*B,   or   X*op( A ) = alpha*B,
      *  where alpha is a scalar, X and B are m by n matrices, A is a unit, or
      *  non-unit,  upper or lower triangular matrix  and  op( A )  is one  of
@@ -588,38 +581,40 @@ public:
      * @param[in] LDB       The first dimension of B as declared in the calling (sub) program.
      *                      LDB must be at least max(1,m).
      */
-    static inline void dtrsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N,
-        double ALPHA, const double *A, int LDA, double *B, int LDB );
+    static inline void trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, TYPE ALPHA, const TYPE *A,
+        int LDA, TYPE *B, int LDB );
 
     /*!
-     * \brief   dlamch
-     * \details  dlamch determines double precision machine parameters.
+     * \brief   lamch
+     * \details  lamch determines TYPE precision machine parameters.
      *
      * @param[in] cmach     Specifies the value to be returned by DLAMCH:
      *                      'E' or 'e':   eps   = relative machine precision
      *                      'S' or 's :   sfmin = safe minimum, such that 1/sfmin does not overflow
      *                      'B' or 'b':   base  = base of the machine
      *                      'P' or 'p':   prec  = eps*base
-     *                      'N' or 'n':   t     = number of (base) digits in the mantissa
-     *                      'R' or 'r':   rnd   = 1.0 when rounding occurs in addition, 0.0 otherwise
+     *                      'N' or 'n':   TYPE     = number of (base) digits in the mantissa
+     *                      'R' or 'r':   rnd   = 1.0 when rounding occurs in addition, 0.0
+     * otherwise
      *                      'M' or 'm':   emin  = minimum exponent before (gradual) underflow
      *                      'U' or 'u':   rmin  = underflow threshold - base**(emin-1)
      *                      'L' or 'l':   emax  = largest exponent before overflow
      *                      'O' or 'o':   rmax  = overflow threshold  - (base**emax)*(1-eps)
      * @return              Return the requested value
      */
-    static inline double dlamch( char cmach );
+    static inline TYPE lamch( char cmach );
 
     /*!
      * \brief   Run a test for a given LAPACK/BLAS routine
      * \details  This will run a simple test for a given LAPACK/BLAS routine.
      *      While this only runs some simple tests, it should detect basic errors.
      * @param[in] routine   The routine to test
-     * @param[in] N         The number of times to repeat the test (useful for thread-safety testing)
+     * @param[in] N         The number of times to repeat the test (useful for thread-safety
+     * testing)
      * @param[out] error    The largest error detected
      * @return              The number of failures detected
      */
-    static int run_test( const char *routine, int N, double &error );
+    static int run_test( const char *routine, int N, TYPE &error );
 
     /*!
      * \brief   Run the basic test suite
@@ -632,10 +627,8 @@ public:
     //! Print all of the machine parameters by dlamch
     static void print_machine_parameters();
 
-
     //! Print information about the lapack version/package
     static void print_lapack_version();
-
 
 private:
     /*!
@@ -646,14 +639,14 @@ private:
 
     /*!
      * \brief   Release the lock
-     * \details  This will release the atomic lock to ensure thread safety (needed for some routines)
+     * \details  This will release the atomic lock to ensure thread safety (needed for some
+     * routines)
      */
     static void release_lock();
 };
 
 
-
-#include "LapackWrappers.hpp"
-
+#include "LapackWrappers.double.hpp"
+#include "LapackWrappers.float.hpp"
 
 #endif

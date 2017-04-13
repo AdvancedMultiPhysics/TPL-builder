@@ -4,67 +4,22 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-
-
-// Detect the OS and include system dependent headers
-#if defined( WIN32 ) || defined( _WIN32 ) || defined( WIN64 ) || defined( _WIN64 ) || defined( _MSC_VER )
-#define USE_WINDOWS
-#define NOMINMAX
-// clang-format off
-#include <windows.h>
-#include <process.h>
-#include <psapi.h>
-#include <tchar.h>
-// clang-format on
-#elif defined( __APPLE__ )
-#define USE_MAC
-#include <cxxabi.h>
-#include <dlfcn.h>
-#include <execinfo.h>
-#include <mach/mach.h>
-#include <stdint.h>
-#include <sys/sysctl.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
-#elif defined( __linux ) || defined( __unix ) || defined( __posix )
-#define USE_LINUX
-#define USE_NM
-#include <dlfcn.h>
-#include <execinfo.h>
-#include <malloc.h>
-#include <sys/time.h>
-#include <unistd.h>
-#else
-#error Unknown OS
-#endif
-
-
-// Get the current time for timming the code
-double time()
-{
-    #if defined( USE_WINDOWS )
-        LARGE_INTEGER end, f;
-        QueryPerformanceFrequency( &f );
-        QueryPerformanceCounter( &end );
-        double time = ( (double) end.QuadPart ) / ( (double) f.QuadPart );
-        return time;
-    #elif defined( USE_LINUX ) || defined( USE_MAC )
-        timeval current_time;
-        gettimeofday( &current_time, nullptr );
-        double time = ( (double) current_time.tv_sec ) + 1e-6 * ( (double) current_time.tv_usec );
-        return time;
-    #else
-    #error Unknown OS
-    #endif
-}
+#include <chrono>
 
 
 // Call Lapack::run_test
+template<typename TYPE>
 void run_test( const char *routine, int N, int& N_errors, double &error )
 {
-    N_errors = Lapack::run_test( routine, N, error );
+    N_errors = Lapack<TYPE>::run_test( routine, N, error );
+}
+
+
+// Get the time difference in us
+static inline int64_t diff( std::chrono::time_point<std::chrono::system_clock> t1,
+    std::chrono::time_point<std::chrono::system_clock> t2 )
+{
+    return static_cast<int64_t>( 1e6 * std::chrono::duration<double>( t2-t1 ).count() );
 }
 
 
@@ -74,54 +29,97 @@ int main( int, char *[] )
     int N_errors = 0;
 
     // Print the lapack version
-    Lapack::print_lapack_version();
+    Lapack<double>::print_lapack_version();
     printf("\n");
 
     // Print the machine specifics
-    Lapack::print_machine_parameters();
+    printf( "\nDouble precision machine parameters\n" );
+    Lapack<double>::print_machine_parameters();
+    printf( "\nSingle precision machine parameters\n" );
+    Lapack<float>::print_machine_parameters();
 
     // Run the basic tests
-    printf( "\nRunning basic tests\n" );
-    N_errors += Lapack::run_all_test();
-    if ( N_errors == 0 ) {
-        printf( "  passed\n" );
+    printf( "\nRunning double precision basic tests\n" );
+    int err = Lapack<double>::run_all_test();
+    if ( err == 0 ) {
+        printf( "  passed dp tests\n" );
+    } else {
+        printf( "  failed %d dp tests\n", err );
+        N_errors += err;
+    }
+    printf( "\nRunning single precision basic tests\n" );
+    err = Lapack<float>::run_all_test();
+    if ( err == 0 ) {
+        printf( "  passed sp tests\n" );
+    } else {
+        printf( "  failed %d sp tests \n", err );
+        N_errors += err;
     }
 
-    // Get the times for the tests
-    printf( "\nGetting test times\n" );
-    const char *tests[] = { "dcopy", "dscal", "dnrm2", "dasum", "ddot", "daxpy", "dgemv", "dgemm",
+    // Get the times for the tests (double)
+    printf( "\nGetting double precision test times\n" );
+    const char *dptests[] = { "dcopy", "dscal", "dnrm2", "dasum", "ddot", "daxpy", "dgemv", "dgemm",
         "dgesv", "dgtsv", "dgbsv", "dgetrf", "dgttrf", "dgbtrf", "dgetrs", "dgttrs", "dgbtrs",
         "dgetri" };
-    const int N[] = { 500, 500, 500, 500, 500, 100, 100, 100, 100, 500, 500, 100, 500, 500, 100,
+    const int dpN[] = { 500, 500, 500, 500, 500, 100, 100, 100, 100, 500, 500, 100, 500, 500, 100,
         500, 500, 100 };
-    for ( size_t i = 0; i < sizeof( tests ) / sizeof( char * ); i++ ) {
-        double t1    = time();
-        double error = 0;
-        int err      = Lapack::run_test( tests[i], N[i], error );
-        double t2    = time();
-        int us       = static_cast<int>( 1e6 * ( t2 - t1 ) / N[i] );
-        printf( "%7s:  %s:  %5i us  (%e)\n", tests[i], err == 0 ? "passed" : "failed", us, error );
-        N_errors += err;
+    int N_err       = 0;
+    for ( size_t i = 0; i < sizeof( dptests ) / sizeof( char * ); i++ ) {
+        auto t1 = std::chrono::system_clock::now();
+        double error;
+        int err = Lapack<double>::run_test( dptests[i], dpN[i], error );
+        auto t2 = std::chrono::system_clock::now();
+        int us  = static_cast<int>( diff( t1, t2 ) / dpN[i] );
+        printf( "%7s:  %s:  %5i us  (%e)\n", dptests[i], err == 0 ? "passed" : "failed", us, error );
+        N_err += err;
+    }
+    if ( N_err == 0 ) {
+        printf( "  passed dp timing tests\n" );
+    } else {
+        printf( "  failed %d dp timing tests\n", N_err );
+        N_errors += N_err;
+    }
+
+    // Get the times for the tests (single)
+    printf( "\nGetting single precision test times\n" );
+    const char *sptests[] = { "scopy", "sscal", "snrm2", "sasum", "sdot", "saxpy", "sgemv", "sgemm", "sgesv", "sgtsv",
+        "sgbsv", "sgetrf", "sgttrf", "sgbtrf", "sgetrs", "sgttrs", "sgbtrs", "sgetri" };
+    const int spN[] = { 500, 500, 500, 500, 500, 100, 100, 100, 100, 500, 500, 100, 500, 500, 100, 500, 500, 100 };
+    N_err           = 0;
+    for ( size_t i = 0; i < sizeof( sptests ) / sizeof( char * ); i++ ) {
+        auto t1 = std::chrono::system_clock::now();
+        float error;
+        int err = Lapack<float>::run_test( sptests[i], spN[i], error );
+        auto t2 = std::chrono::system_clock::now();
+        int us  = static_cast<int>( diff( t1, t2 ) / spN[i] );
+        printf( "%7s:  %s:  %5i us  (%e)\n", sptests[i], err == 0 ? "passed" : "failed", us, error );
+        N_err += err;
+    }
+    if ( N_err == 0 ) {
+        printf( "  passed sp timing tests\n" );
+    } else {
+        printf( "  failed %d sp timing tests\n", N_err );
+        N_errors += N_err;
     }
 
     // Run the tests in parallel to check for parallel bugs
     printf( "\nRunning parallel tests\n" );
     int N_threads = 8;
-    for ( size_t i = 0; i < sizeof( tests ) / sizeof( char * ); i++ ) {
-        double t1 = time();
+    for ( size_t i = 0; i < sizeof( dptests ) / sizeof( char * ); i++ ) {
+        auto t1 = std::chrono::system_clock::now();
         std::thread threads[128];
         int N_errors_thread[128];
         double error_thread[128];
         for ( int j = 0; j < N_threads; j++ )
-            threads[j] = std::thread( run_test, tests[i], N[i], std::ref(N_errors_thread[j]), std::ref(error_thread[j]) );
+            threads[j] = std::thread( run_test<double>, dptests[i], dpN[i], std::ref(N_errors_thread[j]), std::ref(error_thread[j]) );
         for ( int j = 0; j < N_threads; j++ )
             threads[j].join();
-        double t2 = time();
+        auto t2 = std::chrono::system_clock::now();
         bool pass = true;
         for ( int j = 0; j < N_threads; j++ )
             pass = pass && N_errors_thread[j] == 0;
-        int us   = static_cast<int>( 1e6 * ( t2 - t1 ) / ( N[i] * N_threads ) );
-        printf( "%7s:  %s:  %5i us\n", tests[i], pass ? "passed" : "failed", us );
+        int us  = static_cast<int>( diff( t1, t2 ) / ( dpN[i] * N_threads ) );
+        printf( "%7s:  %s:  %5i us\n", dptests[i], pass ? "passed" : "failed", us );
         N_errors += ( pass ? 0 : 1 );
     }
 
