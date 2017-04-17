@@ -30,7 +30,7 @@ The current TPL list and tested versions are:
     BOOST (1.47-1.55)
     ZLIB
     HDF5 (1.8.12)
-    HYPRE (2.11.1)
+    HYPRE (2.11.2)
     PETSc (3.7.5)
     TRILINOS (12.10.1)
     SAMRAI (3.11.2-modified)
@@ -114,7 +114,7 @@ A sample configure script for SAMRAI is:
         -D ZLIB_INSTALL_DIR="/usr/local/lib"            \
         -D PETSC_URL="${TPL_ROOT}/petsc-3.7.5.tar.gz"   \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"    \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.1.tar.gz"  \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.2.tar.gz"  \
         -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.11.2"  \
         -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${SAMR_BUILDER}
@@ -145,7 +145,7 @@ A sample debug configure script for AMP is:
         -D PETSC_URL="${TPL_ROOT}/petsc-3.7.5.tar.gz"                  \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                   \
         -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                    \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.1.tar.gz"                 \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.2.tar.gz"                 \
         -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                    \
         -D TRILINOS_URL="${TPL_ROOT}/trilinos-12.10.1-Source.tar.gz"   \
         -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos;Amesos"           \
