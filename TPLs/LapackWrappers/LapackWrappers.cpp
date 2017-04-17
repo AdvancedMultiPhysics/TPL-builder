@@ -692,7 +692,7 @@ static bool test_gbsv( int N, TYPE &error )
         TYPE err2 = L2Error( K, x1, x2 );
         error     = std::max( error, err2 / norm );
     }
-    const double tol = 2000.0 * std::numeric_limits<TYPE>::epsilon();
+    const double tol = 3000.0 * std::numeric_limits<TYPE>::epsilon();
     if ( error > tol ) {
         printf( "test_gbsv error (%e) exceeded tolerance (%e)\n", error, tol );
         N_errors++;
