@@ -15,6 +15,7 @@
 #   CPPCHECK_INCLUDE      - List of include folders
 #   CPPCHECK_OPTIONS      - List of cppcheck options
 #   CPPCHECK_SOURCE       - Source path to check
+#   CPPCHECK_TIMEOUT      - Timeout for each cppcheck test (default is 5 minutes)
 #
 # The following variables are set by find_package( Cppcheck )
 #
@@ -68,6 +69,9 @@ IF ( NOT DEFINED CPPCHECK_SOURCE )
         SET( CPPCHECK_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}" )
     ENDIF()
 ENDIF()
+IF ( NOT DEFINED CPPCHECK_TIMEOUT )
+    SET( CPPCHECK_TIMEOUT 300 )
+ENDIF()
 
 
 # Add the test
@@ -78,23 +82,21 @@ IF ( CPPCHECK )
         FOREACH(src ${CPPCHECK_SOURCE})
             FILE(GLOB child RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${src}" )
             ADD_TEST( cppcheck-${child} ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} "${src}" )
+            SET_TESTS_PROPERTIES( cppcheck-${child} PROPERTIES PROCESSORS 1 TIMEOUT ${CPPCHECK_TIMEOUT} )
         ENDFOREACH()
     ELSE()
         # Find the number of files to determine if we want one (or multiple) cppcheck commands
         FILE(GLOB_RECURSE SRCS "${CPPCHECK_SOURCE}/*.cpp" "${CPPCHECK_SOURCE}/*.cc" "${CPPCHECK_SOURCE}/*.c" )
         LIST(LENGTH SRCS len)
-        IF ( len LESS 100 OR CPPCHECK_DIR )
+        IF ( len LESS 100 )
             ADD_TEST( cppcheck ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} "${CPPCHECK_SOURCE}" )
-            IF( ${CPPCHECK_DIR} )
-                SET_TESTS_PROPERTIES( ${TEST_NAME} PROPERTIES WORKING_DIRECTORY "${CPPCHECK_DIR}" PROCESSORS 1 )
-            ENDIF()
+            SET_TESTS_PROPERTIES( cppcheck PROPERTIES PROCESSORS 1 TIMEOUT ${CPPCHECK_TIMEOUT} )
         ELSE()
             FILE(GLOB children RELATIVE "${CPPCHECK_SOURCE}" "${CPPCHECK_SOURCE}/*" )
-            SET(dirlist "")
             FOREACH(child ${children})
                 IF(IS_DIRECTORY ${CPPCHECK_SOURCE}/${child})
                     ADD_TEST( cppcheck-${child} ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} "${CPPCHECK_SOURCE}/${child}" )
-                    LIST(APPEND dirlist ${child})
+                    SET_TESTS_PROPERTIES( cppcheck-${child} PROPERTIES PROCESSORS 1 TIMEOUT ${CPPCHECK_TIMEOUT} )
                 ENDIF()
             ENDFOREACH()
         ENDIF()
