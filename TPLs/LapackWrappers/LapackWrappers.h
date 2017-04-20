@@ -1,6 +1,10 @@
 #ifndef USE_LAPACK_WRAPPER
 #define USE_LAPACK_WRAPPER
 
+#include <string>
+#include <vector>
+
+
 /*! \class Lapack
     \brief A wrapper class for BLAS/LAPACK routines
 
@@ -614,7 +618,9 @@ public:
      * @param[out] error    The largest error detected
      * @return              The number of failures detected
      */
-    static int run_test( const char *routine, int N, TYPE &error );
+    static int run_test( const std::string& routine, int N, TYPE &error );
+
+    static std::vector<std::string> list_all_tests( );
 
     /*!
      * \brief   Run the basic test suite

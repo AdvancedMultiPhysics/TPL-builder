@@ -23,11 +23,12 @@
 #include <unistd.h>
 #endif
 
-// Define some sizes of the problems
-#define TEST_SIZE_VEC 10000  // Vector tests O(N)
-#define TEST_SIZE_MATVEC 500 // Matrix-vector tests O(N^2)
-#define TEST_SIZE_MAT 100    // Matrix-matrix / Dense solves tests O(N^3)
-#define TEST_SIZE_TRI 1000   // Tridiagonal/banded tests
+// Define some sizes of the problems (try to normalize the time/test)
+#define TEST_SIZE_VEC 50000     // Vector tests O(N)
+#define TEST_SIZE_MATVEC 500    // Matrix-vector tests O(N^2)
+#define TEST_SIZE_MAT 100       // Matrix-matrix / Dense solves tests O(N^3)
+#define TEST_SIZE_TRI 2000      // Tridiagonal/banded tests
+#define TEST_SIZE_TRI_MAT 1000  // Tridiagonal/banded solve tests
 
 /*! \def NULL_USE(variable)
  *  \brief    A null use of a variable
@@ -82,99 +83,66 @@ template <typename TYPE>
 static bool test_getri( int N, TYPE &error );
 
 
-// Run a given test
+// Lists the tests availible to run
 template <>
-int Lapack<double>::run_test( const char *routine, int N, double &error )
+std::vector<std::string> Lapack<double>::list_all_tests( )
 {
-    std::string name( routine );
-    // std::transform(name.begin(),name.end(),name.begin(),::tolower);
-    int N_errors = 0;
-    if ( name == "dcopy" ) {
-        N_errors += test_copy<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dscal" ) {
-        N_errors += test_scal<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dnrm2" ) {
-        N_errors += test_nrm2<double>( N, error ) ? 1 : 0;
-    } else if ( name == "daxpy" ) {
-        N_errors += test_axpy<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgemv" ) {
-        N_errors += test_gemv<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgemm" ) {
-        N_errors += test_gemm<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dasum" ) {
-        N_errors += test_asum<double>( N, error ) ? 1 : 0;
-    } else if ( name == "ddot" ) {
-        N_errors += test_dot<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgesv" ) {
-        N_errors += test_gesv<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgtsv" ) {
-        N_errors += test_gtsv<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgbsv" ) {
-        N_errors += test_gbsv<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgetrf" ) {
-        N_errors += test_getrf<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgttrf" ) {
-        N_errors += test_gttrf<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgbtrf" ) {
-        N_errors += test_gbtrf<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgetrs" ) {
-        N_errors += test_getrs<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgttrs" ) {
-        N_errors += test_gttrs<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgbtrs" ) {
-        N_errors += test_gbtrs<double>( N, error ) ? 1 : 0;
-    } else if ( name == "dgetri" ) {
-        N_errors += test_getri<double>( N, error ) ? 1 : 0;
-    } else {
-        std::cerr << "Unknown test\n";
-        return -1;
-    }
-    return N_errors;
+    return { "dcopy", "dscal", "dnrm2", "daxpy", "dgemv", "dgemm",
+        "dasum", "ddot", "dgesv", "dgtsv", "dgbsv", "dgetrf", 
+        "dgttrf", "dgbtrf", "dgetrs", "dgttrs", "dgetri" };
+}
+template <>
+std::vector<std::string> Lapack<float>::list_all_tests( )
+{
+    return { "scopy", "sscal", "snrm2", "saxpy", "sgemv", "sgemm",
+        "sasum", "sdot", "sgesv", "sgtsv", "sgbsv", "sgetrf", 
+        "sgttrf", "sgbtrf", "sgetrs", "sgttrs", "sgetri" };
 }
 
+
 // Run a given test
-template <>
-int Lapack<float>::run_test( const char *routine, int N, float &error )
+template<class TYPE>
+int Lapack<TYPE>::run_test( const std::string& routine, int N, TYPE &error )
 {
-    std::string name( routine );
-    // std::transform(name.begin(),name.end(),name.begin(),::tolower);
+    auto name = routine.substr( 1 );
+    std::transform(name.begin(),name.end(),name.begin(),::tolower);
     int N_errors = 0;
-    if ( name == "scopy" ) {
-        N_errors += test_copy<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sscal" ) {
-        N_errors += test_scal<float>( N, error ) ? 1 : 0;
-    } else if ( name == "snrm2" ) {
-        N_errors += test_nrm2<float>( N, error ) ? 1 : 0;
-    } else if ( name == "saxpy" ) {
-        N_errors += test_axpy<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgemv" ) {
-        N_errors += test_gemv<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgemm" ) {
-        N_errors += test_gemm<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sasum" ) {
-        N_errors += test_asum<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sdot" ) {
-        N_errors += test_dot<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgesv" ) {
-        N_errors += test_gesv<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgtsv" ) {
-        N_errors += test_gtsv<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgbsv" ) {
-        N_errors += test_gbsv<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgetrf" ) {
-        N_errors += test_getrf<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgttrf" ) {
-        N_errors += test_gttrf<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgbtrf" ) {
-        N_errors += test_gbtrf<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgetrs" ) {
-        N_errors += test_getrs<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgttrs" ) {
-        N_errors += test_gttrs<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgbtrs" ) {
-        N_errors += test_gbtrs<float>( N, error ) ? 1 : 0;
-    } else if ( name == "sgetri" ) {
-        N_errors += test_getri<float>( N, error ) ? 1 : 0;
+    if ( name == "copy" ) {
+        N_errors += test_copy<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "scal" ) {
+        N_errors += test_scal<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "nrm2" ) {
+        N_errors += test_nrm2<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "axpy" ) {
+        N_errors += test_axpy<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gemv" ) {
+        N_errors += test_gemv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gemm" ) {
+        N_errors += test_gemm<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "asum" ) {
+        N_errors += test_asum<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "dot" ) {
+        N_errors += test_dot<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gesv" ) {
+        N_errors += test_gesv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gtsv" ) {
+        N_errors += test_gtsv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gbsv" ) {
+        N_errors += test_gbsv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "getrf" ) {
+        N_errors += test_getrf<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gttrf" ) {
+        N_errors += test_gttrf<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gbtrf" ) {
+        N_errors += test_gbtrf<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "getrs" ) {
+        N_errors += test_getrs<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gttrs" ) {
+        N_errors += test_gttrs<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gbtrs" ) {
+        N_errors += test_gbtrs<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "getri" ) {
+        N_errors += test_getri<TYPE>( N, error ) ? 1 : 0;
     } else {
         std::cerr << "Unknown test\n";
         return -1;
@@ -188,84 +156,17 @@ int Lapack<TYPE>::run_all_test()
 {
     int N_errors = 0;
     int N        = 2; // We want two iterations to enure the test works for N>1
-    TYPE error;
-    // Basic blas operations
-    if ( test_copy<TYPE>( N, error ) ) {
-        printf( "test_copy failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_nrm2<TYPE>( N, error ) ) {
-        printf( "test_nrm2 failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_axpy<TYPE>( N, error ) ) {
-        printf( "test_axpy failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_asum<TYPE>( N, error ) ) {
-        printf( "test_asum failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_dot<TYPE>( N, error ) ) {
-        printf( "test_dot failed (%e)\n", error );
-        N_errors++;
-    }
-    // Matrix blas operations
-    if ( test_gemv<TYPE>( N, error ) ) {
-        printf( "test_gemv failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_gemm<TYPE>( N, error ) ) {
-        printf( "test_gemm failed (%e)\n", error );
-        N_errors++;
-    }
-    // Linear solves
-    if ( test_gesv<TYPE>( N, error ) ) {
-        printf( "test_gesv failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_gtsv<TYPE>( N, error ) ) {
-        printf( "test_gtsv failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_gbsv<TYPE>( N, error ) ) {
-        printf( "test_gbsv failed (%e)\n", error );
-        N_errors++;
-    }
-    // Linear factorizations
-    if ( test_getrf<TYPE>( N, error ) ) {
-        printf( "test_getrf failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_gttrf<TYPE>( N, error ) ) {
-        printf( "test_gttrf failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_gbtrf<TYPE>( N, error ) ) {
-        printf( "test_gbtrf failed (%e)\n", error );
-        N_errors++;
-    }
-    // Solve using factorization
-    if ( test_getrs<TYPE>( N, error ) ) {
-        printf( "test_getrs failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_gttrs<TYPE>( N, error ) ) {
-        printf( "test_gttrs failed (%e)\n", error );
-        N_errors++;
-    }
-    if ( test_gbtrs<TYPE>( N, error ) ) {
-        printf( "test_gbtrs failed (%e)\n", error );
-        N_errors++;
-    }
-    // Inverse using factorization
-    if ( test_getri<TYPE>( N, error ) ) {
-        printf( "test_getri failed (%e)\n", error );
-        N_errors++;
+    auto tests = Lapack<TYPE>::list_all_tests();
+    for ( auto test : tests ) {
+        TYPE error;
+        int err = Lapack<TYPE>::run_test( test, N, error );
+        if ( err != 0 ) {
+            printf( "test_%s failed (%e)\n", test.c_str(), error );
+            N_errors++;
+        }
     }
     return N_errors > 0;
 }
-
 
 // Fill a vector with random TYPE precision data
 template <typename TYPE>
@@ -385,7 +286,7 @@ static bool test_nrm2( int N, TYPE &error )
 template <typename TYPE>
 static bool test_asum( int N, TYPE &error )
 {
-    const int K = TEST_SIZE_VEC;
+    const int K = 2*TEST_SIZE_VEC;
     // Maximum roundoff error that is acceptible is determined by the
     //    error from adding a series of numbers from (0,1).
     //    The expected error is much less than the maximum error.
@@ -426,7 +327,7 @@ static bool test_dot( int N, TYPE &error )
     for ( int i = 0; i < N; i++ ) {
         TYPE ans2 = Lapack<TYPE>::dot( K, x1, 1, x2, 1 );
         error     = std::max( error, std::abs( ans1 - ans2 ) / K );
-        if ( std::abs( ans1 - ans2 ) > 10 * K * std::numeric_limits<TYPE>::epsilon() )
+        if ( std::abs( ans1 - ans2 ) > 50 * K * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x1;
@@ -585,7 +486,7 @@ template <typename TYPE>
 static bool test_gtsv( int N, TYPE &error )
 {
     // Test solving a tri-diagonal matrix by comparing to dgtsv
-    const int K = TEST_SIZE_TRI;
+    const int K = TEST_SIZE_TRI_MAT/2;
     TYPE *A     = new TYPE[K * K];
     TYPE *D     = new TYPE[K];
     TYPE *D2    = new TYPE[K];
@@ -656,7 +557,7 @@ static bool test_gbsv( int N, TYPE &error )
     //       a11  a22  a33  a44  a55  a66
     //       a21  a32  a43  a54  a65   *
     //       a31  a42  a53  a64   *    *
-    const int K  = TEST_SIZE_TRI;
+    const int K  = TEST_SIZE_TRI_MAT/2;
     const int KL = 2;
     const int KU = 2;
     const int K2 = 2 * KL + KU + 1;
@@ -752,7 +653,7 @@ template <typename TYPE>
 static bool test_gttrf( int N, TYPE &error )
 {
     // Check dgttrf by performing a factorization and solve and comparing to dgtsv
-    const int K = TEST_SIZE_TRI;
+    const int K = 5*TEST_SIZE_TRI;
     TYPE *D     = new TYPE[K];
     TYPE *D2    = new TYPE[K];
     TYPE *DL    = new TYPE[K - 1];
@@ -851,7 +752,7 @@ template <typename TYPE>
 static bool test_getrs( int N, TYPE &error )
 {
     // Check dgetrs by performing a factorization and solve and comparing to dgesv
-    const int K = TEST_SIZE_MAT;
+    const int K = 2*TEST_SIZE_MAT;
     TYPE *A     = new TYPE[K * K];
     TYPE *A2    = new TYPE[K * K];
     TYPE *x1    = new TYPE[K];
@@ -892,7 +793,7 @@ template <typename TYPE>
 static bool test_gttrs( int N, TYPE &error )
 {
     // Check dgttrs by performing a factorization and solve and comparing to dgtsv
-    const int K = TEST_SIZE_TRI;
+    const int K = 4*TEST_SIZE_TRI;
     TYPE *D     = new TYPE[K];
     TYPE *D2    = new TYPE[K];
     TYPE *DL    = new TYPE[K - 1];
