@@ -356,7 +356,7 @@ static bool test_axpy( int N, TYPE &error )
         TYPE err = L2Error( K, y1, y2 );
         error    = std::max( error, err );
     }
-    bool fail = error > std::numeric_limits<TYPE>::epsilon();
+    bool fail = error > 200*std::numeric_limits<TYPE>::epsilon();
     NULL_USE( y1 );
     delete[] x;
     delete[] y0;
@@ -687,7 +687,7 @@ static bool test_gttrf( int N, TYPE &error )
     Lapack<TYPE>::gttrs( 'N', K, 1, DL2, D2, DU2, DU3, IPIV, x2, K, err );
     TYPE norm = L2Norm( K, x1 );
     TYPE err2 = L2Error( K, x1, x2 );
-    if ( err2 > 10.0 * norm * std::numeric_limits<TYPE>::epsilon() )
+    if ( err2/norm > 300.0 * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
     error = err2 / norm;
     delete[] D;
@@ -829,7 +829,7 @@ static bool test_gttrs( int N, TYPE &error )
         N_errors += err == 0 ? 0 : 1;
         TYPE norm = L2Norm( K, x1 );
         TYPE err2 = L2Error( K, x1, x2 );
-        if ( err2 > 10.0 * norm * std::numeric_limits<TYPE>::epsilon() )
+        if ( err2/norm > 250.0 * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
         error = std::max( error, err2 / norm );
     }
@@ -945,9 +945,9 @@ static bool test_getri( int N, TYPE &error )
         Lapack<TYPE>::gemv( 'N', K, K, 1, A2, K, b, 1, 0, x2, 1 );
         // Check the result
         TYPE err2 = L2Error( K, x1, x2 );
-        if ( err2 > 100 * norm * eps )
+        if ( err2/norm > 250 * eps )
             N_errors++;
-        error = std::max( error, err2 / norm );
+        error = std::max( error, err2 );
         // printf("Iteration %d, error = %f, norm = %f, err2 = %f\n", i, error, norm, err2);
     }
     delete[] A;
