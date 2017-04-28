@@ -44,7 +44,7 @@ ENDIF()
 
 # Set the options for cppcheck
 IF ( NOT DEFINED CPPCHECK_OPTIONS )
-    SET( CPPCHECK_OPTIONS -q --enable=all --force --suppress=missingIncludeSystem 
+    SET( CPPCHECK_OPTIONS -q --enable=all --suppress=missingIncludeSystem 
         "--suppressions-list=${CMAKE_CURRENT_SOURCE_DIR}/cppcheckSuppressionFile" )
     IF ( CXX_STD STREQUAL 98 )
         SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c99 --std=c++03 --std=posix )
@@ -53,7 +53,23 @@ IF ( NOT DEFINED CPPCHECK_OPTIONS )
     ELSEIF ( CXX_STD STREQUAL 14 )
         SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c11 --std=c++11 --std=posix )
     ENDIF()
+    # Set definitions
+    GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS )
+    FOREACH( def ${DirDefs} )
+        SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -D${def} )
+    ENDFOREACH()
+    # Set OS specific defines
+    IF ( WIN32 )
+        SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -DWIN32 )
+    ELSEIF( APPLE )
+        SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -D__APPLE__ )
+    ELSEIF( UNIX )
+        SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -D__unix )
+    ENDIF()
 ENDIF()
+
+
+# Add the include paths
 IF( NOT DEFINED CPPCHECK_INCLUDE )
     SET( CPPCHECK_INCLUDE )
     GET_PROPERTY( dirs DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY INCLUDE_DIRECTORIES )
