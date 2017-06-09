@@ -113,7 +113,10 @@ IF ( CMAKE_BUILD_LIBMESH )
         SET( LIBMESH_CXX_FLAGS -std=c++11 )
     ELSEIF ( ${CXX_STD} STREQUAL 14 )
         SET( LIBMESH_CXX_FLAGS -std=c++14 )
-    ENDIF()
+      ENDIF()
+   # for some strange reason this is required for linking when MPI is not turned on
+   # even if pthreads is disabled   
+   SET( LIBMESH_LD_FLAGS -pthread )
 ENDIF()
 
 
@@ -125,7 +128,7 @@ IF ( CMAKE_BUILD_LIBMESH )
         DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS}
+        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
         BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     make install
