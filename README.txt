@@ -148,7 +148,7 @@ A sample debug configure script for AMP is:
         -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.2.tar.gz"                 \
         -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                    \
         -D TRILINOS_URL="${TPL_ROOT}/trilinos-12.10.1-Source.tar.gz"   \
-        -D TRILINOS_PACKAGES="Epetra;Thyra;ML;Kokkos;Amesos"           \
+        -D TRILINOS_PACKAGES="Epetra;EpetraExt;Thyra;Tpetra;ML;MueLu;Kokkos;Amesos;Ifpack;Ifpack2;Belos;NOX;Stratimikos" \
         -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.6.2.tar.gz"            \
         -D AMP_SRC_DIR="/projects/AMP/AMP"                             \
         -D AMP_DATA:PATH=/projects/AMP/AMP-Data                        \
