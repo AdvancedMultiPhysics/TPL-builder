@@ -64,6 +64,16 @@ MACRO(ASSERT test comment)
 ENDMACRO(ASSERT)
 
 
+# Set the maximum number of processors
+IF ( NOT TEST_MAX_PROCS )
+    INCLUDE(ProcessorCount)
+    ProcessorCount( TEST_MAX_PROCS )
+    IF ( ${TEST_MAX_PROCS} EQUAL 0 )
+        SET( TEST_MAX_PROCS 16 )
+    ENDIF()
+ENDIF()
+
+
 # Macro to convert a m4 file
 # This command converts a file of the format "global_path/file.m4"
 # and convertes it to file.F.  It also requires the path.  

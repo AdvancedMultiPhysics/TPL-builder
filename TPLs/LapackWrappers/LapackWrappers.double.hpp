@@ -174,6 +174,8 @@ inline void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K,
 template <>
 inline double Lapack<double>::asum( int N, const double *DX, int INCX )
 {
+    if ( N == 0 )
+        return 0;
 #ifdef USE_ATLAS
     return cblas_dasum( N, DX, INCX );
 #elif defined( USE_VECLIB )
