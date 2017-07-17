@@ -44,43 +44,6 @@
         }                                    \
     } while ( 0 )
 
-// Declare the individual tests
-template <typename TYPE>
-static bool test_copy( int N, TYPE &error );
-template <typename TYPE>
-static bool test_scal( int N, TYPE &error );
-template <typename TYPE>
-static bool test_nrm2( int N, TYPE &error );
-template <typename TYPE>
-static bool test_asum( int N, TYPE &error );
-template <typename TYPE>
-static bool test_dot( int N, TYPE &error );
-template <typename TYPE>
-static bool test_axpy( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gemv( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gemm( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gesv( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gtsv( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gbsv( int N, TYPE &error );
-template <typename TYPE>
-static bool test_getrf( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gttrf( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gbtrf( int N, TYPE &error );
-template <typename TYPE>
-static bool test_getrs( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gttrs( int N, TYPE &error );
-template <typename TYPE>
-static bool test_gbtrs( int N, TYPE &error );
-template <typename TYPE>
-static bool test_getri( int N, TYPE &error );
 
 
 // Lists the tests availible to run
@@ -89,66 +52,16 @@ std::vector<std::string> Lapack<double>::list_all_tests( )
 {
     return { "dcopy", "dscal", "dnrm2", "daxpy", "dgemv", "dgemm",
         "dasum", "ddot", "dgesv", "dgtsv", "dgbsv", "dgetrf", 
-        "dgttrf", "dgbtrf", "dgetrs", "dgttrs", "dgetri" };
+        "dgttrf", "dgbtrf", "dgetrs", "dgttrs", "dgetri", "drand" };
 }
 template <>
 std::vector<std::string> Lapack<float>::list_all_tests( )
 {
     return { "scopy", "sscal", "snrm2", "saxpy", "sgemv", "sgemm",
         "sasum", "sdot", "sgesv", "sgtsv", "sgbsv", "sgetrf", 
-        "sgttrf", "sgbtrf", "sgetrs", "sgttrs", "sgetri" };
+        "sgttrf", "sgbtrf", "sgetrs", "sgttrs", "sgetri", "srand" };
 }
 
-
-// Run a given test
-template<class TYPE>
-int Lapack<TYPE>::run_test( const std::string& routine, int N, TYPE &error )
-{
-    auto name = routine.substr( 1 );
-    std::transform(name.begin(),name.end(),name.begin(),::tolower);
-    int N_errors = 0;
-    if ( name == "copy" ) {
-        N_errors += test_copy<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "scal" ) {
-        N_errors += test_scal<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "nrm2" ) {
-        N_errors += test_nrm2<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "axpy" ) {
-        N_errors += test_axpy<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gemv" ) {
-        N_errors += test_gemv<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gemm" ) {
-        N_errors += test_gemm<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "asum" ) {
-        N_errors += test_asum<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "dot" ) {
-        N_errors += test_dot<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gesv" ) {
-        N_errors += test_gesv<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gtsv" ) {
-        N_errors += test_gtsv<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gbsv" ) {
-        N_errors += test_gbsv<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "getrf" ) {
-        N_errors += test_getrf<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gttrf" ) {
-        N_errors += test_gttrf<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gbtrf" ) {
-        N_errors += test_gbtrf<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "getrs" ) {
-        N_errors += test_getrs<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gttrs" ) {
-        N_errors += test_gttrs<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "gbtrs" ) {
-        N_errors += test_gbtrs<TYPE>( N, error ) ? 1 : 0;
-    } else if ( name == "getri" ) {
-        N_errors += test_getri<TYPE>( N, error ) ? 1 : 0;
-    } else {
-        std::cerr << "Unknown test\n";
-        return -1;
-    }
-    return N_errors;
-}
 
 // Run all the tests
 template <typename TYPE>
@@ -168,13 +81,23 @@ int Lapack<TYPE>::run_all_test()
     return N_errors > 0;
 }
 
+
 // Fill a vector with random TYPE precision data
-template <typename TYPE>
-static inline void random( int N, TYPE *data )
+template <>
+void Lapack<float>::random( int N, float *data )
 {
-    std::random_device rd;
-    std::mt19937 gen( rd() );
-    std::uniform_real_distribution<TYPE> dis( 0, 1 );
+    static std::random_device rd;
+    static std::mt19937 gen( rd() );
+    static std::uniform_real_distribution<float> dis( 0, 1 );
+    for ( int i = 0; i < N; i++ )
+        data[i] = dis( gen );
+}
+template <>
+void Lapack<double>::random( int N, double *data )
+{
+    static std::random_device rd;
+    static std::mt19937_64 gen( rd() );
+    static std::uniform_real_distribution<double> dis( 0, 1 );
     for ( int i = 0; i < N; i++ )
         data[i] = dis( gen );
 }
@@ -212,6 +135,29 @@ static inline TYPE L2Error( int N, const TYPE *x1, const TYPE *x2 )
 }
 
 
+// Test random
+template <typename TYPE>
+static bool test_random( int N, TYPE &error )
+{
+    TYPE *x = new TYPE[TEST_SIZE_VEC];
+    Lapack<TYPE>::random( TEST_SIZE_VEC, x );
+    error = 0;
+    for (int it = 0; it < N; it++) {
+        TYPE sum = 0;
+        for ( int i = 0; i < TEST_SIZE_VEC; i++ ) {
+            error = ( error==0 && x[i]<0 ) ? 1:error;
+            error = ( error==0 && x[i]>1 ) ? 2:error;
+            sum += x[i];
+        }
+        TYPE avg = sum/TEST_SIZE_VEC;
+        if ( error==0 && ( avg<0.4 || avg>0.6 ) )
+            error = 3;
+    }
+    delete[] x;
+    return error != 0;
+}
+
+
 // Test copy
 template <typename TYPE>
 static bool test_copy( int N, TYPE &error )
@@ -219,7 +165,7 @@ static bool test_copy( int N, TYPE &error )
     const int K = TEST_SIZE_VEC;
     TYPE *x1    = new TYPE[K];
     TYPE *x2    = new TYPE[K];
-    random( K, x1 );
+    Lapack<TYPE>::random( K, x1 );
     int N_errors = 0;
     error        = 0;
     for ( int i = 0; i < N; i++ ) {
@@ -233,6 +179,7 @@ static bool test_copy( int N, TYPE &error )
     return N_errors > 0;
 }
 
+
 // Test scal
 template <typename TYPE>
 static bool test_scal( int N, TYPE &error )
@@ -241,7 +188,7 @@ static bool test_scal( int N, TYPE &error )
     TYPE *x0    = new TYPE[K];
     TYPE *x1    = new TYPE[K];
     TYPE *x2    = new TYPE[K];
-    random( K, x0 );
+    Lapack<TYPE>::random( K, x0 );
     const TYPE pi = static_cast<TYPE>( 3.141592653589793 );
     for ( int j  = 0; j < K; j++ )
         x1[j]    = pi * x0[j];
@@ -265,7 +212,7 @@ static bool test_nrm2( int N, TYPE &error )
 {
     const int K = TEST_SIZE_VEC;
     TYPE *x     = new TYPE[K];
-    random( K, x );
+    Lapack<TYPE>::random( K, x );
     TYPE ans1 = 0.0;
     for ( int j = 0; j < K; j++ )
         ans1 += x[j] * x[j];
@@ -293,7 +240,7 @@ static bool test_asum( int N, TYPE &error )
     const TYPE max_error = K * K / 2 * std::numeric_limits<TYPE>::epsilon();
     // Create a random set of numbers and the sum (simple method)
     TYPE *x = new TYPE[K];
-    random( K, x );
+    Lapack<TYPE>::random( K, x );
     TYPE ans1 = 0;
     for ( int j = 0; j < K; j++ )
         ans1 += std::abs( x[j] );
@@ -317,8 +264,8 @@ static bool test_dot( int N, TYPE &error )
     const int K = TEST_SIZE_VEC;
     TYPE *x1    = new TYPE[K];
     TYPE *x2    = new TYPE[K];
-    random( K, x1 );
-    random( K, x2 );
+    Lapack<TYPE>::random( K, x1 );
+    Lapack<TYPE>::random( K, x2 );
     TYPE ans1 = 0.0;
     for ( int j = 0; j < K; j++ )
         ans1 += x1[j] * x2[j];
@@ -344,8 +291,8 @@ static bool test_axpy( int N, TYPE &error )
     TYPE *y0    = new TYPE[K];
     TYPE *y1    = new TYPE[K];
     TYPE *y2    = new TYPE[K];
-    random( K, x );
-    random( K, y0 );
+    Lapack<TYPE>::random( K, x );
+    Lapack<TYPE>::random( K, y0 );
     const TYPE pi = static_cast<TYPE>( 3.141592653589793 );
     for ( int j = 0; j < K; j++ )
         y1[j]   = y0[j] + pi * x[j];
@@ -375,9 +322,9 @@ static bool test_gemv( int N, TYPE &error )
     TYPE *y     = new TYPE[K];
     TYPE *y1    = new TYPE[K];
     TYPE *y2    = new TYPE[K];
-    random( K * K, A );
-    random( K, x );
-    random( K, y );
+    Lapack<TYPE>::random( K * K, A );
+    Lapack<TYPE>::random( K, x );
+    Lapack<TYPE>::random( K, y );
     const TYPE alpha = static_cast<TYPE>( 3.141592653589793 );
     const TYPE beta  = static_cast<TYPE>( 1.414213562373095 );
     for ( int j = 0; j < K; j++ ) {
@@ -413,9 +360,9 @@ static bool test_gemm( int N, TYPE &error )
     TYPE *C     = new TYPE[K * K];
     TYPE *C1    = new TYPE[K * K];
     TYPE *C2    = new TYPE[K * K];
-    random( K * K, A );
-    random( K * K, B );
-    random( K * K, C );
+    Lapack<TYPE>::random( K * K, A );
+    Lapack<TYPE>::random( K * K, B );
+    Lapack<TYPE>::random( K * K, C );
     const TYPE alpha = static_cast<TYPE>( 3.141592653589793 );
     const TYPE beta  = static_cast<TYPE>( 1.414213562373095 );
     for ( int i = 0; i < K; i++ ) {
@@ -455,8 +402,8 @@ static bool test_gesv( int N, TYPE &error )
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
     memset( A, 0, K * K * sizeof( TYPE ) );
-    random( K, x2 );
-    random( K, b );
+    Lapack<TYPE>::random( K, x2 );
+    Lapack<TYPE>::random( K, b );
     for ( int k = 0; k < K; k++ ) {
         A[k + k * K] = x2[k] + std::numeric_limits<TYPE>::epsilon();
         x1[k]        = b[k] / ( x2[k] + std::numeric_limits<TYPE>::epsilon() );
@@ -499,10 +446,10 @@ static bool test_gtsv( int N, TYPE &error )
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
     memset( A, 0, K * K * sizeof( TYPE ) );
-    random( K, D );
-    random( K - 1, DL );
-    random( K - 1, DU );
-    random( K, b );
+    Lapack<TYPE>::random( K, D );
+    Lapack<TYPE>::random( K - 1, DL );
+    Lapack<TYPE>::random( K - 1, DU );
+    Lapack<TYPE>::random( K, b );
     A[0] = D[0];
     for ( int k = 1; k < K; k++ ) {
         A[k + k * K]         = D[k];
@@ -568,8 +515,8 @@ static bool test_gbsv( int N, TYPE &error )
     TYPE *x2     = new TYPE[K];
     TYPE *b      = new TYPE[K];
     int *IPIV    = new int[K];
-    random( K * K2, AB );
-    random( K, b );
+    Lapack<TYPE>::random( K * K2, AB );
+    Lapack<TYPE>::random( K, b );
     memset( A, 0, K * K * sizeof( TYPE ) );
     for ( int k = 0; k < K; k++ ) {
         for ( int k2 = -KL; k2 <= KU; k2++ ) {
@@ -620,8 +567,8 @@ static bool test_getrf( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    random( K * K, A );
-    random( K, b );
+    Lapack<TYPE>::random( K * K, A );
+    Lapack<TYPE>::random( K, b );
     memcpy( A2, A, K * K * sizeof( TYPE ) );
     memcpy( x1, b, K * sizeof( TYPE ) );
     int err = 0;
@@ -665,10 +612,10 @@ static bool test_gttrf( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    random( K, D );
-    random( K - 1, DL );
-    random( K - 1, DU );
-    random( K, b );
+    Lapack<TYPE>::random( K, D );
+    Lapack<TYPE>::random( K - 1, DL );
+    Lapack<TYPE>::random( K - 1, DU );
+    Lapack<TYPE>::random( K, b );
     memcpy( x1, b, K * sizeof( TYPE ) );
     memcpy( D2, D, K * sizeof( TYPE ) );
     memcpy( DL2, DL, ( K - 1 ) * sizeof( TYPE ) );
@@ -719,8 +666,8 @@ static bool test_gbtrf( int N, TYPE &error )
     TYPE *x2     = new TYPE[K];
     TYPE *b      = new TYPE[K];
     int *IPIV    = new int[K];
-    random( K * K2, AB );
-    random( K, b );
+    Lapack<TYPE>::random( K * K2, AB );
+    Lapack<TYPE>::random( K, b );
     int err = 0;
     memcpy( x1, b, K * sizeof( TYPE ) );
     memcpy( AB2, AB, K * K2 * sizeof( TYPE ) );
@@ -759,8 +706,8 @@ static bool test_getrs( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    random( K * K, A );
-    random( K, b );
+    Lapack<TYPE>::random( K * K, A );
+    Lapack<TYPE>::random( K, b );
     int err = 0;
     error   = 0;
     memcpy( A2, A, K * K * sizeof( TYPE ) );
@@ -806,10 +753,10 @@ static bool test_gttrs( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    random( K, D );
-    random( K - 1, DL );
-    random( K - 1, DU );
-    random( K, b );
+    Lapack<TYPE>::random( K, D );
+    Lapack<TYPE>::random( K - 1, DL );
+    Lapack<TYPE>::random( K - 1, DU );
+    Lapack<TYPE>::random( K, b );
     int err = 0;
     error   = 0;
     memcpy( x1, b, K * sizeof( TYPE ) );
@@ -863,8 +810,8 @@ static bool test_gbtrs( int N, TYPE &error )
     TYPE *x2     = new TYPE[K];
     TYPE *b      = new TYPE[K];
     int *IPIV    = new int[K];
-    random( K * K2, AB );
-    random( K, b );
+    Lapack<TYPE>::random( K * K2, AB );
+    Lapack<TYPE>::random( K, b );
     int err = 0;
     error   = 0;
     memcpy( x1, b, K * sizeof( TYPE ) );
@@ -908,8 +855,8 @@ static bool test_getri( int N, TYPE &error )
     int *IPIV       = new int[K];
     TYPE *WORK      = new TYPE[LWORK];
     TYPE eps        = std::numeric_limits<TYPE>::epsilon();
-    random( K * K, A );
-    random( K, b );
+    Lapack<TYPE>::random( K * K, A );
+    Lapack<TYPE>::random( K, b );
     int err      = 0;
     error        = 0;
     int N_errors = 0;
@@ -1042,6 +989,62 @@ void Lapack<TYPE>::release_lock()
 #else
 #error Not programmed
 #endif
+
+
+
+/******************************************************************
+* Run a given test                                                *
+******************************************************************/
+template<class TYPE>
+int Lapack<TYPE>::run_test( const std::string& routine, int N, TYPE &error )
+{
+    auto name = routine.substr( 1 );
+    std::transform(name.begin(),name.end(),name.begin(),::tolower);
+    int N_errors = 0;
+    if ( name == "copy" ) {
+        N_errors += test_copy<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "scal" ) {
+        N_errors += test_scal<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "nrm2" ) {
+        N_errors += test_nrm2<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "axpy" ) {
+        N_errors += test_axpy<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gemv" ) {
+        N_errors += test_gemv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gemm" ) {
+        N_errors += test_gemm<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "asum" ) {
+        N_errors += test_asum<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "dot" ) {
+        N_errors += test_dot<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gesv" ) {
+        N_errors += test_gesv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gtsv" ) {
+        N_errors += test_gtsv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gbsv" ) {
+        N_errors += test_gbsv<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "getrf" ) {
+        N_errors += test_getrf<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gttrf" ) {
+        N_errors += test_gttrf<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gbtrf" ) {
+        N_errors += test_gbtrf<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "getrs" ) {
+        N_errors += test_getrs<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gttrs" ) {
+        N_errors += test_gttrs<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "gbtrs" ) {
+        N_errors += test_gbtrs<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "getri" ) {
+        N_errors += test_getri<TYPE>( N, error ) ? 1 : 0;
+    } else if ( name == "rand" ) {
+        N_errors += test_random<TYPE>( N, error ) ? 1 : 0;
+    } else {
+        std::cerr << "Unknown test: " << name << std::endl;
+        return -1;
+    }
+    return N_errors;
+}
 
 
 // Explicit instantiations

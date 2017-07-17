@@ -609,6 +609,14 @@ public:
     static inline TYPE lamch( char cmach );
 
     /*!
+     * \brief  Fill a vector with random numbers
+     * \details  This will fill a vector with random numbers in the range (0,1)
+     * @param[in] N         Specifies the number of entries to fill
+     * @param[out] X        Output vector
+     */
+    static void random( int N, TYPE *X );
+
+    /*!
      * \brief   Run a test for a given LAPACK/BLAS routine
      * \details  This will run a simple test for a given LAPACK/BLAS routine.
      *      While this only runs some simple tests, it should detect basic errors.
