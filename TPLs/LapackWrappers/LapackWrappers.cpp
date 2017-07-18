@@ -7,6 +7,7 @@
 #include <limits>
 #include <random>
 #include <string.h>
+#include <complex>
 
 
 // Choose the OS
@@ -44,6 +45,13 @@
         }                                    \
     } while ( 0 )
 
+
+// Choose precision to perfom calculations
+template<class TYPE> class extended { };
+template<> class extended<float> { public: typedef double TYPE2; };
+template<> class extended<double> { public: typedef double TYPE2; };
+template<> class extended<std::complex<float>> { public: typedef std::complex<double> TYPE2; };
+template<> class extended<std::complex<double>> { public: typedef std::complex<double> TYPE2; };
 
 
 // Lists the tests availible to run
@@ -113,16 +121,6 @@ static inline bool approx_equal( int N, const TYPE *x1, const TYPE *x2, const TY
     return pass;
 }
 
-// Return the L2 norm
-template <typename TYPE>
-static inline TYPE L2Norm( int N, const TYPE *x )
-{
-    TYPE norm = 0.0;
-    for ( int i = 0; i < N; i++ )
-        norm += x[i] * x[i];
-    return sqrt( norm );
-}
-
 
 // Return the L2 error
 template <typename TYPE>
@@ -139,17 +137,18 @@ static inline TYPE L2Error( int N, const TYPE *x1, const TYPE *x2 )
 template <typename TYPE>
 static bool test_random( int N, TYPE &error )
 {
-    TYPE *x = new TYPE[TEST_SIZE_VEC];
-    Lapack<TYPE>::random( TEST_SIZE_VEC, x );
+    int K = TEST_SIZE_VEC/20;
+    TYPE *x = new TYPE[K];
     error = 0;
     for (int it = 0; it < N; it++) {
+        Lapack<TYPE>::random( K, x );
         TYPE sum = 0;
-        for ( int i = 0; i < TEST_SIZE_VEC; i++ ) {
+        for ( int i = 0; i < K; i++ ) {
             error = ( error==0 && x[i]<0 ) ? 1:error;
             error = ( error==0 && x[i]>1 ) ? 2:error;
             sum += x[i];
         }
-        TYPE avg = sum/TEST_SIZE_VEC;
+        TYPE avg = sum/K;
         if ( error==0 && ( avg<0.4 || avg>0.6 ) )
             error = 3;
     }
@@ -210,19 +209,21 @@ static bool test_scal( int N, TYPE &error )
 template <typename TYPE>
 static bool test_nrm2( int N, TYPE &error )
 {
+    typedef typename extended<TYPE>::TYPE2 TYPE2;
     const int K = TEST_SIZE_VEC;
     TYPE *x     = new TYPE[K];
     Lapack<TYPE>::random( K, x );
-    TYPE ans1 = 0.0;
+    TYPE2 ans1 = 0.0;
     for ( int j = 0; j < K; j++ )
-        ans1 += x[j] * x[j];
+        ans1 += static_cast<TYPE>(x[j]) * static_cast<TYPE>(x[j]);
     ans1         = sqrt( ans1 );
     int N_errors = 0;
     error        = 0;
     for ( int i = 0; i < N; i++ ) {
-        TYPE ans2 = Lapack<TYPE>::nrm2( K, x, 1 );
-        error     = std::max( error, std::abs( ans1 - ans2 ) );
-        if ( std::abs( ans1 - ans2 ) > K * std::numeric_limits<TYPE>::epsilon() )
+        TYPE ans2  = Lapack<TYPE>::nrm2( K, x, 1 );
+        double err = std::abs( ans1 - ans2 ) / sqrt(K);
+        error      = std::max<TYPE>( error, err );
+        if ( err > 50*std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x;
@@ -233,24 +234,22 @@ static bool test_nrm2( int N, TYPE &error )
 template <typename TYPE>
 static bool test_asum( int N, TYPE &error )
 {
+    typedef typename extended<TYPE>::TYPE2 TYPE2;
     const int K = 2*TEST_SIZE_VEC;
-    // Maximum roundoff error that is acceptible is determined by the
-    //    error from adding a series of numbers from (0,1).
-    //    The expected error is much less than the maximum error.
-    const TYPE max_error = K * K / 2 * std::numeric_limits<TYPE>::epsilon();
     // Create a random set of numbers and the sum (simple method)
     TYPE *x = new TYPE[K];
     Lapack<TYPE>::random( K, x );
-    TYPE ans1 = 0;
+    TYPE2 ans1 = 0.0;
     for ( int j = 0; j < K; j++ )
         ans1 += std::abs( x[j] );
-    // Check dasum
+    // Check asum
     int N_errors = 0;
     error        = 0;
     for ( int i = 0; i < N; i++ ) {
-        TYPE ans2 = Lapack<TYPE>::asum( K, x, 1 );
-        error     = std::max( error, std::abs( ( ans1 - ans2 ) / K ) );
-        if ( std::abs( ans1 - ans2 ) > max_error )
+        TYPE ans2  = Lapack<TYPE>::asum( K, x, 1 );
+        double err = std::abs( ans1 - ans2 ) / K;
+        error      = std::max<TYPE>( error, err );
+        if ( err > 50*std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x;
@@ -261,20 +260,22 @@ static bool test_asum( int N, TYPE &error )
 template <typename TYPE>
 static bool test_dot( int N, TYPE &error )
 {
+    typedef typename extended<TYPE>::TYPE2 TYPE2;
     const int K = TEST_SIZE_VEC;
     TYPE *x1    = new TYPE[K];
     TYPE *x2    = new TYPE[K];
     Lapack<TYPE>::random( K, x1 );
     Lapack<TYPE>::random( K, x2 );
-    TYPE ans1 = 0.0;
+    TYPE2 ans1 = 0.0;
     for ( int j = 0; j < K; j++ )
-        ans1 += x1[j] * x2[j];
+        ans1 += static_cast<TYPE2>(x1[j]) * static_cast<TYPE2>(x2[j]);
     int N_errors = 0;
     error        = 0;
     for ( int i = 0; i < N; i++ ) {
         TYPE ans2 = Lapack<TYPE>::dot( K, x1, 1, x2, 1 );
-        error     = std::max( error, std::abs( ans1 - ans2 ) / K );
-        if ( std::abs( ans1 - ans2 ) > 50 * K * std::numeric_limits<TYPE>::epsilon() )
+        double err = std::abs( ans1 - ans2 ) / K;
+        error      = std::max<TYPE>( error, err );
+        if ( err > 50*std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x1;
@@ -334,7 +335,7 @@ static bool test_gemv( int N, TYPE &error )
     }
     int N_errors = 0;
     error        = 0;
-    TYPE norm    = L2Norm( K, y1 );
+    TYPE norm    = Lapack<TYPE>::nrm2( K, y1, 1 );
     for ( int i = 0; i < N; i++ ) {
         memcpy( y2, y, K * sizeof( TYPE ) );
         Lapack<TYPE>::gemv( 'N', K, K, alpha, A, K, x, 1, beta, y2, 1 );
@@ -374,7 +375,7 @@ static bool test_gemm( int N, TYPE &error )
     }
     int N_errors = 0;
     error        = 0;
-    TYPE norm    = L2Norm( K * K, C1 );
+    TYPE norm    = Lapack<TYPE>::nrm2( K*K, C1, 1 );
     for ( int i = 0; i < N; i++ ) {
         memcpy( C2, C, K * K * sizeof( TYPE ) );
         Lapack<TYPE>::gemm( 'N', 'N', K, K, K, alpha, A, K, B, K, beta, C2, K );
@@ -410,7 +411,7 @@ static bool test_gesv( int N, TYPE &error )
     }
     int N_errors = 0;
     error        = 0;
-    TYPE norm    = L2Norm( K, x1 );
+    TYPE norm    = Lapack<TYPE>::nrm2( K, x1, 1 );
     for ( int i = 0; i < N; i++ ) {
         memcpy( x2, b, K * sizeof( TYPE ) );
         int err = 0;
@@ -471,7 +472,7 @@ static bool test_gtsv( int N, TYPE &error )
         if ( err != 0 )
             printf( "Error calling gtsv (%i)\n", err );
         TYPE err2 = L2Error( N, x1, x2 );
-        TYPE norm = L2Norm( N, x1 );
+        TYPE norm = Lapack<TYPE>::nrm2( N, x1, 1 );
         error     = std::max( error, err2 / norm );
     }
     const TYPE tol = static_cast<TYPE>( 2e4 ) * std::numeric_limits<TYPE>::epsilon();
@@ -536,7 +537,7 @@ static bool test_gbsv( int N, TYPE &error )
         memcpy( AB2, AB, K * K2 * sizeof( TYPE ) );
         Lapack<TYPE>::gbsv( K, KL, KU, 1, AB2, K2, IPIV, x2, K, err );
         N_errors += err == 0 ? 0 : 1;
-        TYPE norm = L2Norm( K, x1 );
+        TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
         TYPE err2 = L2Error( K, x1, x2 );
         error     = std::max( error, err2 / norm );
     }
@@ -581,7 +582,7 @@ static bool test_getrf( int N, TYPE &error )
     }
     memcpy( x2, b, K * sizeof( TYPE ) );
     Lapack<TYPE>::getrs( 'N', K, 1, A2, K, IPIV, x2, K, err );
-    TYPE norm = L2Norm( K, x1 );
+    TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     TYPE err2 = L2Error( K, x1, x2 );
     if ( err2 > 10.0 * norm * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
@@ -632,7 +633,7 @@ static bool test_gttrf( int N, TYPE &error )
     }
     memcpy( x2, b, K * sizeof( TYPE ) );
     Lapack<TYPE>::gttrs( 'N', K, 1, DL2, D2, DU2, DU3, IPIV, x2, K, err );
-    TYPE norm = L2Norm( K, x1 );
+    TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     TYPE err2 = L2Error( K, x1, x2 );
     if ( err2/norm > 300.0 * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
@@ -680,7 +681,7 @@ static bool test_gbtrf( int N, TYPE &error )
     }
     memcpy( x2, b, K * sizeof( TYPE ) );
     Lapack<TYPE>::gbtrs( 'N', K, KL, KU, 1, AB2, K2, IPIV, x2, K, err );
-    TYPE norm = L2Norm( K, x1 );
+    TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     TYPE err2 = L2Error( K, x1, x2 );
     if ( err2 > 10.0 * norm * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
@@ -720,7 +721,7 @@ static bool test_getrs( int N, TYPE &error )
         memcpy( x2, b, K * sizeof( TYPE ) );
         Lapack<TYPE>::getrs( 'N', K, 1, A2, K, IPIV, x2, K, err );
         N_errors += err == 0 ? 0 : 1;
-        TYPE norm = L2Norm( K, x1 );
+        TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
         TYPE err2 = L2Error( K, x1, x2 );
         if ( err > 10.0 * norm * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
@@ -774,7 +775,7 @@ static bool test_gttrs( int N, TYPE &error )
         memcpy( x2, b, K * sizeof( TYPE ) );
         Lapack<TYPE>::gttrs( 'N', K, 1, DL2, D2, DU2, DU4, IPIV, x2, K, err );
         N_errors += err == 0 ? 0 : 1;
-        TYPE norm = L2Norm( K, x1 );
+        TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
         TYPE err2 = L2Error( K, x1, x2 );
         if ( err2/norm > 250.0 * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
@@ -824,7 +825,7 @@ static bool test_gbtrs( int N, TYPE &error )
         memcpy( x2, b, K * sizeof( TYPE ) );
         Lapack<TYPE>::gbtrs( 'N', K, KL, KU, 1, AB2, K2, IPIV, x2, K, err );
         N_errors += err == 0 ? 0 : 1;
-        TYPE norm = L2Norm( K, x1 );
+        TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
         TYPE err2 = L2Error( K, x1, x2 );
         if ( err2 > 10.0 * norm * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
@@ -866,7 +867,7 @@ static bool test_getri( int N, TYPE &error )
     if ( err != 0 ) {
         printf( "Error in gesv within test_getri\n" );
     }
-    TYPE norm = L2Norm( K, x1 );
+    TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     // reinitialize IPIV
     for ( int j = 0; j < K; ++j ) {
         IPIV[j] = 0;
