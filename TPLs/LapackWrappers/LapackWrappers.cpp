@@ -139,21 +139,33 @@ static bool test_random( int N, TYPE &error )
 {
     int K = TEST_SIZE_VEC/20;
     TYPE *x = new TYPE[K];
+    int count[25] = {0};
     error = 0;
     for (int it = 0; it < N; it++) {
         Lapack<TYPE>::random( K, x );
         TYPE sum = 0;
         for ( int i = 0; i < K; i++ ) {
-            error = ( error==0 && x[i]<0 ) ? 1:error;
-            error = ( error==0 && x[i]>1 ) ? 2:error;
+            error = ( error==0 && x[i]<0 ) ? -1:error;
+            error = ( error==0 && x[i]>1 ) ? -2:error;
             sum += x[i];
+            int j = static_cast<int>( floor(x[i]*25) );
+            count[j]++;
         }
         TYPE avg = sum/K;
         if ( error==0 && ( avg<0.4 || avg>0.6 ) )
-            error = 3;
+            error = -3;
     }
     delete[] x;
-    return error != 0;
+    if ( error != 0 )
+        return true;
+    // If we did not encounter an error, check the Chi-Square Distribution
+    double E = (K*N)/25.0;
+    double X2 = 0.0;
+    for (int i=0; i<25; i++)
+        X2 += (count[i]-E)*(count[i]-E)/E;
+    double X2c = 51.179;    // Critical value for 0.999 (we will fail 0.1% of the time)
+    error = X2/X2c;
+    return error > 1.0;
 }
 
 
