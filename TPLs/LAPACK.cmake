@@ -72,6 +72,10 @@ ELSE()
     IF ( (NOT BLAS_FOUND) OR (NOT LAPACK_FOUND) )
         CHECK_MKL( "${LAPACK_INSTALL_DIR}" "${LAPACK_OUT}" )
     ENDIF()
+    # Check if we are including veclib
+    IF ( (NOT BLAS_FOUND) OR (NOT LAPACK_FOUND) )
+        CHECK_VECLIB( "${LAPACK_INSTALL_DIR}" "${LAPACK_OUT}" )
+    ENDIF()
     # Check for basic blas/lapack
     IF ( (NOT BLAS_FOUND) OR (NOT LAPACK_FOUND) )
         IF ( NOT BLAS_FOUND )
