@@ -268,7 +268,9 @@ inline void Lapack<double>::gbsv(
     FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
     release_lock();
 #elif defined( USE_VECLIB )
+    get_lock();
     FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
+    release_lock();
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];

@@ -553,7 +553,7 @@ static bool test_gbsv( int N, TYPE &error )
         TYPE err2 = L2Error( K, x1, x2 );
         error     = std::max( error, err2 / norm );
     }
-    const double tol = 3000.0 * std::numeric_limits<TYPE>::epsilon();
+    const double tol = 100 * sqrt(K) * std::numeric_limits<TYPE>::epsilon();
     if ( error > tol ) {
         printf( "test_gbsv error (%e) exceeded tolerance (%e)\n", error, tol );
         N_errors++;
@@ -950,6 +950,8 @@ void Lapack<TYPE>::print_lapack_version()
     printf( "Using MKL\n" );
 #elif defined( USE_MATLAB_LAPACK )
     printf( "Using MATLAB LAPACK\n" );
+#elif defined( USE_VECLIB )
+    printf( "Using VECLIB\n" );
 #else
     printf( "Using unknown LAPACK library\n" );
 #endif
