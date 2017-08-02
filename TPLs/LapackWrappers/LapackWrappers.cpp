@@ -553,7 +553,7 @@ static bool test_gbsv( int N, TYPE &error )
         TYPE err2 = L2Error( K, x1, x2 );
         error     = std::max( error, err2 / norm );
     }
-    const double tol = 100 * sqrt(K) * std::numeric_limits<TYPE>::epsilon();
+    const double tol = 500 * sqrt(K) * std::numeric_limits<TYPE>::epsilon();
     if ( error > tol ) {
         printf( "test_gbsv error (%e) exceeded tolerance (%e)\n", error, tol );
         N_errors++;
@@ -898,17 +898,18 @@ static bool test_getri( int N, TYPE &error )
         Lapack<TYPE>::getri( K, A2, K, IPIV, WORK, LWORK, err );
         if ( err != 0 ) {
             printf( "Error in getri within test_getri\n" );
+            N_errors++;
         }
-        N_errors += err == 0 ? 0 : 1;
         // Perform the mat-vec
         memset( x2, 0xB6, K * sizeof( TYPE ) );
         Lapack<TYPE>::gemv( 'N', K, K, 1, A2, K, b, 1, 0, x2, 1 );
-        // Check the result
-        TYPE err2 = L2Error( K, x1, x2 );
-        if ( err2/norm > 250 * eps )
-            N_errors++;
+        TYPE err2 = L2Error( K, x1, x2 )/norm;
         error = std::max( error, err2 );
-        // printf("Iteration %d, error = %f, norm = %f, err2 = %f\n", i, error, norm, err2);
+    }
+    // Check the result
+    if ( error > 300 * eps ) {
+        printf("getri exceeded tolerance: error = %e, tol = %e\n", error, 300*eps);
+        N_errors++;
     }
     delete[] A;
     delete[] A2;

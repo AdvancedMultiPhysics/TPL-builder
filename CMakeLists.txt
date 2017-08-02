@@ -161,6 +161,7 @@ ENDIF()
 
 
 # Configure TPLs
+ADD_CUSTOM_TARGET( logs ALL )
 FOREACH( TPL ${TPL_LIST} )
     FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
     MESSAGE_TPL("Configuring ${TPL}")
@@ -199,7 +200,7 @@ ADD_TPL_SAVE_LOGS( environment )
 ADD_TPL_CLEAN( environment )
 
 # Run the test project as an external project
-CHECK_ENABLE_FLAG( ENABLE_TESTS FALSE )
+CHECK_ENABLE_FLAG( ENABLE_TESTS TRUE )
 IF ( ENABLE_TESTS )
     SET( TPLS_Test_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/tests" )
     CHECK_ENABLE_FLAG( DISABLE_TESTS_AFTER_INSTALL FALSE )
@@ -226,6 +227,15 @@ IF ( ENABLE_TESTS )
             TEST_COMMAND        ctest -VV
             DEPENDS             ${TPL_LIST}
             LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+        )
+        EXTERNALPROJECT_ADD_STEP(
+            TPLS_Test
+            post-test
+            COMMAND             make log-TPLS_Test
+            COMMENT             ""
+            DEPENDEES           test
+            ALWAYS              0
+            LOG                 0
         )
     ENDIF()
     ExternalProject_Add_Step(

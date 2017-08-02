@@ -121,15 +121,19 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
     EXTERNALPROJECT_ADD_STEP(
         ${TPL}
         post-install
-        COMMAND             ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" .
-        COMMAND             ${CMAKE_COMMAND} -E remove ${RM_LIST}  ${TPL}-urlinfo.txt
-        COMMAND             ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
+        COMMAND             make log-${TPL}
         COMMENT             ""
         DEPENDEES           stop-stamp
         ALWAYS              0
-        WORKING_DIRECTORY   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
         LOG                 0
     )
+    ADD_CUSTOM_TARGET( log-${TPL}
+        COMMAND             ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" .
+        COMMAND             ${CMAKE_COMMAND} -E remove ${RM_LIST}  ${TPL}-urlinfo.txt
+        COMMAND             ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
+        WORKING_DIRECTORY   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
+    )
+    ADD_DEPENDENCIES( logs log-${TPL} )
 ENDMACRO()
 
 
@@ -137,7 +141,7 @@ ENDMACRO()
 MACRO( MESSAGE_TPL MSG )
     MESSAGE( "${MSG}" )
     FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# ${MSG}\n" )
-ENDMACRO() 
+ENDMACRO()
 
 
 # Macro to create a test to print the results of the build
