@@ -261,7 +261,7 @@ static bool test_asum( int N, TYPE &error )
         TYPE ans2  = Lapack<TYPE>::asum( K, x, 1 );
         double err = std::abs( ans1 - ans2 ) / K;
         error      = std::max<TYPE>( error, err );
-        if ( err > 50*std::numeric_limits<TYPE>::epsilon() )
+        if ( err > 60*std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x;
