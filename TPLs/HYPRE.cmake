@@ -73,7 +73,6 @@ IF ( CMAKE_BUILD_HYPRE )
         URL                 "${HYPRE_CMAKE_URL}"
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${HYPRE_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ${CMAKE_COMMAND} -E echo "" 
         CONFIGURE_COMMAND   "./configure" --prefix=${HYPRE_INSTALL_DIR} ${CONFIGURE_OPTIONS} ${ENV_VARS}
         BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
         BUILD_IN_SOURCE     1
@@ -88,7 +87,7 @@ IF ( CMAKE_BUILD_HYPRE )
         COMMAND             ${CMAKE_COMMAND} -E remove_directory "${HYPRE_CMAKE_SOURCE_DIR}"
         COMMAND             ${CMAKE_COMMAND} -E rename "HYPRE-tmp" "${HYPRE_CMAKE_SOURCE_DIR}"
         COMMENT             ""
-        DEPENDEES           download update
+        DEPENDEES           download
         DEPENDERS           configure
         WORKING_DIRECTORY   "${HYPRE_CMAKE_SOURCE_DIR}/.."
         LOG                 0

@@ -282,6 +282,11 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
             ADD_LIBRARY( ${PACKAGE} ${LIB_TYPE} ${SOURCES} ${CUBINS} )
             TARGET_LINK_EXTERNAL_LIBRARIES( ${PACKAGE} )
         ENDIF()
+        # Add coverage flags to target
+        IF ( NOT DISABLE_TARGET_COVERAGE )
+            TARGET_COMPILE_DEFINITIONS( ${PACKAGE} PUBLIC ${COVERAGE_FLAGS} )
+        ENDIF()
+        # Add target dependencies
         IF ( TARGET write_repo_version )
             ADD_DEPENDENCIES( ${PACKAGE} write_repo_version )
         ENDIF()
@@ -786,6 +791,10 @@ MACRO( ADD_PROJ_EXE_DEP EXE )
         TARGET_LINK_LIBRARIES( ${EXE} ${${PROJ}_LIBS} ${${PROJ}_LIBS} )
     ENDIF()
     TARGET_LINK_LIBRARIES( ${EXE} ${${PROJECT_NAME}_LIBRARIES} )
+    # Add coverage flags to target
+    IF ( NOT DISABLE_TARGET_COVERAGE )
+        TARGET_COMPILE_DEFINITIONS( ${EXE} PUBLIC ${COVERAGE_FLAGS} )
+    ENDIF()
     # Link to external libraries
     SET_TARGET_PROPERTIES( ${EXE} PROPERTIES LINK_FLAGS "${LDFLAGS} ${LDFLAGS_EXTRA}" )
     TARGET_LINK_LIBRARIES( ${EXE} ${LINK_LIBRARIES} )
