@@ -49,9 +49,9 @@
 // Choose precision to perfom calculations
 template<class TYPE> class extended { };
 template<> class extended<float> { public: typedef double TYPE2; };
-template<> class extended<double> { public: typedef double TYPE2; };
+template<> class extended<double> { public: typedef long double TYPE2; };
 template<> class extended<std::complex<float>> { public: typedef std::complex<double> TYPE2; };
-template<> class extended<std::complex<double>> { public: typedef std::complex<double> TYPE2; };
+template<> class extended<std::complex<double>> { public: typedef std::complex<long double> TYPE2; };
 
 
 // Lists the tests availible to run
@@ -251,9 +251,10 @@ static bool test_asum( int N, TYPE &error )
     // Create a random set of numbers and the sum (simple method)
     TYPE *x = new TYPE[K];
     Lapack<TYPE>::random( K, x );
-    TYPE2 ans1 = 0.0;
+    TYPE2 sum = 0.0;
     for ( int j = 0; j < K; j++ )
-        ans1 += std::abs( x[j] );
+        sum += std::abs( x[j] );
+    TYPE ans1 = sum;
     // Check asum
     int N_errors = 0;
     error        = 0;
@@ -261,7 +262,7 @@ static bool test_asum( int N, TYPE &error )
         TYPE ans2  = Lapack<TYPE>::asum( K, x, 1 );
         double err = std::abs( ans1 - ans2 ) / K;
         error      = std::max<TYPE>( error, err );
-        if ( err > 60*std::numeric_limits<TYPE>::epsilon() )
+        if ( err > 100*std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x;
