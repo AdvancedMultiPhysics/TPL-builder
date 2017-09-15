@@ -246,7 +246,8 @@ SAMRUTILS:
     TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
 AMP:
     AMP_Data         - Path to the data directory for AMP
-
+LIBMESH:
+    LIBMESH_MPI_PATH - path to mpi that needs to be explicitly specified for libmesh
 
 To build:
     cd to the build directory
