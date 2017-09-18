@@ -97,23 +97,23 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
     ENDFOREACH()
     EXTERNALPROJECT_ADD_STEP(
         ${TPL}
-        start-stamp
-        COMMAND             ${CMAKE_COMMAND} -Dfilename=time -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_stamp.cmake"
-        COMMENT             ""
-        DEPENDEES           
-        DEPENDERS           configure
-        ALWAYS              0
-        WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
-        LOG                 0
-    )
-    EXTERNALPROJECT_ADD_STEP(
-        ${TPL}
         stop-stamp
         COMMAND             ${CMAKE_COMMAND} -Dfilename=time -Dappend=1 -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_stamp.cmake"
         COMMAND             ${CMAKE_COMMAND} -Dfilename=time -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/print_elapsed.cmake"
         COMMENT             ""
         DEPENDEES           install
         DEPENDERS           
+        ALWAYS              0
+        WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
+        LOG                 0
+    )
+    EXTERNALPROJECT_ADD_STEP(
+        ${TPL}
+        start-stamp
+        COMMAND             ${CMAKE_COMMAND} -Dfilename=time -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_stamp.cmake"
+        COMMENT             ""
+        DEPENDEES           
+        DEPENDERS           download configure stop-stamp
         ALWAYS              0
         WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
         LOG                 0
