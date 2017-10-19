@@ -33,7 +33,7 @@ IF ( NOT ${PROJ}_INSTALL_DIR )
 ENDIF()
 
 
-# Print a message to indeicate we started looking for TPLs
+# Print a message to indicate we started looking for TPLs
 IF ( NOT TPLs_FIND_QUIETLY )
     MESSAGE( "Running FindTPLs" )
 ENDIF()
