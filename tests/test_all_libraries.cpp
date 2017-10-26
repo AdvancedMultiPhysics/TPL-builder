@@ -8,7 +8,9 @@
 #include <vector>
 
 #include "TPLs.h"
+#include "TPL_helpers.h"
 
+// Include appropriate TPL headers
 #ifdef USE_BOOST
     #include "boost/shared_ptr.hpp"
 #endif
@@ -16,12 +18,12 @@
     #include "LapackWrappers.h"
 #endif
 #ifdef USE_PETSC
-    #define __MPIUNI_H
     #include "petsc.h"
 #endif
 #ifdef USE_HDF5
     #include "hdf5.h"
 #endif
+
 
 
 
@@ -37,240 +39,184 @@ std::vector<std::string> split( const std::string& str )
 }
 
 
+// Define test interface
+template<TPL_Enum TPL> bool test( );
+
+
 // Test BOOST
-int testBOOST( )
-{
-    int N_errors = 0;
 #ifdef USE_BOOST
+template<> bool test<TPL_Enum::BOOST>( )
+{
+    bool pass = true;
     boost::shared_ptr<int> x( new int );
     *x = 3;
     if ( *x != 3 )
-        N_errors++;
-#else
-    std::cout << "   -- USE_BOOST not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+        pass = false;
+    return pass;
 }
+#endif
 
 
 // Test LAPACK
-int testLAPACK( )
+#ifdef USE_LAPACK
+template<> bool test<TPL_Enum::LAPACK>( )
 {
-    int N_errors = 0;
-#if defined(USE_LAPACK) && defined(USE_LAPACK_WRAPPERS)
+#if defined(USE_LAPACK_WRAPPERS)
     std::cout << "   -- Using LAPACK_WRAPPERS to test LAPACK\n";
-#elif defined(USE_LAPACK)
-    std::cout << "   -- No tests defined for LAPACK\n";
 #else
-    std::cout << "   -- USE_LAPACK not defined\n";
-    N_errors++;
+    std::cout << "   -- No tests defined for LAPACK\n";
 #endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test LAPACK_WRAPPERS
-int testLAPACK_WRAPPERS( )
+#ifdef USE_LAPACK_WRAPPERS
+template<> bool test<TPL_Enum::LAPACK_WRAPPERS>( )
 {
     int N_errors = 0;
-#ifdef USE_LAPACK_WRAPPERS
     N_errors = Lapack<double>::run_all_test();
     N_errors += Lapack<float>::run_all_test();
-#else
-    std::cout << "   -- USE_LAPACK_WRAPPERS not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return N_errors==0;
 }
+#endif
 
 
 // Test ZLIB
-int testZLIB( )
-{
-    int N_errors = 0;
 #ifdef USE_ZLIB
+template<> bool test<TPL_Enum::ZLIB>( )
+{
     std::cout << "   -- No tests defined for zlib\n";
-#else
-    std::cout << "   -- USE_ZLIB not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test HDF5
-int testHDF5( )
-{
-    int N_errors = 0;
 #ifdef USE_HDF5
+template<> bool test<TPL_Enum::HDF5>( )
+{
     hid_t H5Fcreate( const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id );
-#else
-    std::cout << "   -- USE_HDF5 not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test PETSC
-int testPETSC( )
-{
-    int N_errors = 0;
 #ifdef USE_PETSC
+template<> bool test<TPL_Enum::PETSC>( )
+{
+    bool pass = true;
     PetscBool initialized;
     PetscErrorCode err = PetscInitialized( &initialized );
     if ( initialized || err!=0 ) {
         std::cout << "   Error calling PetscInitialized\n";
-        N_errors++;
+        pass = false;
     }
-#else
-    std::cout << "   -- USE_PETSC not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return pass;
 }
+#endif
 
 
 // Test SILO
-int testSILO( )
-{
-    int N_errors = 0;
 #ifdef USE_SILO
+template<> bool test<TPL_Enum::SILO>( )
+{
     std::cout << "   -- No tests defined for silo\n";
-#else
-    std::cout << "   -- USE_SILO not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test NETCDF
-int testNETCDF( )
-{
-    int N_errors = 0;
 #ifdef USE_NETCDF
+template<> bool test<TPL_Enum::NETCDF>( )
+{
     std::cout << "   -- No tests defined for netcdf\n";
-#else
-    std::cout << "   -- USE_NETCDF not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test HYPRE
-int testHYPRE( )
-{
-    int N_errors = 0;
 #ifdef USE_HYPRE
+template<> bool test<TPL_Enum::HYPRE>( )
+{
     std::cout << "   -- No tests defined for hypre\n";
-#else
-    std::cout << "   -- USE_HYPRE not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test LIBMESH
-int testLIBMESH( )
-{
-    int N_errors = 0;
 #ifdef USE_LIBMESH
+template<> bool test<TPL_Enum::LIBMESH>( )
+{
     std::cout << "   -- No tests defined for libmesh\n";
-#else
-    std::cout << "   -- USE_LIBMESH not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test TRILINOS
-int testTRILINOS( )
-{
-    int N_errors = 0;
 #ifdef USE_TRILINOS
+template<> bool test<TPL_Enum::TRILINOS>( )
+{
     std::cout << "   -- No tests defined for trilinos\n";
-#else
-    std::cout << "   -- USE_TRILINOS not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test SUNDIALS
-int testSUNDIALS( )
-{
-    int N_errors = 0;
 #ifdef USE_SUNDIALS
+template<> bool test<TPL_Enum::SUNDIALS>( )
+{
     std::cout << "   -- No tests defined for sundials\n";
-#else
-    std::cout << "   -- USE_SUNDIALS not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test TIMER
-int testTIMER( )
-{
-    int N_errors = 0;
 #ifdef USE_TIMER
+template<> bool test<TPL_Enum::TIMER>( )
+{
     std::cout << "   -- No tests defined for timer\n";
-#else
-    std::cout << "   -- USE_TIMER not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test SAMRAI
-int testSAMRAI( )
-{
-    int N_errors = 0;
 #ifdef USE_SAMRAI
+template<> bool test<TPL_Enum::SAMRAI>( )
+{
     std::cout << "   -- No tests defined for samrai\n";
-#else
-    std::cout << "   -- USE_SAMRAI not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test KOKKOS
-int testKOKKOS( )
-{
-    int N_errors = 0;
 #ifdef USE_KOKKOS
+template<> bool test<TPL_Enum::KOKKOS>( )
+{
     std::cout << "   -- No tests defined for kokkos\n";
-#else
-    std::cout << "   -- USE_KOKKOS not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
+#endif
 
 
 // Test OGRE
-int testOGRE( )
-{
-    int N_errors = 0;
 #ifdef USE_OGRE
+template<> bool test<TPL_Enum::OGRE>( )
+{
     std::cout << "   -- No tests defined for ogre\n";
-#else
-    std::cout << "   -- USE_OGRE not defined\n";
-    N_errors++;
-#endif
-    return N_errors;
+    return true;
 }
-
+#endif
 
 
 // Main
@@ -291,63 +237,65 @@ int main()
     
     // Test each of the TPLs
     int N_errors_global = 0;
-    for (size_t i=0; i<tpls.size(); i++) {
-        std::cout << "Testing " << tpls[i] << std::endl;
-        int N_errors = 0;
-        if ( tpls[i] == "BOOST" ) {
+    auto list = enabledTPls();
+    for ( auto tmp : list) {
+        auto tpl = getName(tmp);
+        std::cout << "Testing " << tpl << std::endl;
+        bool pass = true;
+        if ( tpl == "BOOST" ) {
             // Test BOOST
-            N_errors = testBOOST( );
-        } else if ( tpls[i] == "LAPACK" ) {
+            pass = test<TPL_Enum::BOOST>( );
+        } else if ( tpl == "LAPACK" ) {
             // Test LAPACK wrappers
-            N_errors = testLAPACK( );
-        } else if ( tpls[i] == "LAPACK_WRAPPERS" ) {
+            pass = test<TPL_Enum::LAPACK>( );
+        } else if ( tpl == "LAPACK_WRAPPERS" ) {
             // Test LAPACK_WRAPPERS
-            N_errors = testLAPACK_WRAPPERS( );
-        } else if ( tpls[i] == "ZLIB" ) {
+            pass = test<TPL_Enum::LAPACK_WRAPPERS>( );
+        } else if ( tpl == "ZLIB" ) {
             // Test ZLIB
-            N_errors = testZLIB( );
-        } else if ( tpls[i] == "HDF5" ) {
+            pass = test<TPL_Enum::ZLIB>( );
+        } else if ( tpl == "HDF5" ) {
             // Test HDF5
-            N_errors = testHDF5( );
-        } else if ( tpls[i] == "PETSC" ) {
+            pass = test<TPL_Enum::HDF5>( );
+        } else if ( tpl == "PETSC" ) {
             // Test PETSC
-            N_errors = testPETSC( );
-        } else if ( tpls[i] == "SILO" ) {
+            pass = test<TPL_Enum::PETSC>( );
+        } else if ( tpl == "SILO" ) {
             // Test SILO
-            N_errors = testSILO( );
-        } else if ( tpls[i] == "NETCDF" ) {
+            pass = test<TPL_Enum::SILO>( );
+        } else if ( tpl == "NETCDF" ) {
             // Test NETCDF
-            N_errors = testNETCDF( );
-        } else if ( tpls[i] == "HYPRE" ) {
+            pass = test<TPL_Enum::NETCDF>( );
+        } else if ( tpl == "HYPRE" ) {
             // Test HYPRE
-            N_errors = testHYPRE( );
-        } else if ( tpls[i] == "LIBMESH" ) {
+            pass = test<TPL_Enum::HYPRE>( );
+        } else if ( tpl == "LIBMESH" ) {
             // Test LIBMESH
-            N_errors = testLIBMESH( );
-        } else if ( tpls[i] == "TRILINOS" ) {
+            pass = test<TPL_Enum::LIBMESH>( );
+        } else if ( tpl == "TRILINOS" ) {
             // Test TRILINOS
-            N_errors = testTRILINOS( );
-        } else if ( tpls[i] == "SUNDIALS" ) {
+            pass = test<TPL_Enum::TRILINOS>( );
+        } else if ( tpl == "SUNDIALS" ) {
             // Test SUNDIALS
-            N_errors = testSUNDIALS( );
-        } else if ( tpls[i] == "TIMER" ) {
+            pass = test<TPL_Enum::SUNDIALS>( );
+        } else if ( tpl == "TIMER" ) {
             // Test TIMER
-            N_errors = testTIMER( );
-        } else if ( tpls[i] == "SAMRAI" ) {
+            pass = test<TPL_Enum::TIMER>( );
+        } else if ( tpl == "SAMRAI" ) {
             // Test SAMRAI
-            N_errors = testSAMRAI( );
-        } else if ( tpls[i] == "KOKKOS" ) {
+            pass = test<TPL_Enum::SAMRAI>( );
+        } else if ( tpl == "KOKKOS" ) {
             // Test KOKKOS
-            N_errors = testKOKKOS( );
-        } else if ( tpls[i] == "OGRE" ) {
+            pass = test<TPL_Enum::KOKKOS>( );
+        } else if ( tpl == "OGRE" ) {
             // Test OGRE
-            N_errors = testOGRE( );
+            pass = test<TPL_Enum::OGRE>( );
         } else {
             // TPL not found
-            std::cerr << tpls[i] << " not programmed\n";
-            N_errors++;
+            std::cerr << tpl << " not programmed\n";
+            pass = false;
         }
-        if ( N_errors==0 ) {
+        if ( pass ) {
             std::cout << "   -- Passed\n";
         } else {
             std::cout << "   -- Failed\n";
