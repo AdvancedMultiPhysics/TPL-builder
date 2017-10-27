@@ -219,6 +219,13 @@ template<> bool test<TPL_Enum::OGRE>( )
 #endif
 
 
+// Default implimentation
+template<TPL_Enum TPL> bool test( )
+{
+    std::cerr << "   -- Implimentation of " << getName(TPL) << " not defined\n";
+}
+
+
 // Main
 int main()
 {

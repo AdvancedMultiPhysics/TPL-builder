@@ -103,7 +103,7 @@ FUNCTION( CONFIGURE_BLAS_AND_LAPACK )
     ENDIF()
     FILE(APPEND ${BLAS_LAPACK_HEADER} "#endif\n" )
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-        "${BLAS_LAPACK_HEADER}" "${BlasLapackInstallDir}/blas_lapack.h" )
+        "${BLAS_LAPACK_HEADER}" "${BlasLapackInstallDir}/${${PROJ}_INC}/blas_lapack.h" )
     SET( USE_BLAS ${USE_BLAS} PARENT_SCOPE)
     SET( USE_LAPACK ${USE_LAPACK} PARENT_SCOPE)
 ENDFUNCTION()
