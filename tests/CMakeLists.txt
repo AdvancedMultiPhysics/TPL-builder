@@ -74,7 +74,9 @@ IF ( USE_LAPACK )
     ADD_TPLS_Tests_EXECUTABLE( test_LapackWrappers )
     ADD_TPLS_Tests_TEST( test_LapackWrappers )
 ENDIF()
-
+IF ( USE_MATLAB )
+    ADD_SUBDIRECTORY( matlab )
+ENDIF()
 
 # Copy the tests to TPL project
 IF ( TPL_TEST_DIR )

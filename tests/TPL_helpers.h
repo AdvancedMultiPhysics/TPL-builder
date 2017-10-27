@@ -9,7 +9,7 @@
 
 // List of valid TPLs that we can test
 enum class TPL_Enum { BOOST, LAPACK, LAPACK_WRAPPERS, ZLIB, HDF5, PETSC, SILO,
-    NETCDF, HYPRE, LIBMESH, TRILINOS, SUNDIALS, TIMER, SAMRAI, KOKKOS, OGRE, UNKNOWN };
+    NETCDF, HYPRE, LIBMESH, TRILINOS, SUNDIALS, TIMER, SAMRAI, KOKKOS, OGRE, MATLAB, UNKNOWN };
 
 
 // Get the string for an TPL enum
@@ -47,6 +47,8 @@ inline std::string getName( TPL_Enum tpl )
         return "KOKKOS";
     if ( tpl == TPL_Enum::OGRE )
         return "OGRE";
+    if ( tpl == TPL_Enum::MATLAB )
+        return "MATLAB";
     return "UNKNOWN";
 }
 
@@ -86,6 +88,8 @@ inline TPL_Enum getTPL( const std::string &tpl )
         return TPL_Enum::KOKKOS;
     if ( tpl == "OGRE" )
         return TPL_Enum::OGRE;
+    if ( tpl == "MATLAB" )
+        return TPL_Enum::MATLAB;
     return TPL_Enum::UNKNOWN;
 }
 

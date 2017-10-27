@@ -223,6 +223,7 @@ template<> bool test<TPL_Enum::OGRE>( )
 template<TPL_Enum TPL> bool test( )
 {
     std::cerr << "   -- Implimentation of " << getName(TPL) << " not defined\n";
+    return false;
 }
 
 
@@ -297,6 +298,8 @@ int main()
         } else if ( tpl == "OGRE" ) {
             // Test OGRE
             pass = test<TPL_Enum::OGRE>( );
+        } else if ( tpl == "MATLAB" ) {
+            // No MATLAB linkin tests
         } else {
             // TPL not found
             std::cerr << tpl << " not programmed\n";
