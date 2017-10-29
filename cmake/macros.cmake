@@ -1215,9 +1215,10 @@ ENDMACRO()
 # Create a script to start matlab preloading libraries
 FUNCTION( CREATE_MATLAB_WRAPPER )
     IF ( NOT USING_MSVC )
-        STRING(REGEX REPLACE ";" ":" tmp "${MEX_FILES}")
+        STRING(REGEX REPLACE ";" ":" tmp_mex "${MEX_FILES}")
+        STRING(REGEX REPLACE ";" ":" tmp_path "${MATLABPATH}")
         FIND_PROGRAM( MATLAB_EXE2 NAME matlab PATHS "${MATLAB_DIRECTORY}/bin" NO_DEFAULT_PATH ) 
-        FILE( WRITE "${CMAKE_CURRENT_BINARY_DIR}/tmp/matlab" "LD_PRELOAD=\"${tmp}\" \"${MATLAB_EXE2}\" \"$@\"\n")
+        FILE( WRITE "${CMAKE_CURRENT_BINARY_DIR}/tmp/matlab" "LD_PRELOAD=\"${tmp_mex}\" MATLABPATH=\"${tmp_path}\" \"${MATLAB_EXE2}\" \"$@\"\n")
         FILE( COPY "${CMAKE_CURRENT_BINARY_DIR}/tmp/matlab" DESTINATION "${${PROJ}_INSTALL_DIR}/mex"
             FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE )
         SET( MATLAB_EXE "${${PROJ}_INSTALL_DIR}/mex/matlab" CACHE INTERNAL "" )
