@@ -46,6 +46,10 @@
     } while ( 0 )
 
 
+
+int global_set_mkl_threads = putenv( "MKL_NUM_THREADS=1" );
+
+
 // Choose precision to perfom calculations
 template<class TYPE> class extended { };
 template<> class extended<float> { public: typedef double TYPE2; };
