@@ -40,20 +40,38 @@ FUNCTION( CONFIGURE_BLAS_AND_LAPACK )
         FIND_LIBRARY( BLAS_LIBS   NAMES libmwblas.dll   PATHS ${MATLAB_EXTERN}  NO_DEFAULT_PATH )
         FIND_LIBRARY( LAPACK_LIBS NAMES mwlapack        PATHS ${MATLAB_EXTERN}  NO_DEFAULT_PATH )
         FIND_LIBRARY( LAPACK_LIBS NAMES libmwlapack.dll PATHS ${MATLAB_EXTERN}  NO_DEFAULT_PATH )
-        FIND_LIBRARY( LIBSTD_LIB  NAMES stdc++          PATHS ${MATLAB_OS}      NO_DEFAULT_PATH )
-        FIND_LIBRARY( LIBSTD_LIB  NAMES libstdc++.so.6  PATHS ${MATLAB_OS}      NO_DEFAULT_PATH )
+        FIND_LIBRARY( MATLAB_LIBSTD  NAMES stdc++          PATHS ${MATLAB_OS}      NO_DEFAULT_PATH )
+        FIND_LIBRARY( MATLAB_LIBSTD  NAMES libstdc++.so.6  PATHS ${MATLAB_OS}      NO_DEFAULT_PATH )
         IF ( (NOT BLAS_LIBS) OR (NOT LAPACK_LIBS) )
             MESSAGE("${BLAS_LIBS}")
             MESSAGE("${LAPACK_LIBS}")
             MESSAGE(FATAL_ERROR "Could not find MATLAB blas/lapack libraries in: ${MATLAB_EXTERN}")
         ENDIF()
         SET( BLAS_LAPACK_LIBS ${LAPACK_LIBS} ${BLAS_LIBS} )
-        IF ( LIBSTD_LIB )
-            SET( BLAS_LAPACK_LIBS ${BLAS_LAPACK_LIBS} ${LIBSTD_LIB} )
+        # Check if we need to include MATLAB's libstdc++
+        SET( CMAKE_REQUIRED_FLAGS ${CMAKE_CXX_FLAGS} )
+        SET( CMAKE_REQUIRED_LIBRARIES ${BLAS_LAPACK_LIBS} )
+        CHECK_CXX_SOURCE_COMPILES(
+            "#include \"${MATLAB_INSTALL_DIR}/extern/include/tmwtypes.h\"
+             #include \"${MATLAB_INSTALL_DIR}/extern/include/lapack.h\"
+             int main() {
+                dgesv( nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+                return 0;
+             }" MATLAB_LAPACK_LINK )
+        IF ( NOT MATLAB_LAPACK_LINK )
+            SET( BLAS_LAPACK_LIBS ${BLAS_LAPACK_LIBS} ${MATLAB_LIBSTD} )
+            SET( CMAKE_REQUIRED_LIBRARIES ${BLAS_LAPACK_LIBS} )
+            CHECK_CXX_SOURCE_COMPILES(
+                "#include \"${MATLAB_INSTALL_DIR}/extern/include/tmwtypes.h\"
+                 #include \"${MATLAB_INSTALL_DIR}/extern/include/lapack.h\"
+                 int main() {
+                    dgesv( nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+                    return 0;
+                 }" MATLAB_LAPACK_LINK2 )
+            IF ( NOT MATLAB_LAPACK_LINK2 )
+                MESSAGE( FATAL_ERROR "Unable to link with MATLAB's LAPACK" )
+            ENDIF()
         ENDIF()
-        #IF ( USING_GCC )
-        #    SET( BLAS_LAPACK_LIBS ${BLAS_LAPACK_LIBS} -lgfortran )
-        #ENDIF()
         SET( BLAS_LAPACK_LIBS ${BLAS_LAPACK_LIBS} PARENT_SCOPE )
         FILE(APPEND "${BLAS_LAPACK_HEADER}" "#include \"${MATLAB_DIRECTORY}/extern/include/tmwtypes.h\"\n" )
         FILE(APPEND "${BLAS_LAPACK_HEADER}" "#include \"${MATLAB_DIRECTORY}/extern/include/blas.h\"\n" )
