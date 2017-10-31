@@ -131,7 +131,7 @@ IF ( CPPCHECK )
         # Find the number of files to determine if we want one (or multiple) cppcheck commands
         FILE(GLOB_RECURSE SRCS "${CPPCHECK_SOURCE}/*.cpp" "${CPPCHECK_SOURCE}/*.cc" "${CPPCHECK_SOURCE}/*.c" )
         LIST(LENGTH SRCS len)
-        IF ( len LESS 100 )
+        IF ( len LESS 100 OR CPPCHECK_SERIALIZE )
             ADD_CPPCHECK_TEST( cppcheck "${CPPCHECK_SOURCE}" )
         ELSE()
             FILE(GLOB children RELATIVE "${CPPCHECK_SOURCE}" "${CPPCHECK_SOURCE}/*" )
