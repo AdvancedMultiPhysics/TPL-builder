@@ -1218,7 +1218,7 @@ FUNCTION( CREATE_MATLAB_WRAPPER )
         SET( MATLAB_GUI "${CMAKE_CURRENT_BINARY_DIR}/tmp/matlab-gui" )
         SET( MATLAB_CMD "${CMAKE_CURRENT_BINARY_DIR}/tmp/matlab-cmd" )
         SET( MATLAB_INSTALL_CMD "matlab-cmd" )
-        FILE( WRITE "${MATLAB_GUI}" "LD_PRELOAD=\"${tmp_libs}\" MATLABPATH=\"${tmp_path}\" \"${MATLAB_EXE2}\" -singleCompThread -nosplash\"$@\"\n")
+        FILE( WRITE "${MATLAB_GUI}" "LD_PRELOAD=\"${tmp_libs}\" MATLABPATH=\"${tmp_path}\" \"${MATLAB_EXE2}\" -singleCompThread -nosplash \"$@\"\n")
         FILE( WRITE "${MATLAB_CMD}" "LD_PRELOAD=\"${tmp_libs}\" MATLABPATH=\"${tmp_path}\" \"${MATLAB_EXE2}\" -singleCompThread -nosplash -nodisplay -nojvm \"$@\"\n")
     ENDIF()
     FILE( COPY "${MATLAB_GUI}" DESTINATION "${${PROJ}_INSTALL_DIR}/mex"
