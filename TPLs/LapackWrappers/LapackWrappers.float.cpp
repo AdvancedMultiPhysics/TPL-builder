@@ -1,10 +1,9 @@
-#ifndef USE_LAPACK_FLOAT_WRAPPER_HPP
-#define USE_LAPACK_FLOAT_WRAPPER_HPP
-
 #include "LapackWrappers.h"
 #include "blas_lapack.h"
 
+#include <mutex>
 #include <stdexcept>
+
 
 // Define macro to handle name mangling
 #ifndef FORTRAN_WRAPPER
@@ -52,10 +51,14 @@
 #endif
 
 
+// Lock for thread safety
+static std::mutex d_mutex;
+
+
 // Define the member functions
 #undef scopy
 template <>
-inline void Lapack<float>::copy( int N, const float *DX, int INCX, float *DY, int INCY )
+void Lapack<float>::copy( int N, const float *DX, int INCX, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
     cblas_scopy( N, DX, INCX, DY, INCY );
@@ -73,7 +76,7 @@ inline void Lapack<float>::copy( int N, const float *DX, int INCX, float *DY, in
 // Define the member functions
 #undef sswap
 template <>
-inline void Lapack<float>::swap( int N, float *DX, int INCX, float *DY, int INCY )
+void Lapack<float>::swap( int N, float *DX, int INCX, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
     cblas_sswap( N, DX, INCX, DY, INCY );
@@ -90,7 +93,7 @@ inline void Lapack<float>::swap( int N, float *DX, int INCX, float *DY, int INCY
 }
 #undef sscal
 template <>
-inline void Lapack<float>::scal( int N, float DA, float *DX, int INCX )
+void Lapack<float>::scal( int N, float DA, float *DX, int INCX )
 {
 #ifdef USE_ATLAS
     cblas_sscal( N, DA, DX, INCX );
@@ -107,7 +110,7 @@ inline void Lapack<float>::scal( int N, float DA, float *DX, int INCX )
 }
 #undef snrm2
 template <>
-inline float Lapack<float>::nrm2( int N, const float *DX, int INCX )
+float Lapack<float>::nrm2( int N, const float *DX, int INCX )
 {
 #ifdef USE_ATLAS
     return cblas_snrm2( N, DX, INCX );
@@ -124,7 +127,7 @@ inline float Lapack<float>::nrm2( int N, const float *DX, int INCX )
 }
 #undef isamax
 template <>
-inline int Lapack<float>::iamax( int N, const float *DX, int INCX )
+int Lapack<float>::iamax( int N, const float *DX, int INCX )
 {
 #ifdef USE_ATLAS
     return cblas_isamax( N, DX, INCX ) - 1;
@@ -141,7 +144,7 @@ inline int Lapack<float>::iamax( int N, const float *DX, int INCX )
 }
 #undef saxpy
 template <>
-inline void Lapack<float>::axpy( int N, float DA, const float *DX, int INCX, float *DY, int INCY )
+void Lapack<float>::axpy( int N, float DA, const float *DX, int INCX, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
     cblas_saxpy( N, DA, DX, INCX, DY, INCY );
@@ -158,7 +161,7 @@ inline void Lapack<float>::axpy( int N, float DA, const float *DX, int INCX, flo
 }
 #undef sgemv
 template <>
-inline void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const float *A, int LDA, const float *DX,
+void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const float *A, int LDA, const float *DX,
     int INCX, float BETA, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -181,7 +184,7 @@ inline void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const fl
 }
 #undef sgemm
 template <>
-inline void Lapack<float>::gemm( char TRANSA, char TRANSB, int M, int N, int K, float ALPHA, const float *A, int LDA,
+void Lapack<float>::gemm( char TRANSA, char TRANSB, int M, int N, int K, float ALPHA, const float *A, int LDA,
     const float *B, int LDB, float BETA, float *C, int LDC )
 {
 #ifdef USE_ATLAS
@@ -206,7 +209,7 @@ inline void Lapack<float>::gemm( char TRANSA, char TRANSB, int M, int N, int K, 
 }
 #undef sasum
 template <>
-inline float Lapack<float>::asum( int N, const float *DX, int INCX )
+float Lapack<float>::asum( int N, const float *DX, int INCX )
 {
 #ifdef USE_ATLAS
     return cblas_sasum( N, DX, INCX );
@@ -223,7 +226,7 @@ inline float Lapack<float>::asum( int N, const float *DX, int INCX )
 }
 #undef sdot
 template <>
-inline float Lapack<float>::dot( int N, const float *DX, int INCX, const float *DY, int INCY )
+float Lapack<float>::dot( int N, const float *DX, int INCX, const float *DY, int INCY )
 {
 #ifdef USE_ATLAS
     return cblas_sdot( N, DX, INCX, DY, INCY );
@@ -240,7 +243,7 @@ inline float Lapack<float>::dot( int N, const float *DX, int INCX, const float *
 }
 #undef sger
 template <>
-inline void Lapack<float>::ger(
+void Lapack<float>::ger(
     int N, int M, float alpha, const float *x, int INCX, const float *y, int INCY, float *A, int LDA )
 {
 #ifdef USE_ATLAS
@@ -259,7 +262,7 @@ inline void Lapack<float>::ger(
 }
 #undef sgesv
 template <>
-inline void Lapack<float>::gesv( int N, int NRHS, float *A, int LDA, int *IPIV, float *B, int LDB, int &INFO )
+void Lapack<float>::gesv( int N, int NRHS, float *A, int LDA, int *IPIV, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_sgesv( CblasColMajor, N, NRHS, A, LDA, IPIV, B, LDB );
@@ -282,7 +285,7 @@ inline void Lapack<float>::gesv( int N, int NRHS, float *A, int LDA, int *IPIV, 
 }
 #undef sgtsv
 template <>
-inline void Lapack<float>::gtsv( int N, int NRHS, float *DL, float *D, float *DU, float *B, int LDB, int &INFO )
+void Lapack<float>::gtsv( int N, int NRHS, float *DL, float *D, float *DU, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support sgtsv" );
@@ -300,7 +303,7 @@ inline void Lapack<float>::gtsv( int N, int NRHS, float *DL, float *D, float *DU
 }
 #undef sgbsv
 template <>
-inline void Lapack<float>::gbsv(
+void Lapack<float>::gbsv(
     int N, int KL, int KU, int NRHS, float *AB, int LDAB, int *IPIV, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -324,7 +327,7 @@ inline void Lapack<float>::gbsv(
 }
 #undef sgetrf
 template <>
-inline void Lapack<float>::getrf( int M, int N, float *A, int LDA, int *IPIV, int &INFO )
+void Lapack<float>::getrf( int M, int N, float *A, int LDA, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_sgetrf( CblasColMajor, M, N, A, LDA, IPIV );
@@ -347,7 +350,7 @@ inline void Lapack<float>::getrf( int M, int N, float *A, int LDA, int *IPIV, in
 }
 #undef sgttrf
 template <>
-inline void Lapack<float>::gttrf( int N, float *DL, float *D, float *DU, float *DU2, int *IPIV, int &INFO )
+void Lapack<float>::gttrf( int N, float *DL, float *D, float *DU, float *DU2, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support sgttrf" );
@@ -370,7 +373,7 @@ inline void Lapack<float>::gttrf( int N, float *DL, float *D, float *DU, float *
 }
 #undef sgbtrf
 template <>
-inline void Lapack<float>::gbtrf( int M, int N, int KL, int KU, float *AB, int LDAB, int *IPIV, int &INFO )
+void Lapack<float>::gbtrf( int M, int N, int KL, int KU, float *AB, int LDAB, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support sgbtrf" );
@@ -388,16 +391,16 @@ inline void Lapack<float>::gbtrf( int M, int N, int KL, int KU, float *AB, int L
     delete[] IPIVp;
     INFO = static_cast<int>( INFOp );
 #elif defined( USE_ACML )
-    get_lock();
+    d_mutex.lock();
     FORTRAN_WRAPPER(::sgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
-    release_lock();
+    d_mutex.unlock();
 #else
     FORTRAN_WRAPPER(::sgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
 #endif
 }
 #undef sgetrs
 template <>
-inline void Lapack<float>::getrs(
+void Lapack<float>::getrs(
     char TRANS, int N, int NRHS, const float *A, int LDA, const int *IPIV, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -426,7 +429,7 @@ inline void Lapack<float>::getrs(
 }
 #undef sgttrs
 template <>
-inline void Lapack<float>::gttrs( char TRANS, int N, int NRHS, const float *DL, const float *D, const float *DU,
+void Lapack<float>::gttrs( char TRANS, int N, int NRHS, const float *DL, const float *D, const float *DU,
     const float *DU2, const int *IPIV, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -456,7 +459,7 @@ inline void Lapack<float>::gttrs( char TRANS, int N, int NRHS, const float *DL, 
 }
 #undef sgbtrs
 template <>
-inline void Lapack<float>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const float *AB, int LDAB,
+void Lapack<float>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const float *AB, int LDAB,
     const int *IPIV, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -486,7 +489,7 @@ inline void Lapack<float>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, c
 }
 #undef sgetri
 template <>
-inline void Lapack<float>::getri( int N, float *A, int LDA, const int *IPIV, float *WORK, int LWORK, int &INFO )
+void Lapack<float>::getri( int N, float *A, int LDA, const int *IPIV, float *WORK, int LWORK, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_sgetri( CblasColMajor, N, A, LDA, IPIV );
@@ -511,7 +514,7 @@ inline void Lapack<float>::getri( int N, float *A, int LDA, const int *IPIV, flo
 }
 #undef strsm
 template <>
-inline void Lapack<float>::trsm(
+void Lapack<float>::trsm(
     char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, float ALPHA, const float *A, int LDA, float *B, int LDB )
 {
 #ifdef USE_ATLAS
@@ -536,7 +539,7 @@ inline void Lapack<float>::trsm(
 }
 #undef slamch
 template <>
-inline float Lapack<float>::lamch( char cmach )
+float Lapack<float>::lamch( char cmach )
 {
 #ifdef USE_ATLAS
     return clapack_slamch( cmach );
@@ -551,5 +554,3 @@ inline float Lapack<float>::lamch( char cmach )
 #endif
 }
 
-
-#endif

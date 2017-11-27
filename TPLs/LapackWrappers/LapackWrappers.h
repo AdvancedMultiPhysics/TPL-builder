@@ -24,7 +24,7 @@ public:
      * @param[in]  y        The destination vector
      * @param[out] INCY     The spacing between points in y
      */
-    static inline void copy( int N, const TYPE *x, int INCX, TYPE *y, int INCY );
+    static void copy( int N, const TYPE *x, int INCX, TYPE *y, int INCY );
 
     /*!
      * \brief   swap
@@ -35,7 +35,7 @@ public:
      * @param[in,out] y     The second vector
      * @param[in]  INCY     The spacing between points in x
      */
-    static inline void swap( int N, TYPE *x, int INCX, TYPE *y, int INCY );
+    static void swap( int N, TYPE *x, int INCX, TYPE *y, int INCY );
 
     /*!
      * \brief   scal
@@ -45,7 +45,7 @@ public:
      * @param[in,out] x     The vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline void scal( int N, TYPE a, TYPE *x, int INCX );
+    static void scal( int N, TYPE a, TYPE *x, int INCX );
 
     /*!
      * \brief   nrm2
@@ -54,7 +54,7 @@ public:
      * @param[in]  x        The input vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline TYPE nrm2( int N, const TYPE *x, int INCX );
+    static TYPE nrm2( int N, const TYPE *x, int INCX );
 
     /*!
      * \brief   iamax
@@ -64,7 +64,7 @@ public:
      * @param[in]  x        The input vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline int iamax( int N, const TYPE *x, int INCX );
+    static int iamax( int N, const TYPE *x, int INCX );
 
     /*!
      * \brief   axpy
@@ -76,7 +76,7 @@ public:
      * @param[in,out] y     The destination vector
      * @param[in] INCY      The spacing between points in x
      */
-    static inline void axpy( int N, TYPE a, const TYPE *x, int INCX, TYPE *y, int INCY );
+    static void axpy( int N, TYPE a, const TYPE *x, int INCX, TYPE *y, int INCY );
 
     /*!
      * \brief   gemv
@@ -100,7 +100,7 @@ public:
      * @param[in,out] y     The destination vector
      * @param[in] INCY      The spacing between points in x
      */
-    static inline void gemv( char TRANS, int M, int N, TYPE alpha, const TYPE *A, int LDA, const TYPE *x, int INCX,
+    static void gemv( char TRANS, int M, int N, TYPE alpha, const TYPE *A, int LDA, const TYPE *x, int INCX,
         TYPE beta, TYPE *y, int INCY );
 
     /*!
@@ -162,7 +162,7 @@ public:
      *                      declared in  the  calling  (sub)  program.   LDC
      *                      must  be  at  least max( 1, m ).  Unchanged on exit.
      */
-    static inline void gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE alpha, const TYPE *A, int LDA,
+    static void gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE alpha, const TYPE *A, int LDA,
         const TYPE *B, int LDB, TYPE beta, TYPE *C, int LDC );
 
     /*!
@@ -172,7 +172,7 @@ public:
      * @param[in]  x        The source vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static inline TYPE asum( int N, const TYPE *x, int INCX );
+    static TYPE asum( int N, const TYPE *x, int INCX );
 
     /*!
      * \brief   dot
@@ -183,7 +183,7 @@ public:
      * @param[in]  y        The source vector y
      * @param[in]  INCY     The spacing between points in y
      */
-    static inline TYPE dot( int N, const TYPE *x, int INCX, const TYPE *y, int INCY );
+    static TYPE dot( int N, const TYPE *x, int INCX, const TYPE *y, int INCY );
 
     /*!
      * \brief   ger
@@ -202,7 +202,7 @@ public:
      *                      On exit, the updated matrix.
      * @param[in]  LDA      The leading dimension of the array A.  LDA >= max(1,M).
      */
-    static inline void ger(
+    static void ger(
         int N, int M, TYPE alpha, const TYPE *x, int INCX, const TYPE *y, int INCY, TYPE *A, int LDA );
 
     /*!
@@ -236,7 +236,7 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void gesv( int N, int NRHS, TYPE *A, int LDA, int *IPIV, TYPE *B, int LDB, int &INFO );
+    static void gesv( int N, int NRHS, TYPE *A, int LDA, int *IPIV, TYPE *B, int LDB, int &INFO );
 
     /*!
      * \brief   gtsv
@@ -268,7 +268,7 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void gtsv( int N, int NRHS, TYPE *DL, TYPE *D, TYPE *DU, TYPE *B, int LDB, int &INFO );
+    static void gtsv( int N, int NRHS, TYPE *DL, TYPE *D, TYPE *DU, TYPE *B, int LDB, int &INFO );
 
     /*!
      * \brief   gbsv
@@ -329,7 +329,7 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void gbsv(
+    static void gbsv(
         int N, int KL, int KU, int NRHS, TYPE *AB, int LDAB, int *IPIV, TYPE *B, int LDB, int &INFO );
 
 
@@ -357,7 +357,7 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void getrf( int M, int N, TYPE *A, int LDA, int *IPIV, int &INFO );
+    static void getrf( int M, int N, TYPE *A, int LDA, int *IPIV, int &INFO );
 
     /*!
      * \brief   gttrf
@@ -391,7 +391,7 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static inline void gttrf( int N, TYPE *DL, TYPE *D, TYPE *DU, TYPE *DU2, int *IPIV, int &INFO );
+    static void gttrf( int N, TYPE *DL, TYPE *D, TYPE *DU, TYPE *DU2, int *IPIV, int &INFO );
 
     /*!
      * \brief   gbtrf
@@ -420,7 +420,7 @@ public:
      *                            singular, and division by zero will occur if
      *                            it is used to solve a system of equations.
      */
-    static inline void gbtrf( int M, int N, int KL, int KU, TYPE *AB, int LDAB, int *IPIV, int &INFO );
+    static void gbtrf( int M, int N, int KL, int KU, TYPE *AB, int LDAB, int *IPIV, int &INFO );
 
     /*!
      * \brief   getrs
@@ -445,7 +445,7 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static inline void getrs(
+    static void getrs(
         char TRANS, int N, int NRHS, const TYPE *A, int LDA, const int *IPIV, TYPE *B, int LDB, int &INFO );
 
     /*!
@@ -476,7 +476,7 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static inline void gttrs( char TRANS, int N, int NRHS, const TYPE *DL, const TYPE *D, const TYPE *DU,
+    static void gttrs( char TRANS, int N, int NRHS, const TYPE *DL, const TYPE *D, const TYPE *DU,
         const TYPE *DU2, const int *IPIV, TYPE *B, int LDB, int &INFO );
 
     /*!
@@ -510,7 +510,7 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static inline void gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const TYPE *AB, int LDAB, const int *IPIV,
+    static void gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const TYPE *AB, int LDAB, const int *IPIV,
         TYPE *B, int LDB, int &INFO );
 
     /*!
@@ -538,7 +538,7 @@ public:
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      *                      > 0:  if INFO = i, U(i,i) is exactly zero; the matrix is
      */
-    static inline void getri( int N, TYPE *A, int LDA, const int *IPIV, TYPE *WORK, int LWORK, int &INFO );
+    static void getri( int N, TYPE *A, int LDA, const int *IPIV, TYPE *WORK, int LWORK, int &INFO );
 
     /*!
      * \brief   trsm
@@ -585,7 +585,7 @@ public:
      * @param[in] LDB       The first dimension of B as declared in the calling (sub) program.
      *                      LDB must be at least max(1,m).
      */
-    static inline void trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, TYPE ALPHA, const TYPE *A,
+    static void trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, TYPE ALPHA, const TYPE *A,
         int LDA, TYPE *B, int LDB );
 
     /*!
@@ -606,7 +606,7 @@ public:
      *                      'O' or 'o':   rmax  = overflow threshold  - (base**emax)*(1-eps)
      * @return              Return the requested value
      */
-    static inline TYPE lamch( char cmach );
+    static TYPE lamch( char cmach );
 
     /*!
      * \brief  Fill a vector with random numbers
@@ -644,23 +644,7 @@ public:
     //! Print information about the lapack version/package
     static void print_lapack_version();
 
-private:
-    /*!
-     * \brief   Get the lock
-     * \details  This will get an atomic lock to ensure thread safety (needed for some routines)
-     */
-    static void get_lock();
-
-    /*!
-     * \brief   Release the lock
-     * \details  This will release the atomic lock to ensure thread safety (needed for some
-     * routines)
-     */
-    static void release_lock();
 };
 
-
-#include "LapackWrappers.double.hpp"
-#include "LapackWrappers.float.hpp"
 
 #endif

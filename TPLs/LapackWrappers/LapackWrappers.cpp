@@ -92,6 +92,8 @@ int Lapack<TYPE>::run_all_test()
     }
     return N_errors > 0;
 }
+template int Lapack<double>::run_all_test();
+template int Lapack<float>::run_all_test();
 
 
 // Fill a vector with random TYPE precision data
@@ -944,6 +946,8 @@ void Lapack<TYPE>::print_machine_parameters()
     printf( "emax  = %13.6e    largest exponent before overflow\n", Lapack<TYPE>::lamch( 'L' ) );
     printf( "rmax  = %13.6e    overflow threshold - (base**emax)*(1-eps)\n", Lapack<TYPE>::lamch( 'O' ) );
 }
+template void Lapack<double>::print_machine_parameters();
+template void Lapack<float>::print_machine_parameters();
 template <typename TYPE>
 void Lapack<TYPE>::print_lapack_version()
 {
@@ -962,55 +966,8 @@ void Lapack<TYPE>::print_lapack_version()
     printf( "Using unknown LAPACK library\n" );
 #endif
 }
-
-/******************************************************************
-* Some inline functions to acquire/release a mutex                *
-******************************************************************/
-#ifdef WINDOWS
-static HANDLE LapackWrappers_lock_queue = CreateMutex( NULL, FALSE, NULL );
-#elif defined( LINUX )
-static pthread_mutex_t LapackWrappers_lock_queue;
-static int LapackWrappers_lock_queue_error = pthread_mutex_init( &LapackWrappers_lock_queue, nullptr );
-#else
-#error Not programmed
-#endif
-#ifdef WINDOWS
-template <typename TYPE>
-void Lapack<TYPE>::get_lock()
-{
-    WaitForSingleObject( LapackWrappers_lock_queue, INFINITE );
-}
-#elif defined( LINUX )
-template <typename TYPE>
-void Lapack<TYPE>::get_lock()
-{
-    int error = pthread_mutex_lock( &LapackWrappers_lock_queue );
-    if ( error == -1 )
-        printf( "Error locking mutex" );
-}
-#else
-#error Not programmed
-#endif
-#ifdef WINDOWS
-template <typename TYPE>
-void Lapack<TYPE>::release_lock()
-{
-    bool success = ReleaseMutex( LapackWrappers_lock_queue ) != 0;
-    if ( !success )
-        printf( "Error unlocking mutex" );
-}
-#elif defined( LINUX )
-template <typename TYPE>
-void Lapack<TYPE>::release_lock()
-{
-    int error = pthread_mutex_unlock( &LapackWrappers_lock_queue );
-    if ( error == -1 )
-        printf( "Error unlocking mutex" );
-}
-#else
-#error Not programmed
-#endif
-
+template void Lapack<double>::print_lapack_version();
+template void Lapack<float>::print_lapack_version();
 
 
 /******************************************************************
@@ -1066,8 +1023,7 @@ int Lapack<TYPE>::run_test( const std::string& routine, int N, TYPE &error )
     }
     return N_errors;
 }
+template int Lapack<double>::run_test( const std::string&, int, double& );
+template int Lapack<float>::run_test( const std::string&, int, float& );
 
 
-// Explicit instantiations
-template class Lapack<double>;
-template class Lapack<float>;

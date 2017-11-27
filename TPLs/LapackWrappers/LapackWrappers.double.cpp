@@ -1,10 +1,9 @@
-#ifndef USE_LAPACK_WRAPPER_HPP
-#define USE_LAPACK_WRAPPER_HPP
-
 #include "LapackWrappers.h"
 #include "blas_lapack.h"
 
+#include <mutex>
 #include <stdexcept>
+
 
 // Define macro to handle name mangling
 #ifndef FORTRAN_WRAPPER
@@ -51,10 +50,15 @@
 #endif
 #endif
 
+
+// Lock for thread safety
+static std::mutex d_mutex;
+
+
 // Define the member functions
 #undef dcopy
 template <>
-inline void Lapack<double>::copy( int N, const double *DX, int INCX, double *DY, int INCY )
+void Lapack<double>::copy( int N, const double *DX, int INCX, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
     cblas_dcopy( N, DX, INCX, DY, INCY );
@@ -72,7 +76,7 @@ inline void Lapack<double>::copy( int N, const double *DX, int INCX, double *DY,
 // Define the member functions
 #undef dswap
 template <>
-inline void Lapack<double>::swap( int N, double *DX, int INCX, double *DY, int INCY )
+void Lapack<double>::swap( int N, double *DX, int INCX, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
     cblas_dswap( N, DX, INCX, DY, INCY );
@@ -89,7 +93,7 @@ inline void Lapack<double>::swap( int N, double *DX, int INCX, double *DY, int I
 }
 #undef dscal
 template <>
-inline void Lapack<double>::scal( int N, double DA, double *DX, int INCX )
+void Lapack<double>::scal( int N, double DA, double *DX, int INCX )
 {
 #ifdef USE_ATLAS
     cblas_dscal( N, DA, DX, INCX );
@@ -106,7 +110,7 @@ inline void Lapack<double>::scal( int N, double DA, double *DX, int INCX )
 }
 #undef dnrm2
 template <>
-inline double Lapack<double>::nrm2( int N, const double *DX, int INCX )
+double Lapack<double>::nrm2( int N, const double *DX, int INCX )
 {
 #ifdef USE_ATLAS
     return cblas_dnrm2( N, DX, INCX );
@@ -123,7 +127,7 @@ inline double Lapack<double>::nrm2( int N, const double *DX, int INCX )
 }
 #undef idamax
 template <>
-inline int Lapack<double>::iamax( int N, const double *DX, int INCX )
+int Lapack<double>::iamax( int N, const double *DX, int INCX )
 {
 #ifdef USE_ATLAS
     return cblas_idamax( N, DX, INCX ) - 1;
@@ -140,7 +144,7 @@ inline int Lapack<double>::iamax( int N, const double *DX, int INCX )
 }
 #undef daxpy
 template <>
-inline void Lapack<double>::axpy( int N, double DA, const double *DX, int INCX, double *DY, int INCY )
+void Lapack<double>::axpy( int N, double DA, const double *DX, int INCX, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
     cblas_daxpy( N, DA, DX, INCX, DY, INCY );
@@ -157,7 +161,7 @@ inline void Lapack<double>::axpy( int N, double DA, const double *DX, int INCX, 
 }
 #undef dgemv
 template <>
-inline void Lapack<double>::gemv( char TRANS, int M, int N, double ALPHA, const double *A, int LDA, const double *DX,
+void Lapack<double>::gemv( char TRANS, int M, int N, double ALPHA, const double *A, int LDA, const double *DX,
     int INCX, double BETA, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -180,7 +184,7 @@ inline void Lapack<double>::gemv( char TRANS, int M, int N, double ALPHA, const 
 }
 #undef dgemm
 template <>
-inline void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K, double ALPHA, const double *A, int LDA,
+void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K, double ALPHA, const double *A, int LDA,
     const double *B, int LDB, double BETA, double *C, int LDC )
 {
 #ifdef USE_ATLAS
@@ -205,7 +209,7 @@ inline void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K,
 }
 #undef dasum
 template <>
-inline double Lapack<double>::asum( int N, const double *DX, int INCX )
+double Lapack<double>::asum( int N, const double *DX, int INCX )
 {
     if ( N == 0 )
         return 0;
@@ -224,7 +228,7 @@ inline double Lapack<double>::asum( int N, const double *DX, int INCX )
 }
 #undef ddot
 template <>
-inline double Lapack<double>::dot( int N, const double *DX, int INCX, const double *DY, int INCY )
+double Lapack<double>::dot( int N, const double *DX, int INCX, const double *DY, int INCY )
 {
 #ifdef USE_ATLAS
     return cblas_ddot( N, DX, INCX, DY, INCY );
@@ -241,7 +245,7 @@ inline double Lapack<double>::dot( int N, const double *DX, int INCX, const doub
 }
 #undef dger
 template <>
-inline void Lapack<double>::ger(
+void Lapack<double>::ger(
     int N, int M, double alpha, const double *x, int INCX, const double *y, int INCY, double *A, int LDA )
 {
 #ifdef USE_ATLAS
@@ -260,7 +264,7 @@ inline void Lapack<double>::ger(
 }
 #undef dgesv
 template <>
-inline void Lapack<double>::gesv( int N, int NRHS, double *A, int LDA, int *IPIV, double *B, int LDB, int &INFO )
+void Lapack<double>::gesv( int N, int NRHS, double *A, int LDA, int *IPIV, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_dgesv( CblasColMajor, N, NRHS, A, LDA, IPIV, B, LDB );
@@ -283,7 +287,7 @@ inline void Lapack<double>::gesv( int N, int NRHS, double *A, int LDA, int *IPIV
 }
 #undef dgtsv
 template <>
-inline void Lapack<double>::gtsv( int N, int NRHS, double *DL, double *D, double *DU, double *B, int LDB, int &INFO )
+void Lapack<double>::gtsv( int N, int NRHS, double *DL, double *D, double *DU, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgtsv" );
@@ -301,19 +305,19 @@ inline void Lapack<double>::gtsv( int N, int NRHS, double *DL, double *D, double
 }
 #undef dgbsv
 template <>
-inline void Lapack<double>::gbsv(
+void Lapack<double>::gbsv(
     int N, int KL, int KU, int NRHS, double *AB, int LDAB, int *IPIV, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgbsv" );
 #elif defined( USE_ACML )
-    get_lock();
+    d_mutex.lock();
     FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
-    release_lock();
+    d_mutex.unlock();
 #elif defined( USE_VECLIB )
-    get_lock();
+    d_mutex.lock();
     FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
-    release_lock();
+    d_mutex.unlock();
 #elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
@@ -331,7 +335,7 @@ inline void Lapack<double>::gbsv(
 }
 #undef dgetrf
 template <>
-inline void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &INFO )
+void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_dgetrf( CblasColMajor, M, N, A, LDA, IPIV );
@@ -354,7 +358,7 @@ inline void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, 
 }
 #undef dgttrf
 template <>
-inline void Lapack<double>::gttrf( int N, double *DL, double *D, double *DU, double *DU2, int *IPIV, int &INFO )
+void Lapack<double>::gttrf( int N, double *DL, double *D, double *DU, double *DU2, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgttrf" );
@@ -377,7 +381,7 @@ inline void Lapack<double>::gttrf( int N, double *DL, double *D, double *DU, dou
 }
 #undef dgbtrf
 template <>
-inline void Lapack<double>::gbtrf( int M, int N, int KL, int KU, double *AB, int LDAB, int *IPIV, int &INFO )
+void Lapack<double>::gbtrf( int M, int N, int KL, int KU, double *AB, int LDAB, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgbtrf" );
@@ -395,16 +399,16 @@ inline void Lapack<double>::gbtrf( int M, int N, int KL, int KU, double *AB, int
     delete[] IPIVp;
     INFO = static_cast<int>( INFOp );
 #elif defined( USE_ACML )
-    get_lock();
+    d_mutex.lock();
     FORTRAN_WRAPPER(::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
-    release_lock();
+    d_mutex.unlock();
 #else
     FORTRAN_WRAPPER(::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
 #endif
 }
 #undef dgetrs
 template <>
-inline void Lapack<double>::getrs(
+void Lapack<double>::getrs(
     char TRANS, int N, int NRHS, const double *A, int LDA, const int *IPIV, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -433,7 +437,7 @@ inline void Lapack<double>::getrs(
 }
 #undef dgttrs
 template <>
-inline void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const double *D, const double *DU,
+void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const double *D, const double *DU,
     const double *DU2, const int *IPIV, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -463,7 +467,7 @@ inline void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL
 }
 #undef dgbtrs
 template <>
-inline void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const double *AB, int LDAB,
+void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const double *AB, int LDAB,
     const int *IPIV, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -493,7 +497,7 @@ inline void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, 
 }
 #undef dgetri
 template <>
-inline void Lapack<double>::getri( int N, double *A, int LDA, const int *IPIV, double *WORK, int LWORK, int &INFO )
+void Lapack<double>::getri( int N, double *A, int LDA, const int *IPIV, double *WORK, int LWORK, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_dgetri( CblasColMajor, N, A, LDA, IPIV );
@@ -518,7 +522,7 @@ inline void Lapack<double>::getri( int N, double *A, int LDA, const int *IPIV, d
 }
 #undef dtrsm
 template <>
-inline void Lapack<double>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, double ALPHA,
+void Lapack<double>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, double ALPHA,
     const double *A, int LDA, double *B, int LDB )
 {
 #ifdef USE_ATLAS
@@ -543,7 +547,7 @@ inline void Lapack<double>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, i
 }
 #undef dlamch
 template <>
-inline double Lapack<double>::lamch( char cmach )
+double Lapack<double>::lamch( char cmach )
 {
 #ifdef USE_ATLAS
     return clapack_dlamch( cmach );
@@ -557,5 +561,3 @@ inline double Lapack<double>::lamch( char cmach )
     return FORTRAN_WRAPPER(::dlamch )( &cmach );
 #endif
 }
-
-#endif
