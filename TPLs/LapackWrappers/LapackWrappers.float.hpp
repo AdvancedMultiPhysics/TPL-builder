@@ -9,28 +9,45 @@
 // Define macro to handle name mangling
 #ifndef FORTRAN_WRAPPER
 #if defined( USE_ACML )
-#define FORTRAN_WRAPPER( x ) x##_
+    #define FORTRAN_WRAPPER( x ) x##_
 #elif defined( _WIN32 ) || defined( __hpux ) || defined( USE_MKL )
-#define FORTRAN_WRAPPER( x ) x
+    #define FORTRAN_WRAPPER( x ) x
 #elif defined( USE_VECLIB )
-#define FORTRAN_WRAPPER( x ) x##_
-inline CBLAS_SIDE SIDE2( char SIDE ) { return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight; }
-inline CBLAS_UPLO UPLO2( char UPLO ) { return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower; }
-inline CBLAS_DIAG DIAG2( char DIAG ) { return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit; }
-inline CBLAS_TRANSPOSE TRANS2( char TRANS )
-{
-    CBLAS_TRANSPOSE ans = CblasNoTrans;
-    if ( TRANS == 'N' || TRANS == 'n' ) {
-        ans = CblasNoTrans;
-    } else if ( TRANS == 'T' || TRANS == 't' ) {
-        ans = CblasTrans;
-    } else if ( TRANS == 'C' || TRANS == 'c' ) {
-        ans = CblasConjTrans;
+    #define FORTRAN_WRAPPER( x ) x##_
+    inline CBLAS_SIDE SIDE2( char SIDE ) { return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight; }
+    inline CBLAS_UPLO UPLO2( char UPLO ) { return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower; }
+    inline CBLAS_DIAG DIAG2( char DIAG ) { return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit; }
+    inline CBLAS_TRANSPOSE TRANS2( char TRANS )
+    {
+        CBLAS_TRANSPOSE ans = CblasNoTrans;
+        if ( TRANS == 'N' || TRANS == 'n' ) {
+            ans = CblasNoTrans;
+        } else if ( TRANS == 'T' || TRANS == 't' ) {
+            ans = CblasTrans;
+        } else if ( TRANS == 'C' || TRANS == 'c' ) {
+            ans = CblasConjTrans;
+        }
+        return ans;
     }
-    return ans;
-}
+#elif defined( USE_OPENBLAS )
+    #define FORTRAN_WRAPPER( x ) x##_
+    inline CBLAS_SIDE SIDE2( char SIDE ) { return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight; }
+    inline CBLAS_UPLO UPLO2( char UPLO ) { return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower; }
+    inline CBLAS_DIAG DIAG2( char DIAG ) { return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit; }
+    inline CBLAS_TRANSPOSE TRANS2( char TRANS )
+    {
+        CBLAS_TRANSPOSE ans = CblasNoTrans;
+        if ( TRANS == 'N' || TRANS == 'n' ) {
+            ans = CblasNoTrans;
+        } else if ( TRANS == 'T' || TRANS == 't' ) {
+            ans = CblasTrans;
+        } else if ( TRANS == 'C' || TRANS == 'c' ) {
+            ans = CblasConjTrans;
+        }
+        return ans;
+    }
 #else
-#define FORTRAN_WRAPPER( x ) x##_
+    #define FORTRAN_WRAPPER( x ) x##_
 #endif
 #endif
 
@@ -43,6 +60,8 @@ inline void Lapack<float>::copy( int N, const float *DX, int INCX, float *DY, in
 #ifdef USE_ATLAS
     cblas_scopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_VECLIB )
+    cblas_scopy( N, DX, INCX, DY, INCY );
+#elif defined( USE_OPENBLAS )
     cblas_scopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
@@ -60,6 +79,8 @@ inline void Lapack<float>::swap( int N, float *DX, int INCX, float *DY, int INCY
     cblas_sswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_VECLIB )
     cblas_sswap( N, DX, INCX, DY, INCY );
+#elif defined( USE_OPENBLAS )
+    cblas_sswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
     FORTRAN_WRAPPER(::sswap )( &Nl, DX, &INCXl, DY, &INCYl );
@@ -74,6 +95,8 @@ inline void Lapack<float>::scal( int N, float DA, float *DX, int INCX )
 #ifdef USE_ATLAS
     cblas_sscal( N, DA, DX, INCX );
 #elif defined( USE_VECLIB )
+    cblas_sscal( N, DA, DX, INCX );
+#elif defined( USE_OPENBLAS )
     cblas_sscal( N, DA, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
@@ -90,6 +113,8 @@ inline float Lapack<float>::nrm2( int N, const float *DX, int INCX )
     return cblas_snrm2( N, DX, INCX );
 #elif defined( USE_VECLIB )
     return cblas_snrm2( N, DX, INCX );
+#elif defined( USE_OPENBLAS )
+    return cblas_snrm2( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER(::snrm2 )( &Np, (float *) DX, &INCXp );
@@ -105,6 +130,8 @@ inline int Lapack<float>::iamax( int N, const float *DX, int INCX )
     return cblas_isamax( N, DX, INCX ) - 1;
 #elif defined( USE_VECLIB )
     return cblas_isamax( N, DX, INCX ) - 1;
+#elif defined( USE_OPENBLAS )
+    return cblas_isamax( N, DX, INCX ) - 1;
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER(::isamax )( &Np, (float *) DX, &INCXp ) - 1;
@@ -119,6 +146,8 @@ inline void Lapack<float>::axpy( int N, float DA, const float *DX, int INCX, flo
 #ifdef USE_ATLAS
     cblas_saxpy( N, DA, DX, INCX, DY, INCY );
 #elif defined( USE_VECLIB )
+    cblas_saxpy( N, DA, DX, INCX, DY, INCY );
+#elif defined( USE_OPENBLAS )
     cblas_saxpy( N, DA, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
@@ -138,6 +167,8 @@ inline void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const fl
     // FORTRAN_WRAPPER(::sgemv)(&TRANS,&M,&N,&ALPHA,(float*)A,&LDA,(float*)DX,&INCX,&BETA,DY,&INCY,1);
     ::sgemv( TRANS, M, N, ALPHA, (float *) A, LDA, (float *) DX, INCX, BETA, DY, INCY );
 #elif defined( USE_VECLIB )
+    cblas_sgemv( CblasColMajor, TRANS2( TRANS ), M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
+#elif defined( USE_OPENBLAS )
     cblas_sgemv( CblasColMajor, TRANS2( TRANS ), M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, INCXp = INCX, INCYp = INCY;
@@ -162,6 +193,8 @@ inline void Lapack<float>::gemm( char TRANSA, char TRANSB, int M, int N, int K, 
 //::sgemm(TRANSA,TRANSA,M,N,K,ALPHA,(float*)A,LDA,(float*)B,LDB,BETA,C,LDC);
 #elif defined( USE_VECLIB )
     cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC );
+#elif defined( USE_OPENBLAS )
+    cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, Kp = K, LDAp = LDA, LDBp = LDB, LDCp = LDC;
     FORTRAN_WRAPPER(::sgemm )
@@ -179,6 +212,8 @@ inline float Lapack<float>::asum( int N, const float *DX, int INCX )
     return cblas_sasum( N, DX, INCX );
 #elif defined( USE_VECLIB )
     return cblas_sasum( N, DX, INCX );
+#elif defined( USE_OPENBLAS )
+    return cblas_sasum( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER(::sasum )( &Np, (float *) DX, &INCXp );
@@ -193,6 +228,8 @@ inline float Lapack<float>::dot( int N, const float *DX, int INCX, const float *
 #ifdef USE_ATLAS
     return cblas_sdot( N, DX, INCX, DY, INCY );
 #elif defined( USE_VECLIB )
+    return cblas_sdot( N, DX, INCX, DY, INCY );
+#elif defined( USE_OPENBLAS )
     return cblas_sdot( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
@@ -210,6 +247,8 @@ inline void Lapack<float>::ger(
     cblas_sger( N, M, alpha, x, INCX, y, INCY, A, LDA );
 #elif defined( USE_VECLIB )
     cblas_sger( CblasColMajor, N, M, alpha, x, INCX, y, INCY, A, LDA );
+#elif defined( USE_OPENBLAS )
+    cblas_sger( CblasColMajor, N, M, alpha, x, INCX, y, INCY, A, LDA );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, INCXp = INCX, INCYp = INCY, LDAp = LDA;
     FORTRAN_WRAPPER(::sger )
@@ -225,6 +264,8 @@ inline void Lapack<float>::gesv( int N, int NRHS, float *A, int LDA, int *IPIV, 
 #ifdef USE_ATLAS
     INFO = clapack_sgesv( CblasColMajor, N, NRHS, A, LDA, IPIV, B, LDB );
 #elif defined( USE_VECLIB )
+    sgesv_( &N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO );
+#elif defined( USE_OPENBLAS )
     sgesv_( &N, &NRHS, A, &LDA, IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
@@ -247,6 +288,8 @@ inline void Lapack<float>::gtsv( int N, int NRHS, float *DL, float *D, float *DU
     throw std::logic_error( "ATLAS does not support sgtsv" );
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::sgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
+#elif defined( USE_OPENBLAS )
+    FORTRAN_WRAPPER(::sgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t N2 = N, NRHS2 = NRHS, LDB2 = LDB, INFOp;
     FORTRAN_WRAPPER(::sgtsv )( &N2, &NRHS2, DL, D, DU, B, &LDB2, &INFOp );
@@ -263,6 +306,8 @@ inline void Lapack<float>::gbsv(
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support sgbsv" );
 #elif defined( USE_VECLIB )
+    FORTRAN_WRAPPER(::sgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
+#elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER(::sgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
@@ -285,6 +330,8 @@ inline void Lapack<float>::getrf( int M, int N, float *A, int LDA, int *IPIV, in
     INFO = clapack_sgetrf( CblasColMajor, M, N, A, LDA, IPIV );
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::sgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
+#elif defined( USE_OPENBLAS )
+    FORTRAN_WRAPPER(::sgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, LDAp = LDA, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
@@ -306,6 +353,8 @@ inline void Lapack<float>::gttrf( int N, float *DL, float *D, float *DU, float *
     throw std::logic_error( "ATLAS does not support sgttrf" );
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::sgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
+#elif defined( USE_OPENBLAS )
+    FORTRAN_WRAPPER(::sgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np     = N, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
@@ -326,6 +375,8 @@ inline void Lapack<float>::gbtrf( int M, int N, int KL, int KU, float *AB, int L
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support sgbtrf" );
 #elif defined( USE_VECLIB )
+    FORTRAN_WRAPPER(::sgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
+#elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER(::sgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, KLp = KL, KUp = KU, LDABp = LDAB, INFOp;
@@ -356,6 +407,9 @@ inline void Lapack<float>::getrs(
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::sgetrs )
     ( &TRANS, &N, &NRHS, (float *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
+#elif defined( USE_OPENBLAS )
+    FORTRAN_WRAPPER(::sgetrs )
+    ( &TRANS, &N, &NRHS, (float *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
@@ -380,6 +434,9 @@ inline void Lapack<float>::gttrs( char TRANS, int N, int NRHS, const float *DL, 
 #elif defined( USE_ACML )
     ::sgttrs( TRANS, N, NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B, LDB, &INFO );
 #elif defined( USE_VECLIB )
+    FORTRAN_WRAPPER(::sgttrs )
+    ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B, &LDB, &INFO );
+#elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER(::sgttrs )
     ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
@@ -409,6 +466,9 @@ inline void Lapack<float>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, c
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::sgbtrs )
     ( &TRANS, &N, &KL, &KU, &NRHS, (float *) AB, &LDAB, (int *) IPIV, B, &LDB, &INFO );
+#elif defined( USE_OPENBLAS )
+    FORTRAN_WRAPPER(::sgbtrs )
+    ( &TRANS, &N, &KL, &KU, &NRHS, (float *) AB, &LDAB, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
@@ -433,6 +493,8 @@ inline void Lapack<float>::getri( int N, float *A, int LDA, const int *IPIV, flo
 #elif defined( USE_ACML )
     ::sgetri_( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
 #elif defined( USE_VECLIB )
+    FORTRAN_WRAPPER(::sgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
+#elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER(::sgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, LDAp = LDA, LWORKp = LWORK, INFOp;
@@ -460,6 +522,9 @@ inline void Lapack<float>::trsm(
 #elif defined( USE_VECLIB )
     cblas_strsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N, ALPHA, (float *) A,
         LDA, B, LDB );
+#elif defined( USE_OPENBLAS )
+    cblas_strsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N, ALPHA, (float *) A,
+        LDA, B, LDB );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, LDBp = LDB;
     FORTRAN_WRAPPER(::strsm )
@@ -478,6 +543,8 @@ inline float Lapack<float>::lamch( char cmach )
 #elif defined( USE_ACML )
     return ::slamch( cmach );
 #elif defined( USE_VECLIB )
+    return FORTRAN_WRAPPER(::slamch )( &cmach );
+#elif defined( USE_OPENBLAS )
     return FORTRAN_WRAPPER(::slamch )( &cmach );
 #else
     return FORTRAN_WRAPPER(::slamch )( &cmach );

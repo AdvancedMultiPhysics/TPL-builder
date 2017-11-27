@@ -76,7 +76,11 @@ ELSE()
     IF ( (NOT BLAS_FOUND) OR (NOT LAPACK_FOUND) )
         CHECK_VECLIB( "${LAPACK_INSTALL_DIR}" "${LAPACK_OUT}" )
     ENDIF()
-    # Check if we are including veclib
+    # Check if we are including openblas
+    IF ( (NOT BLAS_FOUND) OR (NOT LAPACK_FOUND) )
+        CHECK_OPENBLAS( "${LAPACK_INSTALL_DIR}" "${LAPACK_OUT}" )
+    ENDIF()
+    # Check if we are including matlab's lapack
     IF ( (NOT BLAS_FOUND) OR (NOT LAPACK_FOUND) )
         CHECK_MATLAB_LAPACK( "${LAPACK_INSTALL_DIR}" "${LAPACK_OUT}" )
     ENDIF()
