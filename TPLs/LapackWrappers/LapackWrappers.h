@@ -7,7 +7,6 @@
 
 /*! \class Lapack
     \brief A wrapper class for BLAS/LAPACK routines
-
     \details  This class is a wrapper class to provide a common interface to
       BLAS and LAPACK routines.
 */
@@ -616,6 +615,7 @@ public:
      */
     static void random( int N, TYPE *X );
 
+
     /*!
      * \brief   Run a test for a given LAPACK/BLAS routine
      * \details  This will run a simple test for a given LAPACK/BLAS routine.
@@ -628,6 +628,7 @@ public:
      */
     static int run_test( const std::string& routine, int N, TYPE &error );
 
+    //! List all of the availible tests to run
     static std::vector<std::string> list_all_tests( );
 
     /*!
