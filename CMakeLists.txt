@@ -119,6 +119,10 @@ ENDIF()
 STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 
 
+# Add the StackTrace
+SET( TPL_LIST "STACKTRACE;${TPL_LIST}" )
+
+
 # Add the lapack wrappers if LAPACK
 IF ( ";${TPL_LIST};" MATCHES ";LAPACK;" )
     STRING( REPLACE ";LAPACK;" ";LAPACK;LAPACK_WRAPPERS;" TPL_LIST "?;${TPL_LIST};?" )
