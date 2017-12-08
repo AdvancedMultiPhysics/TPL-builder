@@ -221,7 +221,7 @@ IF ( ENABLE_TESTS )
             BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
             INSTALL_COMMAND     make install
             TEST_AFTER_INSTALL  ${CMAKE_COMMAND} -E echo "Installing"
-            TEST_COMMAND        ctest -VV
+            TEST_COMMAND        ctest -j ${PROCS_INSTALL} --output-on-failure
             DEPENDS             ${TPL_LIST}
             LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
         )

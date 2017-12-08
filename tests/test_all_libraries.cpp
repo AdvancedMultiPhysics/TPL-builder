@@ -10,9 +10,13 @@
 #include "TPLs.h"
 #include "TPL_helpers.h"
 
+
 // Include appropriate TPL headers
 #ifdef USE_BOOST
     #include "boost/shared_ptr.hpp"
+#endif
+#ifdef USE_HDF5
+    #include "hdf5.h"
 #endif
 #ifdef USE_LAPACK_WRAPPERS
     #include "LapackWrappers.h"
@@ -20,10 +24,9 @@
 #ifdef USE_PETSC
     #include "petsc.h"
 #endif
-#ifdef USE_HDF5
-    #include "hdf5.h"
+#ifdef USE_STACKTRACE
+    #include "StackTrace/StackTrace.h"
 #endif
-
 
 
 
@@ -57,6 +60,36 @@ template<> bool test<TPL_Enum::BOOST>( )
 #endif
 
 
+// Test HDF5
+#ifdef USE_HDF5
+template<> bool test<TPL_Enum::HDF5>( )
+{
+    hid_t H5Fcreate( const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id );
+    return true;
+}
+#endif
+
+
+// Test HYPRE
+#ifdef USE_HYPRE
+template<> bool test<TPL_Enum::HYPRE>( )
+{
+    std::cout << "   -- No tests defined for hypre\n";
+    return true;
+}
+#endif
+
+
+// Test KOKKOS
+#ifdef USE_KOKKOS
+template<> bool test<TPL_Enum::KOKKOS>( )
+{
+    std::cout << "   -- No tests defined for kokkos\n";
+    return true;
+}
+#endif
+
+
 // Test LAPACK
 #ifdef USE_LAPACK
 template<> bool test<TPL_Enum::LAPACK>( )
@@ -83,21 +116,31 @@ template<> bool test<TPL_Enum::LAPACK_WRAPPERS>( )
 #endif
 
 
-// Test ZLIB
-#ifdef USE_ZLIB
-template<> bool test<TPL_Enum::ZLIB>( )
+// Test LIBMESH
+#ifdef USE_LIBMESH
+template<> bool test<TPL_Enum::LIBMESH>( )
 {
-    std::cout << "   -- No tests defined for zlib\n";
+    std::cout << "   -- No tests defined for libmesh\n";
     return true;
 }
 #endif
 
 
-// Test HDF5
-#ifdef USE_HDF5
-template<> bool test<TPL_Enum::HDF5>( )
+// Test NETCDF
+#ifdef USE_NETCDF
+template<> bool test<TPL_Enum::NETCDF>( )
 {
-    hid_t H5Fcreate( const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id );
+    std::cout << "   -- No tests defined for netcdf\n";
+    return true;
+}
+#endif
+
+
+// Test OGRE
+#ifdef USE_OGRE
+template<> bool test<TPL_Enum::OGRE>( )
+{
+    std::cout << "   -- No tests defined for ogre\n";
     return true;
 }
 #endif
@@ -119,6 +162,16 @@ template<> bool test<TPL_Enum::PETSC>( )
 #endif
 
 
+// Test SAMRAI
+#ifdef USE_SAMRAI
+template<> bool test<TPL_Enum::SAMRAI>( )
+{
+    std::cout << "   -- No tests defined for samrai\n";
+    return true;
+}
+#endif
+
+
 // Test SILO
 #ifdef USE_SILO
 template<> bool test<TPL_Enum::SILO>( )
@@ -129,42 +182,11 @@ template<> bool test<TPL_Enum::SILO>( )
 #endif
 
 
-// Test NETCDF
-#ifdef USE_NETCDF
-template<> bool test<TPL_Enum::NETCDF>( )
+// Test STACKTRACE
+#ifdef USE_STACKTRACE
+template<> bool test<TPL_Enum::STACKTRACE>( )
 {
-    std::cout << "   -- No tests defined for netcdf\n";
-    return true;
-}
-#endif
-
-
-// Test HYPRE
-#ifdef USE_HYPRE
-template<> bool test<TPL_Enum::HYPRE>( )
-{
-    std::cout << "   -- No tests defined for hypre\n";
-    return true;
-}
-#endif
-
-
-// Test LIBMESH
-#ifdef USE_LIBMESH
-template<> bool test<TPL_Enum::LIBMESH>( )
-{
-    std::cout << "   -- No tests defined for libmesh\n";
-    return true;
-}
-#endif
-
-
-// Test TRILINOS
-#ifdef USE_TRILINOS
-template<> bool test<TPL_Enum::TRILINOS>( )
-{
-    std::cout << "   -- No tests defined for trilinos\n";
-    return true;
+    return !StackTrace::getCallStack().empty();
 }
 #endif
 
@@ -189,31 +211,21 @@ template<> bool test<TPL_Enum::TIMER>( )
 #endif
 
 
-// Test SAMRAI
-#ifdef USE_SAMRAI
-template<> bool test<TPL_Enum::SAMRAI>( )
+// Test TRILINOS
+#ifdef USE_TRILINOS
+template<> bool test<TPL_Enum::TRILINOS>( )
 {
-    std::cout << "   -- No tests defined for samrai\n";
+    std::cout << "   -- No tests defined for trilinos\n";
     return true;
 }
 #endif
 
 
-// Test KOKKOS
-#ifdef USE_KOKKOS
-template<> bool test<TPL_Enum::KOKKOS>( )
+// Test ZLIB
+#ifdef USE_ZLIB
+template<> bool test<TPL_Enum::ZLIB>( )
 {
-    std::cout << "   -- No tests defined for kokkos\n";
-    return true;
-}
-#endif
-
-
-// Test OGRE
-#ifdef USE_OGRE
-template<> bool test<TPL_Enum::OGRE>( )
-{
-    std::cout << "   -- No tests defined for ogre\n";
+    std::cout << "   -- No tests defined for zlib\n";
     return true;
 }
 #endif
@@ -259,47 +271,50 @@ int main()
         } else if ( tpl == "LAPACK_WRAPPERS" ) {
             // Test LAPACK_WRAPPERS
             pass = test<TPL_Enum::LAPACK_WRAPPERS>( );
-        } else if ( tpl == "ZLIB" ) {
-            // Test ZLIB
-            pass = test<TPL_Enum::ZLIB>( );
         } else if ( tpl == "HDF5" ) {
             // Test HDF5
             pass = test<TPL_Enum::HDF5>( );
-        } else if ( tpl == "PETSC" ) {
-            // Test PETSC
-            pass = test<TPL_Enum::PETSC>( );
-        } else if ( tpl == "SILO" ) {
-            // Test SILO
-            pass = test<TPL_Enum::SILO>( );
-        } else if ( tpl == "NETCDF" ) {
-            // Test NETCDF
-            pass = test<TPL_Enum::NETCDF>( );
         } else if ( tpl == "HYPRE" ) {
             // Test HYPRE
             pass = test<TPL_Enum::HYPRE>( );
+        } else if ( tpl == "KOKKOS" ) {
+            // Test KOKKOS
+            pass = test<TPL_Enum::KOKKOS>( );
         } else if ( tpl == "LIBMESH" ) {
             // Test LIBMESH
             pass = test<TPL_Enum::LIBMESH>( );
-        } else if ( tpl == "TRILINOS" ) {
-            // Test TRILINOS
-            pass = test<TPL_Enum::TRILINOS>( );
+        } else if ( tpl == "MATLAB" ) {
+            // No MATLAB linkin tests
+        } else if ( tpl == "NETCDF" ) {
+            // Test NETCDF
+            pass = test<TPL_Enum::NETCDF>( );
+        } else if ( tpl == "OGRE" ) {
+            // Test OGRE
+            pass = test<TPL_Enum::OGRE>( );
+        } else if ( tpl == "PETSC" ) {
+            // Test PETSC
+            pass = test<TPL_Enum::PETSC>( );
+        } else if ( tpl == "SAMRAI" ) {
+            // Test SAMRAI
+            pass = test<TPL_Enum::SAMRAI>( );
+        } else if ( tpl == "SILO" ) {
+            // Test SILO
+            pass = test<TPL_Enum::SILO>( );
+        } else if ( tpl == "STACKTRACE" ) {
+            // Test STACKTRACE
+            pass = test<TPL_Enum::STACKTRACE>( );
         } else if ( tpl == "SUNDIALS" ) {
             // Test SUNDIALS
             pass = test<TPL_Enum::SUNDIALS>( );
         } else if ( tpl == "TIMER" ) {
             // Test TIMER
             pass = test<TPL_Enum::TIMER>( );
-        } else if ( tpl == "SAMRAI" ) {
-            // Test SAMRAI
-            pass = test<TPL_Enum::SAMRAI>( );
-        } else if ( tpl == "KOKKOS" ) {
-            // Test KOKKOS
-            pass = test<TPL_Enum::KOKKOS>( );
-        } else if ( tpl == "OGRE" ) {
-            // Test OGRE
-            pass = test<TPL_Enum::OGRE>( );
-        } else if ( tpl == "MATLAB" ) {
-            // No MATLAB linkin tests
+        } else if ( tpl == "TRILINOS" ) {
+            // Test TRILINOS
+            pass = test<TPL_Enum::TRILINOS>( );
+        } else if ( tpl == "ZLIB" ) {
+            // Test ZLIB
+            pass = test<TPL_Enum::ZLIB>( );
         } else {
             // TPL not found
             std::cerr << tpl << " not programmed\n";
