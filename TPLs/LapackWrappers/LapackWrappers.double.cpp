@@ -8,45 +8,63 @@
 // Define macro to handle name mangling
 #ifndef FORTRAN_WRAPPER
 #if defined( USE_ACML )
-    #define FORTRAN_WRAPPER( x ) x##_
+#define FORTRAN_WRAPPER( x ) x##_
 #elif defined( _WIN32 ) || defined( __hpux ) || defined( USE_MKL )
-    #define FORTRAN_WRAPPER( x ) x
+#define FORTRAN_WRAPPER( x ) x
 #elif defined( USE_VECLIB )
-    #define FORTRAN_WRAPPER( x ) x##_
-    inline CBLAS_SIDE SIDE2( char SIDE ) { return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight; }
-    inline CBLAS_UPLO UPLO2( char UPLO ) { return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower; }
-    inline CBLAS_DIAG DIAG2( char DIAG ) { return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit; }
-    inline CBLAS_TRANSPOSE TRANS2( char TRANS )
-    {
-        CBLAS_TRANSPOSE ans = CblasNoTrans;
-        if ( TRANS == 'N' || TRANS == 'n' ) {
-            ans = CblasNoTrans;
-        } else if ( TRANS == 'T' || TRANS == 't' ) {
-            ans = CblasTrans;
-        } else if ( TRANS == 'C' || TRANS == 'c' ) {
-            ans = CblasConjTrans;
-        }
-        return ans;
+#define FORTRAN_WRAPPER( x ) x##_
+inline CBLAS_SIDE SIDE2( char SIDE )
+{
+    return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight;
+}
+inline CBLAS_UPLO UPLO2( char UPLO )
+{
+    return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower;
+}
+inline CBLAS_DIAG DIAG2( char DIAG )
+{
+    return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit;
+}
+inline CBLAS_TRANSPOSE TRANS2( char TRANS )
+{
+    CBLAS_TRANSPOSE ans = CblasNoTrans;
+    if ( TRANS == 'N' || TRANS == 'n' ) {
+        ans = CblasNoTrans;
+    } else if ( TRANS == 'T' || TRANS == 't' ) {
+        ans = CblasTrans;
+    } else if ( TRANS == 'C' || TRANS == 'c' ) {
+        ans = CblasConjTrans;
     }
+    return ans;
+}
 #elif defined( USE_OPENBLAS )
-    #define FORTRAN_WRAPPER( x ) x##_
-    inline CBLAS_SIDE SIDE2( char SIDE ) { return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight; }
-    inline CBLAS_UPLO UPLO2( char UPLO ) { return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower; }
-    inline CBLAS_DIAG DIAG2( char DIAG ) { return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit; }
-    inline CBLAS_TRANSPOSE TRANS2( char TRANS )
-    {
-        CBLAS_TRANSPOSE ans = CblasNoTrans;
-        if ( TRANS == 'N' || TRANS == 'n' ) {
-            ans = CblasNoTrans;
-        } else if ( TRANS == 'T' || TRANS == 't' ) {
-            ans = CblasTrans;
-        } else if ( TRANS == 'C' || TRANS == 'c' ) {
-            ans = CblasConjTrans;
-        }
-        return ans;
+#define FORTRAN_WRAPPER( x ) x##_
+inline CBLAS_SIDE SIDE2( char SIDE )
+{
+    return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight;
+}
+inline CBLAS_UPLO UPLO2( char UPLO )
+{
+    return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower;
+}
+inline CBLAS_DIAG DIAG2( char DIAG )
+{
+    return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit;
+}
+inline CBLAS_TRANSPOSE TRANS2( char TRANS )
+{
+    CBLAS_TRANSPOSE ans = CblasNoTrans;
+    if ( TRANS == 'N' || TRANS == 'n' ) {
+        ans = CblasNoTrans;
+    } else if ( TRANS == 'T' || TRANS == 't' ) {
+        ans = CblasTrans;
+    } else if ( TRANS == 'C' || TRANS == 'c' ) {
+        ans = CblasConjTrans;
     }
+    return ans;
+}
 #else
-    #define FORTRAN_WRAPPER( x ) x##_
+#define FORTRAN_WRAPPER( x ) x##_
 #endif
 #endif
 
@@ -57,7 +75,7 @@ static std::mutex d_mutex;
 
 // Define the member functions
 #undef dcopy
-template <>
+template<>
 void Lapack<double>::copy( int N, const double *DX, int INCX, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -75,7 +93,7 @@ void Lapack<double>::copy( int N, const double *DX, int INCX, double *DY, int IN
 }
 // Define the member functions
 #undef dswap
-template <>
+template<>
 void Lapack<double>::swap( int N, double *DX, int INCX, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -92,7 +110,7 @@ void Lapack<double>::swap( int N, double *DX, int INCX, double *DY, int INCY )
 #endif
 }
 #undef dscal
-template <>
+template<>
 void Lapack<double>::scal( int N, double DA, double *DX, int INCX )
 {
 #ifdef USE_ATLAS
@@ -109,7 +127,7 @@ void Lapack<double>::scal( int N, double DA, double *DX, int INCX )
 #endif
 }
 #undef dnrm2
-template <>
+template<>
 double Lapack<double>::nrm2( int N, const double *DX, int INCX )
 {
 #ifdef USE_ATLAS
@@ -126,7 +144,7 @@ double Lapack<double>::nrm2( int N, const double *DX, int INCX )
 #endif
 }
 #undef idamax
-template <>
+template<>
 int Lapack<double>::iamax( int N, const double *DX, int INCX )
 {
 #ifdef USE_ATLAS
@@ -143,7 +161,7 @@ int Lapack<double>::iamax( int N, const double *DX, int INCX )
 #endif
 }
 #undef daxpy
-template <>
+template<>
 void Lapack<double>::axpy( int N, double DA, const double *DX, int INCX, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -160,12 +178,13 @@ void Lapack<double>::axpy( int N, double DA, const double *DX, int INCX, double 
 #endif
 }
 #undef dgemv
-template <>
-void Lapack<double>::gemv( char TRANS, int M, int N, double ALPHA, const double *A, int LDA, const double *DX,
-    int INCX, double BETA, double *DY, int INCY )
+template<>
+void Lapack<double>::gemv( char TRANS, int M, int N, double ALPHA, const double *A, int LDA,
+    const double *DX, int INCX, double BETA, double *DY, int INCY )
 {
 #ifdef USE_ATLAS
-    cblas_dgemv( CblasColMajor, (CBLAS_TRANSPOSE) TRANS, M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
+    cblas_dgemv(
+        CblasColMajor, (CBLAS_TRANSPOSE) TRANS, M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
 #elif defined( USE_ACML )
     // FORTRAN_WRAPPER(::dgemv)(&TRANS,&M,&N,&ALPHA,(double*)A,&LDA,(double*)DX,&INCX,&BETA,DY,&INCY,1);
     ::dgemv( TRANS, M, N, ALPHA, (double *) A, LDA, (double *) DX, INCX, BETA, DY, INCY );
@@ -183,32 +202,37 @@ void Lapack<double>::gemv( char TRANS, int M, int N, double ALPHA, const double 
 #endif
 }
 #undef dgemm
-template <>
-void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K, double ALPHA, const double *A, int LDA,
-    const double *B, int LDB, double BETA, double *C, int LDC )
+template<>
+void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K, double ALPHA,
+    const double *A, int LDA, const double *B, int LDB, double BETA, double *C, int LDC )
 {
 #ifdef USE_ATLAS
-    cblas_dgemm( CblasColMajor, (CBLAS_TRANSPOSE) TRANSA, (CBLAS_TRANSPOSE) TRANSB, M, N, K, ALPHA, A, LDA, B, LDB,
-        BETA, C, LDC );
+    cblas_dgemm( CblasColMajor, (CBLAS_TRANSPOSE) TRANSA, (CBLAS_TRANSPOSE) TRANSB, M, N, K, ALPHA,
+        A, LDA, B, LDB, BETA, C, LDC );
 #elif defined( USE_ACML )
     FORTRAN_WRAPPER(::dgemm )
-    ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (double *) A, &LDA, (double *) B, &LDB, &BETA, C, &LDC, 1, 1 );
+    ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (double *) A, &LDA, (double *) B, &LDB, &BETA, C, &LDC,
+        1, 1 );
 //::dgemm(TRANSA,TRANSA,M,N,K,ALPHA,(double*)A,LDA,(double*)B,LDB,BETA,C,LDC);
 #elif defined( USE_VECLIB )
-    cblas_dgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC );
+    cblas_dgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB,
+        BETA, C, LDC );
 #elif defined( USE_OPENBLAS )
-    cblas_dgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC );
+    cblas_dgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB,
+        BETA, C, LDC );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, Kp = K, LDAp = LDA, LDBp = LDB, LDCp = LDC;
     FORTRAN_WRAPPER(::dgemm )
-    ( &TRANSA, &TRANSB, &Mp, &Np, &Kp, &ALPHA, (double *) A, &LDAp, (double *) B, &LDBp, &BETA, C, &LDCp );
+    ( &TRANSA, &TRANSB, &Mp, &Np, &Kp, &ALPHA, (double *) A, &LDAp, (double *) B, &LDBp, &BETA, C,
+        &LDCp );
 #else
     FORTRAN_WRAPPER(::dgemm )
-    ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (double *) A, &LDA, (double *) B, &LDB, &BETA, C, &LDC );
+    ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (double *) A, &LDA, (double *) B, &LDB, &BETA, C,
+        &LDC );
 #endif
 }
 #undef dasum
-template <>
+template<>
 double Lapack<double>::asum( int N, const double *DX, int INCX )
 {
     if ( N == 0 )
@@ -227,7 +251,7 @@ double Lapack<double>::asum( int N, const double *DX, int INCX )
 #endif
 }
 #undef ddot
-template <>
+template<>
 double Lapack<double>::dot( int N, const double *DX, int INCX, const double *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -244,9 +268,9 @@ double Lapack<double>::dot( int N, const double *DX, int INCX, const double *DY,
 #endif
 }
 #undef dger
-template <>
-void Lapack<double>::ger(
-    int N, int M, double alpha, const double *x, int INCX, const double *y, int INCY, double *A, int LDA )
+template<>
+void Lapack<double>::ger( int N, int M, double alpha, const double *x, int INCX, const double *y,
+    int INCY, double *A, int LDA )
 {
 #ifdef USE_ATLAS
     cblas_dger( N, M, alpha, x, INCX, y, INCY, A, LDA );
@@ -263,8 +287,9 @@ void Lapack<double>::ger(
 #endif
 }
 #undef dgesv
-template <>
-void Lapack<double>::gesv( int N, int NRHS, double *A, int LDA, int *IPIV, double *B, int LDB, int &INFO )
+template<>
+void Lapack<double>::gesv(
+    int N, int NRHS, double *A, int LDA, int *IPIV, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_dgesv( CblasColMajor, N, NRHS, A, LDA, IPIV, B, LDB );
@@ -276,9 +301,8 @@ void Lapack<double>::gesv( int N, int NRHS, double *A, int LDA, int *IPIV, doubl
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     FORTRAN_WRAPPER(::dgesv )( &Np, &NRHSp, A, &LDAp, IPIVp, B, &LDBp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
@@ -286,8 +310,9 @@ void Lapack<double>::gesv( int N, int NRHS, double *A, int LDA, int *IPIV, doubl
 #endif
 }
 #undef dgtsv
-template <>
-void Lapack<double>::gtsv( int N, int NRHS, double *DL, double *D, double *DU, double *B, int LDB, int &INFO )
+template<>
+void Lapack<double>::gtsv(
+    int N, int NRHS, double *DL, double *D, double *DU, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgtsv" );
@@ -304,9 +329,9 @@ void Lapack<double>::gtsv( int N, int NRHS, double *DL, double *D, double *DU, d
 #endif
 }
 #undef dgbsv
-template <>
-void Lapack<double>::gbsv(
-    int N, int KL, int KU, int NRHS, double *AB, int LDAB, int *IPIV, double *B, int LDB, int &INFO )
+template<>
+void Lapack<double>::gbsv( int N, int KL, int KU, int NRHS, double *AB, int LDAB, int *IPIV,
+    double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgbsv" );
@@ -324,9 +349,8 @@ void Lapack<double>::gbsv(
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     FORTRAN_WRAPPER(::dgbsv )( &Np, &KLp, &KUp, &NRHSp, AB, &LDABp, IPIVp, B, &LDBp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
     delete[] IPIVp;
     INFO = static_cast<int>( INFOp );
 #else
@@ -334,7 +358,7 @@ void Lapack<double>::gbsv(
 #endif
 }
 #undef dgetrf
-template <>
+template<>
 void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -347,9 +371,8 @@ void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &IN
     ptrdiff_t Np = N, Mp = M, LDAp = LDA, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     FORTRAN_WRAPPER(::dgetrf )( &Mp, &Np, A, &LDAp, IPIVp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
     delete[] IPIVp;
     INFO             = static_cast<int>( INFOp );
 #else
@@ -357,8 +380,9 @@ void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &IN
 #endif
 }
 #undef dgttrf
-template <>
-void Lapack<double>::gttrf( int N, double *DL, double *D, double *DU, double *DU2, int *IPIV, int &INFO )
+template<>
+void Lapack<double>::gttrf(
+    int N, double *DL, double *D, double *DU, double *DU2, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgttrf" );
@@ -370,9 +394,8 @@ void Lapack<double>::gttrf( int N, double *DL, double *D, double *DU, double *DU
     ptrdiff_t Np     = N, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     FORTRAN_WRAPPER(::dgttrf )( &Np, DL, D, DU, DU2, IPIVp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
@@ -380,8 +403,9 @@ void Lapack<double>::gttrf( int N, double *DL, double *D, double *DU, double *DU
 #endif
 }
 #undef dgbtrf
-template <>
-void Lapack<double>::gbtrf( int M, int N, int KL, int KU, double *AB, int LDAB, int *IPIV, int &INFO )
+template<>
+void Lapack<double>::gbtrf(
+    int M, int N, int KL, int KU, double *AB, int LDAB, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgbtrf" );
@@ -393,9 +417,8 @@ void Lapack<double>::gbtrf( int M, int N, int KL, int KU, double *AB, int LDAB, 
     ptrdiff_t Mp = M, Np = N, KLp = KL, KUp = KU, LDABp = LDAB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     FORTRAN_WRAPPER(::dgbtrf )( &Mp, &Np, &KLp, &KUp, AB, &LDABp, IPIVp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
     delete[] IPIVp;
     INFO = static_cast<int>( INFOp );
 #elif defined( USE_ACML )
@@ -407,9 +430,9 @@ void Lapack<double>::gbtrf( int M, int N, int KL, int KU, double *AB, int LDAB, 
 #endif
 }
 #undef dgetrs
-template <>
-void Lapack<double>::getrs(
-    char TRANS, int N, int NRHS, const double *A, int LDA, const int *IPIV, double *B, int LDB, int &INFO )
+template<>
+void Lapack<double>::getrs( char TRANS, int N, int NRHS, const double *A, int LDA, const int *IPIV,
+    double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_dgetrs( CblasColMajor, (CBLAS_TRANSPOSE) TRANS, N, NRHS, A, LDA, IPIV, B, LDB );
@@ -424,9 +447,8 @@ void Lapack<double>::getrs(
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
-    }
     FORTRAN_WRAPPER(::dgetrs )( &TRANS, &Np, &NRHSp, (double *) A, &LDAp, IPIVp, B, &LDBp, &INFOp );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
@@ -436,20 +458,23 @@ void Lapack<double>::getrs(
 #endif
 }
 #undef dgttrs
-template <>
-void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const double *D, const double *DU,
-    const double *DU2, const int *IPIV, double *B, int LDB, int &INFO )
+template<>
+void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const double *D,
+    const double *DU, const double *DU2, const int *IPIV, double *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgttrs" );
 #elif defined( USE_ACML )
-    ::dgttrs( TRANS, N, NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV, B, LDB, &INFO );
+    ::dgttrs( TRANS, N, NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2,
+        (int *) IPIV, B, LDB, &INFO );
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::dgttrs )
-    ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV,
+        B, &LDB, &INFO );
 #elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER(::dgttrs )
-    ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV,
+        B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
@@ -457,16 +482,18 @@ void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const
         IPIVp[i] = IPIV[i];
     }
     FORTRAN_WRAPPER(::dgttrs )
-    ( &TRANS, &Np, &NRHSp, (double *) DL, (double *) D, (double *) DU, (double *) DU2, IPIVp, B, &LDBp, &INFOp );
+    ( &TRANS, &Np, &NRHSp, (double *) DL, (double *) D, (double *) DU, (double *) DU2, IPIVp, B,
+        &LDBp, &INFOp );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER(::dgttrs )
-    ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV,
+        B, &LDB, &INFO );
 #endif
 }
 #undef dgbtrs
-template <>
+template<>
 void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const double *AB, int LDAB,
     const int *IPIV, double *B, int LDB, int &INFO )
 {
@@ -496,8 +523,9 @@ void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const d
 #endif
 }
 #undef dgetri
-template <>
-void Lapack<double>::getri( int N, double *A, int LDA, const int *IPIV, double *WORK, int LWORK, int &INFO )
+template<>
+void Lapack<double>::getri(
+    int N, double *A, int LDA, const int *IPIV, double *WORK, int LWORK, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_dgetri( CblasColMajor, N, A, LDA, IPIV );
@@ -521,21 +549,23 @@ void Lapack<double>::getri( int N, double *A, int LDA, const int *IPIV, double *
 #endif
 }
 #undef dtrsm
-template <>
+template<>
 void Lapack<double>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, double ALPHA,
     const double *A, int LDA, double *B, int LDB )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "dtrsm not implimented for ATLAS" );
 #elif defined( USE_ACML )
-    char SIDE2[2] = { SIDE, 0 }, UPLO2[2] = { UPLO, 0 }, TRANS2[2] = { TRANS, 0 }, DIAG2[2] = { DIAG, 0 };
-    ::dtrsm_( SIDE2, UPLO2, TRANS2, DIAG2, &M, &N, &ALPHA, (double *) A, &LDA, B, &LDB, 1, 1, 1, 1 );
+    char SIDE2[2] = { SIDE, 0 }, UPLO2[2] = { UPLO, 0 }, TRANS2[2] = { TRANS, 0 },
+         DIAG2[2] = { DIAG, 0 };
+    ::dtrsm_(
+        SIDE2, UPLO2, TRANS2, DIAG2, &M, &N, &ALPHA, (double *) A, &LDA, B, &LDB, 1, 1, 1, 1 );
 #elif defined( USE_VECLIB )
-    cblas_dtrsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N, ALPHA, (double *) A,
-        LDA, B, LDB );
+    cblas_dtrsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N,
+        ALPHA, (double *) A, LDA, B, LDB );
 #elif defined( USE_OPENBLAS )
-    cblas_dtrsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N, ALPHA, (double *) A,
-        LDA, B, LDB );
+    cblas_dtrsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N,
+        ALPHA, (double *) A, LDA, B, LDB );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, LDBp = LDB;
     FORTRAN_WRAPPER(::dtrsm )
@@ -546,7 +576,7 @@ void Lapack<double>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, i
 #endif
 }
 #undef dlamch
-template <>
+template<>
 double Lapack<double>::lamch( char cmach )
 {
 #ifdef USE_ATLAS

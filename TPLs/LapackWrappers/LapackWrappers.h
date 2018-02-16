@@ -10,7 +10,7 @@
     \details  This class is a wrapper class to provide a common interface to
       BLAS and LAPACK routines.
 */
-template <typename TYPE>
+template<typename TYPE>
 class Lapack
 {
 public:
@@ -90,7 +90,8 @@ public:
      * @param[in] N         The number of rows of the matrix A.  M >= 0
      * @param[in] M         The number of columns of the matrix A.  N >= 0
      * @param[in] alpha     The scale factor alpha
-     * @param[in] A         The leading m by n part of the array A must contain the matrix of coefficients.
+     * @param[in] A         The leading m by n part of the array A must contain the matrix of
+     * coefficients.
      * @param[in] LDA       LDA specifies the first dimension of A as declared in the
      *                      calling (sub) program. LDA must be at least max( 1, m ).
      * @param[in] x         The source vector
@@ -99,8 +100,8 @@ public:
      * @param[in,out] y     The destination vector
      * @param[in] INCY      The spacing between points in x
      */
-    static void gemv( char TRANS, int M, int N, TYPE alpha, const TYPE *A, int LDA, const TYPE *x, int INCX,
-        TYPE beta, TYPE *y, int INCY );
+    static void gemv( char TRANS, int M, int N, TYPE alpha, const TYPE *A, int LDA, const TYPE *x,
+        int INCX, TYPE beta, TYPE *y, int INCY );
 
     /*!
      * \brief   gemm
@@ -161,8 +162,8 @@ public:
      *                      declared in  the  calling  (sub)  program.   LDC
      *                      must  be  at  least max( 1, m ).  Unchanged on exit.
      */
-    static void gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE alpha, const TYPE *A, int LDA,
-        const TYPE *B, int LDB, TYPE beta, TYPE *C, int LDC );
+    static void gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE alpha, const TYPE *A,
+        int LDA, const TYPE *B, int LDB, TYPE beta, TYPE *C, int LDC );
 
     /*!
      * \brief   asum
@@ -201,8 +202,8 @@ public:
      *                      On exit, the updated matrix.
      * @param[in]  LDA      The leading dimension of the array A.  LDA >= max(1,M).
      */
-    static void ger(
-        int N, int M, TYPE alpha, const TYPE *x, int INCX, const TYPE *y, int INCY, TYPE *A, int LDA );
+    static void ger( int N, int M, TYPE alpha, const TYPE *x, int INCX, const TYPE *y, int INCY,
+        TYPE *A, int LDA );
 
     /*!
      * \brief   gesv
@@ -328,8 +329,8 @@ public:
      *                            has been completed, but the factor U is exactly
      *                            singular, so the solution could not be computed.
      */
-    static void gbsv(
-        int N, int KL, int KU, int NRHS, TYPE *AB, int LDAB, int *IPIV, TYPE *B, int LDB, int &INFO );
+    static void gbsv( int N, int KL, int KU, int NRHS, TYPE *AB, int LDAB, int *IPIV, TYPE *B,
+        int LDB, int &INFO );
 
 
     /*!
@@ -444,8 +445,8 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static void getrs(
-        char TRANS, int N, int NRHS, const TYPE *A, int LDA, const int *IPIV, TYPE *B, int LDB, int &INFO );
+    static void getrs( char TRANS, int N, int NRHS, const TYPE *A, int LDA, const int *IPIV,
+        TYPE *B, int LDB, int &INFO );
 
     /*!
      * \brief   gttrs
@@ -509,8 +510,8 @@ public:
      *                      = 0:  successful exit
      *                      < 0:  if INFO = -i, the i-th argument had an illegal value
      */
-    static void gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const TYPE *AB, int LDAB, const int *IPIV,
-        TYPE *B, int LDB, int &INFO );
+    static void gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const TYPE *AB, int LDAB,
+        const int *IPIV, TYPE *B, int LDB, int &INFO );
 
     /*!
      * \brief   getri
@@ -584,8 +585,8 @@ public:
      * @param[in] LDB       The first dimension of B as declared in the calling (sub) program.
      *                      LDB must be at least max(1,m).
      */
-    static void trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, TYPE ALPHA, const TYPE *A,
-        int LDA, TYPE *B, int LDB );
+    static void trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, TYPE ALPHA,
+        const TYPE *A, int LDA, TYPE *B, int LDB );
 
     /*!
      * \brief   lamch
@@ -626,10 +627,10 @@ public:
      * @param[out] error    The largest error detected
      * @return              The number of failures detected
      */
-    static int run_test( const std::string& routine, int N, TYPE &error );
+    static int run_test( const std::string &routine, int N, TYPE &error );
 
     //! List all of the availible tests to run
-    static std::vector<std::string> list_all_tests( );
+    static std::vector<std::string> list_all_tests();
 
     /*!
      * \brief   Run the basic test suite
@@ -644,7 +645,6 @@ public:
 
     //! Print information about the lapack version/package
     static void print_lapack_version();
-
 };
 
 

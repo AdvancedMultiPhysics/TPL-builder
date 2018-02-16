@@ -8,45 +8,63 @@
 // Define macro to handle name mangling
 #ifndef FORTRAN_WRAPPER
 #if defined( USE_ACML )
-    #define FORTRAN_WRAPPER( x ) x##_
+#define FORTRAN_WRAPPER( x ) x##_
 #elif defined( _WIN32 ) || defined( __hpux ) || defined( USE_MKL )
-    #define FORTRAN_WRAPPER( x ) x
+#define FORTRAN_WRAPPER( x ) x
 #elif defined( USE_VECLIB )
-    #define FORTRAN_WRAPPER( x ) x##_
-    inline CBLAS_SIDE SIDE2( char SIDE ) { return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight; }
-    inline CBLAS_UPLO UPLO2( char UPLO ) { return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower; }
-    inline CBLAS_DIAG DIAG2( char DIAG ) { return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit; }
-    inline CBLAS_TRANSPOSE TRANS2( char TRANS )
-    {
-        CBLAS_TRANSPOSE ans = CblasNoTrans;
-        if ( TRANS == 'N' || TRANS == 'n' ) {
-            ans = CblasNoTrans;
-        } else if ( TRANS == 'T' || TRANS == 't' ) {
-            ans = CblasTrans;
-        } else if ( TRANS == 'C' || TRANS == 'c' ) {
-            ans = CblasConjTrans;
-        }
-        return ans;
+#define FORTRAN_WRAPPER( x ) x##_
+inline CBLAS_SIDE SIDE2( char SIDE )
+{
+    return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight;
+}
+inline CBLAS_UPLO UPLO2( char UPLO )
+{
+    return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower;
+}
+inline CBLAS_DIAG DIAG2( char DIAG )
+{
+    return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit;
+}
+inline CBLAS_TRANSPOSE TRANS2( char TRANS )
+{
+    CBLAS_TRANSPOSE ans = CblasNoTrans;
+    if ( TRANS == 'N' || TRANS == 'n' ) {
+        ans = CblasNoTrans;
+    } else if ( TRANS == 'T' || TRANS == 't' ) {
+        ans = CblasTrans;
+    } else if ( TRANS == 'C' || TRANS == 'c' ) {
+        ans = CblasConjTrans;
     }
+    return ans;
+}
 #elif defined( USE_OPENBLAS )
-    #define FORTRAN_WRAPPER( x ) x##_
-    inline CBLAS_SIDE SIDE2( char SIDE ) { return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight; }
-    inline CBLAS_UPLO UPLO2( char UPLO ) { return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower; }
-    inline CBLAS_DIAG DIAG2( char DIAG ) { return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit; }
-    inline CBLAS_TRANSPOSE TRANS2( char TRANS )
-    {
-        CBLAS_TRANSPOSE ans = CblasNoTrans;
-        if ( TRANS == 'N' || TRANS == 'n' ) {
-            ans = CblasNoTrans;
-        } else if ( TRANS == 'T' || TRANS == 't' ) {
-            ans = CblasTrans;
-        } else if ( TRANS == 'C' || TRANS == 'c' ) {
-            ans = CblasConjTrans;
-        }
-        return ans;
+#define FORTRAN_WRAPPER( x ) x##_
+inline CBLAS_SIDE SIDE2( char SIDE )
+{
+    return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight;
+}
+inline CBLAS_UPLO UPLO2( char UPLO )
+{
+    return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower;
+}
+inline CBLAS_DIAG DIAG2( char DIAG )
+{
+    return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit;
+}
+inline CBLAS_TRANSPOSE TRANS2( char TRANS )
+{
+    CBLAS_TRANSPOSE ans = CblasNoTrans;
+    if ( TRANS == 'N' || TRANS == 'n' ) {
+        ans = CblasNoTrans;
+    } else if ( TRANS == 'T' || TRANS == 't' ) {
+        ans = CblasTrans;
+    } else if ( TRANS == 'C' || TRANS == 'c' ) {
+        ans = CblasConjTrans;
     }
+    return ans;
+}
 #else
-    #define FORTRAN_WRAPPER( x ) x##_
+#define FORTRAN_WRAPPER( x ) x##_
 #endif
 #endif
 
@@ -57,7 +75,7 @@ static std::mutex d_mutex;
 
 // Define the member functions
 #undef scopy
-template <>
+template<>
 void Lapack<float>::copy( int N, const float *DX, int INCX, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -75,7 +93,7 @@ void Lapack<float>::copy( int N, const float *DX, int INCX, float *DY, int INCY 
 }
 // Define the member functions
 #undef sswap
-template <>
+template<>
 void Lapack<float>::swap( int N, float *DX, int INCX, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -92,7 +110,7 @@ void Lapack<float>::swap( int N, float *DX, int INCX, float *DY, int INCY )
 #endif
 }
 #undef sscal
-template <>
+template<>
 void Lapack<float>::scal( int N, float DA, float *DX, int INCX )
 {
 #ifdef USE_ATLAS
@@ -109,7 +127,7 @@ void Lapack<float>::scal( int N, float DA, float *DX, int INCX )
 #endif
 }
 #undef snrm2
-template <>
+template<>
 float Lapack<float>::nrm2( int N, const float *DX, int INCX )
 {
 #ifdef USE_ATLAS
@@ -126,7 +144,7 @@ float Lapack<float>::nrm2( int N, const float *DX, int INCX )
 #endif
 }
 #undef isamax
-template <>
+template<>
 int Lapack<float>::iamax( int N, const float *DX, int INCX )
 {
 #ifdef USE_ATLAS
@@ -143,7 +161,7 @@ int Lapack<float>::iamax( int N, const float *DX, int INCX )
 #endif
 }
 #undef saxpy
-template <>
+template<>
 void Lapack<float>::axpy( int N, float DA, const float *DX, int INCX, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -160,12 +178,13 @@ void Lapack<float>::axpy( int N, float DA, const float *DX, int INCX, float *DY,
 #endif
 }
 #undef sgemv
-template <>
-void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const float *A, int LDA, const float *DX,
-    int INCX, float BETA, float *DY, int INCY )
+template<>
+void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const float *A, int LDA,
+    const float *DX, int INCX, float BETA, float *DY, int INCY )
 {
 #ifdef USE_ATLAS
-    cblas_sgemv( CblasColMajor, (CBLAS_TRANSPOSE) TRANS, M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
+    cblas_sgemv(
+        CblasColMajor, (CBLAS_TRANSPOSE) TRANS, M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
 #elif defined( USE_ACML )
     // FORTRAN_WRAPPER(::sgemv)(&TRANS,&M,&N,&ALPHA,(float*)A,&LDA,(float*)DX,&INCX,&BETA,DY,&INCY,1);
     ::sgemv( TRANS, M, N, ALPHA, (float *) A, LDA, (float *) DX, INCX, BETA, DY, INCY );
@@ -183,32 +202,36 @@ void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const float *A,
 #endif
 }
 #undef sgemm
-template <>
-void Lapack<float>::gemm( char TRANSA, char TRANSB, int M, int N, int K, float ALPHA, const float *A, int LDA,
-    const float *B, int LDB, float BETA, float *C, int LDC )
+template<>
+void Lapack<float>::gemm( char TRANSA, char TRANSB, int M, int N, int K, float ALPHA,
+    const float *A, int LDA, const float *B, int LDB, float BETA, float *C, int LDC )
 {
 #ifdef USE_ATLAS
-    cblas_sgemm( CblasColMajor, (CBLAS_TRANSPOSE) TRANSA, (CBLAS_TRANSPOSE) TRANSB, M, N, K, ALPHA, A, LDA, B, LDB,
-        BETA, C, LDC );
+    cblas_sgemm( CblasColMajor, (CBLAS_TRANSPOSE) TRANSA, (CBLAS_TRANSPOSE) TRANSB, M, N, K, ALPHA,
+        A, LDA, B, LDB, BETA, C, LDC );
 #elif defined( USE_ACML )
     FORTRAN_WRAPPER(::sgemm )
-    ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (float *) A, &LDA, (float *) B, &LDB, &BETA, C, &LDC, 1, 1 );
+    ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (float *) A, &LDA, (float *) B, &LDB, &BETA, C, &LDC, 1,
+        1 );
 //::sgemm(TRANSA,TRANSA,M,N,K,ALPHA,(float*)A,LDA,(float*)B,LDB,BETA,C,LDC);
 #elif defined( USE_VECLIB )
-    cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC );
+    cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB,
+        BETA, C, LDC );
 #elif defined( USE_OPENBLAS )
-    cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC );
+    cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB,
+        BETA, C, LDC );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, Kp = K, LDAp = LDA, LDBp = LDB, LDCp = LDC;
     FORTRAN_WRAPPER(::sgemm )
-    ( &TRANSA, &TRANSB, &Mp, &Np, &Kp, &ALPHA, (float *) A, &LDAp, (float *) B, &LDBp, &BETA, C, &LDCp );
+    ( &TRANSA, &TRANSB, &Mp, &Np, &Kp, &ALPHA, (float *) A, &LDAp, (float *) B, &LDBp, &BETA, C,
+        &LDCp );
 #else
     FORTRAN_WRAPPER(::sgemm )
     ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (float *) A, &LDA, (float *) B, &LDB, &BETA, C, &LDC );
 #endif
 }
 #undef sasum
-template <>
+template<>
 float Lapack<float>::asum( int N, const float *DX, int INCX )
 {
 #ifdef USE_ATLAS
@@ -225,7 +248,7 @@ float Lapack<float>::asum( int N, const float *DX, int INCX )
 #endif
 }
 #undef sdot
-template <>
+template<>
 float Lapack<float>::dot( int N, const float *DX, int INCX, const float *DY, int INCY )
 {
 #ifdef USE_ATLAS
@@ -242,9 +265,9 @@ float Lapack<float>::dot( int N, const float *DX, int INCX, const float *DY, int
 #endif
 }
 #undef sger
-template <>
-void Lapack<float>::ger(
-    int N, int M, float alpha, const float *x, int INCX, const float *y, int INCY, float *A, int LDA )
+template<>
+void Lapack<float>::ger( int N, int M, float alpha, const float *x, int INCX, const float *y,
+    int INCY, float *A, int LDA )
 {
 #ifdef USE_ATLAS
     cblas_sger( N, M, alpha, x, INCX, y, INCY, A, LDA );
@@ -261,8 +284,9 @@ void Lapack<float>::ger(
 #endif
 }
 #undef sgesv
-template <>
-void Lapack<float>::gesv( int N, int NRHS, float *A, int LDA, int *IPIV, float *B, int LDB, int &INFO )
+template<>
+void Lapack<float>::gesv(
+    int N, int NRHS, float *A, int LDA, int *IPIV, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_sgesv( CblasColMajor, N, NRHS, A, LDA, IPIV, B, LDB );
@@ -284,8 +308,9 @@ void Lapack<float>::gesv( int N, int NRHS, float *A, int LDA, int *IPIV, float *
 #endif
 }
 #undef sgtsv
-template <>
-void Lapack<float>::gtsv( int N, int NRHS, float *DL, float *D, float *DU, float *B, int LDB, int &INFO )
+template<>
+void Lapack<float>::gtsv(
+    int N, int NRHS, float *DL, float *D, float *DU, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support sgtsv" );
@@ -302,7 +327,7 @@ void Lapack<float>::gtsv( int N, int NRHS, float *DL, float *D, float *DU, float
 #endif
 }
 #undef sgbsv
-template <>
+template<>
 void Lapack<float>::gbsv(
     int N, int KL, int KU, int NRHS, float *AB, int LDAB, int *IPIV, float *B, int LDB, int &INFO )
 {
@@ -326,7 +351,7 @@ void Lapack<float>::gbsv(
 #endif
 }
 #undef sgetrf
-template <>
+template<>
 void Lapack<float>::getrf( int M, int N, float *A, int LDA, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -349,7 +374,7 @@ void Lapack<float>::getrf( int M, int N, float *A, int LDA, int *IPIV, int &INFO
 #endif
 }
 #undef sgttrf
-template <>
+template<>
 void Lapack<float>::gttrf( int N, float *DL, float *D, float *DU, float *DU2, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -372,7 +397,7 @@ void Lapack<float>::gttrf( int N, float *DL, float *D, float *DU, float *DU2, in
 #endif
 }
 #undef sgbtrf
-template <>
+template<>
 void Lapack<float>::gbtrf( int M, int N, int KL, int KU, float *AB, int LDAB, int *IPIV, int &INFO )
 {
 #ifdef USE_ATLAS
@@ -399,9 +424,9 @@ void Lapack<float>::gbtrf( int M, int N, int KL, int KU, float *AB, int LDAB, in
 #endif
 }
 #undef sgetrs
-template <>
-void Lapack<float>::getrs(
-    char TRANS, int N, int NRHS, const float *A, int LDA, const int *IPIV, float *B, int LDB, int &INFO )
+template<>
+void Lapack<float>::getrs( char TRANS, int N, int NRHS, const float *A, int LDA, const int *IPIV,
+    float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_sgetrs( CblasColMajor, (CBLAS_TRANSPOSE) TRANS, N, NRHS, A, LDA, IPIV, B, LDB );
@@ -428,20 +453,23 @@ void Lapack<float>::getrs(
 #endif
 }
 #undef sgttrs
-template <>
-void Lapack<float>::gttrs( char TRANS, int N, int NRHS, const float *DL, const float *D, const float *DU,
-    const float *DU2, const int *IPIV, float *B, int LDB, int &INFO )
+template<>
+void Lapack<float>::gttrs( char TRANS, int N, int NRHS, const float *DL, const float *D,
+    const float *DU, const float *DU2, const int *IPIV, float *B, int LDB, int &INFO )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support sgttrs" );
 #elif defined( USE_ACML )
-    ::sgttrs( TRANS, N, NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B, LDB, &INFO );
+    ::sgttrs( TRANS, N, NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV,
+        B, LDB, &INFO );
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::sgttrs )
-    ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B,
+        &LDB, &INFO );
 #elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER(::sgttrs )
-    ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B,
+        &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
@@ -449,16 +477,18 @@ void Lapack<float>::gttrs( char TRANS, int N, int NRHS, const float *DL, const f
         IPIVp[i] = IPIV[i];
     }
     FORTRAN_WRAPPER(::sgttrs )
-    ( &TRANS, &Np, &NRHSp, (float *) DL, (float *) D, (float *) DU, (float *) DU2, IPIVp, B, &LDBp, &INFOp );
+    ( &TRANS, &Np, &NRHSp, (float *) DL, (float *) D, (float *) DU, (float *) DU2, IPIVp, B, &LDBp,
+        &INFOp );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER(::sgttrs )
-    ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, (float *) DL, (float *) D, (float *) DU, (float *) DU2, (int *) IPIV, B,
+        &LDB, &INFO );
 #endif
 }
 #undef sgbtrs
-template <>
+template<>
 void Lapack<float>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const float *AB, int LDAB,
     const int *IPIV, float *B, int LDB, int &INFO )
 {
@@ -488,8 +518,9 @@ void Lapack<float>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const fl
 #endif
 }
 #undef sgetri
-template <>
-void Lapack<float>::getri( int N, float *A, int LDA, const int *IPIV, float *WORK, int LWORK, int &INFO )
+template<>
+void Lapack<float>::getri(
+    int N, float *A, int LDA, const int *IPIV, float *WORK, int LWORK, int &INFO )
 {
 #ifdef USE_ATLAS
     INFO = clapack_sgetri( CblasColMajor, N, A, LDA, IPIV );
@@ -513,21 +544,22 @@ void Lapack<float>::getri( int N, float *A, int LDA, const int *IPIV, float *WOR
 #endif
 }
 #undef strsm
-template <>
-void Lapack<float>::trsm(
-    char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, float ALPHA, const float *A, int LDA, float *B, int LDB )
+template<>
+void Lapack<float>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int N, float ALPHA,
+    const float *A, int LDA, float *B, int LDB )
 {
 #ifdef USE_ATLAS
     throw std::logic_error( "strsm not implemented for ATLAS" );
 #elif defined( USE_ACML )
-    char SIDE2[2] = { SIDE, 0 }, UPLO2[2] = { UPLO, 0 }, TRANS2[2] = { TRANS, 0 }, DIAG2[2] = { DIAG, 0 };
+    char SIDE2[2] = { SIDE, 0 }, UPLO2[2] = { UPLO, 0 }, TRANS2[2] = { TRANS, 0 },
+         DIAG2[2] = { DIAG, 0 };
     ::strsm_( SIDE2, UPLO2, TRANS2, DIAG2, &M, &N, &ALPHA, (float *) A, &LDA, B, &LDB, 1, 1, 1, 1 );
 #elif defined( USE_VECLIB )
-    cblas_strsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N, ALPHA, (float *) A,
-        LDA, B, LDB );
+    cblas_strsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N,
+        ALPHA, (float *) A, LDA, B, LDB );
 #elif defined( USE_OPENBLAS )
-    cblas_strsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N, ALPHA, (float *) A,
-        LDA, B, LDB );
+    cblas_strsm( CblasColMajor, SIDE2( SIDE ), UPLO2( UPLO ), TRANS2( TRANS ), DIAG2( DIAG ), M, N,
+        ALPHA, (float *) A, LDA, B, LDB );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, LDBp = LDB;
     FORTRAN_WRAPPER(::strsm )
@@ -538,7 +570,7 @@ void Lapack<float>::trsm(
 #endif
 }
 #undef slamch
-template <>
+template<>
 float Lapack<float>::lamch( char cmach )
 {
 #ifdef USE_ATLAS
@@ -553,4 +585,3 @@ float Lapack<float>::lamch( char cmach )
     return FORTRAN_WRAPPER(::slamch )( &cmach );
 #endif
 }
-

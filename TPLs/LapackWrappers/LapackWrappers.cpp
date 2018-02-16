@@ -2,12 +2,12 @@
 #include "LapackWrappers.h"
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <cstdio>
 #include <iostream>
 #include <limits>
 #include <random>
 #include <string.h>
-#include <complex>
 
 
 // Choose the OS
@@ -25,11 +25,11 @@
 #endif
 
 // Define some sizes of the problems (try to normalize the time/test)
-#define TEST_SIZE_VEC 50000     // Vector tests O(N)
-#define TEST_SIZE_MATVEC 500    // Matrix-vector tests O(N^2)
-#define TEST_SIZE_MAT 100       // Matrix-matrix / Dense solves tests O(N^3)
-#define TEST_SIZE_TRI 2000      // Tridiagonal/banded tests
-#define TEST_SIZE_TRI_MAT 1000  // Tridiagonal/banded solve tests
+#define TEST_SIZE_VEC 50000    // Vector tests O(N)
+#define TEST_SIZE_MATVEC 500   // Matrix-vector tests O(N^2)
+#define TEST_SIZE_MAT 100      // Matrix-matrix / Dense solves tests O(N^3)
+#define TEST_SIZE_TRI 2000     // Tridiagonal/banded tests
+#define TEST_SIZE_TRI_MAT 1000 // Tridiagonal/banded solve tests
 
 /*! \def NULL_USE(variable)
  *  \brief    A null use of a variable
@@ -46,42 +46,62 @@
     } while ( 0 )
 
 
-
 int global_set_mkl_threads = putenv( "MKL_NUM_THREADS=1" );
 
 
 // Choose precision to perfom calculations
-template<class TYPE> class extended { };
-template<> class extended<float> { public: typedef double TYPE2; };
-template<> class extended<double> { public: typedef long double TYPE2; };
-template<> class extended<std::complex<float>> { public: typedef std::complex<double> TYPE2; };
-template<> class extended<std::complex<double>> { public: typedef std::complex<long double> TYPE2; };
+template<class TYPE>
+class extended
+{
+};
+template<>
+class extended<float>
+{
+public:
+    typedef double TYPE2;
+};
+template<>
+class extended<double>
+{
+public:
+    typedef long double TYPE2;
+};
+template<>
+class extended<std::complex<float>>
+{
+public:
+    typedef std::complex<double> TYPE2;
+};
+template<>
+class extended<std::complex<double>>
+{
+public:
+    typedef std::complex<long double> TYPE2;
+};
 
 
 // Lists the tests availible to run
-template <>
-std::vector<std::string> Lapack<double>::list_all_tests( )
+template<>
+std::vector<std::string> Lapack<double>::list_all_tests()
 {
-    return { "dcopy", "dscal", "dnrm2", "daxpy", "dgemv", "dgemm",
-        "dasum", "ddot", "dgesv", "dgtsv", "dgbsv", "dgetrf", 
-        "dgttrf", "dgbtrf", "dgetrs", "dgttrs", "dgetri", "drand" };
+    return { "dcopy", "dscal", "dnrm2", "daxpy", "dgemv", "dgemm", "dasum", "ddot", "dgesv",
+        "dgtsv", "dgbsv", "dgetrf", "dgttrf", "dgbtrf", "dgetrs", "dgttrs", "dgetri", "drand" };
 }
-template <>
-std::vector<std::string> Lapack<float>::list_all_tests( )
+template<>
+std::vector<std::string> Lapack<float>::list_all_tests()
 {
-    return { "scopy", "sscal", "snrm2", "saxpy", "sgemv", "sgemm",
-        "sasum", "sdot", "sgesv", "sgtsv", "sgbsv", "sgetrf", 
-        "sgttrf", "sgbtrf", "sgetrs", "sgttrs", "sgetri", "srand" };
+    return { "scopy", "sscal", "snrm2", "saxpy", "sgemv", "sgemm", "sasum", "sdot", "sgesv",
+        "sgtsv", "sgbsv", "sgetrf", "sgttrf", "sgbtrf", "sgetrs", "sgttrs", "sgetri", "srand" };
 }
 
 
 // Run all the tests
-template <typename TYPE>
+template<typename TYPE>
 int Lapack<TYPE>::run_all_test()
 {
     int N_errors = 0;
     int N        = 2; // We want two iterations to enure the test works for N>1
-    auto tests = Lapack<TYPE>::list_all_tests();
+    auto tests   = Lapack<TYPE>::list_all_tests();
     for ( auto test : tests ) {
         TYPE error;
         int err = Lapack<TYPE>::run_test( test, N, error );
@@ -97,7 +117,7 @@ template int Lapack<float>::run_all_test();
 
 
 // Fill a vector with random TYPE precision data
-template <>
+template<>
 void Lapack<float>::random( int N, float *data )
 {
     static std::random_device rd;
@@ -106,7 +126,7 @@ void Lapack<float>::random( int N, float *data )
     for ( int i = 0; i < N; i++ )
         data[i] = dis( gen );
 }
-template <>
+template<>
 void Lapack<double>::random( int N, double *data )
 {
     static std::random_device rd;
@@ -118,7 +138,7 @@ void Lapack<double>::random( int N, double *data )
 
 
 // Check if two vectors are approximately equal
-template <typename TYPE>
+template<typename TYPE>
 static inline bool approx_equal( int N, const TYPE *x1, const TYPE *x2, const TYPE tol = 1e-12 )
 {
     bool pass = true;
@@ -129,7 +149,7 @@ static inline bool approx_equal( int N, const TYPE *x1, const TYPE *x2, const TY
 
 
 // Return the L2 error
-template <typename TYPE>
+template<typename TYPE>
 static inline TYPE L2Error( int N, const TYPE *x1, const TYPE *x2 )
 {
     TYPE norm = 0.0;
@@ -140,43 +160,43 @@ static inline TYPE L2Error( int N, const TYPE *x1, const TYPE *x2 )
 
 
 // Test random
-template <typename TYPE>
+template<typename TYPE>
 static bool test_random( int N, TYPE &error )
 {
-    int K = TEST_SIZE_VEC/20;
-    TYPE *x = new TYPE[K];
-    int count[25] = {0};
-    error = 0;
-    for (int it = 0; it < N; it++) {
+    int K         = TEST_SIZE_VEC / 20;
+    TYPE *x       = new TYPE[K];
+    int count[25] = { 0 };
+    error         = 0;
+    for ( int it = 0; it < N; it++ ) {
         Lapack<TYPE>::random( K, x );
         TYPE sum = 0;
         for ( int i = 0; i < K; i++ ) {
-            error = ( error==0 && x[i]<0 ) ? -1:error;
-            error = ( error==0 && x[i]>1 ) ? -2:error;
+            error = ( error == 0 && x[i] < 0 ) ? -1 : error;
+            error = ( error == 0 && x[i] > 1 ) ? -2 : error;
             sum += x[i];
-            int j = static_cast<int>( floor(x[i]*25) );
+            int j = static_cast<int>( floor( x[i] * 25 ) );
             count[j]++;
         }
-        TYPE avg = sum/K;
-        if ( error==0 && ( avg<0.4 || avg>0.6 ) )
+        TYPE avg = sum / K;
+        if ( error == 0 && ( avg < 0.4 || avg > 0.6 ) )
             error = -3;
     }
     delete[] x;
     if ( error != 0 )
         return true;
     // If we did not encounter an error, check the Chi-Square Distribution
-    double E = (K*N)/25.0;
+    double E  = ( K * N ) / 25.0;
     double X2 = 0.0;
-    for (int i=0; i<25; i++)
-        X2 += (count[i]-E)*(count[i]-E)/E;
-    double X2c = 51.179;    // Critical value for 0.999 (we will fail 0.1% of the time)
-    error = X2/X2c;
+    for ( int i = 0; i < 25; i++ )
+        X2 += ( count[i] - E ) * ( count[i] - E ) / E;
+    double X2c = 51.179; // Critical value for 0.999 (we will fail 0.1% of the time)
+    error      = X2 / X2c;
     return error > 1.0;
 }
 
 
 // Test copy
-template <typename TYPE>
+template<typename TYPE>
 static bool test_copy( int N, TYPE &error )
 {
     const int K = TEST_SIZE_VEC;
@@ -198,7 +218,7 @@ static bool test_copy( int N, TYPE &error )
 
 
 // Test scal
-template <typename TYPE>
+template<typename TYPE>
 static bool test_scal( int N, TYPE &error )
 {
     const int K = TEST_SIZE_VEC;
@@ -207,8 +227,8 @@ static bool test_scal( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     Lapack<TYPE>::random( K, x0 );
     const TYPE pi = static_cast<TYPE>( 3.141592653589793 );
-    for ( int j  = 0; j < K; j++ )
-        x1[j]    = pi * x0[j];
+    for ( int j = 0; j < K; j++ )
+        x1[j] = pi * x0[j];
     int N_errors = 0;
     error        = 0;
     for ( int i = 0; i < N; i++ ) {
@@ -224,7 +244,7 @@ static bool test_scal( int N, TYPE &error )
 }
 
 // Test nrm2
-template <typename TYPE>
+template<typename TYPE>
 static bool test_nrm2( int N, TYPE &error )
 {
     typedef typename extended<TYPE>::TYPE2 TYPE2;
@@ -233,15 +253,15 @@ static bool test_nrm2( int N, TYPE &error )
     Lapack<TYPE>::random( K, x );
     TYPE2 ans1 = 0.0;
     for ( int j = 0; j < K; j++ )
-        ans1 += static_cast<TYPE>(x[j]) * static_cast<TYPE>(x[j]);
+        ans1 += static_cast<TYPE>( x[j] ) * static_cast<TYPE>( x[j] );
     ans1         = sqrt( ans1 );
     int N_errors = 0;
     error        = 0;
     for ( int i = 0; i < N; i++ ) {
         TYPE ans2  = Lapack<TYPE>::nrm2( K, x, 1 );
-        double err = std::abs( ans1 - ans2 ) / sqrt(K);
+        double err = std::abs( ans1 - ans2 ) / sqrt( K );
         error      = std::max<TYPE>( error, err );
-        if ( err > 50*std::numeric_limits<TYPE>::epsilon() )
+        if ( err > 50 * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x;
@@ -249,11 +269,11 @@ static bool test_nrm2( int N, TYPE &error )
 }
 
 // Test asum
-template <typename TYPE>
+template<typename TYPE>
 static bool test_asum( int N, TYPE &error )
 {
     typedef typename extended<TYPE>::TYPE2 TYPE2;
-    const int K = 2*TEST_SIZE_VEC;
+    const int K = 2 * TEST_SIZE_VEC;
     // Create a random set of numbers and the sum (simple method)
     TYPE *x = new TYPE[K];
     Lapack<TYPE>::random( K, x );
@@ -268,7 +288,7 @@ static bool test_asum( int N, TYPE &error )
         TYPE ans2  = Lapack<TYPE>::asum( K, x, 1 );
         double err = std::abs( ans1 - ans2 ) / K;
         error      = std::max<TYPE>( error, err );
-        if ( err > 100*std::numeric_limits<TYPE>::epsilon() )
+        if ( err > 100 * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x;
@@ -276,7 +296,7 @@ static bool test_asum( int N, TYPE &error )
 }
 
 // Test dot
-template <typename TYPE>
+template<typename TYPE>
 static bool test_dot( int N, TYPE &error )
 {
     typedef typename extended<TYPE>::TYPE2 TYPE2;
@@ -287,14 +307,14 @@ static bool test_dot( int N, TYPE &error )
     Lapack<TYPE>::random( K, x2 );
     TYPE2 ans1 = 0.0;
     for ( int j = 0; j < K; j++ )
-        ans1 += static_cast<TYPE2>(x1[j]) * static_cast<TYPE2>(x2[j]);
+        ans1 += static_cast<TYPE2>( x1[j] ) * static_cast<TYPE2>( x2[j] );
     int N_errors = 0;
     error        = 0;
     for ( int i = 0; i < N; i++ ) {
-        TYPE ans2 = Lapack<TYPE>::dot( K, x1, 1, x2, 1 );
+        TYPE ans2  = Lapack<TYPE>::dot( K, x1, 1, x2, 1 );
         double err = std::abs( ans1 - ans2 ) / K;
         error      = std::max<TYPE>( error, err );
-        if ( err > 50*std::numeric_limits<TYPE>::epsilon() )
+        if ( err > 50 * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
     }
     delete[] x1;
@@ -303,7 +323,7 @@ static bool test_dot( int N, TYPE &error )
 }
 
 // Test axpy
-template <typename TYPE>
+template<typename TYPE>
 static bool test_axpy( int N, TYPE &error )
 {
     const int K = TEST_SIZE_VEC;
@@ -315,15 +335,15 @@ static bool test_axpy( int N, TYPE &error )
     Lapack<TYPE>::random( K, y0 );
     const TYPE pi = static_cast<TYPE>( 3.141592653589793 );
     for ( int j = 0; j < K; j++ )
-        y1[j]   = y0[j] + pi * x[j];
-    error       = 0;
+        y1[j] = y0[j] + pi * x[j];
+    error = 0;
     for ( int i = 0; i < N; i++ ) {
         memcpy( y2, y0, K * sizeof( TYPE ) );
         Lapack<TYPE>::axpy( K, pi, x, 1, y2, 1 );
         TYPE err = L2Error( K, y1, y2 );
         error    = std::max( error, err );
     }
-    bool fail = error > 200*std::numeric_limits<TYPE>::epsilon();
+    bool fail = error > 200 * std::numeric_limits<TYPE>::epsilon();
     NULL_USE( y1 );
     delete[] x;
     delete[] y0;
@@ -333,7 +353,7 @@ static bool test_axpy( int N, TYPE &error )
 }
 
 // Test gemv
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gemv( int N, TYPE &error )
 {
     const int K = TEST_SIZE_MATVEC;
@@ -371,7 +391,7 @@ static bool test_gemv( int N, TYPE &error )
 }
 
 // Test gemm
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gemm( int N, TYPE &error )
 {
     const int K = TEST_SIZE_MAT;
@@ -394,7 +414,7 @@ static bool test_gemm( int N, TYPE &error )
     }
     int N_errors = 0;
     error        = 0;
-    TYPE norm    = Lapack<TYPE>::nrm2( K*K, C1, 1 );
+    TYPE norm    = Lapack<TYPE>::nrm2( K * K, C1, 1 );
     for ( int i = 0; i < N; i++ ) {
         memcpy( C2, C, K * K * sizeof( TYPE ) );
         Lapack<TYPE>::gemm( 'N', 'N', K, K, K, alpha, A, K, B, K, beta, C2, K );
@@ -411,7 +431,7 @@ static bool test_gemm( int N, TYPE &error )
 }
 
 // Test gesv
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gesv( int N, TYPE &error )
 {
     // Test solving a diagonal matrix
@@ -449,11 +469,11 @@ static bool test_gesv( int N, TYPE &error )
 }
 
 // Test gtsv
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gtsv( int N, TYPE &error )
 {
     // Test solving a tri-diagonal matrix by comparing to dgtsv
-    const int K = TEST_SIZE_TRI_MAT/2;
+    const int K = TEST_SIZE_TRI_MAT / 2;
     TYPE *A     = new TYPE[K * K];
     TYPE *D     = new TYPE[K];
     TYPE *D2    = new TYPE[K];
@@ -513,7 +533,7 @@ static bool test_gtsv( int N, TYPE &error )
     return N_errors > 0;
 }
 // Test gbsv
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gbsv( int N, TYPE &error )
 {
     // Test solving a banded-diagonal matrix by comparing to dgtsv
@@ -524,7 +544,7 @@ static bool test_gbsv( int N, TYPE &error )
     //       a11  a22  a33  a44  a55  a66
     //       a21  a32  a43  a54  a65   *
     //       a31  a42  a53  a64   *    *
-    const int K  = TEST_SIZE_TRI_MAT/2;
+    const int K  = TEST_SIZE_TRI_MAT / 2;
     const int KL = 2;
     const int KU = 2;
     const int K2 = 2 * KL + KU + 1;
@@ -560,7 +580,7 @@ static bool test_gbsv( int N, TYPE &error )
         TYPE err2 = L2Error( K, x1, x2 );
         error     = std::max( error, err2 / norm );
     }
-    const double tol = 500 * sqrt(K) * std::numeric_limits<TYPE>::epsilon();
+    const double tol = 500 * sqrt( K ) * std::numeric_limits<TYPE>::epsilon();
     if ( error > tol ) {
         printf( "test_gbsv error (%e) exceeded tolerance (%e)\n", error, tol );
         N_errors++;
@@ -576,7 +596,7 @@ static bool test_gbsv( int N, TYPE &error )
 }
 
 // Test getrf
-template <typename TYPE>
+template<typename TYPE>
 static bool test_getrf( int N, TYPE &error )
 {
     // Check dgetrf by performing a factorization and solve and comparing to dgesv
@@ -616,11 +636,11 @@ static bool test_getrf( int N, TYPE &error )
 }
 
 // Test gttrf
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gttrf( int N, TYPE &error )
 {
     // Check dgttrf by performing a factorization and solve and comparing to dgtsv
-    const int K = 5*TEST_SIZE_TRI;
+    const int K = 5 * TEST_SIZE_TRI;
     TYPE *D     = new TYPE[K];
     TYPE *D2    = new TYPE[K];
     TYPE *DL    = new TYPE[K - 1];
@@ -654,7 +674,7 @@ static bool test_gttrf( int N, TYPE &error )
     Lapack<TYPE>::gttrs( 'N', K, 1, DL2, D2, DU2, DU3, IPIV, x2, K, err );
     TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     TYPE err2 = L2Error( K, x1, x2 );
-    if ( err2/norm > 300.0 * std::numeric_limits<TYPE>::epsilon() )
+    if ( err2 / norm > 300.0 * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
     error = err2 / norm;
     delete[] D;
@@ -672,7 +692,7 @@ static bool test_gttrf( int N, TYPE &error )
 }
 
 // Test gbtrf
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gbtrf( int N, TYPE &error )
 {
     // Check dgbtrf by performing a factorization and solve and comparing to dgbsv
@@ -715,11 +735,11 @@ static bool test_gbtrf( int N, TYPE &error )
 }
 
 // Test getrs
-template <typename TYPE>
+template<typename TYPE>
 static bool test_getrs( int N, TYPE &error )
 {
     // Check dgetrs by performing a factorization and solve and comparing to dgesv
-    const int K = 2*TEST_SIZE_MAT;
+    const int K = 2 * TEST_SIZE_MAT;
     TYPE *A     = new TYPE[K * K];
     TYPE *A2    = new TYPE[K * K];
     TYPE *x1    = new TYPE[K];
@@ -756,11 +776,11 @@ static bool test_getrs( int N, TYPE &error )
 }
 
 // Test gttrs
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gttrs( int N, TYPE &error )
 {
     // Check dgttrs by performing a factorization and solve and comparing to dgtsv
-    const int K = 4*TEST_SIZE_TRI;
+    const int K = 4 * TEST_SIZE_TRI;
     TYPE *D     = new TYPE[K];
     TYPE *D2    = new TYPE[K];
     TYPE *DL    = new TYPE[K - 1];
@@ -796,7 +816,7 @@ static bool test_gttrs( int N, TYPE &error )
         N_errors += err == 0 ? 0 : 1;
         TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
         TYPE err2 = L2Error( K, x1, x2 );
-        if ( err2/norm > 250.0 * std::numeric_limits<TYPE>::epsilon() )
+        if ( err2 / norm > 250.0 * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
         error = std::max( error, err2 / norm );
     }
@@ -816,7 +836,7 @@ static bool test_gttrs( int N, TYPE &error )
 }
 
 // Test gbtrs
-template <typename TYPE>
+template<typename TYPE>
 static bool test_gbtrs( int N, TYPE &error )
 {
     // Check dgbtrs by performing a factorization and solve and comparing to dgbsv
@@ -860,7 +880,7 @@ static bool test_gbtrs( int N, TYPE &error )
 }
 
 // Test getri
-template <typename TYPE>
+template<typename TYPE>
 static bool test_getri( int N, TYPE &error )
 {
     // Check getri by performing a factorization, calculating the inverse,
@@ -910,12 +930,12 @@ static bool test_getri( int N, TYPE &error )
         // Perform the mat-vec
         memset( x2, 0xB6, K * sizeof( TYPE ) );
         Lapack<TYPE>::gemv( 'N', K, K, 1, A2, K, b, 1, 0, x2, 1 );
-        TYPE err2 = L2Error( K, x1, x2 )/norm;
-        error = std::max( error, err2 );
+        TYPE err2 = L2Error( K, x1, x2 ) / norm;
+        error     = std::max( error, err2 );
     }
     // Check the result
     if ( error > 300 * eps ) {
-        printf("getri exceeded tolerance: error = %e, tol = %e\n", error, 300*eps);
+        printf( "getri exceeded tolerance: error = %e, tol = %e\n", error, 300 * eps );
         N_errors++;
     }
     delete[] A;
@@ -930,9 +950,9 @@ static bool test_getri( int N, TYPE &error )
 
 
 /******************************************************************
-* Print all of the machine parameters by lamch                   *
-******************************************************************/
-template <typename TYPE>
+ * Print all of the machine parameters by lamch                   *
+ ******************************************************************/
+template<typename TYPE>
 void Lapack<TYPE>::print_machine_parameters()
 {
     printf( "eps   = %13.6e    relative machine precision\n", Lapack<TYPE>::lamch( 'E' ) );
@@ -940,15 +960,18 @@ void Lapack<TYPE>::print_machine_parameters()
     printf( "base  = %13.6e    base of the machine\n", Lapack<TYPE>::lamch( 'B' ) );
     printf( "prec  = %13.6e    eps*base\n", Lapack<TYPE>::lamch( 'P' ) );
     printf( "t     = %13.6e    number of digits in the mantissa\n", Lapack<TYPE>::lamch( 'N' ) );
-    printf( "rnd   = %13.6e    1.0 when rounding occurs in addition, 0.0 otherwise\n", Lapack<TYPE>::lamch( 'R' ) );
+    printf( "rnd   = %13.6e    1.0 when rounding occurs in addition, 0.0 otherwise\n",
+        Lapack<TYPE>::lamch( 'R' ) );
     printf( "emin  = %13.6e    minimum exponent before underflow\n", Lapack<TYPE>::lamch( 'M' ) );
-    printf( "rmin  = %13.6e    underflow threshold - base**(emin-1)\n", Lapack<TYPE>::lamch( 'U' ) );
+    printf(
+        "rmin  = %13.6e    underflow threshold - base**(emin-1)\n", Lapack<TYPE>::lamch( 'U' ) );
     printf( "emax  = %13.6e    largest exponent before overflow\n", Lapack<TYPE>::lamch( 'L' ) );
-    printf( "rmax  = %13.6e    overflow threshold - (base**emax)*(1-eps)\n", Lapack<TYPE>::lamch( 'O' ) );
+    printf( "rmax  = %13.6e    overflow threshold - (base**emax)*(1-eps)\n",
+        Lapack<TYPE>::lamch( 'O' ) );
 }
 template void Lapack<double>::print_machine_parameters();
 template void Lapack<float>::print_machine_parameters();
-template <typename TYPE>
+template<typename TYPE>
 void Lapack<TYPE>::print_lapack_version()
 {
 #ifdef USE_ATLAS
@@ -971,13 +994,13 @@ template void Lapack<float>::print_lapack_version();
 
 
 /******************************************************************
-* Run a given test                                                *
-******************************************************************/
+ * Run a given test                                                *
+ ******************************************************************/
 template<class TYPE>
-int Lapack<TYPE>::run_test( const std::string& routine, int N, TYPE &error )
+int Lapack<TYPE>::run_test( const std::string &routine, int N, TYPE &error )
 {
     auto name = routine.substr( 1 );
-    std::transform(name.begin(),name.end(),name.begin(),::tolower);
+    std::transform( name.begin(), name.end(), name.begin(), ::tolower );
     int N_errors = 0;
     if ( name == "copy" ) {
         N_errors += test_copy<TYPE>( N, error ) ? 1 : 0;
@@ -1023,7 +1046,5 @@ int Lapack<TYPE>::run_test( const std::string& routine, int N, TYPE &error )
     }
     return N_errors;
 }
-template int Lapack<double>::run_test( const std::string&, int, double& );
-template int Lapack<float>::run_test( const std::string&, int, float& );
-
-
+template int Lapack<double>::run_test( const std::string &, int, double & );
+template int Lapack<float>::run_test( const std::string &, int, float & );
