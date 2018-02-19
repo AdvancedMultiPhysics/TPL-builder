@@ -1716,10 +1716,13 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
         object   = stripPath( object );
         filename = stripPath( filename );
         // Remove callstack (and all children) for threads that are just contributing
-        if ( function.find( "_callstack_signal_handler" ) != npos &&
-             filename.find( "StackTrace.cpp" ) != npos ) {
-            it = stack.children.erase( it );
-            continue;
+        if ( filename.find( "StackTrace.cpp" ) != npos ) {
+            bool test = function.find( "_callstack_signal_handler" ) != npos ||
+                        function.find( "getGlobalCallStacks" ) != npos;
+            if ( test ) {
+                it = stack.children.erase( it );
+                continue;
+            }
         }
         // Remove __libc_start_main
         if ( function.find( "__libc_start_main" ) != npos &&
@@ -1736,14 +1739,11 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
         if ( function.find( "std::condition_variable::__wait_until_impl" ) != npos &&
              filename == "condition_variable" )
             remove_entry = true;
-        // Remove std::_Function_handler<
-        if ( function.find( "std::_Function_handler<" ) != npos && filename == "functional" )
-            remove_entry = true;
-        // Remove std::_Bind_simple<
-        if ( function.find( "std::_Bind_simple<" ) != npos && filename == "functional" ) {
-            auto pos     = function.find( "std::_Bind_simple<" );
-            function     = function.substr( 0, pos ) + "std::_Bind_simple<...>(...)";
-            remove_entry = true;
+        // Remove std::function references
+        if ( filename == "functional" ) {
+            remove_entry = remove_entry || function.find( "std::_Function_handler<" ) != npos;
+            remove_entry = remove_entry || function.find( "std::_Bind_simple<" ) != npos;
+            remove_entry = remove_entry || function.find( "_M_invoke" ) != npos;
         }
         // Remove std::this_thread::__sleep_for
         if ( function.find( "std::this_thread::__sleep_for(" ) != npos &&

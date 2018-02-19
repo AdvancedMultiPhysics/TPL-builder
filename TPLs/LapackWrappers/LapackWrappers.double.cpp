@@ -478,9 +478,8 @@ void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
-    }
     FORTRAN_WRAPPER(::dgttrs )
     ( &TRANS, &Np, &NRHSp, (double *) DL, (double *) D, (double *) DU, (double *) DU2, IPIVp, B,
         &LDBp, &INFOp );
@@ -510,11 +509,12 @@ void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const d
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
-    }
+    d_mutex.lock();
     FORTRAN_WRAPPER(::dgbtrs )
     ( &TRANS, &Np, &KLp, &KUp, &NRHSp, (double *) AB, &LDABp, IPIVp, B, &LDBp, &INFOp );
+    d_mutex.unlock();
     INFO = static_cast<int>( INFOp );
     delete[] IPIVp;
 #else
@@ -538,9 +538,8 @@ void Lapack<double>::getri(
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, LDAp = LDA, LWORKp = LWORK, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
+    for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
-    }
     FORTRAN_WRAPPER(::dgetri )( &Np, A, &LDAp, IPIVp, WORK, &LWORKp, &INFOp );
     INFO = static_cast<int>( INFOp );
     delete[] IPIVp;
