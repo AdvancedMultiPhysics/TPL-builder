@@ -83,16 +83,6 @@
 #endif
 
 
-// Set the callstack signal
-#ifdef SIGRTMIN
-#define CALLSTACK_SIG SIGRTMIN + 4
-#else
-#define CALLSTACK_SIG SIGUSR1
-#define SIGRTMIN SIGUSR1
-#define SIGRTMAX SIGUSR1
-#endif
-
-
 // Helper thread
 static std::shared_ptr<std::thread> globalMonitorThread;
 
@@ -916,6 +906,13 @@ static void _callstack_signal_handler( int, siginfo_t*, void* )
 {
     thread_backtrace_count = backtrace_thread( StackTrace::thisThread(), thread_backtrace, 1000 );
 }
+static int get_thread_callstack_signal()
+{
+    if ( 39 >= SIGRTMIN && 39 <= SIGRTMAX )
+        return 39;
+    return SIGRTMIN+4;
+}
+static int thread_callstack_signal = get_thread_callstack_signal();
 #endif
 static int backtrace_thread( const std::thread::native_handle_type& tid, void **buffer, size_t size )
 {
@@ -931,9 +928,9 @@ static int backtrace_thread( const std::thread::native_handle_type& tid, void **
             sigfillset(&sa.sa_mask);
             sa.sa_flags = SA_SIGINFO;
             sa.sa_sigaction = _callstack_signal_handler;
-            sigaction(CALLSTACK_SIG, &sa, nullptr);
+            sigaction(thread_callstack_signal, &sa, nullptr);
             thread_backtrace_count = -1;
-            pthread_kill( tid, CALLSTACK_SIG );
+            pthread_kill( tid, thread_callstack_signal );
             auto t1 = std::chrono::high_resolution_clock::now();
             auto t2 = std::chrono::high_resolution_clock::now();
             while ( thread_backtrace_count==-1 && std::chrono::duration<double>(t2-t1).count()<0.15 ) {
@@ -1102,12 +1099,12 @@ std::set<std::thread::native_handle_type> StackTrace::activeThreads( )
                 tid.insert( tid2 );
         }
         tid.erase( syscall(SYS_gettid) );
-        signal( CALLSTACK_SIG, _activeThreads_signal_handler );
+        signal( thread_callstack_signal, _activeThreads_signal_handler );
         for ( auto tid2 : tid ) {
             thread_backtrace_mutex.lock();
             thread_id_finished = false;
             thread_handle = thisThread();
-            syscall( SYS_tgkill, pid, tid2, CALLSTACK_SIG );
+            syscall( SYS_tgkill, pid, tid2, thread_callstack_signal );
             auto t1 = std::chrono::high_resolution_clock::now();
             auto t2 = std::chrono::high_resolution_clock::now();
             while ( !thread_id_finished && std::chrono::duration<double>(t2-t1).count()<0.1 ) {
