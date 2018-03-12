@@ -62,6 +62,8 @@
     #include <mach/mach.h>
     #include <sys/sysctl.h>
     #include <sys/types.h>
+    #define SIGRTMIN SIGUSR1
+    #define SIGRTMAX SIGUSR2
 #endif
 // clang-format on
 
@@ -910,7 +912,7 @@ static int get_thread_callstack_signal()
 {
     if ( 39 >= SIGRTMIN && 39 <= SIGRTMAX )
         return 39;
-    return SIGRTMIN+4;
+    return std::min<int>( SIGRTMIN+4, SIGRTMAX );
 }
 static int thread_callstack_signal = get_thread_callstack_signal();
 #endif
