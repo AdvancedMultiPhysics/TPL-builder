@@ -63,6 +63,9 @@ IF ( CMAKE_BUILD_SILO )
     ELSE()
         SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --disable-static )
     ENDIF()
+    IF ( BUILD_TYPE )
+        SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --build=${BUILD_TYPE} )
+    ENDIF()
 ENDIF()
 
 
