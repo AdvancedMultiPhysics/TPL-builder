@@ -5,6 +5,21 @@
 #include <vector>
 
 
+struct LapackMachineParams {
+    bool rnd;                  // true if rounding occurs in addition, false otherwise
+    uint8_t base;              // base of the machine
+    uint8_t t;                 // number of digits in the mantissa
+    short emin;                // minimum exponent before underflow
+    short emax;                // largest exponent before overflow
+    double eps;                // relative machine precision
+    double sfmin;              // safe minimum
+    double prec;               // eps*base
+    double rmin;               // underflow threshold - base**(emin-1)
+    double rmax;               // overflow threshold - (base**emax)*(1-eps)
+    std::string print() const; // Print the machine parameters
+};
+
+
 /*! \class Lapack
     \brief A wrapper class for BLAS/LAPACK routines
     \details  This class is a wrapper class to provide a common interface to
@@ -639,12 +654,11 @@ public:
      */
     static int run_all_test();
 
+    //! Return machine parameter info
+    static LapackMachineParams machineParams();
 
-    //! Print all of the machine parameters by dlamch
-    static void print_machine_parameters();
-
-    //! Print information about the lapack version/package
-    static void print_lapack_version();
+    //! Print lapack info
+    static std::string info();
 };
 
 

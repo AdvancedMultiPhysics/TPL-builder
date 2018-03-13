@@ -1,6 +1,9 @@
 #define NOMINMAX
 #include "LapackWrappers.h"
+#include "blas_lapack.h"
+
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <complex>
 #include <cstdio>
@@ -8,6 +11,8 @@
 #include <limits>
 #include <random>
 #include <string.h>
+#include <string>
+#include <thread>
 
 
 // Choose the OS
@@ -45,8 +50,26 @@
         }                                    \
     } while ( 0 )
 
+static char MKL_ENV[]      = "MKL_NUM_THREADS=1";
+int global_set_mkl_threads = putenv( MKL_ENV );
 
-int global_set_mkl_threads = putenv( "MKL_NUM_THREADS=1" );
+
+// Function to replace all instances of a string with another
+static inline std::string strrep(
+    const std::string &in, const std::string &s, const std::string &r )
+{
+    std::string str( in );
+    size_t i = 0;
+    while ( i < str.length() ) {
+        i = str.find( s, i );
+        if ( i == std::string::npos ) {
+            break;
+        }
+        str.replace( i, s.length(), r );
+        i += r.length();
+    }
+    return str;
+}
 
 
 // Choose precision to perfom calculations
@@ -950,47 +973,104 @@ static bool test_getri( int N, TYPE &error )
 
 
 /******************************************************************
- * Print all of the machine parameters by lamch                   *
+ * Set the vendor string                                           *
+ ******************************************************************/
+// clang-format off
+#ifdef USE_ATLAS
+    static constexpr char LapackVendor[] = "ATLAS";
+#elif defined( USE_ACML )
+    static constexpr char LapackVendor[] = "ACML";
+#elif defined( USE_MKL )
+    static constexpr char LapackVendor[] = "MKL";
+#elif defined( USE_MATLAB_LAPACK )
+    static constexpr char LapackVendor[] = "MATLAB LAPACK";
+#elif defined( USE_VECLIB )
+    static constexpr char LapackVendor[] = "VECLIB";
+#else
+    static constexpr char LapackVendor[] = "Unknown";
+#endif
+// clang-format on
+
+
+/******************************************************************
+ * Get the machine parameters by lamch                             *
  ******************************************************************/
 template<typename TYPE>
-void Lapack<TYPE>::print_machine_parameters()
+LapackMachineParams Lapack<TYPE>::machineParams()
 {
-    printf( "eps   = %13.6e    relative machine precision\n", Lapack<TYPE>::lamch( 'E' ) );
-    printf( "sfmin = %13.6e    safe minimum\n", Lapack<TYPE>::lamch( 'S' ) );
-    printf( "base  = %13.6e    base of the machine\n", Lapack<TYPE>::lamch( 'B' ) );
-    printf( "prec  = %13.6e    eps*base\n", Lapack<TYPE>::lamch( 'P' ) );
-    printf( "t     = %13.6e    number of digits in the mantissa\n", Lapack<TYPE>::lamch( 'N' ) );
-    printf( "rnd   = %13.6e    1.0 when rounding occurs in addition, 0.0 otherwise\n",
-        Lapack<TYPE>::lamch( 'R' ) );
-    printf( "emin  = %13.6e    minimum exponent before underflow\n", Lapack<TYPE>::lamch( 'M' ) );
-    printf(
-        "rmin  = %13.6e    underflow threshold - base**(emin-1)\n", Lapack<TYPE>::lamch( 'U' ) );
-    printf( "emax  = %13.6e    largest exponent before overflow\n", Lapack<TYPE>::lamch( 'L' ) );
-    printf( "rmax  = %13.6e    overflow threshold - (base**emax)*(1-eps)\n",
-        Lapack<TYPE>::lamch( 'O' ) );
+    LapackMachineParams data;
+    data.eps   = Lapack<TYPE>::lamch( 'E' );
+    data.sfmin = Lapack<TYPE>::lamch( 'S' );
+    data.base  = Lapack<TYPE>::lamch( 'B' );
+    data.prec  = Lapack<TYPE>::lamch( 'P' );
+    data.t     = Lapack<TYPE>::lamch( 'N' );
+    data.rnd   = Lapack<TYPE>::lamch( 'R' );
+    data.emin  = Lapack<TYPE>::lamch( 'M' );
+    data.rmin  = Lapack<TYPE>::lamch( 'U' );
+    data.emax  = Lapack<TYPE>::lamch( 'L' );
+    data.rmax  = Lapack<TYPE>::lamch( 'O' );
+    return data;
 }
-template void Lapack<double>::print_machine_parameters();
-template void Lapack<float>::print_machine_parameters();
+template LapackMachineParams Lapack<double>::machineParams();
+template LapackMachineParams Lapack<float>::machineParams();
+std::string LapackMachineParams::print() const
+{
+    char msg[1000];
+    char *tmp = msg;
+    tmp += sprintf( tmp, "  eps   = %-13.6e    relative machine precision\n", eps );
+    tmp += sprintf( tmp, "  sfmin = %-13.6e    safe minimum\n", sfmin );
+    tmp += sprintf( tmp, "  base  = %-11i      base of the machine\n", base );
+    tmp += sprintf( tmp, "  prec  = %-13.6e    eps*base\n", prec );
+    tmp += sprintf( tmp, "  t     = %-11i      number of digits in the mantissa\n", t );
+    tmp += sprintf( tmp, "  rnd   = %-11i      1 when rounding occurs in addition, 0 otherwise\n",
+        rnd ? 1 : 0 );
+    tmp += sprintf( tmp, "  emin  = %-11i      minimum exponent before underflow\n", emin );
+    tmp += sprintf( tmp, "  rmin  = %-13.6e    underflow threshold - base**(emin-1)\n", rmin );
+    tmp += sprintf( tmp, "  emax  = %-11i      largest exponent before overflow\n", emax );
+    tmp += sprintf( tmp, "  rmax  = %-13.6e    overflow threshold - (base**emax)*(1-eps)\n", rmax );
+    return std::string( msg );
+}
+
+
+/******************************************************************
+ * Print the lapack information                                    *
+ ******************************************************************/
 template<typename TYPE>
-void Lapack<TYPE>::print_lapack_version()
+std::string Lapack<TYPE>::info()
 {
-#ifdef USE_ATLAS
-    printf( "Using ATLAS\n" );
-#elif defined( USE_ACML )
-    printf( "Using ACML:\n" );
+    // Print the vendor info
+    std::string msg( LapackVendor );
+    msg += "\n";
+    // Get vendor specific output (capture stdout)
+    fflush( stdout ); // clean everything first
+    char buffer[2048];
+    memset( buffer, 0, sizeof( buffer ) );
+    auto out = dup( STDOUT_FILENO );
+    freopen( "NUL", "a", stdout );
+    setvbuf( stdout, buffer, _IOFBF, 2048 );
+#ifdef USE_ACML
     acmlinfo();
-#elif defined( USE_MKL )
-    printf( "Using MKL\n" );
-#elif defined( USE_MATLAB_LAPACK )
-    printf( "Using MATLAB LAPACK\n" );
-#elif defined( USE_VECLIB )
-    printf( "Using VECLIB\n" );
-#else
-    printf( "Using unknown LAPACK library\n" );
 #endif
+    freopen( "NUL", "a", stdout );
+    dup2( out, STDOUT_FILENO );
+    setvbuf( stdout, NULL, _IONBF, 2048 );
+    msg += "  " + strrep( buffer, "\n", "\n  " );
+    while ( !msg.empty() ) {
+        char tmp = msg.back();
+        if ( tmp > 32 && tmp != ' ' )
+            break;
+        msg.pop_back();
+    }
+    msg += "\n";
+    // Print the machine specific parameters
+    msg += "Double precision machine parameters\n";
+    msg += Lapack<double>::machineParams().print();
+    msg += "Single precision machine parameters\n";
+    msg += Lapack<float>::machineParams().print();
+    return msg;
 }
-template void Lapack<double>::print_lapack_version();
-template void Lapack<float>::print_lapack_version();
+template std::string Lapack<double>::info();
+template std::string Lapack<float>::info();
 
 
 /******************************************************************

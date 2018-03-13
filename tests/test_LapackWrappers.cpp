@@ -38,15 +38,8 @@ int main( int, char *[] )
     // Store the number of errors
     int N_errors = 0;
 
-    // Print the lapack version
-    Lapack<double>::print_lapack_version();
-    printf("\n");
-
-    // Print the machine specifics
-    printf( "\nDouble precision machine parameters\n" );
-    Lapack<double>::print_machine_parameters();
-    printf( "\nSingle precision machine parameters\n" );
-    Lapack<float>::print_machine_parameters();
+    // Print the lapack information
+    std::cout << Lapack<double>::info();
 
     // Run the basic tests
     printf( "\nRunning double precision basic tests\n" );

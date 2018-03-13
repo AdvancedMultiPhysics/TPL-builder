@@ -352,7 +352,7 @@ void Lapack<double>::gbsv( int N, int KL, int KU, int NRHS, double *AB, int LDAB
     for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
     delete[] IPIVp;
-    INFO = static_cast<int>( INFOp );
+    INFO         = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
 #endif
@@ -363,6 +363,10 @@ void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &IN
 {
 #ifdef USE_ATLAS
     INFO = clapack_dgetrf( CblasColMajor, M, N, A, LDA, IPIV );
+#elif defined( USE_ACML )
+    d_mutex.lock();
+    FORTRAN_WRAPPER(::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
+    d_mutex.unlock();
 #elif defined( USE_VECLIB )
     FORTRAN_WRAPPER(::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
 #elif defined( USE_OPENBLAS )
@@ -374,7 +378,7 @@ void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &IN
     for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
     delete[] IPIVp;
-    INFO             = static_cast<int>( INFOp );
+    INFO = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER(::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
 #endif
