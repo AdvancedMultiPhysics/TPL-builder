@@ -294,7 +294,8 @@ int main( int argc, char *argv[] )
         std::thread thread2( sleep_ms, 1000 );
         sleep_ms( 50 ); // Give threads time to start
         auto thread_ids_test = StackTrace::activeThreads();
-        std::set<std::thread::native_handle_type> thread_ids;
+        std::set<std::thread::native_handle_type> self, thread_ids;
+        self.insert( StackTrace::thisThread() );
         thread_ids.insert( StackTrace::thisThread() );
         thread_ids.insert( thread1.native_handle() );
         thread_ids.insert( thread2.native_handle() );
@@ -302,8 +303,10 @@ int main( int argc, char *argv[] )
         thread2.join();
         if ( thread_ids == thread_ids_test )
             passes.push_back( "StackTrace::activeThreads" );
+        else if ( thread_ids_test == self )
+            expected_failure.push_back( "StackTrace::activeThreads only is able to return self" );
         else
-            expected_failure.push_back( "StackTrace::activeThreads" );
+            failure.push_back( "StackTrace::activeThreads" );
 
         // Test getting the symbols
         std::vector<void *> address;

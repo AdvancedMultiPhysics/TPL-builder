@@ -177,6 +177,7 @@ IF ( CMAKE_BUILD_TRILINOS )
     EXTERNALPROJECT_ADD(
         TRILINOS
         URL                 "${TRILINOS_CMAKE_URL}"
+        TIMEOUT             300
         DOWNLOAD_DIR        "${TRILINOS_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${TRILINOS_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
