@@ -120,7 +120,13 @@ STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 
 
 # Add the StackTrace
-SET( TPL_LIST "STACKTRACE;${TPL_LIST}" )
+IF ( ";${TPL_LIST};" MATCHES ";TIMER;" )
+    STRING( REPLACE ";TIMER;" ";TIMER;STACKTRACE;" TPL_LIST "?;${TPL_LIST};?" )
+    STRING( REPLACE "?;" "" TPL_LIST "${TPL_LIST}" )
+    STRING( REPLACE ";?" "" TPL_LIST "${TPL_LIST}" )
+ELSE()
+    SET( TPL_LIST "STACKTRACE;${TPL_LIST}" )
+ENDIF()
 
 
 # Add the lapack wrappers if LAPACK
