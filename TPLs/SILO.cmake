@@ -7,7 +7,7 @@
 # Intialize download/src/install vars
 SET( SILO_BUILD_DIR "${CMAKE_BINARY_DIR}/SILO-prefix/src/SILO-build" )
 IF ( SILO_URL ) 
-    MESSAGE_TPL("   SILO_URL = ${SILO_URL}")
+    MESSAGE("   SILO_URL = ${SILO_URL}")
     SET( SILO_SRC_DIR "${CMAKE_BINARY_DIR}/SILO-prefix/src/SILO-src" )
     SET( SILO_CMAKE_URL            "${SILO_URL}"        )
     SET( SILO_CMAKE_DOWNLOAD_DIR   "${SILO_SRC_DIR}"    )
@@ -16,7 +16,7 @@ IF ( SILO_URL )
     SET( CMAKE_BUILD_SILO TRUE )
 ELSEIF ( SILO_SRC_DIR )
     VERIFY_PATH("${SILO_SRC_DIR}")
-    MESSAGE_TPL("   SILO_SRC_DIR = ${SILO_SRC_DIR}")
+    MESSAGE("   SILO_SRC_DIR = ${SILO_SRC_DIR}")
     SET( SILO_CMAKE_URL            ""                   )
     SET( SILO_CMAKE_DOWNLOAD_DIR   ""                   )
     SET( SILO_CMAKE_SOURCE_DIR     "${SILO_SRC_DIR}"    )
@@ -29,8 +29,7 @@ ELSE()
     MESSAGE(FATAL_ERROR "Please specify SILO_SRC_DIR, SILO_URL, or SILO_INSTALL_DIR")
 ENDIF()
 SET( SILO_INSTALL_DIR "${SILO_CMAKE_INSTALL_DIR}" )
-MESSAGE_TPL( "   SILO_INSTALL_DIR = ${SILO_INSTALL_DIR}" )
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(SILO_INSTALL_DIR \"${SILO_INSTALL_DIR}\")\n" )
+MESSAGE( "   SILO_INSTALL_DIR = ${SILO_INSTALL_DIR}" )
 
 
 # Configure silo

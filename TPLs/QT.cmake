@@ -7,7 +7,7 @@
 # Intialize download/src/install vars
 SET( QT_BUILD_DIR "${CMAKE_BINARY_DIR}/QT-prefix/src/QT-build" )
 IF ( QT_URL ) 
-    MESSAGE_TPL("   QT_URL = ${QT_URL}")
+    MESSAGE("   QT_URL = ${QT_URL}")
     SET( QT_CMAKE_URL            "${QT_URL}"     )
     SET( QT_CMAKE_DOWNLOAD_DIR   "${QT_BUILD_DIR}" )
     SET( QT_CMAKE_SOURCE_DIR     "${QT_BUILD_DIR}" )
@@ -15,7 +15,7 @@ IF ( QT_URL )
     SET( CMAKE_BUILD_QT TRUE )
 ELSEIF ( QT_SRC_DIR )
     VERIFY_PATH("${QT_SRC_DIR}")
-    MESSAGE_TPL("   QT_SRC_DIR = ${QT_SRC_DIR}")
+    MESSAGE("   QT_SRC_DIR = ${QT_SRC_DIR}")
     SET( QT_CMAKE_URL            "${QT_SRC_DIR}"   )
     SET( QT_CMAKE_DOWNLOAD_DIR   "${QT_BUILD_DIR}" )
     SET( QT_CMAKE_SOURCE_DIR     "${QT_BUILD_DIR}" )
@@ -28,8 +28,7 @@ ELSE()
     MESSAGE(FATAL_ERROR "Please specify QT_SRC_DIR, QT_URL, or QT_INSTALL_DIR")
 ENDIF()
 SET( QT_INSTALL_DIR "${QT_CMAKE_INSTALL_DIR}" )
-MESSAGE_TPL( "   QT_INSTALL_DIR = ${QT_INSTALL_DIR}" )
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(QT_INSTALL_DIR \"${QT_INSTALL_DIR}\")\n" )
+MESSAGE( "   QT_INSTALL_DIR = ${QT_INSTALL_DIR}" )
 
 
 # Configure qt

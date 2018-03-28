@@ -7,7 +7,7 @@
 # Intialize download/src/install vars
 SET( AMP_BUILD_DIR "${CMAKE_BINARY_DIR}/AMP-prefix/src/AMP-build" )
 IF ( AMP_URL ) 
-    MESSAGE_TPL("   AMP_URL = ${AMP_URL}")
+    MESSAGE("   AMP_URL = ${AMP_URL}")
     SET( AMP_SRC_DIR "${CMAKE_BINARY_DIR}/AMP-prefix/src/AMP-src" )
     SET( AMP_CMAKE_URL            "${AMP_URL}"     )
     SET( AMP_CMAKE_DOWNLOAD_DIR   "${AMP_SRC_DIR}" )
@@ -16,7 +16,7 @@ IF ( AMP_URL )
     SET( CMAKE_BUILD_AMP TRUE )
 ELSEIF ( AMP_SRC_DIR )
     VERIFY_PATH("${AMP_SRC_DIR}")
-    MESSAGE_TPL("   AMP_SRC_DIR = ${AMP_SRC_DIR}")
+    MESSAGE("   AMP_SRC_DIR = ${AMP_SRC_DIR}")
     SET( AMP_CMAKE_URL            ""                  )
     SET( AMP_CMAKE_DOWNLOAD_DIR   ""                  )
     SET( AMP_CMAKE_SOURCE_DIR     "${AMP_SRC_DIR}" )
@@ -29,8 +29,7 @@ ELSE()
     MESSAGE(FATAL_ERROR "Please specify AMP_SRC_DIR, AMP_URL, or AMP_INSTALL_DIR")
 ENDIF()
 SET( AMP_INSTALL_DIR "${AMP_CMAKE_INSTALL_DIR}" )
-MESSAGE_TPL( "   AMP_INSTALL_DIR = ${AMP_INSTALL_DIR}" )
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "SET(AMP_INSTALL_DIR \"${AMP_INSTALL_DIR}\")\n" )
+MESSAGE( "   AMP_INSTALL_DIR = ${AMP_INSTALL_DIR}" )
 
 
 # Configure amp

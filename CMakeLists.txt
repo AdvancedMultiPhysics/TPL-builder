@@ -34,7 +34,6 @@ ENDIF()
 # Set the project name
 PROJECT( TPLS )
 
-
 # Set the install path
 IF( PREFIX )
     SET( CMAKE_INSTALL_PREFIX ${PREFIX} )
@@ -103,11 +102,6 @@ IF ( USE_MPI AND NOT MPIEXEC )
 ENDIF()
 
 
-# Create a cmake file that can be included from other projects (obsolete)
-FILE( WRITE "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# This file sets cmake variables that specify the locations of TPLs\n")
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# It may also include comments for record information on how the TPLs were compiled\n")
-
-
 # SET the global compile and link flags
 SET_COMPILER_FLAGS()
 
@@ -135,11 +129,7 @@ IF ( ";${TPL_LIST};" MATCHES ";LAPACK;" )
     STRING( REPLACE "?;" "" TPL_LIST "${TPL_LIST}" )
     STRING( REPLACE ";?" "" TPL_LIST "${TPL_LIST}" )
 ENDIF()
-
-
-# Save the TPL list
 MESSAGE( "TPL_LIST = ${TPL_LIST}" )
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n# TPL_LIST\nSET(TPL_LIST \"${TPL_LIST}\")\n")
 
 
 # Set TPL defaults
@@ -166,12 +156,10 @@ ENDIF()
 # Configure TPLs
 ADD_CUSTOM_TARGET( logs ALL )
 FOREACH( TPL ${TPL_LIST} )
-    FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
-    MESSAGE_TPL("Configuring ${TPL}")
+    MESSAGE("Configuring ${TPL}")
     INCLUDE(TPLs/${TPL}.cmake)
     SET( ${TPL_LIST}_ENABLE true )
 ENDFOREACH()
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
 
 
 # Add build-test target to print results of build process
@@ -182,7 +170,6 @@ SET_TESTS_PROPERTIES( echo-build PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_B
 FOREACH( TPL ${TPL_LIST} )
     ADD_BUILD_TEST( ${TPL} )
 ENDFOREACH()
-FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "\n")
 
 
 # Add distclean

@@ -14,7 +14,6 @@ MACRO( ADD_DISTCLEAN )
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/macros.cmake"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/LapackWrappers"
-        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLs.cmake"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/tests"
         COMMAND ${CMAKE_COMMAND} -E remove_directory tmp
         COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
@@ -135,13 +134,6 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
         WORKING_DIRECTORY   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
     )
     ADD_DEPENDENCIES( logs log-${TPL} )
-ENDMACRO()
-
-
-# Macro to write a message and record it in TPLs.cmake
-MACRO( MESSAGE_TPL MSG )
-    MESSAGE( "${MSG}" )
-    FILE( APPEND "${CMAKE_INSTALL_PREFIX}/TPLs.cmake" "# ${MSG}\n" )
 ENDMACRO()
 
 
