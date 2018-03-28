@@ -1597,7 +1597,7 @@ static void term_func_abort( int sig )
     StackTrace::cleanupStackTrace( err.stack );
     abort_fun( err );
 }
-static std::set<int> signals_set = std::set<int>();
+static bool signals_set[256] = { false };
 static void term_func()
 {
     auto err = rethrow();
@@ -1609,22 +1609,25 @@ static void null_term_func()
 }
 void StackTrace::clearSignal( int sig )
 {
-    if ( signals_set.find( sig ) != signals_set.end() ) {
+    if ( signals_set[sig] ) {
         signal( sig, SIG_DFL );
-        signals_set.erase( sig );
+        signals_set[sig] = false;
     }
 }
 void StackTrace::clearSignals()
 {
-    for ( auto sig : signals_set )
-        signal( sig, SIG_DFL );
-    signals_set.clear();
+    for (size_t i=0; i<sizeof(signals_set); i++) {
+        if ( signals_set[i] ) {
+            signal( i, SIG_DFL );
+            signals_set[i] = false;
+        }
+    }
 }
 void StackTrace::setSignals( const std::vector<int> &signals, void ( *handler )( int ) )
 {
     for ( auto sig : signals ) {
         signal( sig, handler );
-        signals_set.insert( sig );
+        signals_set[sig] = true;
     }
 }
 void StackTrace::setErrorHandler( std::function<void( const StackTrace::abort_error& )> abort )
