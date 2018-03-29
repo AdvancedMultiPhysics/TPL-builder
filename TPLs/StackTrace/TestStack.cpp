@@ -101,10 +101,10 @@ void testSignal( std::vector<std::string> &passes, std::vector<std::string> &fai
         auto signals = StackTrace::allSignalsToCatch();
         // Identify the signals
         std::cout << "\nIdentifying signals\n";
-        for ( int i = 1; i <= std::max(64,signals.back()); i++ )
+        for ( int i = 1; i <= std::max( 64, signals.back() ); i++ )
             std::cout << "  " << i << ": " << StackTrace::signalName( i ) << std::endl;
         // Test setting/catching different signals
-        bool pass    = true;
+        bool pass = true;
         StackTrace::setSignals( signals, handleSignal );
         for ( auto sig : signals ) {
             raise( sig );
@@ -123,9 +123,8 @@ void testSignal( std::vector<std::string> &passes, std::vector<std::string> &fai
 
 
 // Test current stack trace
-void testCurrentStack( std::vector<std::string> &passes,
-                       std::vector<std::string> &failure,
-                       bool &decoded_symbols )
+void testCurrentStack(
+    std::vector<std::string> &passes, std::vector<std::string> &failure, bool &decoded_symbols )
 {
     barrier();
     const int rank  = getRank();
@@ -162,9 +161,8 @@ void testCurrentStack( std::vector<std::string> &passes,
 
 
 // Test stack trace of another thread
-void testThreadStack( std::vector<std::string> &passes,
-                      std::vector<std::string> &failure,
-                      bool decoded_symbols )
+void testThreadStack(
+    std::vector<std::string> &passes, std::vector<std::string> &failure, bool decoded_symbols )
 {
     barrier();
     const int rank = getRank();
@@ -231,10 +229,8 @@ void testFullStack( std::vector<std::string> &, std::vector<std::string> & )
 
 
 // Test stack trace of another thread
-void testGlobalStack( std::vector<std::string> &,
-                      std::vector<std::string> &,
-                      bool all,
-                      const std::basic_string<wchar_t> & = std::basic_string<wchar_t>() )
+void testGlobalStack( std::vector<std::string> &, std::vector<std::string> &, bool all,
+    const std::basic_string<wchar_t> & = std::basic_string<wchar_t>() )
 {
     barrier();
     const int rank = getRank();

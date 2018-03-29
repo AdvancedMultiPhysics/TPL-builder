@@ -91,15 +91,16 @@ static std::shared_ptr<std::thread> globalMonitorThread;
 
 
 // Utility to break a string by a newline
-static inline std::vector<std::string> breakString( const std::string &str )
+static inline std::vector<char *> breakString( char *str )
 {
-    std::vector<std::string> strvec;
-    size_t i1 = 0;
-    size_t i2 = std::min( str.find( '\n', i1 ), str.length() );
-    while ( i1 < str.length() ) {
-        strvec.push_back( str.substr( i1, i2 - i1 ) );
-        i1 = i2 + 1;
-        i2 = std::min( str.find( '\n', i1 ), str.length() );
+    std::vector<char *> strvec;
+    strvec.reserve( 128 );
+    for ( size_t i = 0; str[i] != 0; i++ ) {
+        if ( str[i] == '\n' ) {
+            str[i] = 0;
+            if ( str[i + 1] >= 32 )
+                strvec.push_back( &str[i + 1] );
+        }
     }
     return strvec;
 }
@@ -142,11 +143,8 @@ static inline void *subtractAddress( void *a, void *b )
 
 
 #ifdef USE_WINDOWS
-static BOOL __stdcall readProcMem( HANDLE hProcess,
-                                   DWORD64 qwBaseAddress,
-                                   PVOID lpBuffer,
-                                   DWORD nSize,
-                                   LPDWORD lpNumberOfBytesRead )
+static BOOL __stdcall readProcMem( HANDLE hProcess, DWORD64 qwBaseAddress, PVOID lpBuffer,
+    DWORD nSize, LPDWORD lpNumberOfBytesRead )
 {
     SIZE_T st;
     BOOL bRet = ReadProcessMemory( hProcess, (LPVOID) qwBaseAddress, lpBuffer, nSize, &st );
@@ -178,6 +176,24 @@ static inline const char *copy_out( size_t N, void *data, const char *ptr )
 {
     memcpy( data, ptr, N );
     return ptr + N;
+}
+
+
+/****************************************************************************
+ *  Utility functions to use std::vector like a set                          *
+ ****************************************************************************/
+template<class TYPE>
+static inline void erase( std::vector<TYPE> &x, TYPE y )
+{
+    x.erase( std::find( x.begin(), x.end(), y ) );
+}
+template<class TYPE>
+static inline void insert( std::vector<TYPE> &x, TYPE y )
+{
+    if ( std::find( x.begin(), x.end(), y ) == x.end() ) {
+        x.push_back( y );
+        std::sort( x.begin(), x.end() );
+    }
 }
 
 
@@ -243,8 +259,8 @@ int StackTrace::stack_info::getAddressWidth() const
         return 12;
     return 16;
 }
-std::string
-StackTrace::stack_info::print( int widthAddress, int widthObject, int widthFunction ) const
+std::string StackTrace::stack_info::print(
+    int widthAddress, int widthObject, int widthFunction ) const
 {
     char tmp1[64], tmp2[64];
     sprintf( tmp1, "0x%%0%illx:  ", widthAddress );
@@ -374,8 +390,8 @@ StackTrace::multi_stack_info::multi_stack_info( const std::vector<stack_info> &r
 {
     operator=( rhs );
 }
-StackTrace::multi_stack_info &StackTrace::multi_stack_info::
-operator=( const std::vector<stack_info> &rhs )
+StackTrace::multi_stack_info &StackTrace::multi_stack_info::operator=(
+    const std::vector<stack_info> &rhs )
 {
     clear();
     if ( rhs.empty() )
@@ -392,9 +408,8 @@ void StackTrace::multi_stack_info::clear()
     stack.clear();
     children.clear();
 }
-void StackTrace::multi_stack_info::print2( const std::string &prefix,
-                                           int w[3],
-                                           std::vector<std::string> &text ) const
+void StackTrace::multi_stack_info::print2(
+    const std::string &prefix, int w[3], std::vector<std::string> &text ) const
 {
     if ( stack == stack_info() ) {
         for ( const auto &child : children )
@@ -471,11 +486,8 @@ void StackTrace::multi_stack_info::add( size_t len, const stack_info *stack )
 /****************************************************************************
  *  abort_error                                                              *
  ****************************************************************************/
-StackTrace::abort_error::abort_error( ):
-    type(terminateType::unknown), line(-1), bytes(0)
-{
-}
-const char* StackTrace::abort_error::what() const noexcept
+StackTrace::abort_error::abort_error() : type( terminateType::unknown ), line( -1 ), bytes( 0 ) {}
+const char *StackTrace::abort_error::what() const noexcept
 {
     d_msg.clear();
     if ( type == terminateType::abort ) {
@@ -513,7 +525,7 @@ const char* StackTrace::abort_error::what() const noexcept
 /****************************************************************************
  *  Function to find an entry                                                *
  ****************************************************************************/
-template <class TYPE>
+template<class TYPE>
 inline size_t findfirst( const std::vector<TYPE> &X, TYPE Y )
 {
     if ( X.empty() )
@@ -611,13 +623,12 @@ static const global_symbols_struct &getSymbols2()
 #error Unknown OS using nm
 #endif
                 int code;
-                auto output = breakString( StackTrace::exec( cmd, code ) );
+                auto cmd_output = StackTrace::exec( cmd, code );
+                auto output     = breakString( (char *) cmd_output.data() );
                 for ( const auto &line : output ) {
-                    if ( line.empty() )
-                        continue;
                     if ( line[0] == ' ' )
                         continue;
-                    auto *a = const_cast<char *>( line.c_str() );
+                    auto *a = const_cast<char *>( line );
                     char *b = strchr( a, ' ' );
                     if ( b == nullptr )
                         continue;
@@ -648,9 +659,8 @@ static const global_symbols_struct &getSymbols2()
     }
     return data;
 }
-int StackTrace::getSymbols( std::vector<void *> &address,
-                            std::vector<char> &type,
-                            std::vector<std::string> &obj )
+int StackTrace::getSymbols(
+    std::vector<void *> &address, std::vector<char> &type, std::vector<std::string> &obj )
 {
     const global_symbols_struct &data = getSymbols2();
     address                           = data.address;
@@ -727,11 +737,8 @@ using uint_p = uint64_t;
 typedef unsigned long uint_p;
 #endif
 #if defined( USE_LINUX ) || defined( USE_MAC )
-static inline std::string generateCmd( const std::string &s1,
-                                       const std::string &s2,
-                                       const std::string &s3,
-                                       std::vector<void *> addresses,
-                                       const std::string &s4 )
+static inline std::string generateCmd( const std::string &s1, const std::string &s2,
+    const std::string &s3, std::vector<void *> addresses, const std::string &s4 )
 {
     std::string cmd = s1 + s2 + s3;
     for ( auto &addresse : addresses ) {
@@ -764,7 +771,7 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
         // Get the function/line/file
         int code;
         auto cmd_output = StackTrace::exec( cmd, code );
-        auto output = breakString( cmd_output );
+        auto output = breakString( (char*) cmd_output.data() );
         if ( output.size() != 2*info.size() )
             return;
         // Add the results to info
@@ -773,7 +780,7 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
             if ( info[i]->function.empty() )
                 info[i]->function = output[2*i+0];
             // get file and line
-            const char *buf = output[2*i+1].c_str();
+            const char *buf = output[2*i+1];
             if ( buf[0] != '?' && buf[0] != 0 ) {
                 size_t j = 0;
                 for ( j = 0; j < 4095 && buf[j] != ':'; j++ ) {
@@ -798,7 +805,7 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
         // Get the function/line/file
         int code;
         auto cmd_output = StackTrace::exec( cmd, code );
-        auto output = breakString( cmd_output );
+        auto output = breakString( (char*) cmd_output.data() );
         if ( output.size() != info.size() )
             return;
         // Parse the output for function, file and line info
@@ -817,15 +824,22 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
 }
 static void getFileAndLine( std::vector<StackTrace::stack_info> &info )
 {
-    // Build a list of stack elements for each object
-    std::map<std::string,std::vector<StackTrace::stack_info*>> obj_map;
-    for (auto & i : info) {
-        auto& list = obj_map[i.object];
-        list.emplace_back( &i );
-    }
+    // Get a list of objects
+    std::vector<std::string> objects;
+    objects.reserve( 1024 );
+    for ( const auto & tmp : info )
+        insert( objects, tmp.object );
     // For each object, get the file/line numbers for all entries
-    for ( auto& entry : obj_map ) 
-        getFileAndLineObject( entry.second );
+    std::vector<StackTrace::stack_info*> list;
+    list.reserve( info.size() );
+    for ( const auto & object : objects ) {
+        list.clear();
+        for (auto & tmp : info) {
+            if ( tmp.object == object )
+                list.push_back( &tmp );
+        }
+        getFileAndLineObject( list );
+    }
 }
 // Try to use the global symbols to decode info about the stack
 static void getDataFromGlobalSymbols( StackTrace::stack_info &info )
@@ -1139,19 +1153,21 @@ std::set<std::thread::native_handle_type> StackTrace::activeThreads( )
 {
     std::set<std::thread::native_handle_type> threads;
     #if defined( USE_LINUX )
-        std::set<int> tid;
+        std::vector<int> tid;
+        tid.reserve( 128 );
         int pid = getpid();
         char cmd[128];
         sprintf( cmd, "ps -T -p %i", pid );
         signal( SIGCHLD, SIG_DFL );     // Clear child exited
         int code;
-        auto output = breakString( exec( cmd, code ) );
+        auto cmd_out = StackTrace::exec( cmd, code );
+        auto output = breakString( (char*) cmd_out.data() );
         for ( const auto& line : output ) {
             int tid2 = get_tid( pid, line );
             if ( tid2 != -1 )
-                tid.insert( tid2 );
+                insert( tid, tid2 );
         }
-        tid.erase( syscall(SYS_gettid) );
+        erase<int>( tid, syscall(SYS_gettid) );
         signal( thread_callstack_signal, _activeThreads_signal_handler );
         for ( auto tid2 : tid ) {
             thread_backtrace_mutex.lock();
@@ -1253,19 +1269,19 @@ static std::vector<std::vector<StackTrace::stack_info>> generateStacks(
     const std::vector<std::vector<void *>> &trace )
 {
     // Get the stack data for all pointers
-    std::set<void *> addresses_set;
+    std::vector<void *> addresses;
+    addresses.reserve( 1024 );
     for ( const auto &tmp : trace ) {
         for ( auto ptr : tmp )
-            addresses_set.insert( ptr );
+            insert( addresses, ptr );
     }
-    std::vector<void *> addresses( addresses_set.begin(), addresses_set.end() );
     auto stack_data = StackTrace::getStackInfo( addresses );
     std::map<void *, StackTrace::stack_info> map_data;
     for ( size_t i = 0; i < addresses.size(); i++ )
         map_data.insert( std::make_pair( addresses[i], stack_data[i] ) );
     // Create the stack traces
     std::vector<std::vector<StackTrace::stack_info>> stack( trace.size() );
-    for ( size_t i=0; i<trace.size(); i++ ) {
+    for ( size_t i = 0; i < trace.size(); i++ ) {
         // Create the stack for the given thread trace
         stack[i].resize( trace[i].size() );
         for ( size_t j = 0; j < trace[i].size(); j++ )
@@ -1273,8 +1289,8 @@ static std::vector<std::vector<StackTrace::stack_info>> generateStacks(
     }
     return stack;
 }
-static StackTrace::multi_stack_info
-generateMultiStack( const std::vector<std::vector<void *>> &trace )
+static StackTrace::multi_stack_info generateMultiStack(
+    const std::vector<std::vector<void *>> &trace )
 {
     // Get the stack data for all pointers
     auto stack = generateStacks( trace );
@@ -1530,22 +1546,26 @@ void StackTrace::LoadModules()
 std::string StackTrace::signalName( int sig ) { return std::string( strsignal( sig ) ); }
 std::vector<int> StackTrace::allSignalsToCatch()
 {
-    std::set<int> signals;
-    for ( int i = 1; i < 32; i++ )
-        signals.insert( i );
-    for ( int i = SIGRTMIN; i <= SIGRTMAX; i++ )
-        signals.insert( i );
-    signals.erase( SIGKILL );
-    signals.erase( SIGSTOP );
-    return std::vector<int>( signals.begin(), signals.end() );
+    std::vector<int> signals;
+    signals.reserve( SIGRTMAX );
+    for ( int i = 1; i < 32; i++ ) {
+        if ( i == SIGKILL || i == SIGSTOP )
+            continue;
+        signals.push_back( i );
+    }
+    for ( int i = SIGRTMIN; i <= SIGRTMAX; i++ ) {
+        if ( i == SIGKILL || i == SIGSTOP )
+            continue;
+        signals.push_back( i );
+    }
+    return signals;
 }
 std::vector<int> StackTrace::defaultSignalsToCatch()
 {
-    auto tmp = allSignalsToCatch();
-    std::set<int> signals( tmp.begin(), tmp.end() );
-    signals.erase( SIGWINCH ); // Don't catch window changed by default
-    signals.erase( SIGCONT );  // Don't catch continue by default
-    return std::vector<int>( signals.begin(), signals.end() );
+    auto signals = allSignalsToCatch();
+    erase( signals, SIGWINCH ); // Don't catch window changed by default
+    erase( signals, SIGCONT );  // Don't catch continue by default
+    return signals;
 }
 
 
@@ -1590,10 +1610,10 @@ static StackTrace::abort_error rethrow()
 static void term_func_abort( int sig )
 {
     StackTrace::abort_error err;
-    err.type = StackTrace::terminateType::signal;
+    err.type   = StackTrace::terminateType::signal;
     err.signal = sig;
-    err.bytes = StackTrace::Utilities::getMemoryUsage();
-    err.stack = StackTrace::getGlobalCallStacks();
+    err.bytes  = StackTrace::Utilities::getMemoryUsage();
+    err.stack  = StackTrace::getGlobalCallStacks();
     StackTrace::cleanupStackTrace( err.stack );
     abort_fun( err );
 }
@@ -1604,9 +1624,7 @@ static void term_func()
     StackTrace::clearSignals();
     abort_fun( err );
 }
-static void null_term_func()
-{
-}
+static void null_term_func() {}
 void StackTrace::clearSignal( int sig )
 {
     if ( signals_set[sig] ) {
@@ -1616,7 +1634,7 @@ void StackTrace::clearSignal( int sig )
 }
 void StackTrace::clearSignals()
 {
-    for (size_t i=0; i<sizeof(signals_set); i++) {
+    for ( size_t i = 0; i < sizeof( signals_set ); i++ ) {
         if ( signals_set[i] ) {
             signal( i, SIG_DFL );
             signals_set[i] = false;
@@ -1630,16 +1648,16 @@ void StackTrace::setSignals( const std::vector<int> &signals, void ( *handler )(
         signals_set[sig] = true;
     }
 }
-void StackTrace::setErrorHandler( std::function<void( const StackTrace::abort_error& )> abort )
+void StackTrace::setErrorHandler( std::function<void( const StackTrace::abort_error & )> abort )
 {
     abort_fun = abort;
     std::set_terminate( term_func );
     setSignals( defaultSignalsToCatch(), &term_func_abort );
     std::set_unexpected( term_func );
 }
-void StackTrace::clearErrorHandler( )
+void StackTrace::clearErrorHandler()
 {
-    abort_fun = [](const StackTrace::abort_error&) {};
+    abort_fun = []( const StackTrace::abort_error & ) {};
     std::set_terminate( null_term_func );
     clearSignals();
     std::set_unexpected( null_term_func );
@@ -1647,8 +1665,8 @@ void StackTrace::clearErrorHandler( )
 
 
 /****************************************************************************
-*  Functions to handle MPI errors                                           *
-****************************************************************************/
+ *  Functions to handle MPI errors                                           *
+ ****************************************************************************/
 #ifdef USE_MPI
 static std::shared_ptr<MPI_Errhandler> mpierr;
 static void MPI_error_handler_fun( MPI_Comm *comm, int *err, ... )
@@ -1658,21 +1676,21 @@ static void MPI_error_handler_fun( MPI_Comm *comm, int *err, ... )
         std::cerr << "Error invalid MPI_COMM_WORLD";
         exit( -1 );
     }
-    int msg_len = 0;
+    int msg_len        = 0;
     char message[1000] = { 0 };
     MPI_Error_string( *err, message, &msg_len );
     StackTrace::abort_error error;
     error.message = std::string( message );
-    error.type = StackTrace::terminateType::MPI;
-    error.bytes = StackTrace::Utilities::getMemoryUsage();
-    error.stack = StackTrace::getGlobalCallStacks();
+    error.type    = StackTrace::terminateType::MPI;
+    error.bytes   = StackTrace::Utilities::getMemoryUsage();
+    error.stack   = StackTrace::getGlobalCallStacks();
     StackTrace::cleanupStackTrace( error.stack );
     throw error;
 }
 void StackTrace::setMPIErrorHandler( MPI_Comm comm )
 {
     if ( mpierr.get() == nullptr ) {
-        mpierr = std::make_shared<MPI_Errhandler>( );
+        mpierr = std::make_shared<MPI_Errhandler>();
         MPI_Comm_create_errhandler( MPI_error_handler_fun, mpierr.get() );
     }
     MPI_Comm_set_errhandler( comm, *mpierr );
@@ -1685,12 +1703,8 @@ void StackTrace::clearMPIErrorHandler( MPI_Comm comm )
     MPI_Comm_set_errhandler( comm, MPI_ERRORS_ARE_FATAL );
 }
 #else
-void StackTrace::setMPIErrorHandler( MPI_Comm )
-{
-}
-void StackTrace::clearMPIErrorHandler( MPI_Comm )
-{
-}
+void StackTrace::setMPIErrorHandler( MPI_Comm ) {}
+void StackTrace::clearMPIErrorHandler( MPI_Comm ) {}
 #endif
 
 
@@ -1698,7 +1712,7 @@ void StackTrace::clearMPIErrorHandler( MPI_Comm )
  *  Global call stack functionallity                                         *
  ****************************************************************************/
 #ifdef USE_MPI
-static MPI_Comm globalCommForGlobalCommStack = MPI_COMM_NULL;
+static MPI_Comm globalCommForGlobalCommStack  = MPI_COMM_NULL;
 static volatile int globalMonitorThreadStatus = -1;
 static void runGlobalMonitorThread()
 {
@@ -1725,9 +1739,9 @@ static void runGlobalMonitorThread()
             if ( threads.empty() )
                 continue;
             // Get the trace of each thread
-            std::vector<std::vector<void*>> trace(threads.size());
+            std::vector<std::vector<void *>> trace( threads.size() );
             auto it = threads.begin();
-            for ( size_t i=0; i<threads.size(); i++, ++it ) {
+            for ( size_t i = 0; i < threads.size(); i++, ++it ) {
                 trace[i].resize( 1000, nullptr );
                 size_t count = backtrace_thread( *it, trace[i].data(), trace[i].size() );
                 trace[i].resize( count );
@@ -1746,27 +1760,41 @@ static void runGlobalMonitorThread()
 }
 void StackTrace::globalCallStackInitialize( MPI_Comm comm )
 {
+    globalMonitorThreadStatus = 3;
     // Check that we have the necessary MPI thread support
+    int mpi_initialized = 0;
+    MPI_Initialized( &mpi_initialized );
+    if ( mpi_initialized == 0 ) {
+        printf( "Warning: MPI not initialized before calling globalCallStackInitialize\n" );
+        return;
+    }
+    int rank = 0;
+    MPI_Comm_rank( comm, &rank );
     int provided;
     MPI_Query_thread( &provided );
     if ( provided != MPI_THREAD_MULTIPLE ) {
-        printf( "Warning: getGlobalCallStacks requires support for MPI_THREAD_MULTIPLE\n" );
-        globalMonitorThreadStatus = 3;
+        if ( rank == 0 )
+            printf( "Warning: getGlobalCallStacks requires support for MPI_THREAD_MULTIPLE\n" );
         return;
     }
     // Check that we have support to get call stacks from threads
-    std::thread thread( StackTrace::Utilities::sleep_ms, 100 );
-    auto thread_ids = activeThreads();
-    thread.detach();
-    if ( thread_ids.size() == 1 ) {
-        printf( "Warning: getAllCallStacks not supported on this OS\n" );
-        globalCallStackFinalize();
-        globalMonitorThreadStatus = 3;
+    int N_threads = 0;
+    if ( rank == 0 ) {
+        std::thread thread( StackTrace::Utilities::sleep_ms, 500 );
+        std::this_thread::yield();
+        auto thread_ids = activeThreads();
+        N_threads       = thread_ids.size();
+        thread.detach();
+    }
+    MPI_Bcast( &N_threads, 1, MPI_INT, 0, comm );
+    if ( N_threads == 1 ) {
+        if ( rank == 0 )
+            printf( "Warning: getAllCallStacks not supported on this OS\n" );
         return;
     }
     // Create the communicator and initialize the helper thread
-    MPI_Comm_dup( comm, &globalCommForGlobalCommStack );
     globalMonitorThreadStatus = 1;
+    MPI_Comm_dup( comm, &globalCommForGlobalCommStack );
     globalMonitorThread.reset( new std::thread( runGlobalMonitorThread ) );
     std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
 }
@@ -1808,9 +1836,9 @@ StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
     }
     // Get the trace for the current process
     auto threads = StackTrace::activeThreads();
-    std::vector<std::vector<void*>> trace( threads.size() );
+    std::vector<std::vector<void *>> trace( threads.size() );
     auto it = threads.begin();
-    for ( size_t i=0; i<threads.size(); i++, ++it )
+    for ( size_t i = 0; i < threads.size(); i++, ++it )
         trace[i] = StackTrace::backtrace( *it );
     auto multistack = generateMultiStack( trace );
     // Recieve the backtrace for all processes/threads
@@ -1831,13 +1859,8 @@ StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
             int count;
             MPI_Get_count( &status, MPI_CHAR, &count );
             std::vector<char> data( count, 0 );
-            MPI_Recv( data.data(),
-                      count,
-                      MPI_CHAR,
-                      src_rank,
-                      tag,
-                      globalCommForGlobalCommStack,
-                      &status );
+            MPI_Recv( data.data(), count, MPI_CHAR, src_rank, tag, globalCommForGlobalCommStack,
+                &status );
             auto stack_list = unpack( data );
             for ( const auto &stack : stack_list )
                 multistack.add( stack.size(), stack.data() );
@@ -1934,7 +1957,8 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
         if ( function.find( "std::thread::_Impl<" ) != npos && filename == "thread" )
             remove_entry = true;
         // Remove MPI internal routines
-        if ( function == "MPIR_Barrier_impl" || function == "MPIR_Barrier_intra" || function == "MPIC_Sendrecv" )
+        if ( function == "MPIR_Barrier_impl" || function == "MPIR_Barrier_intra" ||
+             function == "MPIC_Sendrecv" )
             remove_entry = true;
         // Remove MATLAB internal routines
         if ( object == "libmwmcr.so" || object == "libmwm_lxe.so" || object == "libmwbridge.so" ||
@@ -1956,9 +1980,8 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
         // Replace std::chrono::duration with abbriviated version
         if ( function.find( "std::chrono::duration<" ) != npos ) {
             strrep( function, "std::chrono::duration<long, std::ratio<1l, 1l> >", "ticks" );
-            strrep( function,
-                    "std::chrono::duration<long, std::ratio<1l, 1000000000l> >",
-                    "nanoseconds" );
+            strrep( function, "std::chrono::duration<long, std::ratio<1l, 1000000000l> >",
+                "nanoseconds" );
         }
         // Replace std::ratio with abbriviated version.
         if ( function.find( "std::ratio<" ) != npos ) {
@@ -2011,24 +2034,18 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
             strrep( function, "::sleep_for<long,>", "::sleep_for<seconds>" );
             strrep( function, "::sleep_for<long, std::ratio<60>>", "::sleep_for<minutes>" );
             strrep( function, "::sleep_for<long, std::ratio<3600>>", "::sleep_for<hours>" );
-            strrep( function,
-                    "::sleep_for<nanoseconds>(std::chrono::nanoseconds",
-                    "::sleep_for(std::chrono::nanoseconds" );
-            strrep( function,
-                    "::sleep_for<microseconds>(std::chrono::microseconds",
-                    "::sleep_for(std::chrono::microseconds" );
-            strrep( function,
-                    "::sleep_for<milliseconds>(std::chrono::milliseconds",
-                    "::sleep_for(std::chrono::milliseconds" );
-            strrep( function,
-                    "::sleep_for<seconds>(std::chrono::seconds",
-                    "::sleep_for(std::chrono::seconds" );
-            strrep( function,
-                    "::sleep_for<milliseconds>(std::chrono::minutes",
-                    "::sleep_for(std::chrono::milliseconds" );
-            strrep( function,
-                    "::sleep_for<milliseconds>(std::chrono::hours",
-                    "::sleep_for(std::chrono::hours" );
+            strrep( function, "::sleep_for<nanoseconds>(std::chrono::nanoseconds",
+                "::sleep_for(std::chrono::nanoseconds" );
+            strrep( function, "::sleep_for<microseconds>(std::chrono::microseconds",
+                "::sleep_for(std::chrono::microseconds" );
+            strrep( function, "::sleep_for<milliseconds>(std::chrono::milliseconds",
+                "::sleep_for(std::chrono::milliseconds" );
+            strrep( function, "::sleep_for<seconds>(std::chrono::seconds",
+                "::sleep_for(std::chrono::seconds" );
+            strrep( function, "::sleep_for<milliseconds>(std::chrono::minutes",
+                "::sleep_for(std::chrono::milliseconds" );
+            strrep( function, "::sleep_for<milliseconds>(std::chrono::hours",
+                "::sleep_for(std::chrono::hours" );
         }
         // Replace std::basic_string with abbriviated version
         size_t pos = 0;
