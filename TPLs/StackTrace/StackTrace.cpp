@@ -1668,6 +1668,13 @@ void StackTrace::clearErrorHandler()
  *  Functions to handle MPI errors                                           *
  ****************************************************************************/
 #ifdef USE_MPI
+static bool MPI_Initialized()
+{
+    int initialized = 0, finalized = 0;
+    MPI_Initialized( &initialized );
+    MPI_Finalized( &finalized );
+    return initialized != 0 && finalized == 0;
+}
 static std::shared_ptr<MPI_Errhandler> mpierr;
 static void MPI_error_handler_fun( MPI_Comm *comm, int *err, ... )
 {
@@ -1689,6 +1696,8 @@ static void MPI_error_handler_fun( MPI_Comm *comm, int *err, ... )
 }
 void StackTrace::setMPIErrorHandler( MPI_Comm comm )
 {
+    if ( !MPI_Initialized() )
+        return;
     if ( mpierr.get() == nullptr ) {
         mpierr = std::make_shared<MPI_Errhandler>();
         MPI_Comm_create_errhandler( MPI_error_handler_fun, mpierr.get() );
@@ -1697,6 +1706,8 @@ void StackTrace::setMPIErrorHandler( MPI_Comm comm )
 }
 void StackTrace::clearMPIErrorHandler( MPI_Comm comm )
 {
+    if ( !MPI_Initialized() )
+        return;
     if ( mpierr.get() != nullptr )
         MPI_Errhandler_free( mpierr.get() ); // Delete the error handler
     mpierr.reset();
@@ -1762,9 +1773,7 @@ void StackTrace::globalCallStackInitialize( MPI_Comm comm )
 {
     globalMonitorThreadStatus = 3;
     // Check that we have the necessary MPI thread support
-    int mpi_initialized = 0;
-    MPI_Initialized( &mpi_initialized );
-    if ( mpi_initialized == 0 ) {
+    if ( !MPI_Initialized() ) {
         printf( "Warning: MPI not initialized before calling globalCallStackInitialize\n" );
         return;
     }
