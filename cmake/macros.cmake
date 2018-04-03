@@ -23,6 +23,24 @@ IF ( NOT CMAKE_BUILD_TYPE )
 ENDIF()
 
 
+# Enable json
+SET( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
+
+# Check for link time optimization (LTO)
+IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${CMAKE_VERSION} VERSION_GREATER 3.9.4 )
+    CMAKE_MINIMUM_REQUIRED(VERSION 3.9)
+    INCLUDE( CheckIPOSupported )
+    CHECK_IPO_SUPPORTED(RESULT supported OUTPUT error)
+    IF( supported )
+        MESSAGE(STATUS "IPO / LTO enabled")
+        SET( CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE )
+    ELSE()
+        MESSAGE(STATUS "IPO / LTO not supported: <${error}>")
+    ENDIF()
+ENDIF()
+
+
 # Add some default targets if they do not exist
 IF ( NOT TARGET copy-${PROJ}-Data )
     ADD_CUSTOM_TARGET( copy-${PROJ}-Data ALL )

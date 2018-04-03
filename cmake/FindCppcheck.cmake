@@ -84,14 +84,13 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
         ENDFOREACH()
         # Set OS specific defines
         IF ( WIN32 )
-            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -DWIN32 )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -DWIN32 -DWIN64 -D_WIN32 -D_WIN64 -U__APPLE__ -U__linux -U__unix -U__posix )
         ELSEIF( APPLE )
-            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -D__APPLE__ )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -UWIN32 -UWIN64 -U_WIN32 -U_WIN64 -D__APPLE__ -U__linux -U__unix -U__posix )
         ELSEIF( UNIX )
-            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -D__unix )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -UWIN32 -UWIN64 -U_WIN32 -U_WIN64 -U__APPLE__ -D__linux -D__unix -D__posix )
         ENDIF()
     ENDIF()
-
     # Add the include paths
     IF( NOT DEFINED CPPCHECK_INCLUDE )
         SET( CPPCHECK_INCLUDE )
