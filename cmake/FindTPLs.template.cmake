@@ -12,7 +12,7 @@
 #   )
 #
 # This module finds headers and requested component libraries for the TPLs that
-# were installed by the builder.  
+# were installed by the builder.
 #
 #   TPLs_FOUND            - True if headers and requested libraries were found
 #   TPL_LIST              - List of TPLs that are availible
@@ -119,17 +119,17 @@ IF ( NOT TPLs_FOUND )
     MESSAGE( STATUS "System is: ${CMAKE_SYSTEM_NAME}" )
     IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
         # Windows specific system libraries
-        SET( SYSTEM_PATHS "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/Lib/x64" 
-                          "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/PlatformSDK/Lib/AMD64" 
+        SET( SYSTEM_PATHS "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/Lib/x64"
+                          "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/PlatformSDK/Lib/AMD64"
                           "C:/Program Files (x86)/Microsoft Visual Studio 12.0/Common7/Packages/Debugger/X64" )
         FIND_LIBRARY( PSAPI_LIB    NAMES Psapi    PATHS ${SYSTEM_PATHS}  NO_DEFAULT_PATH )
         FIND_LIBRARY( DBGHELP_LIB  NAMES DbgHelp  PATHS ${SYSTEM_PATHS}  NO_DEFAULT_PATH )
         FIND_LIBRARY( DBGHELP_LIB  NAMES DbgHelp )
-        IF ( PSAPI_LIB ) 
+        IF ( PSAPI_LIB )
             ADD_DEFINITIONS( -DPSAPI )
             SET( SYSTEM_LIBS ${PSAPI_LIB} )
         ENDIF()
-        IF ( DBGHELP_LIB ) 
+        IF ( DBGHELP_LIB )
             ADD_DEFINITIONS( -DDBGHELP )
             SET( SYSTEM_LIBS ${DBGHELP_LIB} )
         ELSE()
@@ -240,35 +240,10 @@ IF ( USE_MPI AND NOT TPL_FOUND_MPI )
     SET( MPIEXEC_NUMPROC_FLAG       @MPIEXEC_NUMPROC_FLAG@      )
     SET( MPIEXEC_PREFLAGS           @MPIEXEC_PREFLAGS@          )
     SET( MPIEXEC_POSTFLAGS          @MPIEXEC_POSTFLAGS@         )
-    # Find MPI
-    FIND_PACKAGE( MPI )
-    # Print the results
-    IF ( NOT TPLs_FIND_QUIETLY )
-        FOREACH( lang ${MPI_LANG} )
-            MESSAGE( "   MPI_${lang}_FOUND: ${MPI_${lang}_FOUND}" )
-            MESSAGE( "   MPI_${lang}_COMPILER: ${MPI_${lang}_COMPILER}" )
-            MESSAGE( "   MPI_${lang}_COMPILE_FLAGS: ${MPI_${lang}_COMPILE_FLAGS}" )
-            MESSAGE( "   MPI_${lang}_INCLUDE_PATH: ${MPI_${lang}_INCLUDE_PATH}" )
-            MESSAGE( "   MPI_${lang}_LINK_FLAGS: ${MPI_${lang}_LINK_FLAGS}" )
-            MESSAGE( "   MPI_${lang}_LIBRARIES: ${MPI_${lang}_LIBRARIES}" )
-        ENDFOREACH()
-        MESSAGE( "   MPIEXEC = ${MPIEXEC}" )
-        MESSAGE( "   MPIEXEC_NUMPROC_FLAG = ${MPIEXEC_NUMPROC_FLAG}" )
-        MESSAGE( "   MPIEXEC_PREFLAGS = ${MPIEXEC_PREFLAGS}" )
-        MESSAGE( "   MPIEXEC_POSTFLAGS = ${MPIEXEC_POSTFLAGS}" )
-    ENDIF()
-    IF ( NOT MPI_C_FOUND AND NOT MPI_CXX_FOUND AND NOT MPI_Fortran_FOUND )
-        SET( USE_MPI false )
-    ENDIF()
-    IF ( USE_MPI ) 
-        SET( USE_EXT_MPI true )
-        SET( TPL_FOUND_MPI true )
-        ADD_DEFINITIONS( -DUSE_MPI )
-        ADD_DEFINITIONS( -DUSE_EXT_MPI )
-    ELSE()
-        SET( USE_EXT_MPI false )
-        SET( TPL_FOUND_MPI false )
-    ENDIF()
+    SET( USE_EXT_MPI true )
+    SET( TPL_FOUND_MPI true )
+    ADD_DEFINITIONS( -DUSE_MPI )
+    ADD_DEFINITIONS( -DUSE_EXT_MPI )
     FOREACH( lang ${MPI_LANG} )
         SET( CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${MPI_${lang}_COMPILE_FLAGS}" )
         SET( TPL_INCLUDE_DIRS ${TPL_INCLUDE_DIRS} ${MPI_${lang}_INCLUDE_PATH} )
