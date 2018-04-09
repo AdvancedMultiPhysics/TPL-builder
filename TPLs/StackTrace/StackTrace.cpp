@@ -93,14 +93,20 @@ static std::shared_ptr<std::thread> globalMonitorThread;
 // Utility to break a string by a newline
 static inline std::vector<char *> breakString( char *str )
 {
+    if ( str == nullptr )
+        return std::vector<char *>();
     std::vector<char *> strvec;
     strvec.reserve( 128 );
-    for ( size_t i = 0; str[i] != 0; i++ ) {
-        if ( str[i] == '\n' ) {
+    size_t i = 0;
+    while( str[i] != 0 ) {
+        while ( str[i] < 32 && str[i] != 0 ) {
             str[i] = 0;
-            if ( str[i + 1] >= 32 )
-                strvec.push_back( &str[i + 1] );
+            i++;
         }
+        if ( str[i] >= 32 )
+            strvec.push_back( &str[i] );
+        while ( str[i] != '\n' && str[i] != 0 )
+            i++;
     }
     return strvec;
 }
