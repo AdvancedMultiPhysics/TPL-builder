@@ -28,7 +28,7 @@ SET( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 
 # Check for link time optimization (LTO)
-IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${CMAKE_VERSION} VERSION_GREATER 3.9.4 )
+IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${CMAKE_VERSION} VERSION_GREATER 3.9.4 AND NOT DISABLE_LTO )
     CMAKE_MINIMUM_REQUIRED(VERSION 3.9)
     INCLUDE( CheckIPOSupported )
     CHECK_IPO_SUPPORTED(RESULT supported OUTPUT error)
@@ -37,7 +37,10 @@ IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${CMAKE_VERSION} VERSION_GREATER
         SET( CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE )
     ELSE()
         MESSAGE(STATUS "IPO / LTO not supported: <${error}>")
+        SET( CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE )
     ENDIF()
+ELSE()
+    SET( CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE )
 ENDIF()
 
 
@@ -1294,6 +1297,7 @@ MACRO( ADD_DISTCLEAN ${ARGN} )
         CMakeCache.txt
         CMakeFiles
         CMakeTmp
+        CMakeDoxy*
         cmake.check_cache
         *.cmake
         compile.log
@@ -1306,6 +1310,7 @@ MACRO( ADD_DISTCLEAN ${ARGN} )
         include
         doc
         docs
+        examples
         latex_docs
         lib
         Makefile.config
