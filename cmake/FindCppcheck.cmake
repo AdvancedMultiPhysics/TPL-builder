@@ -53,8 +53,7 @@ ENDIF()
 
 
 # Function to add a cppcheck tests
-FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
-
+FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR SOURCE )
     # Check if SRCDIR has been processed by CMake
     STRING(REGEX REPLACE "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" BINDIR "${SRCDIR}" )
     SET( PROCESSED FALSE )
@@ -111,36 +110,48 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
     ENDIF()
 
     # Add the test
-    ADD_TEST( ${TESTNAME} ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} "${SRCDIR}" )
+    ADD_TEST( ${TESTNAME} ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} ${SOURCE} )
     SET_TESTS_PROPERTIES( ${TESTNAME} PROPERTIES PROCESSORS 1 TIMEOUT ${CPPCHECK_TIMEOUT} COST ${CPPCHECK_TIMEOUT} )
 
 ENDFUNCTION()
 
 
-# Add the test(s)
-IF ( CPPCHECK )
-    LIST(LENGTH CPPCHECK_SOURCE src_len)
+# Add the cppcheck test splitting directories with too many files
+FUNCTION( ADD_CPPCHECK_TEST_RECURSIVE TESTNAME SRCDIR )
+    LIST(LENGTH SRCDIR src_len)
     IF ( src_len GREATER 1 )
         # Multiple src directories
-        FOREACH(src ${CPPCHECK_SOURCE})
+        FOREACH(src ${SRCDIR})
             FILE(GLOB child RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${src}" )
-            ADD_CPPCHECK_TEST( cppcheck-${child} "${src}" )
+            ADD_CPPCHECK_TEST_RECURSIVE( ${TESTNAME}-${child} "${src}" )
         ENDFOREACH()
     ELSE()
         # Find the number of files to determine if we want one (or multiple) cppcheck commands
-        FILE(GLOB_RECURSE SRCS "${CPPCHECK_SOURCE}/*.cpp" "${CPPCHECK_SOURCE}/*.cc" "${CPPCHECK_SOURCE}/*.c" )
+        FILE(GLOB_RECURSE SRCS "${SRCDIR}/*.cpp" "${SRCDIR}/*.cc" "${SRCDIR}/*.c" )
         LIST(LENGTH SRCS len)
         IF ( len LESS 100 OR CPPCHECK_SERIALIZE )
-            ADD_CPPCHECK_TEST( cppcheck "${CPPCHECK_SOURCE}" )
+            ADD_CPPCHECK_TEST( ${TESTNAME} "${SRCDIR}" "${SRCDIR}" )
         ELSE()
-            FILE(GLOB children RELATIVE "${CPPCHECK_SOURCE}" "${CPPCHECK_SOURCE}/*" )
+            FILE(GLOB children RELATIVE "${SRCDIR}" "${SRCDIR}/*" )
+            # Add subdirectories
             FOREACH(child ${children})
-                FILE(GLOB_RECURSE SRCS "${CPPCHECK_SOURCE}/${child}/*.cpp" "${CPPCHECK_SOURCE}/${child}/*.cc" "${CPPCHECK_SOURCE}/${child}/*.c" )
+                FILE(GLOB_RECURSE SRCS "${SRCDIR}/${child}/*.cpp" "${SRCDIR}/${child}/*.cc" "${SRCDIR}/${child}/*.c" )
                 LIST(LENGTH SRCS len)
-                IF ( (IS_DIRECTORY ${CPPCHECK_SOURCE}/${child}) AND (len GREATER 0) )
-                    ADD_CPPCHECK_TEST( cppcheck-${child} "${CPPCHECK_SOURCE}/${child}" )
+                IF ( (IS_DIRECTORY ${SRCDIR}/${child}) AND (len GREATER 0) )
+                    ADD_CPPCHECK_TEST_RECURSIVE( ${TESTNAME}-${child} "${SRCDIR}/${child}" )
                 ENDIF()
             ENDFOREACH()
+            # Add source files in current directory
+            FILE(GLOB SRCS "${SRCDIR}/*.cpp" "${SRCDIR}/*.cc" "${SRCDIR}/*.c" )
+            LIST(LENGTH SRCS len)
+            IF ( len GREATER 0 )
+                ADD_CPPCHECK_TEST( ${TESTNAME} "${SRCDIR}" ${SRCS} )
+            ENDIF()
         ENDIF()
     ENDIF()
+ENDFUNCTION()
+
+# Add the test(s)
+IF ( CPPCHECK )
+    ADD_CPPCHECK_TEST_RECURSIVE( cppcheck "${CPPCHECK_SOURCE}" )
 ENDIF()
