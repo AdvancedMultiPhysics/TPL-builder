@@ -77,8 +77,12 @@ ENDIF()
 
 # Configure MPI
 CHECK_ENABLE_FLAG( USE_MPI 1 )
+MESSAGE("MPIEXEC = ${MPIEXEC}")
 IF ( USE_MPI )
     MESSAGE( "Configuring MPI" )
+    IF ( MPIEXEC )
+        SET( MPIEXEC_EXECUTABLE ${MPIEXEC} )
+    ENDIF()
     FIND_PACKAGE( MPI )
     SET( MPI_LANG C CXX Fortran )
     FOREACH( tmp ${MPI_LANG} )
