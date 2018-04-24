@@ -103,6 +103,9 @@ IF ( NOT TPLs_FOUND )
     SET( TPL_INCLUDE_DIRS )
     SET( TPL_LIBRARIES )
 
+    # Disable LTO
+    SET( DISABLE_LTO @DISABLE_LTO@ )
+
     # Include additional cmake files
     SET( TPL_MACRO_CMAKE "@CMAKE_INSTALL_PREFIX@/cmake/macros.cmake" )
     INCLUDE( "${TPL_MACRO_CMAKE}" )

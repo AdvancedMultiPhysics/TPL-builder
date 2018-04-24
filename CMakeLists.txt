@@ -139,6 +139,12 @@ ENDIF()
 MESSAGE( "TPL_LIST = ${TPL_LIST}" )
 
 
+# Disable LTO for certain configurations
+IF ( ";${TPL_LIST};" MATCHES ";MATLAB;" )
+    SET( DISABLE_LTO TRUE )
+ENDIF()
+
+
 # Set TPL defaults
 SET_DEFAULT_TPL( ZLIB  URL http://zlib.net/zlib-1.2.8.tar.gz )
 SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.8.12.tar.gz  )
@@ -156,7 +162,7 @@ CONFIGURE_FILE( cmake/WriteRepoVersion.cmake "${CMAKE_INSTALL_PREFIX}/cmake/Writ
 SET( FIND_TPLS_CMAKE "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" )
 CONFIGURE_FILE( cmake/FindTPLs.template.cmake "${FIND_TPLS_CMAKE}" @ONLY )
 IF ( USE_MATLAB )
-    MESSAGE( WARNING "USE_MATLAB is obsolete, please specify MATLAB as a TPL" )
+    MESSAGE( FATAL_ERROR "USE_MATLAB is obsolete, please specify MATLAB as a TPL" )
 ENDIF()
 
 
