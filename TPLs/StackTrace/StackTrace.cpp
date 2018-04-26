@@ -773,7 +773,7 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
                 address_list[i] = info[i]->address2; 
         }
         std::string cmd = generateCmd( "addr2line -C -e ", info[0]->object,
-            " -f -i ", address_list, " 2> /dev/null" );
+            " -f ", address_list, " 2> /dev/null" );
         // Get the function/line/file
         int code;
         auto cmd_output = StackTrace::exec( cmd, code );
