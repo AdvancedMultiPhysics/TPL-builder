@@ -212,7 +212,7 @@ static inline void insert( std::vector<TYPE> &x, TYPE y )
 #endif
 std::string StackTrace::exec( const std::string &cmd, int &code )
 {
-    signal( SIGCHLD, SIG_DFL ); // Clear child exited
+    auto old = signal( SIGCHLD, SIG_DFL ); // Clear child exited
     FILE *pipe = popen( cmd.c_str(), "r" );
     if ( pipe == nullptr )
         return std::string();
@@ -226,6 +226,8 @@ std::string StackTrace::exec( const std::string &cmd, int &code )
     }
     auto status = pclose( pipe );
     code        = WEXITSTATUS( status );
+    std::this_thread::yield();  // Allow any signals to process
+    signal( SIGCHLD, old );     // Reset child exited signal
     return result;
 }
 
@@ -1164,7 +1166,6 @@ std::set<std::thread::native_handle_type> StackTrace::activeThreads( )
         int pid = getpid();
         char cmd[128];
         sprintf( cmd, "ps -T -p %i", pid );
-        signal( SIGCHLD, SIG_DFL );     // Clear child exited
         int code;
         auto cmd_out = StackTrace::exec( cmd, code );
         auto output = breakString( (char*) cmd_out.data() );
@@ -1174,7 +1175,7 @@ std::set<std::thread::native_handle_type> StackTrace::activeThreads( )
                 insert( tid, tid2 );
         }
         erase<int>( tid, syscall(SYS_gettid) );
-        signal( thread_callstack_signal, _activeThreads_signal_handler );
+        auto old = signal( thread_callstack_signal, _activeThreads_signal_handler );
         for ( auto tid2 : tid ) {
             thread_backtrace_mutex.lock();
             thread_id_finished = false;
@@ -1189,11 +1190,12 @@ std::set<std::thread::native_handle_type> StackTrace::activeThreads( )
             threads.insert( thread_handle );
             thread_backtrace_mutex.unlock();
         }
+        signal( thread_callstack_signal, old );
     #elif defined( USE_MAC )
         thread_act_port_array_t thread_list;
         mach_msg_type_number_t thread_count = 0;
         task_threads(mach_task_self(), &thread_list, &thread_count);
-        signal( thread_callstack_signal, _activeThreads_signal_handler );
+        auto old = signal( thread_callstack_signal, _activeThreads_signal_handler );
         for ( int i=0; i<thread_count; i++) {
             if ( thread_list[i] == mach_thread_self() )
                 continue;
@@ -1226,6 +1228,7 @@ std::set<std::thread::native_handle_type> StackTrace::activeThreads( )
             threads.insert( thread_handle );
             thread_backtrace_mutex.unlock();*/
         }
+        signal( thread_callstack_signal, old );
     #elif defined( USE_WINDOWS )
         HANDLE hThreadSnap = CreateToolhelp32Snapshot( TH32CS_SNAPTHREAD, 0 ); 
         if( hThreadSnap != INVALID_HANDLE_VALUE ) {
@@ -1653,6 +1656,7 @@ void StackTrace::setSignals( const std::vector<int> &signals, void ( *handler )(
         signal( sig, handler );
         signals_set[sig] = true;
     }
+    std::this_thread::yield();
 }
 void StackTrace::setErrorHandler( std::function<void( const StackTrace::abort_error & )> abort )
 {
