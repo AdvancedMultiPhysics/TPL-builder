@@ -1,6 +1,7 @@
 #define NOMINMAX
 #include "StackTrace/Utilities.h"
 #include "StackTrace/StackTrace.h"
+#include "StackTrace/ErrorHandlers.h"
 
 #include <algorithm>
 #include <csignal>

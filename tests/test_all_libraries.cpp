@@ -265,6 +265,8 @@ int main()
         if ( tpl == "BOOST" ) {
             // Test BOOST
             pass = test<TPL_Enum::BOOST>( );
+        } else if ( tpl == "OPENBLAS" ) {
+            // Test OpenBLAS is tested through the lapack wrappers
         } else if ( tpl == "LAPACK" ) {
             // Test LAPACK wrappers
             pass = test<TPL_Enum::LAPACK>( );

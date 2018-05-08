@@ -4,6 +4,12 @@
 #    location by specifying LAPACK_INSTALL_DIR
 
 
+# Skip if we are installing OpenBLAS
+IF ( OPENBLAS_INSTALL_DIR )
+    RETURN()
+ENDIF()
+
+
 # Intialize download/src/install vars
 SET( LAPACK_BUILD_DIR "${CMAKE_BINARY_DIR}/LAPACK-prefix/src/LAPACK-build" )
 IF ( LAPACK_URL ) 

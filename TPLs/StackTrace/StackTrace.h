@@ -8,11 +8,6 @@
 #include <vector>
 
 
-// Define MPI_Comm
-// clang-format off
-@MPI_COMM@
-// clang-format oon
-
 namespace StackTrace
 {
 
@@ -197,23 +192,6 @@ namespace StackTrace
 
 
     /*!
-     * Set the error handler
-     * @param[in] abort     Function to terminate the program: abort(msg,type)
-     */
-    void setErrorHandler( std::function<void( const StackTrace::abort_error & )> abort );
-
-    //! Clear the error handler
-    void clearErrorHandler();
-
-
-    //! Set an error handler for MPI
-    void setMPIErrorHandler( MPI_Comm comm );
-
-    //! Clear an error handler for MPI
-    void clearMPIErrorHandler( MPI_Comm comm );
-
-
-    /*!
      * Set the given signals to the handler
      * @param[in] signals   Signals to handle
      * @param[in] handler   Function to terminate the program: abort(signal)
@@ -241,13 +219,6 @@ namespace StackTrace
 
     //! Get a handle to this thread
     std::thread::native_handle_type thisThread();
-
-
-    //! Initialize globalCallStack functionallity
-    void globalCallStackInitialize( MPI_Comm comm );
-
-    //! Clean up globalCallStack functionallity
-    void globalCallStackFinalize();
 
 
     /*!

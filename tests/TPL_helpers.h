@@ -9,7 +9,7 @@
 
 // List of valid TPLs that we can test
 enum class TPL_Enum { BOOST, HDF5, HYPRE, KOKKOS, LAPACK, LAPACK_WRAPPERS, 
-    LIBMESH, MATLAB, NETCDF, OGRE, PETSC, SAMRAI, SILO, STACKTRACE, 
+    OPENBLAS, LIBMESH, MATLAB, NETCDF, OGRE, PETSC, SAMRAI, SILO, STACKTRACE, 
     SUNDIALS, TIMER, TRILINOS, ZLIB, UNKNOWN };
 
 
@@ -28,6 +28,8 @@ inline std::string getName( TPL_Enum tpl )
         return "LAPACK";
     if ( tpl == TPL_Enum::LAPACK_WRAPPERS )
         return "LAPACK_WRAPPERS";
+    if ( tpl == TPL_Enum::OPENBLAS )
+        return "OPENBLAS";
     if ( tpl == TPL_Enum::LIBMESH )
         return "LIBMESH";
     if ( tpl == TPL_Enum::MATLAB )
@@ -71,6 +73,8 @@ inline TPL_Enum getTPL( const std::string &tpl )
         return TPL_Enum::LAPACK;
     if ( tpl == "LAPACK_WRAPPERS" )
         return TPL_Enum::LAPACK_WRAPPERS;
+    if ( tpl == "OPENBLAS" )
+        return TPL_Enum::OPENBLAS;
     if ( tpl == "LIBMESH" )
         return TPL_Enum::LIBMESH;
     if ( tpl == "MATLAB" )

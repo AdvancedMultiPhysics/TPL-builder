@@ -1,4 +1,5 @@
 #include "StackTrace/StackTrace.h"
+#include "StackTrace/ErrorHandlers.h"
 #include "StackTrace/Utilities.h"
 
 #include <algorithm>
