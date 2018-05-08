@@ -70,7 +70,7 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
         ELSEIF ( CXX_STD STREQUAL 11 )
             SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c11 --std=c++11 --std=posix )
         ELSEIF ( CXX_STD STREQUAL 14 )
-            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c11 --std=c++11 --std=posix )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c11 --std=c++14 --std=posix )
         ENDIF()
         # Set definitions
         IF ( PROCESSED )
