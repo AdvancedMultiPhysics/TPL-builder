@@ -1,5 +1,5 @@
 # Set some CMake properties
-CMAKE_MINIMUM_REQUIRED( VERSION 3.6 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.9 )
 
 
 MESSAGE("================")

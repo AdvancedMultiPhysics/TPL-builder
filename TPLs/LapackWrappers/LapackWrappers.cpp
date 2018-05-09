@@ -133,7 +133,7 @@ int Lapack<TYPE>::run_all_test()
             N_errors++;
         }
     }
-    return N_errors > 0;
+    return N_errors;
 }
 template int Lapack<double>::run_all_test();
 template int Lapack<float>::run_all_test();
@@ -144,8 +144,8 @@ template<>
 void Lapack<float>::random( int N, float *data )
 {
     static std::random_device rd;
-    static std::mt19937 gen( rd() );
-    static std::uniform_real_distribution<float> dis( 0, 1 );
+    static thread_local std::mt19937 gen( rd() );
+    static thread_local std::uniform_real_distribution<float> dis( 0, 1 );
     for ( int i = 0; i < N; i++ )
         data[i] = dis( gen );
 }
@@ -153,8 +153,8 @@ template<>
 void Lapack<double>::random( int N, double *data )
 {
     static std::random_device rd;
-    static std::mt19937_64 gen( rd() );
-    static std::uniform_real_distribution<double> dis( 0, 1 );
+    static thread_local std::mt19937_64 gen( rd() );
+    static thread_local std::uniform_real_distribution<double> dis( 0, 1 );
     for ( int i = 0; i < N; i++ )
         data[i] = dis( gen );
 }
@@ -179,6 +179,71 @@ static inline TYPE L2Error( int N, const TYPE *x1, const TYPE *x2 )
     for ( int i = 0; i < N; i++ )
         norm += ( x1[i] - x2[i] ) * ( x1[i] - x2[i] );
     return sqrt( norm );
+}
+
+
+// Generate a matrix/rhs
+template<typename TYPE>
+void generateRhs( int N, TYPE* x )
+{
+    Lapack<TYPE>::random( N, x );
+}
+template<typename TYPE>
+void generateMatrix( int N, TYPE* A )
+{
+    Lapack<TYPE>::random( N * N, A );
+    for ( int i = 0; i < N; i++) {
+        double d = A[i+i*N];
+        A[i+i*N] = 0;
+        A[i+i*N] = d - Lapack<TYPE>::asum( N, &A[i*N], 1 );
+    }
+}
+template<typename TYPE>
+void generateMatrixBanded( int N, int KL, int KU, TYPE* A )
+{
+    for ( int i = 0; i < N * N; i++)
+        A[i] = 0;
+    for ( int i = 0; i < N; i++) {
+        int K1 = std::max(i-KL,0);
+        int K2 = std::min(i+KU,N-1);
+        Lapack<TYPE>::random( K2-K1+1, &A[K1+i*N] );
+        double d = A[i+i*N];
+        A[i+i*N] = 0;
+        A[i+i*N] = d - Lapack<TYPE>::asum( K2-K1+1, &A[K1+i*N], 1 );
+    }
+}
+template<typename TYPE>
+void generateTriDiag( int N, TYPE *DL, TYPE *D, TYPE *DU )
+{
+    Lapack<TYPE>::random( N - 1, DL );
+    Lapack<TYPE>::random( N - 1, DU );
+    Lapack<TYPE>::random( N, D );
+    D[0] -= DL[0];
+    for ( int i = 1; i<N-1; i++)
+        D[i] -= DL[i] + DU[i-1];
+    D[N-1] -= DU[N-2];
+}
+template<typename TYPE>
+void extractBanded( int N, int KL, int KU, const TYPE* A, TYPE *AB)
+{
+    const int K2 = 2 * KL + KU + 1;
+    for ( int k = 0; k < N; k++ ) {
+        for ( int k2 = -KL; k2 <= KU; k2++ ) {
+            if ( k + k2 < 0 || k + k2 >= N )
+                continue;
+            AB[k2 + 2 * KL + k * K2] = A[k + k2 + k * N];
+        }
+    }
+}
+template<typename TYPE>
+void extractTriDiag( int N, const TYPE* A, TYPE *DL, TYPE *D, TYPE *DU)
+{
+    D[0] = A[0];
+    for ( int k = 1; k < N; k++ ) {
+        D[k] = A[k + k * N];
+        DU[k - 1] = A[( k - 1 ) + k * N];
+        DL[k - 1] = A[k + ( k - 1 ) * N];
+    }
 }
 
 
@@ -508,17 +573,9 @@ static bool test_gtsv( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    memset( A, 0, K * K * sizeof( TYPE ) );
-    Lapack<TYPE>::random( K, D );
-    Lapack<TYPE>::random( K - 1, DL );
-    Lapack<TYPE>::random( K - 1, DU );
-    Lapack<TYPE>::random( K, b );
-    A[0] = D[0];
-    for ( int k = 1; k < K; k++ ) {
-        A[k + k * K]         = D[k];
-        A[( k - 1 ) + k * K] = DU[k - 1];
-        A[k + ( k - 1 ) * K] = DL[k - 1];
-    }
+    generateRhs( K, b );
+    generateMatrixBanded( K, 1, 1, A );
+    extractTriDiag( K, A, DL, D, DU );
     memcpy( x1, b, K * sizeof( TYPE ) );
     int err = 0;
     Lapack<TYPE>::gesv( K, 1, A, K, IPIV, x1, K, err );
@@ -578,17 +635,9 @@ static bool test_gbsv( int N, TYPE &error )
     TYPE *x2     = new TYPE[K];
     TYPE *b      = new TYPE[K];
     int *IPIV    = new int[K];
-    Lapack<TYPE>::random( K * K2, AB );
-    Lapack<TYPE>::random( K, b );
-    memset( A, 0, K * K * sizeof( TYPE ) );
-    for ( int k = 0; k < K; k++ ) {
-        for ( int k2 = -KL; k2 <= KU; k2++ ) {
-            if ( k + k2 < 0 || k + k2 >= K ) {
-                continue;
-            }
-            A[k + k2 + k * K] = AB[k2 + 2 * KL + k * K2];
-        }
-    }
+    generateRhs( K, b );
+    generateMatrixBanded( K, KL, KU, A );
+    extractBanded( K, KL, KU, A, AB );
     memcpy( x1, b, K * sizeof( TYPE ) );
     int err = 0;
     error   = 0;
@@ -630,8 +679,8 @@ static bool test_getrf( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    Lapack<TYPE>::random( K * K, A );
-    Lapack<TYPE>::random( K, b );
+    generateRhs( K, b );
+    generateMatrix( K, A );
     memcpy( A2, A, K * K * sizeof( TYPE ) );
     memcpy( x1, b, K * sizeof( TYPE ) );
     int err = 0;
@@ -675,10 +724,8 @@ static bool test_gttrf( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    Lapack<TYPE>::random( K, D );
-    Lapack<TYPE>::random( K - 1, DL );
-    Lapack<TYPE>::random( K - 1, DU );
-    Lapack<TYPE>::random( K, b );
+    generateRhs( K, b );
+    generateTriDiag( K, DL, D, DU );
     memcpy( x1, b, K * sizeof( TYPE ) );
     memcpy( D2, D, K * sizeof( TYPE ) );
     memcpy( DL2, DL, ( K - 1 ) * sizeof( TYPE ) );
@@ -697,7 +744,7 @@ static bool test_gttrf( int N, TYPE &error )
     Lapack<TYPE>::gttrs( 'N', K, 1, DL2, D2, DU2, DU3, IPIV, x2, K, err );
     TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     TYPE err2 = L2Error( K, x1, x2 );
-    if ( err2 / norm > 300.0 * std::numeric_limits<TYPE>::epsilon() )
+    if ( err2 > 5 * K * norm * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
     error = err2 / norm;
     delete[] D;
@@ -803,7 +850,7 @@ template<typename TYPE>
 static bool test_gttrs( int N, TYPE &error )
 {
     // Check dgttrs by performing a factorization and solve and comparing to dgtsv
-    const int K = 4 * TEST_SIZE_TRI;
+    const int K = 5 * TEST_SIZE_TRI;
     TYPE *D     = new TYPE[K];
     TYPE *D2    = new TYPE[K];
     TYPE *DL    = new TYPE[K - 1];
@@ -816,10 +863,8 @@ static bool test_gttrs( int N, TYPE &error )
     TYPE *x2    = new TYPE[K];
     TYPE *b     = new TYPE[K];
     int *IPIV   = new int[K];
-    Lapack<TYPE>::random( K, D );
-    Lapack<TYPE>::random( K - 1, DL );
-    Lapack<TYPE>::random( K - 1, DU );
-    Lapack<TYPE>::random( K, b );
+    generateRhs( K, b );
+    generateTriDiag( K, DL, D, DU );
     int err = 0;
     error   = 0;
     memcpy( x1, b, K * sizeof( TYPE ) );
@@ -839,7 +884,7 @@ static bool test_gttrs( int N, TYPE &error )
         N_errors += err == 0 ? 0 : 1;
         TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
         TYPE err2 = L2Error( K, x1, x2 );
-        if ( err2 / norm > 250.0 * std::numeric_limits<TYPE>::epsilon() )
+        if ( err2 > 5 * K * norm * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
         error = std::max( error, err2 / norm );
     }
