@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <iostream>
 #include <limits>
+#include <mutex>
 #include <random>
 #include <string.h>
 #include <string>
@@ -143,20 +144,26 @@ template int Lapack<float>::run_all_test();
 template<>
 void Lapack<float>::random( int N, float *data )
 {
+    static std::mutex lock;
     static std::random_device rd;
-    static thread_local std::mt19937 gen( rd() );
-    static thread_local std::uniform_real_distribution<float> dis( 0, 1 );
+    static std::mt19937 gen( rd() );
+    static std::uniform_real_distribution<float> dis( 0, 1 );
+    lock.lock();
     for ( int i = 0; i < N; i++ )
         data[i] = dis( gen );
+    lock.unlock();
 }
 template<>
 void Lapack<double>::random( int N, double *data )
 {
+    static std::mutex lock;
     static std::random_device rd;
-    static thread_local std::mt19937_64 gen( rd() );
-    static thread_local std::uniform_real_distribution<double> dis( 0, 1 );
+    static std::mt19937_64 gen( rd() );
+    static std::uniform_real_distribution<double> dis( 0, 1 );
+    lock.lock();
     for ( int i = 0; i < N; i++ )
         data[i] = dis( gen );
+    lock.unlock();
 }
 
 
@@ -1091,12 +1098,14 @@ std::string Lapack<TYPE>::info()
     char buffer[2048];
     memset( buffer, 0, sizeof( buffer ) );
     auto out = dup( STDOUT_FILENO );
-    freopen( "NUL", "a", stdout );
+    auto tmp = freopen( "NUL", "a", stdout );
+    NULL_USE( tmp );
     setvbuf( stdout, buffer, _IOFBF, 2048 );
 #ifdef USE_ACML
     acmlinfo();
 #endif
-    freopen( "NUL", "a", stdout );
+    tmp = freopen( "NUL", "a", stdout );
+    NULL_USE( tmp );
     dup2( out, STDOUT_FILENO );
     setvbuf( stdout, NULL, _IONBF, 2048 );
     msg += "  " + strrep( buffer, "\n", "\n  " );
