@@ -49,6 +49,9 @@ IF ( NOT TPLs_FOUND )
     SET( TPL_LIST @TPL_LIST@ )
 
     # Include project install directory
+    INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_LIST_DIR}" )
+
+    # Include project install directory
     INCLUDE_DIRECTORIES( "${${PROJ}_INSTALL_DIR}/include" )
 
     # Set CMAKE_MODULE_PATH

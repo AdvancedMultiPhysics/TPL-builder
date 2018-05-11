@@ -36,6 +36,10 @@ FUNCTION( CHECK_ACML INSTALL_PATH CMAKE_FILE )
     FILE( APPEND "${CMAKE_FILE}" "SET(USE_ACML true)\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(ACML_DIR \"${INSTALL_PATH}\")\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(ACML_DIRECTORY \"${INSTALL_PATH}\")\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/include/acml.h\"\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_BLAS\n #define USE_BLAS\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_LAPACK\n #define USE_LAPACK\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_ACML\n #define USE_ACML\n #endif\n" )
 ENDFUNCTION()
 
 
@@ -108,6 +112,11 @@ FUNCTION( CHECK_MKL INSTALL_PATH CMAKE_FILE )
     FILE( APPEND "${CMAKE_FILE}" "SET(USE_MKL true)\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(MKL_DIR \"${INSTALL_PATH}\")\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(MKL_DIRECTORY \"${INSTALL_PATH}\")\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/include/mkl_blas.h\"\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/include/mkl_lapack.h\"\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_BLAS\n #define USE_BLAS\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_LAPACK\n #define USE_LAPACK\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_ACML\n #define USE_MKL\n #endif\n" )
 ENDFUNCTION()
 
 
@@ -138,6 +147,11 @@ FUNCTION( CHECK_VECLIB INSTALL_PATH CMAKE_FILE )
     FILE( APPEND "${CMAKE_FILE}" "SET(USE_VECLIB true)\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(VECLIB_DIR \"${INSTALL_PATH}\")\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(VECLIB_DIRECTORY \"${INSTALL_PATH}\")\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/Headers/cblas.h\"\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/Headers/clapack.h\"\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_BLAS\n #define USE_BLAS\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_LAPACK\n #define USE_LAPACK\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_VECLIB\n #define USE_VECLIB\n #endif\n" )
 ENDFUNCTION()
 
 
@@ -166,23 +180,11 @@ FUNCTION( CHECK_OPENBLAS INSTALL_PATH CMAKE_FILE )
     FILE( APPEND "${CMAKE_FILE}" "SET(USE_OPENBLAS true)\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(OPENBLAS_DIR \"${INSTALL_PATH}\")\n" )
     FILE( APPEND "${CMAKE_FILE}" "SET(OPENBLAS_DIRECTORY \"${INSTALL_PATH}\")\n" )
-ENDFUNCTION()
-
-
-# Macro to check for MATLAB's LAPACK and set the appropriate variables
-FUNCTION( CHECK_MATLAB_LAPACK INSTALL_PATH CMAKE_FILE )
-    IF ( (NOT USE_MATLAB) OR (NOT USE_MATLAB_LAPACK) )
-        SET( USE_MATLAB_LAPACK FALSE PARENT_SCOPE )
-        RETURN()
-    ENDIF()
-    # Set the appropriate flags in the parent scope
-    SET( BLAS_FOUND true PARENT_SCOPE )
-    SET( LAPACK_FOUND true PARENT_SCOPE )
-    SET( BLAS_DIR    "${MATLAB_EXTERN}" PARENT_SCOPE )
-    SET( LAPACK_DIR  "${MATLAB_EXTERN}" PARENT_SCOPE )
-    SET( BLAS_LIBS   ${MATLAB_BLAS_LIBRARY} PARENT_SCOPE )
-    SET( LAPACK_LIBS ${MATLAB_LAPACK_LIBRARY} PARENT_SCOPE )
-    SET( BLAS_LAPACK_LINK ${MATLAB_LAPACK} PARENT_SCOPE )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/include/cblas.h\"\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/include/lapacke.h\"\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_BLAS\n #define USE_BLAS\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_LAPACK\n #define USE_LAPACK\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_OPENBLAS\n #define USE_OPENBLAS\n #endif\n" )
 ENDFUNCTION()
 
 
