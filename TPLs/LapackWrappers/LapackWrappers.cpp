@@ -978,25 +978,16 @@ static bool test_getri( int N, TYPE &error )
     memcpy( A2, A, K * K * sizeof( TYPE ) );
     memcpy( x1, b, K * sizeof( TYPE ) );
     Lapack<TYPE>::gesv( K, 1, A2, K, IPIV, x1, K, err );
-    if ( err != 0 ) {
+    if ( err != 0 )
         printf( "Error in gesv within test_getri\n" );
-    }
     TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
-    // reinitialize IPIV
-    for ( int j = 0; j < K; ++j ) {
-        IPIV[j] = 0;
-    }
+    // Compute LU factorization
     Lapack<TYPE>::getrf( K, K, A, K, IPIV, err );
-    if ( err != 0 ) {
+    if ( err != 0 )
         printf( "Error in getrf within test_getri\n" );
-    }
     for ( int i = 0; i < N; i++ ) {
         // Compute the inverse
         memcpy( A2, A, K * K * sizeof( TYPE ) );
-        for ( int j = 0; j < LWORK; ++j ) {
-            WORK[j] = 0;
-        }
-        err = 0;
         Lapack<TYPE>::getri( K, A2, K, IPIV, WORK, LWORK, err );
         if ( err != 0 ) {
             printf( "Error in getri within test_getri\n" );
@@ -1009,8 +1000,8 @@ static bool test_getri( int N, TYPE &error )
         error     = std::max( error, err2 );
     }
     // Check the result
-    if ( error > 300 * eps ) {
-        printf( "getri exceeded tolerance: error = %e, tol = %e\n", error, 300 * eps );
+    if ( error > 500 * eps ) {
+        printf( "getri exceeded tolerance: error = %e, tol = %e\n", error, 500 * eps );
         N_errors++;
     }
     delete[] A;
