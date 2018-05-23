@@ -11,8 +11,8 @@
 #include <vector>
 
 
-#include "StackTrace/StackTrace.h"
 #include "StackTrace/ErrorHandlers.h"
+#include "StackTrace/StackTrace.h"
 #include "StackTrace/Utilities.h"
 
 
@@ -101,6 +101,7 @@ int global_signal_helper[1024] = { 0 };
 void handleSignal( int s ) { global_signal_helper[s] = 1; }
 void testSignal( std::vector<std::string> &passes, std::vector<std::string> &failure )
 {
+    barrier();
     int rank = getRank();
     if ( rank == 0 ) {
         // Get a list of signals that can be caught

@@ -99,7 +99,7 @@ static inline std::vector<char *> breakString( char *str )
     std::vector<char *> strvec;
     strvec.reserve( 128 );
     size_t i = 0;
-    while( str[i] != 0 ) {
+    while ( str[i] != 0 ) {
         while ( str[i] < 32 && str[i] != 0 ) {
             str[i] = 0;
             i++;
@@ -134,8 +134,7 @@ static inline std::string stripPath( const std::string &filename )
     if ( filename.empty() )
         return std::string();
     int i = 0;
-    for ( i = (int) filename.size() - 1; i >= 0 && filename[i] != 47 && filename[i] != 92; i-- ) {
-    }
+    for ( i = (int) filename.size() - 1; i >= 0 && filename[i] != 47 && filename[i] != 92; i-- ) {}
     i = std::max( 0, i + 1 );
     return filename.substr( i );
 }
@@ -213,7 +212,7 @@ static inline void insert( std::vector<TYPE> &x, TYPE y )
 #endif
 std::string StackTrace::exec( const std::string &cmd, int &code )
 {
-    auto old = signal( SIGCHLD, SIG_DFL ); // Clear child exited
+    auto old   = signal( SIGCHLD, SIG_DFL ); // Clear child exited
     FILE *pipe = popen( cmd.c_str(), "r" );
     if ( pipe == nullptr )
         return std::string();
@@ -227,8 +226,8 @@ std::string StackTrace::exec( const std::string &cmd, int &code )
     }
     auto status = pclose( pipe );
     code        = WEXITSTATUS( status );
-    std::this_thread::yield();  // Allow any signals to process
-    signal( SIGCHLD, old );     // Reset child exited signal
+    std::this_thread::yield(); // Allow any signals to process
+    signal( SIGCHLD, old );    // Reset child exited signal
     return result;
 }
 
@@ -619,51 +618,49 @@ static const global_symbols_struct &getSymbols2()
     // Load the symbol tables if they have not been loaded
     if ( !loaded ) {
         getSymbols_mutex.lock();
-        if ( !loaded ) {
-            loaded = true;
+        loaded = true;
 #ifdef USE_NM
-            try {
-                char cmd[1024];
+        try {
+            char cmd[1024];
 #ifdef USE_LINUX
-                sprintf( cmd, "nm -n --demangle %s", global_exe_name );
+            sprintf( cmd, "nm -n --demangle %s", global_exe_name );
 #elif defined( USE_MAC )
-                sprintf( cmd, "nm -n %s | c++filt", global_exe_name );
+            sprintf( cmd, "nm -n %s | c++filt", global_exe_name );
 #else
 #error Unknown OS using nm
 #endif
-                int code;
-                auto cmd_output = StackTrace::exec( cmd, code );
-                auto output     = breakString( (char *) cmd_output.data() );
-                for ( const auto &line : output ) {
-                    if ( line[0] == ' ' )
-                        continue;
-                    auto *a = const_cast<char *>( line );
-                    char *b = strchr( a, ' ' );
-                    if ( b == nullptr )
-                        continue;
-                    b[0] = 0;
-                    b++;
-                    char *c = strchr( b, ' ' );
-                    if ( c == nullptr )
-                        continue;
-                    c[0] = 0;
-                    c++;
-                    char *d = strchr( c, '\n' );
-                    if ( d )
-                        d[0] = 0;
-                    size_t add = strtoul( a, nullptr, 16 );
-                    data.address.push_back( reinterpret_cast<void *>( add ) );
-                    data.type.push_back( b[0] );
-                    data.obj.emplace_back( c );
-                }
-            } catch ( ... ) {
-                data.error = -3;
+            int code;
+            auto cmd_output = StackTrace::exec( cmd, code );
+            auto output     = breakString( (char *) cmd_output.data() );
+            for ( const auto &line : output ) {
+                if ( line[0] == ' ' )
+                    continue;
+                auto *a = const_cast<char *>( line );
+                char *b = strchr( a, ' ' );
+                if ( b == nullptr )
+                    continue;
+                b[0] = 0;
+                b++;
+                char *c = strchr( b, ' ' );
+                if ( c == nullptr )
+                    continue;
+                c[0] = 0;
+                c++;
+                char *d = strchr( c, '\n' );
+                if ( d )
+                    d[0] = 0;
+                size_t add = strtoul( a, nullptr, 16 );
+                data.address.push_back( reinterpret_cast<void *>( add ) );
+                data.type.push_back( b[0] );
+                data.obj.emplace_back( c );
             }
-            data.error = 0;
-#else
-            data.error = -1;
-#endif
+        } catch ( ... ) {
+            data.error = -3;
         }
+        data.error = 0;
+#else
+        data.error = -1;
+#endif
         getSymbols_mutex.unlock();
     }
     return data;
@@ -740,25 +737,6 @@ static std::tuple<std::string, std::string, std::string, int> split_atos( const 
     return std::make_tuple( fun, obj, file, line );
 }
 #endif
-#ifdef USE_LINUX
-using uint_p = uint64_t;
-#elif defined( USE_MAC )
-typedef unsigned long uint_p;
-#endif
-#if defined( USE_LINUX ) || defined( USE_MAC )
-static inline std::string generateCmd( const std::string &s1, const std::string &s2,
-    const std::string &s3, std::vector<void *> addresses, const std::string &s4 )
-{
-    std::string cmd = s1 + s2 + s3;
-    for ( auto &addresse : addresses ) {
-        char tmp[32];
-        sprintf( tmp, "%lx ", reinterpret_cast<uint_p>( addresse ) );
-        cmd += tmp;
-    }
-    cmd += s4;
-    return cmd;
-}
-#endif
 // clang-format off
 static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
 {
@@ -767,29 +745,37 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
     // This gets the file and line numbers for multiple stack lines in the same object
     #if defined( USE_LINUX )
         // Create the call command
-        std::vector<void*> address_list(info.size(),nullptr);
+        char cmd[1000];
+        static_assert( sizeof(unsigned long) == sizeof(size_t), "Unxpected size for ul" );
+        int N = sprintf(cmd,"addr2line -C -e %s -f",info[0]->object.c_str());
         for (size_t i=0; i<info.size(); i++) {
-            address_list[i] = info[i]->address;
-            if ( info[i]->object.find( ".so" ) != std::string::npos )
-                address_list[i] = info[i]->address2; 
-            if ( info[i]->object.find( ".mexa64" ) != std::string::npos )
-                address_list[i] = info[i]->address2; 
+            N += sprintf(&cmd[N]," %lx %lx",
+                reinterpret_cast<unsigned long>( info[i]->address ),
+                reinterpret_cast<unsigned long>( info[i]->address2 ) );
         }
-        std::string cmd = generateCmd( "addr2line -C -e ", info[0]->object,
-            " -f ", address_list, " 2> /dev/null" );
+        N += sprintf(&cmd[N]," 2> /dev/null");
         // Get the function/line/file
         int code;
         auto cmd_output = StackTrace::exec( cmd, code );
         auto output = breakString( (char*) cmd_output.data() );
-        if ( output.size() != 2*info.size() )
+        if ( output.size() != 4*info.size() )
             return;
         // Add the results to info
         for (size_t i=0; i<info.size(); i++) {
+            const char *tmp1 = output[4*i+0];
+            const char *tmp2 = output[4*i+1];
+            if ( tmp1[0] == '?' && tmp1[1] == '?' ) {
+                tmp1 = output[4*i+2];
+                tmp2 = output[4*i+3];
+            }
+            if ( tmp1[0] == '?' && tmp1[1] == '?' ) {
+                continue;
+            }
             // get function name
             if ( info[i]->function.empty() )
-                info[i]->function = output[2*i+0];
+                info[i]->function = tmp1;
             // get file and line
-            const char *buf = output[2*i+1];
+            const char *buf = tmp2;
             if ( buf[0] != '?' && buf[0] != 0 ) {
                 size_t j = 0;
                 for ( j = 0; j < 4095 && buf[j] != ':'; j++ ) {
@@ -803,14 +789,14 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
         void* load_address = loadAddress( info[0]->object );
         if ( load_address == nullptr )
             return;
-        std::vector<void*> address_list(info.size(),nullptr);
-        for (size_t i=0; i<info.size(); i++)
-            address_list[i] = info[i]->address;
         // Call atos to get the object info
-        char tmp[64];
-        sprintf( tmp, " -l %lx ", (uint_p) load_address );
-        std::string cmd = generateCmd( "atos -o ", info[0]->object,
-            tmp, address_list, " 2> /dev/null" );
+        char cmd[1000];
+        static_assert( sizeof(unsigned long) == sizeof(size_t), "Unxpected size for ul" );
+        int N = sprintf( cmd, "atos -o %s -f -l %lx", info[0]->object.c_str(),
+            reinterpret_cast<unsigned long>( load_address ) );
+        for (size_t i=0; i<info.size(); i++)
+            N += sprintf( &cmd[N], " %lx", reinterpret_cast<unsigned long>( info[i]->address ) );
+        N += sprintf(&cmd[N]," 2> /dev/null");
         // Get the function/line/file
         int code;
         auto cmd_output = StackTrace::exec( cmd, code );
@@ -819,7 +805,7 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
             return;
         // Parse the output for function, file and line info
         for ( size_t i=0; i<info.size(); i++) {
-            auto data = split_atos( output[i] );
+            auto data = split_atos( output[2*i] );
             if ( info[i]->function.empty() )
                 info[i]->function = std::get<0>(data);
             if ( info[i]->object.empty() )
@@ -1575,6 +1561,7 @@ std::vector<int> StackTrace::defaultSignalsToCatch()
     auto signals = allSignalsToCatch();
     erase( signals, SIGWINCH ); // Don't catch window changed by default
     erase( signals, SIGCONT );  // Don't catch continue by default
+    erase( signals, SIGCHLD );  // Don't catch child exited by default
     return signals;
 }
 
@@ -1974,11 +1961,21 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
              object.find( "libstdc++" ) != npos )
             remove_entry = true;
         // Remove std::thread::_Impl
-        if ( function.find( "std::thread::_Impl<" ) != npos && filename == "thread" )
+        if ( filename == "thread" ) {
+            if ( function.find( "std::thread::_Impl<" ) != npos ||
+                 function.find( "std::thread::_Invoker<" ) != npos )
+                remove_entry = true;
+        }
+        // Remove pthread internals
+        if ( function == "__GI___pthread_timedjoin_ex" )
             remove_entry = true;
         // Remove MPI internal routines
         if ( function == "MPIR_Barrier_impl" || function == "MPIR_Barrier_intra" ||
              function == "MPIC_Sendrecv" )
+            remove_entry = true;
+        // Remove OpenMPI specific internal routines
+        if ( function == "opal_libevent2022_event_set_log_callback" ||
+             function == "opal_libevent2022_event_base_loop" )
             remove_entry = true;
         // Remove MATLAB internal routines
         if ( object == "libmwmcr.so" || object == "libmwm_lxe.so" || object == "libmwbridge.so" ||
@@ -2069,6 +2066,7 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
         }
         // Replace std::basic_string with abbriviated version
         size_t pos = 0;
+        strrep( function, "std::__cxx11::basic_string<", "std::basic_string<" );
         while ( pos < function.size() ) {
             // Find next instance of std::basic_string
             const std::string match = "std::basic_string<";
