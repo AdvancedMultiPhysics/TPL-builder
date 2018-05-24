@@ -1077,9 +1077,11 @@ ENDMACRO()
 
 # Create a script to start matlab preloading libraries
 FUNCTION( CREATE_MATLAB_WRAPPER )
+    SET( MATLABPATH ${MATLABPATH} "${${PROJ}_INSTALL_DIR}/mex" )
     SET( tmp_libs ${MEX_LIBCXX} ${MEX_FILES} )
-    STRING(REGEX REPLACE ";" ":" tmp_libs "${tmp_libs}")
-    STRING(REGEX REPLACE ";" ":" tmp_path "${MATLABPATH}")
+    LIST( REMOVE_DUPLICATES MATLABPATH )
+    STRING( REGEX REPLACE ";" ":" tmp_libs "${tmp_libs}" )
+    STRING( REGEX REPLACE ";" ":" tmp_path "${MATLABPATH}" )
     IF ( USING_MSVC )
         # Create a matlab wrapper for windows
         SET( MATLAB_GUI "${CMAKE_CURRENT_BINARY_DIR}/tmp/matlab-gui.bat" )
