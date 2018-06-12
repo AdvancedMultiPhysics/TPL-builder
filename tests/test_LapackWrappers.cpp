@@ -1,31 +1,29 @@
 #include "LapackWrappers.h"
 
-#include <thread>
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <chrono>
-
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <thread>
 
 
 // Get the time difference in us
 static inline int64_t diff( std::chrono::time_point<std::chrono::system_clock> t1,
     std::chrono::time_point<std::chrono::system_clock> t2 )
 {
-    return static_cast<int64_t>( 1e6 * std::chrono::duration<double>( t2-t1 ).count() );
+    return static_cast<int64_t>( 1e6 * std::chrono::duration<double>( t2 - t1 ).count() );
 }
 
 
 // Call Lapack::run_test
 template<typename TYPE>
-void run_test( const std::string& routine, int N, int& us, TYPE& error, int& err )
+void run_test( const std::string &routine, int N, int &us, TYPE &error, int &err )
 {
     auto t1 = std::chrono::system_clock::now();
-    err = Lapack<TYPE>::run_test( routine, N, error );
+    err     = Lapack<TYPE>::run_test( routine, N, error );
     auto t2 = std::chrono::system_clock::now();
-    us  = static_cast<int>( diff( t1, t2 ) / N );
+    us      = static_cast<int>( diff( t1, t2 ) / N );
 }
-
 
 
 // The main function
@@ -33,12 +31,12 @@ int main( int, char *[] )
 {
     // Number of times to run the tests for timing results
     // Note: the tests are designed to take ~ the same time/test
-    const int N_test = 50;     
+    const int N_test = 50;
 
     // Store the number of errors
     int N_errors = 0;
 
-    // Print the lapack information
+    // Print the lapack version
     std::cout << Lapack<double>::info();
 
     // Run the basic tests
@@ -69,7 +67,8 @@ int main( int, char *[] )
         int N_err = 0;
         for ( size_t i = 0; i < tests.size(); i++ ) {
             run_test<double>( tests[i], N_test, time[i], error[i], err[i] );
-            printf( "%7s:  %s:  %5i us  (%e)\n", tests[i].c_str(), err[i] == 0 ? "passed" : "failed", time[i], error[i] );
+            printf( "%7s:  %s:  %5i us  (%e)\n", tests[i].c_str(),
+                err[i] == 0 ? "passed" : "failed", time[i], error[i] );
             N_err += err[i];
         }
         if ( N_err == 0 ) {
@@ -90,7 +89,8 @@ int main( int, char *[] )
         int N_err = 0;
         for ( size_t i = 0; i < tests.size(); i++ ) {
             run_test<float>( tests[i], N_test, time[i], error[i], err[i] );
-            printf( "%7s:  %s:  %5i us  (%e)\n", tests[i].c_str(), err[i] == 0 ? "passed" : "failed", time[i], error[i] );
+            printf( "%7s:  %s:  %5i us  (%e)\n", tests[i].c_str(),
+                err[i] == 0 ? "passed" : "failed", time[i], error[i] );
             N_err += err[i];
         }
         if ( N_err == 0 ) {
@@ -105,23 +105,24 @@ int main( int, char *[] )
     {
         printf( "\nRunning parallel tests\n" );
         int N_threads = 8;
-        auto tests = Lapack<double>::list_all_tests();
-        for ( size_t i = 0; i < tests.size(); i++ ) {
+        auto tests    = Lapack<double>::list_all_tests();
+        for ( auto &test : tests ) {
             auto t1 = std::chrono::system_clock::now();
             std::thread threads[128];
             int time2[128];
             int err2[128];
             double error2[128];
             for ( int j = 0; j < N_threads; j++ )
-                threads[j] = std::thread( run_test<double>, tests[i], N_test, std::ref(time2[j]), std::ref(error2[j]), std::ref(err2[j]) );
+                threads[j] = std::thread( run_test<double>, test, N_test, std::ref( time2[j] ),
+                    std::ref( error2[j] ), std::ref( err2[j] ) );
             for ( int j = 0; j < N_threads; j++ )
                 threads[j].join();
-            auto t2 = std::chrono::system_clock::now();
+            auto t2   = std::chrono::system_clock::now();
             bool pass = true;
             for ( int j = 0; j < N_threads; j++ )
                 pass = pass && err2[j] == 0;
-            int us  = static_cast<int>( diff( t1, t2 ) / ( N_test * N_threads ) );
-            printf( "%7s:  %s:  %5i us\n", tests[i].c_str(), pass ? "passed" : "failed", us );
+            auto us = static_cast<int>( diff( t1, t2 ) / ( N_test * N_threads ) );
+            printf( "%7s:  %s:  %5i us\n", test.c_str(), pass ? "passed" : "failed", us );
             N_errors += ( pass ? 0 : 1 );
         }
     }

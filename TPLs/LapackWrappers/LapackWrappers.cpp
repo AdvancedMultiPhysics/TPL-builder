@@ -258,9 +258,10 @@ void extractTriDiag( int N, const TYPE* A, TYPE *DL, TYPE *D, TYPE *DU)
 template<typename TYPE>
 static bool test_random( int N, TYPE &error )
 {
-    int K         = TEST_SIZE_VEC / 20;
+    constexpr int Nb = 25;  // NUmber of bins
+    int K         = TEST_SIZE_VEC / 8;
     TYPE *x       = new TYPE[K];
-    int count[25] = { 0 };
+    int count[Nb] = { 0 };
     error         = 0;
     for ( int it = 0; it < N; it++ ) {
         Lapack<TYPE>::random( K, x );
@@ -269,22 +270,22 @@ static bool test_random( int N, TYPE &error )
             error = ( error == 0 && x[i] < 0 ) ? -1 : error;
             error = ( error == 0 && x[i] > 1 ) ? -2 : error;
             sum += x[i];
-            int j = static_cast<int>( floor( x[i] * 25 ) );
+            int j = static_cast<int>( floor( x[i] * Nb ) );
             count[j]++;
         }
         TYPE avg = sum / K;
-        if ( error == 0 && ( avg < 0.4 || avg > 0.6 ) )
+        if ( error == 0 && ( avg < 0.35 || avg > 0.65 ) )
             error = -3;
     }
     delete[] x;
     if ( error != 0 )
         return true;
     // If we did not encounter an error, check the Chi-Square Distribution
-    double E  = ( K * N ) / 25.0;
+    double E  = ( K * N ) / static_cast<double>( Nb );
     double X2 = 0.0;
-    for ( int i = 0; i < 25; i++ )
+    for ( int i = 0; i < Nb; i++ )
         X2 += ( count[i] - E ) * ( count[i] - E ) / E;
-    double X2c = 51.179; // Critical value for 0.999 (we will fail 0.1% of the time)
+    double X2c = 52.6; // Critical value for 0.999 (we will fail 0.1% of the time)
     error      = X2 / X2c;
     return error > 1.0;
 }

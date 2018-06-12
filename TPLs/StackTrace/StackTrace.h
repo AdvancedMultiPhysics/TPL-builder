@@ -1,6 +1,7 @@
 #ifndef included_StackTrace
 #define included_StackTrace
 
+#include <array>
 #include <functional>
 #include <iostream>
 #include <set>
@@ -12,14 +13,16 @@ namespace StackTrace {
 
 //! Class to contain stack trace info for a single thread/process
 struct stack_info {
+    uint32_t line;
     void *address;
     void *address2;
-    std::string object;
-    std::string function;
-    std::string filename;
-    int line;
+    std::array<char, 64> object;
+    std::array<char, 64> objectPath;
+    std::array<char, 64> filename;
+    std::array<char, 64> filenamePath;
+    std::array<char, 512> function;
     //! Default constructor
-    stack_info() : address( nullptr ), address2( nullptr ), line( 0 ) {}
+    stack_info();
     //! Reset the stack
     void clear();
     //! Operator==
@@ -96,6 +99,15 @@ private:
 };
 
 
+//!< Class to contain symbol information
+struct symbols_struct {
+    char type;
+    void *address;
+    std::array<char, 64> obj;
+    std::array<char, 64> objPath;
+};
+
+
 /*!
  * @brief  Get the current call stack
  * @details  This function returns the current call stack for the current thread
@@ -169,10 +181,9 @@ std::string signalName( int signal );
 
 /*!
  * Return the symbols from the current executable (not availible for all platforms)
- * @return      Returns 0 if sucessful
+ * @return      Returns the symbols loaded
  */
-int getSymbols(
-    std::vector<void *> &address, std::vector<char> &type, std::vector<std::string> &obj );
+std::vector<symbols_struct> getSymbols();
 
 
 //! Clear internal symbol data
@@ -205,8 +216,16 @@ void setSignals( const std::vector<int> &signals, void ( *handler )( int ) );
 void clearSignal( int signal );
 
 
+//! Clear a signal set by setSignals
+void clearSignals( const std::vector<int> &signals );
+
+
 //! Clear all signals set by setSignals
 void clearSignals();
+
+
+//! Raise a signal
+void raiseSignal( int signal );
 
 
 //! Return a list of all signals that can be caught
