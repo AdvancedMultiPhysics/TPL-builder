@@ -129,6 +129,7 @@ ELSE()
             CHECK_LAPACK( "${LAPACK_INSTALL_DIR}" "${LAPACK_OUT}" )
         ENDIF()
         SET( BLAS_LAPACK_LINK "-Wl,--start-group ${BLAS_LIBRARY} ${LAPACK_LIBRARY} -Wl,--end-group" )
+        FILE( APPEND "${BLAS_LAPACK_HEADER}" "${LAPACK_HEADER}" )
     ENDIF()
     # Finished searching
     IF ( (NOT BLAS_FOUND) OR (NOT LAPACK_FOUND) )
