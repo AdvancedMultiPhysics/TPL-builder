@@ -142,7 +142,7 @@ public:
      * @param[in] N         N specifies the number of columns of the matrix op( B )
      *                      and of the matrix C.  N must be at least zero.
      * @param[in] K         K specifies  the number of columns of the matrix op( A )
-     *                      and the number of rows of the matrix op( B ). 
+     *                      and the number of rows of the matrix op( B ).
      *                      K must be at least  zero.
      * @param[in] alpha     The scalar alpha.
      * @param[in] A         array of DIMENSION ( LDA, ka ), where

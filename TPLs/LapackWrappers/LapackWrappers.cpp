@@ -18,17 +18,16 @@
 
 // Choose the OS
 #if defined( WIN32 ) || defined( _WIN32 ) || defined( WIN64 ) || defined( _WIN64 )
-// Using windows
 #define WINDOWS
 #include <process.h>
 #include <stdlib.h>
 #include <windows.h>
 #else
-// Using some other operating system (probably linux)
 #define LINUX
 #include <pthread.h>
 #include <unistd.h>
 #endif
+
 
 // Define some sizes of the problems (try to normalize the time/test)
 #define TEST_SIZE_VEC 50000    // Vector tests O(N)
@@ -36,6 +35,7 @@
 #define TEST_SIZE_MAT 100      // Matrix-matrix / Dense solves tests O(N^3)
 #define TEST_SIZE_TRI 2000     // Tridiagonal/banded tests
 #define TEST_SIZE_TRI_MAT 1000 // Tridiagonal/banded solve tests
+
 
 /*! \def NULL_USE(variable)
  *  \brief    A null use of a variable
@@ -51,8 +51,18 @@
         }                                    \
     } while ( 0 )
 
-static char MKL_ENV[]      = "MKL_NUM_THREADS=1";
-int global_set_mkl_threads = putenv( MKL_ENV );
+
+// Disable BLAS/LAPACK threads
+static bool disable_threads()
+{
+    char MKL_ENV[] = "MKL_NUM_THREADS=1";
+    putenv( MKL_ENV );
+#ifdef USE_OPENBLAS
+    openblas_set_num_threads( 1 );
+#endif
+    return true;
+}
+bool global_lapack_threads_disabled = disable_threads();
 
 
 // Function to replace all instances of a string with another
@@ -191,32 +201,32 @@ static inline TYPE L2Error( int N, const TYPE *x1, const TYPE *x2 )
 
 // Generate a matrix/rhs
 template<typename TYPE>
-void generateRhs( int N, TYPE* x )
+void generateRhs( int N, TYPE *x )
 {
     Lapack<TYPE>::random( N, x );
 }
 template<typename TYPE>
-void generateMatrix( int N, TYPE* A )
+void generateMatrix( int N, TYPE *A )
 {
     Lapack<TYPE>::random( N * N, A );
-    for ( int i = 0; i < N; i++) {
-        double d = A[i+i*N];
-        A[i+i*N] = 0;
-        A[i+i*N] = d - Lapack<TYPE>::asum( N, &A[i*N], 1 );
+    for ( int i = 0; i < N; i++ ) {
+        double d     = A[i + i * N];
+        A[i + i * N] = 0;
+        A[i + i * N] = d - Lapack<TYPE>::asum( N, &A[i * N], 1 );
     }
 }
 template<typename TYPE>
-void generateMatrixBanded( int N, int KL, int KU, TYPE* A )
+void generateMatrixBanded( int N, int KL, int KU, TYPE *A )
 {
-    for ( int i = 0; i < N * N; i++)
+    for ( int i = 0; i < N * N; i++ )
         A[i] = 0;
-    for ( int i = 0; i < N; i++) {
-        int K1 = std::max(i-KL,0);
-        int K2 = std::min(i+KU,N-1);
-        Lapack<TYPE>::random( K2-K1+1, &A[K1+i*N] );
-        double d = A[i+i*N];
-        A[i+i*N] = 0;
-        A[i+i*N] = d - Lapack<TYPE>::asum( K2-K1+1, &A[K1+i*N], 1 );
+    for ( int i = 0; i < N; i++ ) {
+        int K1 = std::max( i - KL, 0 );
+        int K2 = std::min( i + KU, N - 1 );
+        Lapack<TYPE>::random( K2 - K1 + 1, &A[K1 + i * N] );
+        double d     = A[i + i * N];
+        A[i + i * N] = 0;
+        A[i + i * N] = d - Lapack<TYPE>::asum( K2 - K1 + 1, &A[K1 + i * N], 1 );
     }
 }
 template<typename TYPE>
@@ -226,12 +236,12 @@ void generateTriDiag( int N, TYPE *DL, TYPE *D, TYPE *DU )
     Lapack<TYPE>::random( N - 1, DU );
     Lapack<TYPE>::random( N, D );
     D[0] -= DL[0];
-    for ( int i = 1; i<N-1; i++)
-        D[i] -= DL[i] + DU[i-1];
-    D[N-1] -= DU[N-2];
+    for ( int i = 1; i < N - 1; i++ )
+        D[i] -= DL[i] + DU[i - 1];
+    D[N - 1] -= DU[N - 2];
 }
 template<typename TYPE>
-void extractBanded( int N, int KL, int KU, const TYPE* A, TYPE *AB)
+void extractBanded( int N, int KL, int KU, const TYPE *A, TYPE *AB )
 {
     const int K2 = 2 * KL + KU + 1;
     for ( int k = 0; k < N; k++ ) {
@@ -243,11 +253,11 @@ void extractBanded( int N, int KL, int KU, const TYPE* A, TYPE *AB)
     }
 }
 template<typename TYPE>
-void extractTriDiag( int N, const TYPE* A, TYPE *DL, TYPE *D, TYPE *DU)
+void extractTriDiag( int N, const TYPE *A, TYPE *DL, TYPE *D, TYPE *DU )
 {
     D[0] = A[0];
     for ( int k = 1; k < N; k++ ) {
-        D[k] = A[k + k * N];
+        D[k]      = A[k + k * N];
         DU[k - 1] = A[( k - 1 ) + k * N];
         DL[k - 1] = A[k + ( k - 1 ) * N];
     }
@@ -258,11 +268,11 @@ void extractTriDiag( int N, const TYPE* A, TYPE *DL, TYPE *D, TYPE *DU)
 template<typename TYPE>
 static bool test_random( int N, TYPE &error )
 {
-    constexpr int Nb = 25;  // NUmber of bins
-    int K         = TEST_SIZE_VEC / 8;
-    TYPE *x       = new TYPE[K];
-    int count[Nb] = { 0 };
-    error         = 0;
+    constexpr int Nb = 25; // NUmber of bins
+    int K            = TEST_SIZE_VEC / 8;
+    TYPE *x          = new TYPE[K];
+    int count[Nb]    = { 0 };
+    error            = 0;
     for ( int it = 0; it < N; it++ ) {
         Lapack<TYPE>::random( K, x );
         TYPE sum = 0;
@@ -1030,6 +1040,8 @@ static bool test_getri( int N, TYPE &error )
     static constexpr char LapackVendor[] = "MATLAB LAPACK";
 #elif defined( USE_VECLIB )
     static constexpr char LapackVendor[] = "VECLIB";
+#elif defined( USE_OPENBLAS )
+    static constexpr char LapackVendor[] = "OpenBLAS";
 #else
     static constexpr char LapackVendor[] = "Unknown";
 #endif
@@ -1085,6 +1097,10 @@ std::string Lapack<TYPE>::info()
     // Print the vendor info
     std::string msg( LapackVendor );
     msg += "\n";
+    // Use vendor-specific utility functions
+#ifdef USE_OPENBLAS
+    msg += "  " + std::string( openblas_get_config() );
+#endif
     // Get vendor specific output (capture stdout)
     fflush( stdout ); // clean everything first
     char buffer[2048];

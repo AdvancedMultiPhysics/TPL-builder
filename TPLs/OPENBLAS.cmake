@@ -108,3 +108,13 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( LAPACK_FOUND $\{USE_LAPACK} )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( TPL_FOUND_LAPACK TRUE )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDIF()\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n" )
+
+# Create blas_lapack.h
+SET( BLAS_LAPACK_HEADER "${CMAKE_INSTALL_PREFIX}/blas_lapack.h" )
+FILE( WRITE "${BLAS_LAPACK_HEADER}" "// Auto-generated file to include BLAS/LAPACK headers\n" )
+FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${OPENBLAS_INSTALL_DIR}/include/cblas.h\"\n" )
+FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${OPENBLAS_INSTALL_DIR}/include/lapacke.h\"\n" )
+FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_BLAS\n #define USE_BLAS\n #endif\n" )
+FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_LAPACK\n #define USE_LAPACK\n #endif\n" )
+FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_OPENBLAS\n #define USE_OPENBLAS\n #endif\n" )
+
