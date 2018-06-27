@@ -52,19 +52,6 @@
     } while ( 0 )
 
 
-// Disable BLAS/LAPACK threads
-static bool disable_threads()
-{
-    char MKL_ENV[] = "MKL_NUM_THREADS=1";
-    putenv( MKL_ENV );
-#ifdef USE_OPENBLAS
-    openblas_set_num_threads( 1 );
-#endif
-    return true;
-}
-bool global_lapack_threads_disabled = disable_threads();
-
-
 // Function to replace all instances of a string with another
 static inline std::string strrep(
     const std::string &in, const std::string &s, const std::string &r )
@@ -1133,6 +1120,33 @@ std::string Lapack<TYPE>::info()
 }
 template std::string Lapack<double>::info();
 template std::string Lapack<float>::info();
+
+
+
+/******************************************************************
+ * Set the number of threads to use                                *
+ ******************************************************************/
+static int setThreads( int N )
+{
+    int N2 = N;
+#if defined( USE_MKL )
+    std::string tmp = "MKL_NUM_THREADS=" + std::to_string( N );
+    putenv( tmp.c_str() );
+    N2 = N;
+#elif defined( USE_OPENBLAS )
+    openblas_set_num_threads( 1 );
+    N2 = openblas_get_num_threads();
+#endif
+    return N2;
+}
+template<> int Lapack<float>::set_num_threads( int N ) { return setThreads( N ); }
+template<> int Lapack<double>::set_num_threads( int N ) { return setThreads( N ); }
+static bool disable_threads()
+{
+    setThreads( 1 );
+    return true;
+}
+bool global_lapack_threads_disabled = disable_threads();
 
 
 /******************************************************************

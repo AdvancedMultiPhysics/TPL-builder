@@ -660,6 +660,11 @@ public:
 
     //! Print lapack info
     static std::string info();
+
+    //! Set the number of threads to use for BLAS/LAPACK
+    static int set_num_threads( int N );
+
+
 };
 
 
