@@ -24,6 +24,12 @@
 #   TPL_CPPCLEAN_CMAKE    - File to cppclean.cmake provided by the TPL install
 
 
+# Set some cmake policies
+IF ( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0" )
+    CMAKE_POLICY( SET CMP0074 OLD )
+ENDIF()
+
+
 # Check that PROJ and ${PROJ}_INSTALL_DIR have been set
 IF ( NOT PROJ )
     MESSAGE( FATAL_ERROR "PROJ must be set before calling FindTPLs")
