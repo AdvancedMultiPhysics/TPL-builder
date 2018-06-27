@@ -1128,10 +1128,11 @@ template std::string Lapack<float>::info();
  ******************************************************************/
 static int setThreads( int N )
 {
-    int N2 = N;
+    int N2 = 0;
 #if defined( USE_MKL )
-    std::string tmp = "MKL_NUM_THREADS=" + std::to_string( N );
-    putenv( tmp.c_str() );
+    char tmp[100];
+    sprintf(tmp,"MKL_NUM_THREADS=%i", N );
+    putenv( tmp );
     N2 = N;
 #elif defined( USE_OPENBLAS )
     openblas_set_num_threads( 1 );
