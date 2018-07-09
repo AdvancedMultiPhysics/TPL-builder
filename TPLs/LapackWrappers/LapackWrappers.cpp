@@ -1137,6 +1137,11 @@ static int setThreads( int N )
 #elif defined( USE_OPENBLAS )
     openblas_set_num_threads( 1 );
     N2 = openblas_get_num_threads();
+#elif defined( USE_MATLAB_LAPACK )
+    char tmp[100];
+    sprintf(tmp,"MKL_NUM_THREADS=%i", N );
+    putenv( tmp );
+    N2 = N;
 #endif
     return N2;
 }
