@@ -36,6 +36,9 @@ int main( int, char *[] )
     // Store the number of errors
     int N_errors = 0;
 
+    // Set the number of threads
+    Lapack<double>::set_num_threads( 1 );
+
     // Print the lapack version
     std::cout << Lapack<double>::info();
 
@@ -60,7 +63,7 @@ int main( int, char *[] )
     // Get the times for the tests (double)
     {
         printf( "\nGetting double precision test times\n" );
-        std::vector<std::string> tests = Lapack<double>::list_all_tests();
+        auto tests = Lapack<double>::list_all_tests();
         std::vector<double> error( tests.size() );
         std::vector<int> time( tests.size() );
         std::vector<int> err( tests.size() );

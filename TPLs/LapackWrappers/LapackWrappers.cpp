@@ -1122,6 +1122,25 @@ template std::string Lapack<double>::info();
 template std::string Lapack<float>::info();
 
 
+/****************************************************************************
+ *  Function to set an environemental variable                               *
+ ****************************************************************************/
+static void setenv( const char *name, const char *value )
+{
+    static std::mutex lock;
+    lock.lock();
+#if defined( WIN32 ) || defined( _WIN32 ) || defined( WIN64 ) || defined( _WIN64 ) || \
+    defined( _MSC_VER )
+    SetEnvironmentVariable( name, value ) != 0;
+#else
+    if ( value != nullptr )
+        ::setenv( name, value, 1 );
+    else
+        ::unsetenv( name );
+#endif
+    lock.unlock();
+}
+
 
 /******************************************************************
  * Set the number of threads to use                                *
@@ -1130,23 +1149,28 @@ static int setThreads( int N )
 {
     int N2 = 0;
 #if defined( USE_MKL )
-    char tmp[100];
-    sprintf(tmp,"MKL_NUM_THREADS=%i", N );
-    putenv( tmp );
+    setenv( "MKL_NUM_THREADS", std::to_string( N ).c_str() );
     N2 = N;
 #elif defined( USE_OPENBLAS )
-    openblas_set_num_threads( 1 );
+    openblas_set_num_threads( N );
     N2 = openblas_get_num_threads();
 #elif defined( USE_MATLAB_LAPACK )
-    char tmp[100];
-    sprintf(tmp,"MKL_NUM_THREADS=%i", N );
-    putenv( tmp );
+    setenv( "OMP_NUM_THREADS", std::to_string( N ).c_str() );
+    setenv( "MKL_NUM_THREADS", std::to_string( N ).c_str() );
     N2 = N;
 #endif
     return N2;
 }
-template<> int Lapack<float>::set_num_threads( int N ) { return setThreads( N ); }
-template<> int Lapack<double>::set_num_threads( int N ) { return setThreads( N ); }
+template<>
+int Lapack<float>::set_num_threads( int N )
+{
+    return setThreads( N );
+}
+template<>
+int Lapack<double>::set_num_threads( int N )
+{
+    return setThreads( N );
+}
 static bool disable_threads()
 {
     setThreads( 1 );
