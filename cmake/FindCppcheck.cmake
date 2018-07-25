@@ -39,6 +39,7 @@ ELSEIF ( CPPCHECK_FIND_REQUIRED )
     MESSAGE( FATAL_ERROR "cppcheck not found")
 ELSE()
     MESSAGE( STATUS "cppcheck not found")
+    RETURN()
 ENDIF()
 
 
@@ -127,29 +128,37 @@ FUNCTION( ADD_CPPCHECK_TEST_RECURSIVE TESTNAME SRCDIR )
     IF ( src_len GREATER 1 )
         # Multiple src directories
         FOREACH(src ${SRCDIR})
-            FILE(GLOB child RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${src}" )
+            FILE( GLOB child RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${src}" )
             ADD_CPPCHECK_TEST_RECURSIVE( ${TESTNAME}-${child} "${src}" )
         ENDFOREACH()
+    ELSEIF( CPPCHECK_SERIALIZE )
+        # Force a single cppcheck command
+        ADD_CPPCHECK_TEST( ${TESTNAME} "${SRCDIR}" "${SRCDIR}" )
     ELSE()
-        # Find the number of files to determine if we want one (or multiple) cppcheck commands
+        # Get a list of all CMake subdirectories
+        GET_PROPERTY( subdirs DIRECTORY "${SRCDIR}" PROPERTY SUBDIRECTORIES )
+        # Get a list of all srcs
         FILE(GLOB_RECURSE SRCS "${SRCDIR}/*.cpp" "${SRCDIR}/*.cc" "${SRCDIR}/*.c" )
         LIST(LENGTH SRCS len)
-        IF ( len LESS 100 OR CPPCHECK_SERIALIZE )
+        IF ( len EQUAL 0 )
+            # Nothing to process
+        ELSEIF ( len LESS 20 )
+            # Only a few files to process
+            ADD_CPPCHECK_TEST( ${TESTNAME} "${SRCDIR}" "${SRCDIR}" )
+        ELSEIF ( NOT subdirs )
+            # No subdirectories
             ADD_CPPCHECK_TEST( ${TESTNAME} "${SRCDIR}" "${SRCDIR}" )
         ELSE()
-            FILE(GLOB children RELATIVE "${SRCDIR}" "${SRCDIR}/*" )
-            # Add subdirectories
-            FOREACH(child ${children})
-                FILE(GLOB_RECURSE SRCS "${SRCDIR}/${child}/*.cpp" "${SRCDIR}/${child}/*.cc" "${SRCDIR}/${child}/*.c" )
-                LIST(LENGTH SRCS len)
-                IF ( (IS_DIRECTORY ${SRCDIR}/${child}) AND (len GREATER 0) )
-                    ADD_CPPCHECK_TEST_RECURSIVE( ${TESTNAME}-${child} "${SRCDIR}/${child}" )
-                ENDIF()
+            # Process each subdirectory
+            FOREACH( dir ${subdirs} )
+                STRING(REGEX REPLACE "${SRCDIR}." "${TESTNAME}-" TESTNAME2 ${dir} )
+                ADD_CPPCHECK_TEST_RECURSIVE( ${TESTNAME2} "${dir}" )
             ENDFOREACH()
-            # Add source files in current directory
-            FILE(GLOB SRCS "${SRCDIR}/*.cpp" "${SRCDIR}/*.cc" "${SRCDIR}/*.c" )
-            LIST(LENGTH SRCS len)
-            IF ( len GREATER 0 )
+            # Find any files that are not part of the included subdirectories
+            FOREACH( dir ${subdirs} )
+                LIST( FILTER SRCS EXCLUDE REGEX "${dir}" )
+            ENDFOREACH()
+            IF ( SRCS )
                 ADD_CPPCHECK_TEST( ${TESTNAME} "${SRCDIR}" ${SRCS} )
             ENDIF()
         ENDIF()
@@ -157,6 +166,5 @@ FUNCTION( ADD_CPPCHECK_TEST_RECURSIVE TESTNAME SRCDIR )
 ENDFUNCTION()
 
 # Add the test(s)
-IF ( CPPCHECK )
-    ADD_CPPCHECK_TEST_RECURSIVE( cppcheck "${CPPCHECK_SOURCE}" )
-ENDIF()
+ADD_CPPCHECK_TEST_RECURSIVE( cppcheck "${CPPCHECK_SOURCE}" )
+
