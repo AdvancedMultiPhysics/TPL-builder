@@ -110,10 +110,12 @@ IF ( CMAKE_BUILD_LIBMESH )
         SET( LIBMESH_CXX_FLAGS -std=c++11 )
     ELSEIF ( ${CXX_STD} STREQUAL 14 )
         SET( LIBMESH_CXX_FLAGS -std=c++14 )
-      ENDIF()
-   # for some strange reason this is required for linking when MPI is not turned on
-   # even if pthreads is disabled   
-   SET( LIBMESH_LD_FLAGS -pthread )
+    ELSEIF ( ${CXX_STD} STREQUAL 17 )
+        SET( LIBMESH_CXX_FLAGS -std=c++17 )
+    ENDIF()
+    # for some strange reason this is required for linking when MPI is not turned on
+    # even if pthreads is disabled   
+    SET( LIBMESH_LD_FLAGS -pthread )
 ENDIF()
 
 
