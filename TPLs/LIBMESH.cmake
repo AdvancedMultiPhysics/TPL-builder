@@ -134,6 +134,14 @@ IF ( CMAKE_BUILD_LIBMESH )
         DEPENDS             
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
+    EXTERNALPROJECT_ADD_STEP(
+        LIBMESH
+        clean
+        COMMAND             make clean
+        DEPENDEES           install
+        WORKING_DIRECTORY   "${LIBMESH_BUILD_DIR}"
+        LOG                 1
+    )
     ADD_TPL_SAVE_LOGS( LIBMESH )
     ADD_TPL_CLEAN( LIBMESH )
 ELSE()

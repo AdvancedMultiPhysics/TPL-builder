@@ -103,6 +103,14 @@ IF ( CMAKE_BUILD_PETSC )
         DEPENDS             LAPACK
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
+    EXTERNALPROJECT_ADD_STEP(
+        PETSC
+        clean
+        COMMAND             make clean
+        DEPENDEES           install
+        WORKING_DIRECTORY   "${PETSC_BUILD_DIR}"
+        LOG                 1
+    )
     ADD_TPL_SAVE_LOGS( PETSC )
     ADD_TPL_CLEAN( PETSC )
 ELSE()

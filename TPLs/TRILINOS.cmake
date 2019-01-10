@@ -187,6 +187,14 @@ IF ( CMAKE_BUILD_TRILINOS )
         DEPENDS             ${TRILINOS_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
+    EXTERNALPROJECT_ADD_STEP(
+        TRILINOS
+        clean
+        COMMAND             make clean
+        DEPENDEES           install
+        WORKING_DIRECTORY   "${TRILINOS_BUILD_DIR}"
+        LOG                 1
+    )
     ADD_TPL_SAVE_LOGS( TRILINOS )
     ADD_TPL_CLEAN( TRILINOS )
 ELSE()

@@ -109,6 +109,14 @@ IF ( CMAKE_BUILD_HDF5 )
         DEPENDS             ZLIB
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
+    EXTERNALPROJECT_ADD_STEP(
+        HDF5
+        clean
+        COMMAND             make clean
+        DEPENDEES           install
+        WORKING_DIRECTORY   "${HDF5_BUILD_DIR}"
+        LOG                 1
+    )
     ADD_TPL_SAVE_LOGS( HDF5 )
     ADD_TPL_CLEAN( HDF5 )
 ELSE()

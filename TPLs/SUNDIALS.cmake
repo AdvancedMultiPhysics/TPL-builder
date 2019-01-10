@@ -70,6 +70,14 @@ IF ( CMAKE_BUILD_SUNDIALS )
         DEPENDS             ${SUNDIALS_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
+    EXTERNALPROJECT_ADD_STEP(
+        SUNDIALS
+        clean
+        COMMAND             make clean
+        DEPENDEES           install
+        WORKING_DIRECTORY   "${SUNDIALS_BUILD_DIR}"
+        LOG                 1
+    )
     ADD_TPL_SAVE_LOGS( SUNDIALS )
     ADD_TPL_CLEAN( SUNDIALS )
 ELSE()

@@ -97,6 +97,7 @@ IF ( CMAKE_BUILD_SAMRAI )
         DEPENDS             LAPACK HDF5 ZLIB BOOST TIMER
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
+    SET( SAMRAI_CLEAN_DEPENDENCIES install )
     IF ( SAMRAI_TEST )
         EXTERNALPROJECT_ADD_STEP(
             SAMRAI
@@ -119,6 +120,7 @@ IF ( CMAKE_BUILD_SAMRAI )
             WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/SAMRAI-prefix/src/SAMRAI-stamp"
             LOG                 0
         )
+        SET( SAMRAI_CLEAN_DEPENDENCIES ${SAMRAI_CLEAN_DEPENDENCIES} check-test )
     ENDIF()
     IF ( SAMRAI_DOCS )
         EXTERNALPROJECT_ADD_STEP(
@@ -133,8 +135,16 @@ IF ( CMAKE_BUILD_SAMRAI )
             WORKING_DIRECTORY   "${SAMRAI_BUILD_DIR}"
             LOG                 1
         )
-
+        SET( SAMRAI_CLEAN_DEPENDENCIES ${SAMRAI_CLEAN_DEPENDENCIES} build-docs )
     ENDIF()
+    EXTERNALPROJECT_ADD_STEP(
+        SAMRAI
+        clean
+        COMMAND             make clean
+        DEPENDEES           ${SAMRAI_CLEAN_DEPENDENCIES}
+        WORKING_DIRECTORY   "${SAMRAI_BUILD_DIR}"
+        LOG                 1
+    )
     ADD_TPL_SAVE_LOGS( SAMRAI )
     ADD_TPL_CLEAN( SAMRAI )
 ELSE()

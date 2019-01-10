@@ -344,13 +344,11 @@ int main( int argc, char *argv[] )
         // Test catching an error
         try {
             throw std::logic_error( "Test" );
-            failure.push_back( "Failed to catch ERROR" );
         } catch ( ... ) {
             passes.push_back( "Caught ERROR" );
         }
         try {
             throw std::logic_error( "test" );
-            failure.push_back( "Failed to catch exception" );
         } catch ( ... ) {
             passes.push_back( "Caught exception" );
         }
