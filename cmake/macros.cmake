@@ -899,6 +899,7 @@ ENDFUNCTION()
 
 # Functions to create a test builder
 FUNCTION( INITIALIZE_TESTBUILDER )
+    SET( TESTBUILDER_SOURCES PARENT_SCOPE )
     # Check if we actually want to add the test
     KEEP_TEST( RESULT )
     IF ( NOT RESULT )
