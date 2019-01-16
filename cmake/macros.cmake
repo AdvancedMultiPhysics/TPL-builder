@@ -52,7 +52,7 @@ IF ( NOT TARGET copy-${PROJ}-Data )
     ADD_CUSTOM_TARGET( copy-${PROJ}-Data ALL )
 ENDIF()
 IF ( NOT TARGET copy-${PROJ}-include )
-    ADD_CUSTOM_TARGET ( copy-${PROJ}-include ALL )
+    ADD_CUSTOM_TARGET( copy-${PROJ}-include ALL )
 ENDIF()
 
 
@@ -75,7 +75,7 @@ ENDMACRO()
 MACRO( PRINT_ALL_VARIABLES )
     GET_CMAKE_PROPERTY(_variableNames VARIABLES)
     FOREACH(_variableName ${_variableNames})
-        message(STATUS "${_variableName}=${${_variableName}}")
+        MESSAGE(STATUS "${_variableName}=${${_variableName}}")
     ENDFOREACH()
 ENDMACRO()
 
@@ -108,28 +108,28 @@ MACRO( CONVERT_M4_FORTRAN IN LOCAL_PATH OUT_PATH )
     IF ( NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_PATH}" )
         FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${OUT_PATH}" )    
     ENDIF()
-    CONFIGURE_FILE ( ${IN} ${IN} COPYONLY )
+    CONFIGURE_FILE( ${IN} ${IN} COPYONLY )
     IF ("${CMAKE_GENERATOR}" STREQUAL "Xcode")
         STRING(REGEX REPLACE ".F" ".o" OUT2 "${OUT}" )
         STRING(REGEX REPLACE ";" " " COMPILE_CMD "${CMAKE_Fortran_COMPILER} -c ${OUT} ${CMAKE_Fortran_FLAGS} -o ${OUT2}")
         STRING(REGEX REPLACE "\\\\" "" COMPILE_CMD "${COMPILE_CMD}")
         MESSAGE("COMPILE_CMD = ${COMPILE_CMD}")
         SET( COMPILE_CMD ${COMPILE_CMD} )
-        add_custom_command(
+        ADD_CUSTOM_COMMAND(
             OUTPUT ${OUT2}
             COMMAND m4 -I${LOCAL_PATH} -I${SAMRAI_FORTDIR} ${M4DIRS} ${IN} > ${OUT}
             COMMAND ${COMPILE_CMD}
             DEPENDS ${IN}
             )
-        set_source_files_properties(${OUT2} PROPERTIES GENERATED true)
+        SET_SOURCE_FILES_PROPERTIES(${OUT2} PROPERTIES GENERATED true)
         SET( SOURCES ${SOURCES} "${OUT2}" )
      ELSE()
-        add_custom_command(
+        ADD_CUSTOM_COMMAND(
             OUTPUT ${OUT}
             COMMAND m4 -I${LOCAL_PATH} -I${SAMRAI_FORTDIR} ${M4DIRS} ${M4_OPTIONS} ${IN} > ${OUT}
             DEPENDS ${IN}
             )
-         set_source_files_properties(${OUT} PROPERTIES GENERATED true)
+         SET_SOURCE_FILES_PROPERTIES(${OUT} PROPERTIES GENERATED true)
          SET( SOURCES ${SOURCES} "${OUT}" )
      ENDIF()
 ENDMACRO()
@@ -303,7 +303,7 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
         IF ( TARGET write_repo_version )
             ADD_DEPENDENCIES( ${PACKAGE} write_repo_version )
         ENDIF()
-        ADD_DEPENDENCIES ( ${PACKAGE} copy-${PROJ}-include )
+        ADD_DEPENDENCIES( ${PACKAGE} copy-${PROJ}-include )
         IF ( NOT ${PROJ}_LIB )
             INSTALL( TARGETS ${PACKAGE} DESTINATION ${${PROJ}_INSTALL_DIR}/lib )
         ENDIF()
@@ -340,7 +340,7 @@ ENDMACRO()
 # Macro to verify that a path has been set
 MACRO( VERIFY_PATH PATH_NAME )
     IF ("${PATH_NAME}" STREQUAL "")
-        MESSAGE ( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
+        MESSAGE( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
     ENDIF()
     IF ( NOT EXISTS "${PATH_NAME}" )
         MESSAGE( FATAL_ERROR "Path does not exist: ${PATH_NAME}" )
@@ -651,7 +651,7 @@ MACRO( COPY_MESH_FILE MESHNAME )
     ENDFOREACH()
     # We have either found the mesh or failed
     IF ( NOT MESHPATH )
-        MESSAGE ( WARNING "Cannot find mesh: " ${MESHNAME} )
+        MESSAGE( WARNING "Cannot find mesh: " ${MESHNAME} )
     ELSE ()
         SET( MESHPATH2 )
         FOREACH( tmp ${MESHPATH} )
@@ -715,8 +715,8 @@ ENDFUNCTION()
 MACRO( ADD_PROJ_EXE_DEP EXE )
     # Add the package dependencies
     IF( ${PROJ}_TEST_LIB_EXISTS )
-        ADD_DEPENDENCIES ( ${EXE} ${PACKAGE_TEST_LIB} )
-        TARGET_LINK_LIBRARIES ( ${EXE} ${PACKAGE_TEST_LIB} )
+        ADD_DEPENDENCIES( ${EXE} ${PACKAGE_TEST_LIB} )
+        TARGET_LINK_LIBRARIES( ${EXE} ${PACKAGE_TEST_LIB} )
     ENDIF()
     # Add the executable to the dependencies of check and build-test
     ADD_DEPENDENCIES( check ${EXE} )
@@ -949,6 +949,10 @@ FUNCTION( FINALIZE_TESTBUILDER )
             ADD_LIBRARY( ${TB_TARGET}_LIB ${LIB_TYPE} ${TESTBUILDER_SOURCES} )
         ELSE()
             ADD_LIBRARY( ${TB_TARGET}_LIB ${LIB_TYPE} EXCLUDE_FROM_ALL ${TESTBUILDER_SOURCES} )
+        ENDIF()
+        ADD_DEPENDENCIES( ${TB_TARGET}_LIB copy-${PROJ}-include )
+        IF( ${PROJ}_TEST_LIB_EXISTS )
+            ADD_DEPENDENCIES( ${TB_TARGET}_LIB ${PACKAGE_TEST_LIB} )
         ENDIF()
         TARGET_LINK_LIBRARIES( ${TB_TARGET} ${TB_TARGET}_LIB )
     ENDIF()
@@ -1280,7 +1284,7 @@ MACRO( ADD_DISTCLEAN ${ARGN} )
         compile_commands.json
         ${ARGN}
     )
-    ADD_CUSTOM_TARGET (distclean @echo cleaning for source distribution)
+    ADD_CUSTOM_TARGET(distclean @echo cleaning for source distribution)
     IF (UNIX)
         ADD_CUSTOM_COMMAND(
             DEPENDS clean
