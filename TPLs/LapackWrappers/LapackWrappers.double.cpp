@@ -578,19 +578,3 @@ void Lapack<double>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, i
     ( &SIDE, &UPLO, &TRANS, &DIAG, &M, &N, &ALPHA, (double *) A, &LDA, B, &LDB );
 #endif
 }
-#undef dlamch
-template<>
-double Lapack<double>::lamch( char cmach )
-{
-#ifdef USE_ATLAS
-    return clapack_dlamch( cmach );
-#elif defined( USE_ACML )
-    return ::dlamch( cmach );
-#elif defined( USE_VECLIB )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#elif defined( USE_OPENBLAS )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#else
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#endif
-}

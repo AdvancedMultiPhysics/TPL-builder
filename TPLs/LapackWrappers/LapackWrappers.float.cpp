@@ -569,19 +569,4 @@ void Lapack<float>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, in
     ( &SIDE, &UPLO, &TRANS, &DIAG, &M, &N, &ALPHA, (float *) A, &LDA, B, &LDB );
 #endif
 }
-#undef slamch
-template<>
-float Lapack<float>::lamch( char cmach )
-{
-#ifdef USE_ATLAS
-    return clapack_slamch( cmach );
-#elif defined( USE_ACML )
-    return ::slamch( cmach );
-#elif defined( USE_VECLIB )
-    return FORTRAN_WRAPPER(::slamch )( &cmach );
-#elif defined( USE_OPENBLAS )
-    return FORTRAN_WRAPPER(::slamch )( &cmach );
-#else
-    return FORTRAN_WRAPPER(::slamch )( &cmach );
-#endif
-}
+

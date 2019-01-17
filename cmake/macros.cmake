@@ -945,7 +945,12 @@ FUNCTION( FINALIZE_TESTBUILDER )
     # Create the library for the test builder
     IF ( TESTBUILDER_SOURCES )
         LIST( REMOVE_DUPLICATES TESTBUILDER_SOURCES )
-        TARGET_SOURCES( ${TB_TARGET} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/TestBuilder.cpp" ${TESTBUILDER_SOURCES} )
+        SET( TB_TARGET_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/TestBuilder.cpp" )
+        FOREACH ( tmp ${TESTBUILDER_SOURCES} )
+            GET_FILENAME_COMPONENT( tmp ${tmp} ABSOLUTE )
+            SET( TB_TARGET_SOURCES ${TB_TARGET_SOURCES} ${tmp} )
+        ENDFOREACH()
+        TARGET_SOURCES( ${TB_TARGET} PUBLIC ${TB_TARGET_SOURCES} )
         ADD_DEPENDENCIES( ${TB_TARGET} copy-${PROJ}-include )
     ENDIF()
     # Add the dependencies to the test builder
