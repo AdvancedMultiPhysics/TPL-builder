@@ -279,6 +279,46 @@ static const char *copy_out( size_t N, void *data, const char *ptr )
 
 
 /****************************************************************************
+ *  Class to replace a std::vector with a fixed capacity                     *
+ ****************************************************************************/
+template<class TYPE, std::size_t CAPACITY>
+class staticVector final
+{
+public:
+    staticVector() : d_size( 0 ) {}
+    size_t size() const { return d_size; }
+    bool empty() const { return d_size == 0; }
+    void push_back( const TYPE &v )
+    {
+        if ( d_size < CAPACITY )
+            d_data[d_size++] = v;
+    }
+    TYPE &operator[]( size_t i ) { return d_data[i]; }
+    TYPE *begin() { return d_data; }
+    TYPE *end() { return d_data + d_size; }
+    TYPE &back() { return d_data[d_size - 1]; }
+    TYPE *data() { return d_size == 0 ? nullptr : d_data; }
+    void pop_back() { d_size = std::max<size_t>( d_size, 1 ) - 1; }
+    const TYPE *begin() const { return d_data; }
+    const TYPE *end() const { return d_data + d_size; }
+    const TYPE &back() const { return d_data[d_size - 1]; }
+    void erase( const TYPE &x )
+    {
+        size_t N = 0;
+        for ( size_t i = 0; i < d_size; i++ ) {
+            if ( d_data[i] != x )
+                d_data[N++] = d_data[i];
+        }
+        d_size = N;
+    }
+
+private:
+    size_t d_size;
+    TYPE d_data[CAPACITY];
+};
+
+
+/****************************************************************************
  *  Utility functions to use std::vector like a set                          *
  ****************************************************************************/
 template<class TYPE>
@@ -331,53 +371,48 @@ static void resetSignal( int sig )
 #define popen _popen
 #define pclose _pclose
 #endif
-static std::vector<std::array<char, 1024>> exec2( const char *cmd )
+template<class FUNCTION>
+static inline int exec3( const char *cmd, FUNCTION &fun )
 {
-    std::vector<std::array<char, 1024>> out;
     clearSignal( SIGCHLD ); // Clear child exited
     auto pipe = popen( cmd, "r" );
     if ( pipe == nullptr )
-        return out;
-    out.reserve( 128 );
+        return -1;
     while ( !feof( pipe ) ) {
         char buffer[0x2000];
         buffer[0] = 0;
         auto ptr  = fgets( buffer, sizeof( buffer ), pipe );
         NULL_USE( ptr );
-        size_t N2 = strlen( buffer );
-        if ( N2 > 0 ) {
-            size_t k = out.size();
-            out.resize( k + 1 );
-            out[k].fill( 0 );
-            memcpy( out[k].data(), buffer, N2 );
-            if ( out[k][N2 - 1] == '\n' )
-                out[k][N2 - 1] = 0;
-        }
+        if ( buffer[0] != 0 )
+            fun( buffer );
     }
-    pclose( pipe );
+    auto status = pclose( pipe );
+    int code    = WEXITSTATUS( status );
     std::this_thread::yield(); // Allow any signals to process
     resetSignal( SIGCHLD );    // Clear child exited
+    return code;
+}
+static std::vector<std::array<char, 1024>> exec2( const char *cmd )
+{
+    std::vector<std::array<char, 1024>> out;
+    out.reserve( 128 );
+    auto fun = [&out]( const char *line ) {
+        size_t N = strlen( line );
+        size_t k = out.size();
+        out.resize( k + 1 );
+        out[k].fill( 0 );
+        memcpy( out[k].data(), line, N );
+        if ( out[k][N - 1] == '\n' )
+            out[k][N - 1] = 0;
+    };
+    exec3( cmd, fun );
     return out;
 }
 std::string StackTrace::exec( const std::string &cmd, int &code )
 {
-    code = -1;
-    clearSignal( SIGCHLD ); // Clear child exited
-    FILE *pipe = popen( cmd.c_str(), "r" );
-    if ( pipe == nullptr )
-        return std::string();
-    std::string result = "";
-    result.reserve( 1024 );
-    while ( !feof( pipe ) ) {
-        char buffer[257];
-        buffer[256] = 0;
-        if ( fgets( buffer, 128, pipe ) != nullptr )
-            result += buffer;
-    }
-    auto status = pclose( pipe );
-    code        = WEXITSTATUS( status );
-    std::this_thread::yield(); // Allow any signals to process
-    resetSignal( SIGCHLD );    // Clear child exited
+    std::string result;
+    auto fun = [&result]( const char *line ) { result += line; };
+    code     = exec3( cmd.c_str(), fun );
     return result;
 }
 
@@ -473,43 +508,6 @@ std::vector<StackTrace::stack_info> StackTrace::stack_info::unpackArray( const c
         ptr = i.unpack( ptr );
     return data;
 }
-#ifdef USE_MPI
-static std::vector<char> pack( const std::vector<std::vector<StackTrace::stack_info>> &data )
-{
-    size_t size = sizeof( int );
-    for ( const auto &i : data ) {
-        size += sizeof( int );
-        for ( size_t j = 0; j < i.size(); j++ )
-            size += i[j].size();
-    }
-    std::vector<char> out( size, 0 );
-    char *ptr = out.data();
-    int N     = data.size();
-    ptr       = copy_in( sizeof( int ), &N, ptr );
-    for ( int i = 0; i < N; i++ ) {
-        int M = data[i].size();
-        ptr   = copy_in( sizeof( int ), &M, ptr );
-        for ( int j = 0; j < M; j++ )
-            ptr = data[i][j].pack( ptr );
-    }
-    return out;
-}
-static std::vector<std::vector<StackTrace::stack_info>> unpack( const std::vector<char> &in )
-{
-    const char *ptr = in.data();
-    int N;
-    ptr = copy_out( sizeof( int ), &N, ptr );
-    std::vector<std::vector<StackTrace::stack_info>> data( N );
-    for ( int i = 0; i < N; i++ ) {
-        int M;
-        ptr = copy_out( sizeof( int ), &M, ptr );
-        data[i].resize( M );
-        for ( int j = 0; j < M; j++ )
-            ptr = data[i][j].unpack( ptr );
-    }
-    return data;
-}
-#endif
 
 
 /****************************************************************************
@@ -606,6 +604,55 @@ void StackTrace::multi_stack_info::add( size_t len, const stack_info *stack )
     children.back().stack = s;
     if ( len > 1 )
         children.back().add( len - 1, stack );
+}
+void StackTrace::multi_stack_info::add( const multi_stack_info &rhs )
+{
+    N += rhs.N;
+    for ( const auto &x : rhs.children ) {
+        bool found = false;
+        for ( auto &tmp : children ) {
+            if ( tmp.stack == x.stack ) {
+                found = true;
+                tmp.add( x );
+            }
+        }
+        if ( !found )
+            children.push_back( x );
+    }
+}
+size_t StackTrace::multi_stack_info::size() const
+{
+    size_t bytes = 2 * sizeof( int ) + stack.size();
+    for ( const auto &tmp : children )
+        bytes += tmp.size();
+    return bytes;
+}
+char *StackTrace::multi_stack_info::pack( char *ptr ) const
+{
+    int N2 = N;
+    memcpy( ptr, &N2, sizeof( int ) );
+    ptr += sizeof( int );
+    ptr    = stack.pack( ptr );
+    int Nc = children.size();
+    memcpy( ptr, &Nc, sizeof( int ) );
+    ptr += sizeof( int );
+    for ( const auto &tmp : children )
+        ptr = tmp.pack( ptr );
+    return ptr;
+}
+const char *StackTrace::multi_stack_info::unpack( const char *ptr )
+{
+    int N2, Nc;
+    memcpy( &N2, ptr, sizeof( int ) );
+    ptr += sizeof( int );
+    N   = N2;
+    ptr = stack.unpack( ptr );
+    memcpy( &Nc, ptr, sizeof( int ) );
+    ptr += sizeof( int );
+    children.resize( Nc );
+    for ( auto &tmp : children )
+        ptr = tmp.unpack( ptr );
+    return ptr;
 }
 
 
@@ -719,19 +766,19 @@ static std::vector<StackTrace::symbols_struct> getSymbolData()
 #else
 #error Unknown OS using nm
 #endif
-        auto output = exec2( cmd );
-        for ( auto &line : output ) {
+        // Function to process a line of nm output
+        auto fun = [&data]( char *line ) {
             if ( line[0] == ' ' )
-                continue;
-            auto *a = line.data();
+                return;
+            auto *a = line;
             char *b = strchr( a, ' ' );
             if ( b == nullptr )
-                continue;
+                return;
             b[0] = 0;
             b++;
             char *c = strchr( b, ' ' );
             if ( c == nullptr )
-                continue;
+                return;
             c[0] = 0;
             c++;
             char *d = strchr( c, '\n' );
@@ -743,7 +790,9 @@ static std::vector<StackTrace::symbols_struct> getSymbolData()
             data[k].address = reinterpret_cast<void *>( add );
             data[k].type    = b[0];
             copy( c, data[k].obj, data[k].objPath );
-        }
+        };
+        // Call nm
+        exec3( cmd, fun );
     } catch ( ... ) {
     }
 #endif
@@ -926,21 +975,21 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
         }
     #endif
 }
-static void getFileAndLine( std::vector<StackTrace::stack_info> &info )
+static void getFileAndLine( size_t N, StackTrace::stack_info *info )
 {
     // Get a list of objects
     std::vector<uint64_t> objectHash;
     objectHash.reserve( 1024 );
-    for ( const auto & tmp : info )
-        insert( objectHash, objHash( tmp.object, tmp.objectPath ) );
+    for ( size_t i = 0; i<N; i++)
+        insert( objectHash, objHash( info[i].object, info[i].objectPath ) );
     // For each object, get the file/line numbers for all entries
     std::vector<StackTrace::stack_info*> list;
-    list.reserve( info.size() );
+    list.reserve( N );
     for ( const auto & hash : objectHash ) {
         list.clear();
-        for (auto & tmp : info ) {
-            if ( objHash( tmp.object, tmp.objectPath ) == hash )
-                list.push_back( &tmp );
+        for ( size_t i = 0; i<N; i++) {
+            if ( objHash( info[i].object, info[i].objectPath ) == hash )
+                list.push_back( &info[i] );
         }
         getFileAndLineObject( list );
     }
@@ -977,16 +1026,11 @@ static void signal_handler( int sig )
     printf("Signal caught acquiring stack (%i)\n",sig);
     StackTrace::setErrorHandler( [](const StackTrace::abort_error &err) { std::cerr << err.what(); exit( -1 ); } );
 }
-StackTrace::stack_info StackTrace::getStackInfo( void *address )
-{
-    return getStackInfo( std::vector<void*>(1,address) )[0];
-}
-std::vector<StackTrace::stack_info> StackTrace::getStackInfo( const std::vector<void*>& address )
+static void getStackInfo2( size_t N, void* const* address, StackTrace::stack_info *info )
 {
     // Temporarily handle signals to prevent recursion on the stack
     auto prev_handler = signal( SIGINT, signal_handler );
     // Get the detailed stack info
-    std::vector<StackTrace::stack_info> info(address.size());
     try {
         #ifdef USE_WINDOWS
             IMAGEHLP_SYMBOL64 pSym[1024];
@@ -1000,7 +1044,7 @@ std::vector<StackTrace::stack_info> StackTrace::getStackInfo( const std::vector<
 
             HANDLE pid = GetCurrentProcess();
 
-            for (size_t i=0; i<address.size(); i++) {
+            for (size_t i=0; i<N; i++) {
                 info[i].address = address[i];
                 DWORD64 address2 = reinterpret_cast<DWORD64>( address[i] );
                 DWORD64 offsetFromSymbol;
@@ -1036,7 +1080,7 @@ std::vector<StackTrace::stack_info> StackTrace::getStackInfo( const std::vector<
                 }
             }
         #else
-            for (size_t i=0; i<address.size(); i++) {
+            for (size_t i=0; i<N; i++) {
                 info[i].address = address[i];
                 #if defined(_GNU_SOURCE) || defined(USE_MAC)
                     Dl_info dlinfo;
@@ -1068,11 +1112,22 @@ std::vector<StackTrace::stack_info> StackTrace::getStackInfo( const std::vector<
                 #endif
             }
             // Get the filename / line numbers for each item on the stack
-            getFileAndLine( info );
+            getFileAndLine( N, info );
         #endif
     } catch ( ... ) {
     }
     signal( SIGINT, prev_handler ) ;
+}
+StackTrace::stack_info StackTrace::getStackInfo( void *address )
+{
+    StackTrace::stack_info info;
+    getStackInfo2( 1, &address, &info );
+    return info;
+}
+std::vector<StackTrace::stack_info> StackTrace::getStackInfo( const std::vector<void*>& address )
+{
+    std::vector<StackTrace::stack_info> info( address.size() );
+    getStackInfo2( address.size(), address.data(), info.data() );
     return info;
 }
 
@@ -1151,29 +1206,31 @@ std::thread::native_handle_type StackTrace::thisThread( )
         return std::thread::native_handle_type();
     #endif
 }
-static std::vector<std::thread::native_handle_type> getActiveThreads( )
+static staticVector<std::thread::native_handle_type,1024> getActiveThreads( )
 {
-    std::vector<std::thread::native_handle_type> threads;
-    threads.reserve( 128 );
+    staticVector<std::thread::native_handle_type,1024> threads;
     #if defined( USE_LINUX )
-        std::vector<int> tid;
-        tid.reserve( 128 );
+        int N_tid = 0, tid[1024];
         int pid = getpid();
         char cmd[128];
         sprintf( cmd, "ps -T -p %i", pid );
-        auto output = exec2( cmd );
-        for ( const auto& line : output ) {
-            int tid2 = get_tid( pid, line.data() );
-            if ( tid2 != -1 )
-                insert( tid, tid2 );
+        auto fun = [&N_tid,&tid,pid]( const char* line ) {
+            int id = get_tid( pid, line );
+            if ( id != -1 && N_tid < 1024 )
+                tid[N_tid++] = id;
+        };
+        exec3( cmd, fun );
+        int myid = syscall(SYS_gettid);
+        for ( int i=0; i<N_tid; i++) {
+            if ( tid[i] == myid )
+                std::swap( tid[i], tid[--N_tid] );
         }
-        erase<int>( tid, syscall(SYS_gettid) );
         auto old = signal( thread_callstack_signal, _activeThreads_signal_handler );
-        for ( auto tid2 : tid ) {
+        for ( int i=0; i<N_tid; i++) {
             StackTrace_mutex.lock();
             thread_id_finished = false;
             thread_handle = StackTrace::thisThread();
-            syscall( SYS_tgkill, pid, tid2, thread_callstack_signal );
+            syscall( SYS_tgkill, pid, tid[i], thread_callstack_signal );
             auto t1 = std::chrono::high_resolution_clock::now();
             auto t2 = std::chrono::high_resolution_clock::now();
             while ( !thread_id_finished && std::chrono::duration<double>(t2-t1).count()<0.1 ) {
@@ -1411,6 +1468,15 @@ std::vector<StackTrace::stack_info> StackTrace::getCallStack( std::thread::nativ
     auto info  = getStackInfo( trace );
     return info;
 }
+template<class TYPE>
+static inline int find( const std::vector<TYPE> &data, const TYPE &x )
+{
+    for ( size_t i = 0; i < data.size(); i++ ) {
+        if ( data[i] == x )
+            return i;
+    }
+    return -1;
+}
 static std::vector<std::vector<StackTrace::stack_info>> generateStacks(
     const std::vector<std::vector<void *>> &trace )
 {
@@ -1422,23 +1488,26 @@ static std::vector<std::vector<StackTrace::stack_info>> generateStacks(
             insert( addresses, ptr );
     }
     auto stack_data = StackTrace::getStackInfo( addresses );
-    std::map<void *, StackTrace::stack_info> map_data;
-    for ( size_t i = 0; i < addresses.size(); i++ )
-        map_data.insert( std::make_pair( addresses[i], stack_data[i] ) );
     // Create the stack traces
     std::vector<std::vector<StackTrace::stack_info>> stack( trace.size() );
     for ( size_t i = 0; i < trace.size(); i++ ) {
         // Create the stack for the given thread trace
         stack[i].resize( trace[i].size() );
-        for ( size_t j = 0; j < trace[i].size(); j++ )
-            stack[i][j] = map_data[trace[i][j]];
+        for ( size_t j = 0; j < trace[i].size(); j++ ) {
+            int k       = find( addresses, trace[i][j] );
+            stack[i][j] = stack_data[k];
+        }
     }
     return stack;
 }
 static StackTrace::multi_stack_info generateMultiStack(
-    const std::vector<std::vector<void *>> &trace )
+    const staticVector<std::thread::native_handle_type, 1024> &threads )
 {
     // Get the stack data for all pointers
+    std::vector<std::vector<void *>> trace( threads.size() );
+    auto it = threads.begin();
+    for ( size_t i = 0; i < threads.size(); i++, ++it )
+        trace[i] = StackTrace::backtrace( *it );
     auto stack = generateStacks( trace );
     // Create the multi-stack trace
     StackTrace::multi_stack_info multistack;
@@ -1449,10 +1518,10 @@ static StackTrace::multi_stack_info generateMultiStack(
 }
 StackTrace::multi_stack_info StackTrace::getAllCallStacks()
 {
-    // Get the backtrace of each thread
-    auto thread_backtrace = backtraceAll();
+    // Get the list of active thread
+    auto threads = getActiveThreads();
     // Create the multi-stack strucutre
-    auto stack = generateMultiStack( thread_backtrace );
+    auto stack = generateMultiStack( threads );
     return stack;
 }
 
@@ -1907,24 +1976,17 @@ static void runGlobalMonitorThread()
             int tag;
             MPI_Recv( &tag, 1, MPI_INT, src_rank, 1, globalCommForGlobalCommStack, &status );
             // Get the list of threads (except this)
-            auto threads = StackTrace::activeThreads();
-            threads.erase( StackTrace::thisThread() );
+            auto threads = getActiveThreads();
             if ( threads.empty() )
                 continue;
-            // Get the trace of each thread
-            std::vector<std::vector<void *>> trace( threads.size() );
-            auto it = threads.begin();
-            for ( size_t i = 0; i < threads.size(); i++, ++it ) {
-                trace[i].resize( 1000, nullptr );
-                size_t count = backtrace_thread( *it, trace[i].data(), trace[i].size() );
-                trace[i].resize( count );
-            }
             // Get the stack info for the threads
-            auto stack = generateStacks( trace );
+            auto multistack = generateMultiStack( threads );
             // Pack and send the data
-            auto data = pack( stack );
-            int count = data.size();
-            MPI_Send( data.data(), count, MPI_CHAR, src_rank, tag, globalCommForGlobalCommStack );
+            size_t bytes = multistack.size();
+            char *data  = new char[bytes];
+            multistack.pack( data );
+            MPI_Send( data, bytes, MPI_CHAR, src_rank, tag, globalCommForGlobalCommStack );
+            delete[] data;
         } else {
             // No requests recieved
             std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
@@ -2006,12 +2068,8 @@ StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
         MPI_Isend( &tag, 1, MPI_INT, i, 1, globalCommForGlobalCommStack, &sendRequest[i] );
     }
     // Get the trace for the current process
-    auto threads = getActiveThreads();
-    std::vector<std::vector<void *>> trace( threads.size() );
-    auto it = threads.begin();
-    for ( size_t i = 0; i < threads.size(); i++, ++it )
-        trace[i] = StackTrace::backtrace( *it );
-    auto multistack = generateMultiStack( trace );
+    auto threads    = getActiveThreads();
+    auto multistack = generateMultiStack( threads );
     // Recieve the backtrace for all processes/threads
     int N_finished        = 1;
     auto start            = std::chrono::steady_clock::now();
@@ -2029,12 +2087,12 @@ StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
             int src_rank = status.MPI_SOURCE;
             int count;
             MPI_Get_count( &status, MPI_CHAR, &count );
-            std::vector<char> data( count, 0 );
-            MPI_Recv( data.data(), count, MPI_CHAR, src_rank, tag, globalCommForGlobalCommStack,
-                &status );
-            auto stack_list = unpack( data );
-            for ( const auto &stack : stack_list )
-                multistack.add( stack.size(), stack.data() );
+            char *data = new char[count];
+            MPI_Recv( data, count, MPI_CHAR, src_rank, tag, globalCommForGlobalCommStack, &status );
+            StackTrace::multi_stack_info tmp;
+            tmp.unpack( data );
+            delete[] data;
+            multistack.add( tmp );
             N_finished++;
         } else {
             auto stop = std::chrono::steady_clock::now();

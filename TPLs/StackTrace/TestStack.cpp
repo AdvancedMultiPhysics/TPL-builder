@@ -416,9 +416,6 @@ int main( int argc, char *argv[] )
 
     // Limit the scope of variables
     {
-        // Test exec
-        test_exec( results );
-
         // Test getting a list of all active threads
         testActivethreads( results );
 
@@ -432,7 +429,7 @@ int main( int argc, char *argv[] )
         // Test getting the full stacktrace of all thread
         testFullStack( results );
 
-        // Test getting the global stack trace of all threads/processes
+        // Test getting the global stack trace of all threads/processes*/
         testGlobalStack( results, false );
         testGlobalStack( results, true );
 
@@ -469,6 +466,9 @@ int main( int argc, char *argv[] )
 
         // Test generating call stack from a string
         testStackFile( results, "ExampleStack.txt" );
+
+        // Test exec
+        // test_exec( results );
     }
 
     // Print the test results
