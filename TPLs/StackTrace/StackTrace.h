@@ -36,6 +36,9 @@ struct stack_info {
     //! Print the stack info
     std::string print( int widthAddress = 16, int widthObject = 20, int widthFunction = 32 ) const;
     //! Print the stack info
+    static void print( std::ostream &out, const std::vector<stack_info> &stack,
+        const StackTrace::string_view &prefix = "" );
+    //! Print the stack info
     void print2(
         char *txt, int widthAddress = 16, int widthObject = 20, int widthFunction = 32 ) const;
     //! Compute the number of bytes needed to store the object
@@ -44,10 +47,6 @@ struct stack_info {
     char *pack( char *ptr ) const;
     //! Unpack the data from a byte array, returning a pointer to the end of the data
     const char *unpack( const char *ptr );
-    //! Pack a vector of data to a memory block
-    static std::vector<char> packArray( const std::vector<stack_info> &data );
-    //! Unpack a vector of data from a memory block
-    static std::vector<stack_info> unpackArray( const char *data );
 };
 
 
@@ -94,19 +93,20 @@ private:
 
 //!< Terminate type
 enum class terminateType : uint8_t { signal, exception, abort, MPI, unknown };
-
+enum class printStackType : uint8_t { local = 1, threaded = 2, global = 3 };
 
 //!< Class to contain exception info from abort
 class abort_error : public std::exception
 {
 public:
-    std::string message;                //!< Abort message
-    std::string filename;               //!< File where abort was called
-    terminateType type;                 //!< What caused the termination
-    uint8_t signal;                     //!< Signal number
-    int line;                           //!< Line number where abort was called
-    size_t bytes;                       //!< Memory in use during abort
-    StackTrace::multi_stack_info stack; //!< Stack for abort
+    std::string message;       //!< Abort message
+    std::string filename;      //!< File where abort was called
+    terminateType type;        //!< What caused the termination
+    printStackType stackType;  //!< Print the local stack, all threads, or global call stack
+    uint8_t signal;            //!< Signal number
+    int line;                  //!< Line number where abort was called
+    size_t bytes;              //!< Memory in use during abort
+    std::vector<void *> stack; //!< Local call stack for abort
 public:
     virtual const char *what() const noexcept override;
     abort_error();
@@ -194,7 +194,7 @@ std::vector<stack_info> getStackInfo( const std::vector<void *> &address );
 
 
 //! Function to return the signal name
-std::string signalName( int signal );
+const char *signalName( int signal );
 
 
 /*!
@@ -254,7 +254,7 @@ std::vector<int> defaultSignalsToCatch();
 
 
 //! Get a list of the active threads
-std::set<std::thread::native_handle_type> activeThreads();
+std::vector<std::thread::native_handle_type> activeThreads();
 
 //! Get a handle to this thread
 std::thread::native_handle_type thisThread();

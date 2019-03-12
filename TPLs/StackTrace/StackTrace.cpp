@@ -120,37 +120,14 @@ static constexpr size_t replace(
 {
     return replace( str.data(), N, pos, len, r );
 }
-template<std::size_t N>
-static inline constexpr size_t find(
-    std::array<char, N> &str, const string_view &match, size_t pos = 0 ) noexcept
-{
-    string_view str2( str.data(), str.size() );
-    return str2.find( match, pos );
-}
-static inline constexpr size_t find(
-    const string_view &str, const string_view &match, size_t pos = 0 ) noexcept
-{
-    return str.find( match, pos );
-}
-template<std::size_t N>
-static constexpr void strrep(
-    std::array<char, N> &str, const string_view &s, const string_view &r ) noexcept
-{
-    size_t Ns  = s.size();
-    size_t pos = find( str, s );
-    while ( pos != std::string::npos ) {
-        Ns  = replace( str, pos, Ns, r );
-        pos = find( str, s );
-    }
-}
 static constexpr void strrep(
     char *str, size_t &N, const string_view &s, const string_view &r ) noexcept
 {
     size_t Ns  = s.size();
-    size_t pos = find( str, s );
+    size_t pos = string_view( str, N ).find( s );
     while ( pos != std::string::npos ) {
         N   = replace( str, N, pos, Ns, r );
-        pos = find( str, s );
+        pos = string_view( str, N ).find( s );
     }
 }
 
@@ -265,19 +242,6 @@ void LoadModules();
 #endif
 
 
-// Functions to copy data
-static char *copy_in( size_t N, const void *data, char *ptr )
-{
-    memcpy( ptr, data, N );
-    return ptr + N;
-}
-static const char *copy_out( size_t N, void *data, const char *ptr )
-{
-    memcpy( data, ptr, N );
-    return ptr + N;
-}
-
-
 /****************************************************************************
  *  Class to replace a std::vector with a fixed capacity                     *
  ****************************************************************************/
@@ -302,6 +266,15 @@ public:
     const TYPE *begin() const { return d_data; }
     const TYPE *end() const { return d_data + d_size; }
     const TYPE &back() const { return d_data[d_size - 1]; }
+    void clear() { d_size = 0; }
+    void resize( size_t N, TYPE x = TYPE() )
+    {
+        if ( N > CAPACITY )
+            throw std::logic_error( "Invalid size" );
+        for ( size_t i = d_size; i < N; i++ )
+            d_data[i] = x;
+        d_size = N;
+    }
     void erase( const TYPE &x )
     {
         size_t N = 0;
@@ -311,29 +284,18 @@ public:
         }
         d_size = N;
     }
+    void insert( const TYPE &x )
+    {
+        if ( std::find( begin(), end(), x ) == end() ) {
+            push_back( x );
+            std::sort( begin(), end() );
+        }
+    }
 
 private:
     size_t d_size;
     TYPE d_data[CAPACITY];
 };
-
-
-/****************************************************************************
- *  Utility functions to use std::vector like a set                          *
- ****************************************************************************/
-template<class TYPE>
-static inline void erase( std::vector<TYPE> &x, TYPE y )
-{
-    x.erase( std::find( x.begin(), x.end(), y ) );
-}
-template<class TYPE>
-static inline void insert( std::vector<TYPE> &x, TYPE y )
-{
-    if ( std::find( x.begin(), x.end(), y ) == x.end() ) {
-        x.push_back( y );
-        std::sort( x.begin(), x.end() );
-    }
-}
 
 
 /****************************************************************************
@@ -392,10 +354,10 @@ static inline int exec3( const char *cmd, FUNCTION &fun )
     resetSignal( SIGCHLD );    // Clear child exited
     return code;
 }
-static std::vector<std::array<char, 1024>> exec2( const char *cmd )
+template<std::size_t blocKSize>
+static void exec2( const char *cmd, staticVector<std::array<char, 1024>, blocKSize> &out )
 {
-    std::vector<std::array<char, 1024>> out;
-    out.reserve( 128 );
+    out.clear();
     auto fun = [&out]( const char *line ) {
         size_t N = strlen( line );
         size_t k = out.size();
@@ -406,7 +368,6 @@ static std::vector<std::array<char, 1024>> exec2( const char *cmd )
             out[k][N - 1] = 0;
     };
     exec3( cmd, fun );
-    return out;
 }
 std::string StackTrace::exec( const string_view &cmd, int &code )
 {
@@ -462,6 +423,15 @@ std::string StackTrace::stack_info::print( int w1, int w2, int w3 ) const
     print2( out, w1, w2, w3 );
     return std::string( out );
 }
+void StackTrace::stack_info::print(
+    std::ostream &out, const std::vector<stack_info> &stack, const StackTrace::string_view &prefix )
+{
+    char buf[32 + sizeof( stack_info )];
+    for ( const auto &tmp : stack ) {
+        tmp.print2( buf, 16, 20, 32 );
+        out << prefix << buf << std::endl;
+    }
+}
 void StackTrace::stack_info::print2( char *out, int w1, int w2, int w3 ) const
 {
     char tmp1[16], tmp2[16];
@@ -489,28 +459,6 @@ const char *StackTrace::stack_info::unpack( const char *ptr )
 {
     memcpy( this, ptr, sizeof( *this ) );
     return ptr + sizeof( *this );
-}
-std::vector<char> StackTrace::stack_info::packArray( const std::vector<stack_info> &data )
-{
-    size_t size = sizeof( int );
-    for ( const auto &i : data )
-        size += i.size();
-    std::vector<char> vec( size, 0 );
-    char *ptr = vec.data();
-    int N     = data.size();
-    ptr       = copy_in( sizeof( int ), &N, ptr );
-    for ( const auto &i : data )
-        ptr = i.pack( ptr );
-    return vec;
-}
-std::vector<StackTrace::stack_info> StackTrace::stack_info::unpackArray( const char *ptr )
-{
-    int N;
-    ptr = copy_out( sizeof( int ), &N, ptr );
-    std::vector<stack_info> data( N );
-    for ( auto &i : data )
-        ptr = i.unpack( ptr );
-    return data;
 }
 
 
@@ -681,89 +629,40 @@ const char *StackTrace::multi_stack_info::unpack( const char *ptr )
 
 
 /****************************************************************************
- *  abort_error                                                              *
- ****************************************************************************/
-StackTrace::abort_error::abort_error()
-    : type( terminateType::unknown ), signal( 0 ), line( -1 ), bytes( 0 )
-{
-}
-const char *StackTrace::abort_error::what() const noexcept
-{
-    d_msg.clear();
-    if ( type == terminateType::abort ) {
-        d_msg += "Program abort called";
-    } else if ( type == terminateType::signal ) {
-        d_msg += "Unhandled signal (" + std::to_string( signal ) + ") caught";
-    } else if ( type == terminateType::exception ) {
-        d_msg += "Unhandled exception caught";
-    } else if ( type == terminateType::MPI ) {
-        d_msg += "Error calling MPI routine";
-    } else {
-        d_msg += "Unknown error called";
-    }
-    if ( !filename.empty() ) {
-        d_msg += " in file '" + filename + "'";
-        if ( line > 0 ) {
-            d_msg += " at line " + std::to_string( line );
-        }
-    }
-    d_msg += ":\n";
-    d_msg += "   " + message + "\n";
-    if ( bytes > 0 ) {
-        d_msg += "Bytes used = " + std::to_string( bytes ) + "\n";
-    }
-    if ( !stack.empty() ) {
-        d_msg += "Stack Trace:\n";
-        d_msg += stack.printString( " " );
-    }
-    for ( size_t i = 0; i < d_msg.size(); i++ )
-        if ( d_msg[i] == 0 )
-            d_msg.erase( i, 1 );
-    return d_msg.c_str();
-}
-
-
-/****************************************************************************
  *  Function to get the executable name                                      *
  ****************************************************************************/
-static char global_exe_name[1000] = { 0 };
-static bool setGlobalExecutableName( char *exe )
+static std::array<char, 1000> getExecutableName()
 {
+    std::array<char, 1000> exe;
     try {
 #ifdef USE_LINUX
-        auto *buf = new char[0x10000];
-        int len   = ::readlink( "/proc/self/exe", buf, 0x10000 );
+        char buf[0x10000] = { 0 };
+        int len           = ::readlink( "/proc/self/exe", buf, 0x10000 );
         if ( len != -1 ) {
             buf[len] = '\0';
-            strcpy( exe, buf );
+            strcpy( exe.data(), buf );
         }
-        delete[] buf;
 #elif defined( USE_MAC )
-        uint32_t size = 0x10000;
-        char *buf     = new char[size];
-        memset( buf, 0, size );
+        uint32_t size     = 0x10000;
+        char buf[0x10000] = { 0 };
         if ( _NSGetExecutablePath( buf, &size ) == 0 )
-            strcpy( exe, buf );
-        delete[] buf;
+            strcpy( exe.data(), buf );
 #elif defined( USE_WINDOWS )
-        DWORD size = 0x10000;
-        char *buf  = new char[size];
-        memset( buf, 0, size );
+        DWORD size        = 0x10000;
+        char buf[0x10000] = { 0 };
         GetModuleFileName( nullptr, buf, size );
-        strcpy( exe, buf );
-        delete[] buf;
+        strcpy( exe.data(), buf );
 #endif
     } catch ( ... ) {
     }
-    return true;
+    return exe;
 }
-static bool global_exe_name_set = setGlobalExecutableName( global_exe_name );
-std::string StackTrace::getExecutable()
+static const char *getExecutable2()
 {
-    if ( !global_exe_name_set )
-        global_exe_name_set = setGlobalExecutableName( global_exe_name );
-    return std::string( global_exe_name );
+    static auto execname = getExecutableName();
+    return execname.data();
 }
+std::string StackTrace::getExecutable() { return std::string( getExecutable2() ); }
 
 
 /****************************************************************************
@@ -782,9 +681,9 @@ static std::vector<StackTrace::symbols_struct> getSymbolData()
     try {
         char cmd[1024];
 #ifdef USE_LINUX
-        sprintf( cmd, "nm -n --demangle %s", global_exe_name );
+        sprintf( cmd, "nm -n --demangle %s", getExecutable2() );
 #elif defined( USE_MAC )
-        sprintf( cmd, "nm -n %s | c++filt", global_exe_name );
+        sprintf( cmd, "nm -n %s | c++filt", getExecutable2() );
 #else
 #error Unknown OS using nm
 #endif
@@ -907,7 +806,8 @@ static auto split_atos( const std::string &buf )
 }
 #endif
 // clang-format off
-static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
+template<std::size_t blockSize>
+static void getFileAndLineObject( staticVector<StackTrace::stack_info*,blockSize> &info )
 {
     if ( info.empty() )
         return;
@@ -928,7 +828,8 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
         }
         N += sprintf(&cmd[N]," 2> /dev/null");
         // Get the function/line/file
-        auto output = exec2( cmd );
+        staticVector<std::array<char, 1024>,4*blockSize> output;
+        exec2( cmd, output );
         if ( output.size() != 4*info.size() )
             return;
         // Add the results to info
@@ -976,7 +877,8 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
             N += sprintf( &cmd[N], " %lx", reinterpret_cast<unsigned long>( info[i]->address ) );
         N += sprintf(&cmd[N]," 2> /dev/null");
         // Get the function/line/file
-        auto output = exec2( cmd );
+        staticVector<std::array<char, 1024>,blockSize> output;
+        exec2( cmd, output );
         if ( output.size() != info.size() )
             return;
         // Parse the output for function, file and line info
@@ -999,21 +901,24 @@ static void getFileAndLineObject( std::vector<StackTrace::stack_info*> &info )
 }
 static void getFileAndLine( size_t N, StackTrace::stack_info *info )
 {
-    // Get a list of objects
-    std::vector<uint64_t> objectHash;
-    objectHash.reserve( 1024 );
-    for ( size_t i = 0; i<N; i++)
-        insert( objectHash, objHash( info[i].object, info[i].objectPath ) );
-    // For each object, get the file/line numbers for all entries
-    std::vector<StackTrace::stack_info*> list;
-    list.reserve( N );
-    for ( const auto & hash : objectHash ) {
-        list.clear();
-        for ( size_t i = 0; i<N; i++) {
-            if ( objHash( info[i].object, info[i].objectPath ) == hash )
-                list.push_back( &info[i] );
+    constexpr size_t blockSize = 1024;
+    // Operate on blocks
+    size_t i0 = 0;
+    while ( i0 < N ) {
+        // Get a list of objects
+        staticVector<uint64_t,blockSize> objectHash;
+        for ( size_t i = i0; i<N && i-i0 < blockSize; i++)
+            objectHash.insert( objHash( info[i].object, info[i].objectPath ) );
+        // For each object, get the file/line numbers for all entries
+        for ( const auto & hash : objectHash ) {
+            staticVector<StackTrace::stack_info*,blockSize> list;
+            for ( size_t i = i0; i<N && i-i0 < blockSize; i++) {
+                if ( objHash( info[i].object, info[i].objectPath ) == hash )
+                    list.push_back( &info[i] );
+            }
+            getFileAndLineObject( list );
         }
-        getFileAndLineObject( list );
+        i0 = std::min( N, i0 + blockSize );
     }
 }
 // Try to use the global symbols to decode info about the stack
@@ -1039,7 +944,7 @@ static void getDataFromGlobalSymbols( StackTrace::stack_info &info )
             copy( data[lower].obj, info.object );
             copy( data[lower].objPath, info.objectPath );
         } else {
-            copy( global_exe_name, info.object, info.objectPath );
+            copy( getExecutable2(), info.object, info.objectPath );
         }
     }
 }
@@ -1187,12 +1092,6 @@ static void _activeThreads_signal_handler( int )
     thread_handle = handle;
     thread_id_finished = true;
 }
-/*static void _activeThreads2( void )
-{
-    auto handle = StackTrace::thisThread( );
-    thread_handle = handle;
-    thread_id_finished = true;
-}*/
 #endif
 #ifdef USE_LINUX
 static constexpr int get_tid( int pid, const char *line )
@@ -1340,10 +1239,11 @@ static staticVector<std::thread::native_handle_type,1024> getActiveThreads( )
     return threads;
 }
 // clang-format on
-std::set<std::thread::native_handle_type> StackTrace::activeThreads()
+std::vector<std::thread::native_handle_type> StackTrace::activeThreads()
 {
     auto threads = getActiveThreads();
-    return std::set<std::thread::native_handle_type>( threads.begin(), threads.end() );
+    std::sort( threads.begin(), threads.end() );
+    return std::vector<std::thread::native_handle_type>( threads.begin(), threads.end() );
 }
 
 
@@ -1465,10 +1365,9 @@ std::vector<std::vector<void *>> StackTrace::backtraceAll()
     auto threads = getActiveThreads();
     // Get the backtrace of each thread
     std::vector<std::vector<void *>> trace( threads.size() );
-    size_t i = 0;
-    for ( auto it = threads.begin(); i < threads.size(); i++, it++ ) {
+    for ( size_t i = 0; i < threads.size(); i++ ) {
         trace[i].resize( 1000 );
-        size_t count = backtrace_thread( *it, trace[i].data(), trace[i].size() );
+        size_t count = backtrace_thread( threads[i], trace[i].data(), trace[i].size() );
         trace[i].resize( count );
     }
     return trace;
@@ -1480,34 +1379,39 @@ std::vector<std::vector<void *>> StackTrace::backtraceAll()
  ****************************************************************************/
 std::vector<StackTrace::stack_info> StackTrace::getCallStack()
 {
-    auto trace = StackTrace::backtrace();
-    auto info  = getStackInfo( trace );
+    void *trace[1000];
+    size_t count = backtrace_thread( thisThread(), trace, 1000 );
+    std::vector<StackTrace::stack_info> info( count );
+    getStackInfo2( count, trace, info.data() );
     return info;
 }
 std::vector<StackTrace::stack_info> StackTrace::getCallStack( std::thread::native_handle_type id )
 {
-    auto trace = StackTrace::backtrace( id );
-    auto info  = getStackInfo( trace );
+    void *trace[1000];
+    size_t count = backtrace_thread( id, trace, 1000 );
+    std::vector<StackTrace::stack_info> info( count );
+    getStackInfo2( count, trace, info.data() );
     return info;
-}
-template<class TYPE>
-static inline int find( const std::vector<TYPE> &data, const TYPE &x )
-{
-    for ( size_t i = 0; i < data.size(); i++ ) {
-        if ( data[i] == x )
-            return i;
-    }
-    return -1;
 }
 static std::vector<std::vector<StackTrace::stack_info>> generateStacks(
     const std::vector<std::vector<void *>> &trace )
 {
+    // Function to find an address
+    auto find = []( const auto &data, auto x ) {
+        for ( size_t i = 0; i < data.size(); i++ ) {
+            if ( data[i] == x )
+                return static_cast<int>( i );
+        }
+        return -1;
+    };
     // Get the stack data for all pointers
     std::vector<void *> addresses;
     addresses.reserve( 1024 );
     for ( const auto &tmp : trace ) {
-        for ( auto ptr : tmp )
-            insert( addresses, ptr );
+        for ( auto ptr : tmp ) {
+            if ( find( addresses, ptr ) == -1 )
+                addresses.push_back( ptr );
+        }
     }
     auto stack_data = StackTrace::getStackInfo( addresses );
     // Create the stack traces
@@ -1523,13 +1427,9 @@ static std::vector<std::vector<StackTrace::stack_info>> generateStacks(
     return stack;
 }
 static StackTrace::multi_stack_info generateMultiStack(
-    const staticVector<std::thread::native_handle_type, 1024> &threads )
+    const std::vector<std::vector<void *>> &trace )
 {
     // Get the stack data for all pointers
-    std::vector<std::vector<void *>> trace( threads.size() );
-    auto it = threads.begin();
-    for ( size_t i = 0; i < threads.size(); i++, ++it )
-        trace[i] = StackTrace::backtrace( *it );
     auto stack = generateStacks( trace );
     // Create the multi-stack trace
     StackTrace::multi_stack_info multistack;
@@ -1537,6 +1437,17 @@ static StackTrace::multi_stack_info generateMultiStack(
     for ( const auto &tmp : stack )
         multistack.add( tmp.size(), tmp.data() );
     return multistack;
+}
+static StackTrace::multi_stack_info generateMultiStack(
+    const staticVector<std::thread::native_handle_type, 1024> &threads )
+{
+    // Get the stack data for all pointers
+    std::vector<std::vector<void *>> trace( threads.size() );
+    auto it = threads.begin();
+    for ( size_t i = 0; i < threads.size(); i++, ++it )
+        trace[i] = StackTrace::backtrace( *it );
+    // Create the multi-stack trace
+    return generateMultiStack( trace );
 }
 StackTrace::multi_stack_info StackTrace::getAllCallStacks()
 {
@@ -1780,12 +1691,20 @@ void StackTrace::LoadModules()
 /****************************************************************************
  *  Get the signal name                                                      *
  ****************************************************************************/
-std::string StackTrace::signalName( int sig )
+static char signalNames[128][32];
+const char *StackTrace::signalName( int sig )
 {
-    StackTrace_mutex.lock();
-    std::string name( strsignal( sig ) );
-    StackTrace_mutex.unlock();
-    return name;
+    static bool initialized = false;
+    if ( !initialized ) {
+        StackTrace_mutex.lock();
+        memset( signalNames, 0, sizeof( signalNames ) );
+        for ( int i = 0; i < 128; i++ )
+            strcpy( signalNames[i], strsignal( i + 1 ) );
+        StackTrace_mutex.unlock();
+        initialized = true;
+    }
+    bool valid = sig > 0 && sig <= 128;
+    return valid ? signalNames[sig - 1] : nullptr;
 }
 std::vector<int> StackTrace::allSignalsToCatch()
 {
@@ -1802,6 +1721,11 @@ std::vector<int> StackTrace::allSignalsToCatch()
         signals.push_back( i );
     }
     return signals;
+}
+template<class TYPE>
+static inline void erase( std::vector<TYPE> &x, TYPE y )
+{
+    x.erase( std::find( x.begin(), x.end(), y ) );
 }
 std::vector<int> StackTrace::defaultSignalsToCatch()
 {
@@ -1846,19 +1770,19 @@ static StackTrace::abort_error rethrow()
     if ( error.bytes == 0 )
         error.bytes = StackTrace::Utilities::getMemoryUsage();
     if ( error.stack.empty() ) {
-        error.stack = StackTrace::getCallStack();
-        StackTrace::cleanupStackTrace( error.stack );
+        error.stackType = StackTrace::printStackType::local;
+        error.stack     = StackTrace::backtrace();
     }
     return error;
 }
 static void term_func_abort( int sig )
 {
     StackTrace::abort_error err;
-    err.type   = StackTrace::terminateType::signal;
-    err.signal = sig;
-    err.bytes  = StackTrace::Utilities::getMemoryUsage();
-    err.stack  = StackTrace::getGlobalCallStacks();
-    StackTrace::cleanupStackTrace( err.stack );
+    err.type      = StackTrace::terminateType::signal;
+    err.signal    = sig;
+    err.bytes     = StackTrace::Utilities::getMemoryUsage();
+    err.stack     = StackTrace::backtrace();
+    err.stackType = StackTrace::printStackType::global;
     abort_fun( err );
 }
 static bool signals_set[256] = { false };
@@ -1940,11 +1864,11 @@ static void MPI_error_handler_fun( MPI_Comm *comm, int *err, ... )
     char message[1000] = { 0 };
     MPI_Error_string( *err, message, &msg_len );
     StackTrace::abort_error error;
-    error.message = std::string( message );
-    error.type    = StackTrace::terminateType::MPI;
-    error.bytes   = StackTrace::Utilities::getMemoryUsage();
-    error.stack   = StackTrace::getGlobalCallStacks();
-    StackTrace::cleanupStackTrace( error.stack );
+    error.message   = std::string( message );
+    error.type      = StackTrace::terminateType::MPI;
+    error.bytes     = StackTrace::Utilities::getMemoryUsage();
+    error.stack     = StackTrace::backtrace();
+    error.stackType = StackTrace::printStackType::global;
     throw error;
 }
 void StackTrace::setMPIErrorHandler( MPI_Comm comm )
@@ -2064,15 +1988,15 @@ void StackTrace::globalCallStackFinalize()
         MPI_Comm_free( &globalCommForGlobalCommStack );
     globalCommForGlobalCommStack = MPI_COMM_NULL;
 }
-StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
+StackTrace::multi_stack_info getRemoteCallStacks()
 {
     if ( globalMonitorThreadStatus == -1 ) {
         // User did not call globalCallStackInitialize
         printf( "Warning: getGlobalCallStacks called without call to globalCallStackInitialize\n" );
-        return getAllCallStacks();
+        return StackTrace::multi_stack_info();
     } else if ( globalMonitorThreadStatus != 1 ) {
         // globalCallStackInitialize is not supported
-        return getAllCallStacks();
+        return StackTrace::multi_stack_info();
     }
     // Signal all processes that we want their stack for all threads
     int rank = 0;
@@ -2089,14 +2013,12 @@ StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
             continue;
         MPI_Isend( &tag, 1, MPI_INT, i, 1, globalCommForGlobalCommStack, &sendRequest[i] );
     }
-    // Get the trace for the current process
-    auto threads    = getActiveThreads();
-    auto multistack = generateMultiStack( threads );
-    // Recieve the backtrace for all processes/threads
+    // Recieve the backtrace for all remote processes/threads
     int N_finished        = 1;
     auto start            = std::chrono::steady_clock::now();
     double time           = 0;
     const double max_time = 10.0 + size * 20e-3;
+    StackTrace::multi_stack_info multistack;
     while ( N_finished < size && time < max_time ) {
         int flag = 0;
         MPI_Status status;
@@ -2132,8 +2054,15 @@ StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
 #else
 void StackTrace::globalCallStackInitialize( MPI_Comm ) {}
 void StackTrace::globalCallStackFinalize() {}
-StackTrace::multi_stack_info StackTrace::getGlobalCallStacks() { return getAllCallStacks(); }
+StackTrace::multi_stack_info getRemoteCallStacks() { return StackTrace::multi_stack_info(); }
 #endif
+StackTrace::multi_stack_info StackTrace::getGlobalCallStacks()
+{
+    auto threads    = getActiveThreads();
+    auto multistack = generateMultiStack( threads );
+    multistack.add( getRemoteCallStacks() );
+    return multistack;
+}
 
 
 /****************************************************************************
@@ -2167,14 +2096,11 @@ static void cleanupFunctionName( char *function )
     strrep( function, N, "< ", "<" );
     // Remove std::__1::
     strrep( function, N, "std::__1::", "std::" );
-    // Replace std::chrono::duration with abbriviated version
-    if ( find( function, "std::chrono::duration<" ) != npos ) {
-        strrep( function, N, "std::chrono::duration<long, std::ratio<1l, 1l> >", "ticks" );
-        strrep( function, N, "std::chrono::duration<long, std::ratio<1l, 1000000000l> >",
-            "nanoseconds" );
-    }
-    // Replace std::ratio with abbriviated version.
-    if ( find( function, "std::ratio<" ) != npos ) {
+    // Replace std::ratio with abbriviated version
+    auto find = [&function, &N]( const string_view &str, size_t pos = 0 ) {
+        return string_view( function, N ).find( str, pos );
+    };
+    if ( find( "std::ratio<" ) != npos ) {
         strrep( function, N, "std::ratio<1l, 1000000000000000000000000l>", "std::yocto" );
         strrep( function, N, "std::ratio<1l, 1000000000000000000000l>", "std::zepto" );
         strrep( function, N, "std::ratio<1l, 1000000000000000000l>", "std::atto" );
@@ -2201,8 +2127,8 @@ static void cleanupFunctionName( char *function )
         strrep( function, N, " >", ">" );
         strrep( function, N, "< ", "<" );
     }
-    // Replace std::chrono::duration with abbriviated version.
-    if ( find( function, "std::chrono::duration<" ) != npos ) {
+    // Replace std::chrono::duration with abbriviated version
+    if ( find( "std::chrono::duration<" ) != npos ) {
         // clang-format off
         strrep( function, N, "std::chrono::duration<long, std::nano>", "std::chrono::nanoseconds" );
         strrep( function, N, "std::chrono::duration<long, std::micro>", "std::chrono::microseconds" );
@@ -2216,7 +2142,7 @@ static void cleanupFunctionName( char *function )
         // clang-format on
     }
     // Replace std::this_thread::sleep_for with abbriviated version.
-    if ( find( function, "::sleep_for<" ) != npos ) {
+    if ( find( "::sleep_for<" ) != npos ) {
         strrep( function, N, "::sleep_for<long, std::nano>", "::sleep_for<nanoseconds>" );
         strrep( function, N, "::sleep_for<long, std::micro>", "::sleep_for<microseconds>" );
         strrep( function, N, "::sleep_for<long, std::milli>", "::sleep_for<milliseconds>" );
@@ -2242,7 +2168,7 @@ static void cleanupFunctionName( char *function )
     size_t pos = 0;
     while ( pos < N ) {
         // Find next instance of std::basic_string
-        pos = find( function, "std::basic_string<", pos );
+        pos = find( "std::basic_string<", pos );
         if ( pos == npos )
             break;
         // Find the matching >
@@ -2261,16 +2187,16 @@ static void cleanupFunctionName( char *function )
         pos++;
     }
     // Replace std::make_shared with abbriviated version
-    if ( find( function, "std::make_shared<" ) != npos ) {
-        size_t pos1 = find( function, "std::make_shared<" );
-        size_t pos2 = find( function, ",", pos1 );
-        size_t pos3 = find( function, "(", pos1 );
+    if ( find( "std::make_shared<" ) != npos ) {
+        size_t pos1 = find( "std::make_shared<" );
+        size_t pos2 = find( ",", pos1 );
+        size_t pos3 = find( "(", pos1 );
         N           = replace( function, N, pos2, pos3 - pos2, ">" );
     }
     // Remove std::allocator in std::vector
-    if ( find( function, "std::vector<" ) != npos ) {
-        size_t pos1 = find( function, "std::vector<" );
-        size_t pos2 = find( function, ", std::allocator", pos1 );
+    if ( find( "std::vector<" ) != npos ) {
+        size_t pos1 = find( "std::vector<" );
+        size_t pos2 = find( ", std::allocator", pos1 );
         size_t pos3 = findMatching( function, N, pos1 + 11 );
         N           = replace( function, N, pos2, pos3 - pos2, ">" );
     }
@@ -2280,12 +2206,13 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
     auto it           = stack.children.begin();
     const size_t npos = std::string::npos;
     while ( it != stack.children.end() ) {
-        string_view object( it->stack.object.data(), it->stack.object.size() );
-        string_view function( it->stack.function.data(), it->stack.function.size() );
-        string_view filename( it->stack.filename.data(), it->stack.filename.size() );
+        string_view object( it->stack.object.data() );
+        string_view function( it->stack.function.data() );
+        string_view filename( it->stack.filename.data() );
         bool remove_entry = false;
-        // Remove callstack (and all children) for threads that are just contributing
-        if ( filename.find( "StackTrace.cpp" ) != npos ) {
+        // Remove StackTrace functions
+        if ( filename == "StackTrace.cpp" ) {
+            // Remove callstack (and all children) for threads that are just contributing
             bool test = function.find( "_callstack_signal_handler" ) != npos ||
                         function.find( "getGlobalCallStacks" ) != npos ||
                         function.find( "(" ) == npos;
@@ -2293,34 +2220,43 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
                 it = stack.children.erase( it );
                 continue;
             }
+            // Remove backtrace_thread
+            if ( function.find( "backtrace_thread" ) != npos )
+                remove_entry = true;
         }
-        // Remove __libc_start_main
-        if ( function.find( "__libc_start_main" ) != npos && object.find( "libc.so" ) != npos )
-            remove_entry = true;
-        // Remove libc fgets children
-        if ( function.find( "fgets" ) != npos && object.find( "libc.so" ) != npos )
-            it->children.clear();
-        // Remove backtrace_thread
-        if ( function.find( "backtrace_thread" ) != npos &&
-             filename.find( "StackTrace.cpp" ) != npos )
-            remove_entry = true;
-        // Remove __restore_rt
-        if ( function.find( "__restore_rt" ) != npos && object.find( "libpthread" ) != npos )
-            remove_entry = true;
-        // Remove std::condition_variable::__wait_until_impl
-        if ( function.find( "std::condition_variable::__wait_until_impl" ) != npos &&
-             filename == "condition_variable" )
-            remove_entry = true;
+        // Remove libc functions
+        if ( object.find( "libc.so" ) != npos ) {
+            // Remove __libc_start_main
+            if ( function.find( "__libc_start_main" ) != npos )
+                remove_entry = true;
+            // Remove libc fgets children
+            if ( function.find( "fgets" ) != npos )
+                it->children.clear();
+        }
+        // Remove libc++ functions
+        if ( object.find( "libstdc++" ) != npos ) {
+            // Remove std::this_thread::__sleep_for
+            if ( function.find( "std::this_thread::__sleep_for(" ) != npos )
+                remove_entry = true;
+        }
+        // Remove pthread functions
+        if ( object.find( "libpthread" ) != npos ) {
+            // Remove __restore_rt
+            if ( function.find( "__restore_rt" ) != npos && object.find( "libpthread" ) != npos )
+                remove_entry = true;
+        }
+        // Remove condition_variable functions
+        if ( filename == "condition_variable" ) {
+            // Remove std::condition_variable::__wait_until_impl
+            if ( function.find( "std::condition_variable::__wait_until_impl" ) != npos )
+                remove_entry = true;
+        }
         // Remove std::function references
         if ( filename == "functional" ) {
             remove_entry = remove_entry || function.find( "std::_Function_handler<" ) != npos;
             remove_entry = remove_entry || function.find( "std::_Bind_simple<" ) != npos;
             remove_entry = remove_entry || function.find( "_M_invoke" ) != npos;
         }
-        // Remove std::this_thread::__sleep_for
-        if ( function.find( "std::this_thread::__sleep_for(" ) != npos &&
-             object.find( "libstdc++" ) != npos )
-            remove_entry = true;
         // Remove std::thread::_Impl
         if ( filename == "thread" ) {
             if ( function.find( "std::thread::_Impl<" ) != npos ||
@@ -2364,7 +2300,7 @@ void StackTrace::cleanupStackTrace( multi_stack_info &stack )
         if ( filename == "gthr-default.h" )
             remove_entry = true;
         // Remove entries with no useful information
-        if ( function == "" && filename == "" )
+        if ( function.empty() && filename.empty() )
             remove_entry = true;
         // Remove the desired entry
         if ( remove_entry ) {
@@ -2508,4 +2444,74 @@ StackTrace::multi_stack_info StackTrace::generateFromString( const std::vector<s
         }
     }
     return stack2;
+}
+
+
+/****************************************************************************
+ *  abort_error                                                              *
+ ****************************************************************************/
+StackTrace::abort_error::abort_error()
+    : type( terminateType::unknown ), signal( 0 ), line( -1 ), bytes( 0 )
+{
+}
+const char *StackTrace::abort_error::what() const noexcept
+{
+    d_msg.clear();
+    if ( type == terminateType::abort ) {
+        d_msg += "Program abort called";
+    } else if ( type == terminateType::signal ) {
+        d_msg += "Unhandled signal (" + std::to_string( signal ) + ") caught";
+    } else if ( type == terminateType::exception ) {
+        d_msg += "Unhandled exception caught";
+    } else if ( type == terminateType::MPI ) {
+        d_msg += "Error calling MPI routine";
+    } else {
+        d_msg += "Unknown error called";
+    }
+    if ( !filename.empty() ) {
+        d_msg += " in file '" + filename + "'";
+        if ( line > 0 ) {
+            d_msg += " at line " + std::to_string( line );
+        }
+    }
+    d_msg += ":\n";
+    d_msg += "   " + message + "\n";
+    if ( bytes > 0 ) {
+        d_msg += "Bytes used = " + std::to_string( bytes ) + "\n";
+    }
+    if ( !stack.empty() ) {
+        d_msg += "Stack Trace:\n";
+        if ( stackType == printStackType::local ) {
+            for ( const auto &item : getStackInfo( stack ) ) {
+                char txt[1000];
+                item.print2( txt );
+                d_msg += " ";
+                d_msg += txt;
+            }
+        } else if ( stackType == printStackType::threaded || stackType == printStackType::global ) {
+            // Get the call stack
+            std::vector<std::vector<void *>> trace;
+            trace.push_back( stack );
+            // Get the call stack for all threads except the current one
+            auto threads = getActiveThreads();
+            threads.erase( thisThread() );
+            for ( auto tid : threads )
+                trace.push_back( backtrace( tid ) );
+            // Generate call stack
+            auto multistack = generateMultiStack( trace );
+            // Add remote call stack info
+            if ( stackType == printStackType::global )
+                multistack.add( getRemoteCallStacks() );
+            // Cleanup call stack
+            cleanupStackTrace( multistack );
+            // Print the results
+            d_msg += multistack.printString( " " );
+        } else {
+            d_msg += "Unknown value for stackType\n";
+        }
+    }
+    for ( size_t i = 0; i < d_msg.size(); i++ )
+        if ( d_msg[i] == 0 )
+            d_msg.erase( i, 1 );
+    return d_msg.c_str();
 }
