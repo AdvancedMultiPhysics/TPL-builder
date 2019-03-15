@@ -1,5 +1,6 @@
 // Supression file for cppcheck
 
+unmatchedSuppression:*
 operatorEq:*
 unusedFunction:*
 useStlAlgorithm:*
@@ -9,3 +10,4 @@ nullPointer:*/Utilities.cpp
 noExplicitConstructor:*/string_view.h
 arrayIndexOutOfBounds:*/StackTrace.cpp
 uninitMemberVar:*/StackTrace.cpp
+knownConditionTrueFalse:*/TestStack.cpp

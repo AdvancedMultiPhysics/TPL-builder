@@ -2378,7 +2378,7 @@ static StackTrace::stack_info parseLine( const char *str )
     if ( p5 == nullptr )
         p5 = p0;
     // Load line
-    auto p6 = strchr( p5, ':' );
+    const char *p6 = strchr( p5, ':' );
     if ( p6 == nullptr )
         p6 = p0;
     // Store the results
@@ -2485,7 +2485,7 @@ const char *StackTrace::abort_error::what() const noexcept
             for ( const auto &item : getStackInfo( stack ) ) {
                 char txt[1000];
                 item.print2( txt );
-                d_msg += " ";
+                d_msg += " \n";
                 d_msg += txt;
             }
         } else if ( stackType == printStackType::threaded || stackType == printStackType::global ) {
