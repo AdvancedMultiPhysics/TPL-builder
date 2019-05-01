@@ -116,7 +116,7 @@ FUNCTION( CHECK_MKL INSTALL_PATH CMAKE_FILE )
     FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${INSTALL_PATH}/include/mkl_lapack.h\"\n" )
     FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_BLAS\n #define USE_BLAS\n #endif\n" )
     FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_LAPACK\n #define USE_LAPACK\n #endif\n" )
-    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_ACML\n #define USE_MKL\n #endif\n" )
+    FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_MKL\n #define USE_MKL\n #endif\n" )
 ENDFUNCTION()
 
 
