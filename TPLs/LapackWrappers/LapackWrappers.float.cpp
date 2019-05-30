@@ -569,4 +569,3 @@ void Lapack<float>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, in
     ( &SIDE, &UPLO, &TRANS, &DIAG, &M, &N, &ALPHA, (float *) A, &LDA, B, &LDB );
 #endif
 }
-

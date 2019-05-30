@@ -6,6 +6,7 @@
 #include <cmath>
 #include <complex>
 #include <cstdio>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <mutex>
@@ -28,28 +29,7 @@
 #endif
 
 
-// Define macro to handle name mangling
-#ifndef FORTRAN_WRAPPER
-#if defined( USE_ACML )
-#define FORTRAN_WRAPPER( x ) x##_
-#elif defined( _WIN32 ) || defined( __hpux ) || defined( USE_MKL )
-#define FORTRAN_WRAPPER( x ) x
-#elif defined( USE_VECLIB )
-#define FORTRAN_WRAPPER( x ) x##_
-#elif defined( USE_OPENBLAS )
-#define FORTRAN_WRAPPER( x ) x##_
-#else
-#define FORTRAN_WRAPPER( x ) x##_
-#endif
-#endif
-
-
-/*! \def NULL_USE(variable)
- *  \brief    A null use of a variable
- *  \details  A null use of a variable, use to avoid GNU compiler warnings about
- * unused variables.
- *  \param variable  Variable to pretend to use
- */
+// Null use macro
 #define NULL_USE( variable )                 \
     do {                                     \
         if ( 0 ) {                           \
@@ -72,6 +52,32 @@ static inline std::string strrep(
         }
         str.replace( i, s.length(), r );
         i += r.length();
+    }
+    return str;
+}
+
+
+// Function to run a command and capture stdout
+static inline std::string runCommand( std::function<void( void )> fun, const std::string &prefix )
+{
+    fflush( stdout ); // clean everything first
+    char buffer[2048];
+    memset( buffer, 0, sizeof( buffer ) );
+    auto out = dup( STDOUT_FILENO );
+    auto tmp = freopen( "NUL", "a", stdout );
+    NULL_USE( tmp );
+    setvbuf( stdout, buffer, _IOFBF, 2048 );
+    fun();
+    tmp = freopen( "NUL", "a", stdout );
+    NULL_USE( tmp );
+    dup2( out, STDOUT_FILENO );
+    setvbuf( stdout, NULL, _IONBF, 2048 );
+    std::string str = prefix + strrep( buffer, "\n", "\n  " );
+    while ( !str.empty() ) {
+        char tmp = str.back();
+        if ( tmp > 32 && tmp != ' ' )
+            break;
+        str.pop_back();
     }
     return str;
 }
@@ -135,81 +141,6 @@ bool global_lapack_threads_disabled = disable_threads();
 
 
 /******************************************************************
- * Get the machine parameters by lamch                             *
- ******************************************************************/
-#undef dlamch
-template<>
-float Lapack<float>::lamch( char cmach )
-{
-#ifdef USE_ATLAS
-    return clapack_dlamch( cmach );
-#elif defined( USE_ACML )
-    return ::dlamch( cmach );
-#elif defined( USE_VECLIB )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#elif defined( USE_OPENBLAS )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#else
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#endif
-}
-template<>
-double Lapack<double>::lamch( char cmach )
-{
-#ifdef USE_ATLAS
-    return clapack_dlamch( cmach );
-#elif defined( USE_ACML )
-    return ::dlamch( cmach );
-#elif defined( USE_VECLIB )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#elif defined( USE_OPENBLAS )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#else
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
-#endif
-}
-
-/******************************************************************
- * Get the machine parameters by lamch                             *
- ******************************************************************/
-template<typename TYPE>
-LapackMachineParams Lapack<TYPE>::machineParams()
-{
-    LapackMachineParams data;
-    data.eps   = Lapack<TYPE>::lamch( 'E' );
-    data.sfmin = Lapack<TYPE>::lamch( 'S' );
-    data.base  = Lapack<TYPE>::lamch( 'B' );
-    data.prec  = Lapack<TYPE>::lamch( 'P' );
-    data.t     = Lapack<TYPE>::lamch( 'N' );
-    data.rnd   = Lapack<TYPE>::lamch( 'R' );
-    data.emin  = Lapack<TYPE>::lamch( 'M' );
-    data.rmin  = Lapack<TYPE>::lamch( 'U' );
-    data.emax  = Lapack<TYPE>::lamch( 'L' );
-    data.rmax  = Lapack<TYPE>::lamch( 'O' );
-    return data;
-}
-template LapackMachineParams Lapack<double>::machineParams();
-template LapackMachineParams Lapack<float>::machineParams();
-std::string LapackMachineParams::print() const
-{
-    char msg[1000];
-    char *tmp = msg;
-    tmp += sprintf( tmp, "  eps   = %-13.6e    relative machine precision\n", eps );
-    tmp += sprintf( tmp, "  sfmin = %-13.6e    safe minimum\n", sfmin );
-    tmp += sprintf( tmp, "  base  = %-11i      base of the machine\n", base );
-    tmp += sprintf( tmp, "  prec  = %-13.6e    eps*base\n", prec );
-    tmp += sprintf( tmp, "  t     = %-11i      number of digits in the mantissa\n", t );
-    tmp += sprintf( tmp, "  rnd   = %-11i      1 when rounding occurs in addition, 0 otherwise\n",
-        rnd ? 1 : 0 );
-    tmp += sprintf( tmp, "  emin  = %-11i      minimum exponent before underflow\n", emin );
-    tmp += sprintf( tmp, "  rmin  = %-13.6e    underflow threshold - base**(emin-1)\n", rmin );
-    tmp += sprintf( tmp, "  emax  = %-11i      largest exponent before overflow\n", emax );
-    tmp += sprintf( tmp, "  rmax  = %-13.6e    overflow threshold - (base**emax)*(1-eps)\n", rmax );
-    return std::string( msg );
-}
-
-
-/******************************************************************
  * Set the vendor string                                           *
  ******************************************************************/
 // clang-format off
@@ -245,33 +176,10 @@ std::string Lapack<TYPE>::info()
     msg += "  " + std::string( openblas_get_config() );
 #endif
     // Get vendor specific output (capture stdout)
-    fflush( stdout ); // clean everything first
-    char buffer[2048];
-    memset( buffer, 0, sizeof( buffer ) );
-    auto out = dup( STDOUT_FILENO );
-    auto tmp = freopen( "NUL", "a", stdout );
-    NULL_USE( tmp );
-    setvbuf( stdout, buffer, _IOFBF, 2048 );
 #ifdef USE_ACML
-    acmlinfo();
+    msg += runCommand( acmlinfo() );
 #endif
-    tmp = freopen( "NUL", "a", stdout );
-    NULL_USE( tmp );
-    dup2( out, STDOUT_FILENO );
-    setvbuf( stdout, NULL, _IONBF, 2048 );
-    msg += "  " + strrep( buffer, "\n", "\n  " );
-    while ( !msg.empty() ) {
-        char tmp = msg.back();
-        if ( tmp > 32 && tmp != ' ' )
-            break;
-        msg.pop_back();
-    }
     msg += "\n";
-    // Print the machine specific parameters
-    msg += "Double precision machine parameters\n";
-    msg += Lapack<double>::machineParams().print();
-    msg += "Single precision machine parameters\n";
-    msg += Lapack<float>::machineParams().print();
     return msg;
 }
 template std::string Lapack<double>::info();

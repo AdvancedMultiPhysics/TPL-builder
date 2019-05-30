@@ -39,20 +39,14 @@ SET( CMAKE_MODULE_PATH "${TPL_DIRECTORY}" ${CMAKE_MODULE_PATH} )
 FIND_PACKAGE( TPLs REQUIRED COMPONENTS LAPACK )
 
 
-# Enable tests
-ENABLE_TESTING()
-INCLUDE( CTest )
-
-
-# Include the macros file
-INCLUDE( "${TPL_MACRO_CMAKE}" )
-ADD_CUSTOM_TARGET( check )
-ADD_CUSTOM_TARGET( build-test )
-
-
 # Include the TPL inclde paths and libraries
 INCLUDE_DIRECTORIES( ${TPL_INCLUDE_DIRS} )
 SET( TPL_LIBS ${TPL_LIBRARIES} )
+
+
+# Enable tests
+ENABLE_TESTING()
+INCLUDE( CTest )
 
 
 # Install the library
