@@ -79,6 +79,7 @@ static inline std::string runCommand( std::function<void( void )> fun, const std
             break;
         str.pop_back();
     }
+    msg += "\n";
     return str;
 }
 
@@ -179,7 +180,6 @@ std::string Lapack<TYPE>::info()
 #ifdef USE_ACML
     msg += runCommand( acmlinfo() );
 #endif
-    msg += "\n";
     return msg;
 }
 template std::string Lapack<double>::info();
