@@ -79,7 +79,7 @@ static inline std::string runCommand( std::function<void( void )> fun, const std
             break;
         str.pop_back();
     }
-    msg += "\n";
+    str += "\n";
     return str;
 }
 
