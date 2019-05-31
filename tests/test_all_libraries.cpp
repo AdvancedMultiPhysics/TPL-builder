@@ -60,6 +60,16 @@ template<> bool test<TPL_Enum::BOOST>( )
 #endif
 
 
+// Test FFTW
+#ifdef USE_FFTW
+template<> bool test<TPL_Enum::FFTW>( )
+{
+    std::cout << "   -- No tests defined for fftw\n";
+    return true;
+}
+#endif
+
+
 // Test HDF5
 #ifdef USE_HDF5
 template<> bool test<TPL_Enum::HDF5>( )
@@ -265,6 +275,8 @@ int main()
         if ( tpl == "BOOST" ) {
             // Test BOOST
             pass = test<TPL_Enum::BOOST>( );
+        } else if ( tpl == "FFTW" ) {
+            // Test FFTW
         } else if ( tpl == "OPENBLAS" ) {
             // Test OpenBLAS is tested through the lapack wrappers
         } else if ( tpl == "LAPACK" ) {
