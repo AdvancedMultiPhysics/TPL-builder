@@ -47,6 +47,16 @@ ELSEIF( NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION )
 ENDIF()
 
 
+# Check for gold linker
+IF ( UNIX AND NOT APPLE )
+    EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE LD_VERSION )
+    IF ( "${LD_VERSION}" MATCHES "GNU gold" )
+        SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags" )
+        SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags" )
+    ENDIF()
+ENDIF()
+
+
 # Add some default targets if they do not exist
 IF ( NOT TARGET copy-${PROJ}-Data )
     ADD_CUSTOM_TARGET( copy-${PROJ}-Data ALL )
