@@ -639,7 +639,7 @@ static bool test_gbsv( int N, TYPE &error )
         TYPE err2 = L2Error( K, x1, x2 );
         error     = std::max( error, err2 / norm );
     }
-    const double tol = 500 * sqrt( K ) * std::numeric_limits<TYPE>::epsilon();
+    const double tol = 1000 * sqrt( K ) * std::numeric_limits<TYPE>::epsilon();
     if ( error > tol ) {
         printf( "test_gbsv error (%e) exceeded tolerance (%e)\n", error, tol );
         N_errors++;
@@ -731,7 +731,7 @@ static bool test_gttrf( int N, TYPE &error )
     Lapack<TYPE>::gttrs( 'N', K, 1, DL2, D2, DU2, DU3, IPIV, x2, K, err );
     TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     TYPE err2 = L2Error( K, x1, x2 );
-    if ( err2 > 5 * K * norm * std::numeric_limits<TYPE>::epsilon() )
+    if ( err2 > 10 * K * norm * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
     error = err2 / norm;
     delete[] D;
