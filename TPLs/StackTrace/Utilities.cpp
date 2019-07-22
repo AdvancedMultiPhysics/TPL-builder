@@ -21,6 +21,10 @@
 #include "MemoryApp.h"
 #endif
 
+#ifdef USE_GCOV
+extern "C" void __gcov_flush( void );
+#endif
+
 
 #define perr std::cerr
 
@@ -104,13 +108,12 @@ inline size_t findfirst( const std::vector<TYPE> &X, TYPE Y )
 /****************************************************************************
  *  Function to terminate the program                                        *
  ****************************************************************************/
-static bool abort_throwException      = false;
-static printStackType abort_stackType = printStackType::global;
-static int force_exit                 = 0;
+static bool abort_throwException = false;
+static int force_exit            = 0;
 void Utilities::setAbortBehavior( bool throwException, int stackType )
 {
     abort_throwException = throwException;
-    abort_stackType      = static_cast<printStackType>( stackType );
+    StackTrace::setDefaultStackType( static_cast<printStackType>( stackType ) );
 }
 void Utilities::abort( const std::string &message, const std::string &filename, const int line )
 {
@@ -120,11 +123,19 @@ void Utilities::abort( const std::string &message, const std::string &filename, 
     err.type      = terminateType::abort;
     err.line      = line;
     err.bytes     = Utilities::getMemoryUsage();
-    err.stackType = abort_stackType;
+    err.stackType = StackTrace::getDefaultStackType();
     err.stack     = StackTrace::backtrace();
     throw err;
 }
 static std::mutex terminate_mutex;
+static inline void callAbort()
+{
+#ifdef USE_GCOV
+    __gcov_flush();
+#endif
+    terminate_mutex.unlock();
+    std::abort();
+}
 void Utilities::terminate( const StackTrace::abort_error &err )
 {
     // Lock mutex to ensure multiple threads do not try to abort simultaneously
@@ -133,8 +144,7 @@ void Utilities::terminate( const StackTrace::abort_error &err )
     clearErrorHandler();
     // Print the message and abort
     if ( force_exit > 1 ) {
-        terminate_mutex.unlock();
-        std::abort();
+        callAbort();
     } else if ( !abort_throwException ) {
         // Use MPI_abort (will terminate all processes)
         force_exit = 2;
@@ -148,13 +158,11 @@ void Utilities::terminate( const StackTrace::abort_error &err )
             MPI_Abort( MPI_COMM_WORLD, -1 );
         }
 #endif
-        terminate_mutex.unlock();
-        std::abort();
+        callAbort();
     } else {
         perr << err.what();
         perr.flush();
-        terminate_mutex.unlock();
-        std::abort();
+        callAbort();
     }
 }
 

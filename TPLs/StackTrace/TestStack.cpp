@@ -456,6 +456,24 @@ void test_throw( UnitTest & )
 }
 
 
+// Test terminate
+void testTerminate( UnitTest &results )
+{
+    int exit;
+    bool pass = true;
+    auto msg1 = StackTrace::Utilities::exec( "./TestTerminate signal 2>&1", exit );
+    auto msg2 = StackTrace::Utilities::exec( "./TestTerminate abort 2>&1", exit );
+    auto msg3 = StackTrace::Utilities::exec( "./TestTerminate throw 2>&1", exit );
+    pass      = pass && msg1.find( "Unhandled signal (6) caught" ) != std::string::npos;
+    pass      = pass && msg2.find( "Program abort called in file" ) != std::string::npos;
+    pass      = pass && msg3.find( "Unhandled exception caught" ) != std::string::npos;
+    if ( pass )
+        results.passes( "terminate" );
+    else
+        results.failure( "terminate" );
+}
+
+
 // Test getting type name
 void testTypeName( UnitTest &results )
 {
@@ -543,6 +561,23 @@ int main( int argc, char *argv[] )
 
         // Test the cost to throw using abort
         test_throw( results );
+
+        // Test tick
+        double tick = StackTrace::Utilities::tick();
+        if ( tick > 0 && tick < 1e-5 )
+            results.passes( "tick" );
+        else
+            results.failure( "tick" );
+
+        // Test getSystemMemory
+        auto bytes = StackTrace::Utilities::getSystemMemory();
+        if ( bytes > 1e7 && bytes < 1e14 )
+            results.passes( "getSystemMemory" );
+        else
+            results.failure( "getSystemMemory" );
+
+        // Test terminate
+        testTerminate( results );
     }
 
     // Print the test results
@@ -560,6 +595,7 @@ int main( int argc, char *argv[] )
     shutdown();
 #ifdef USE_TIMER
     PROFILE_DISABLE();
+    std::cout << std::endl << std::endl;
     if ( rank == 0 )
         MemoryApp::print( std::cout );
 #endif

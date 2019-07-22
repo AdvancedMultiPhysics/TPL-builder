@@ -74,7 +74,7 @@ GET_SYSTEM_LIBS()
 
 
 # Add distclean target
-ADD_DISTCLEAN( libstacktrace* FindStackTrace.cmake TestStack ExampleStack.txt )
+ADD_DISTCLEAN( libstacktrace* FindStackTrace.cmake TestStack TestTerminate ExampleStack.txt )
 
 
 # Set the install path
@@ -95,6 +95,17 @@ IF ( USE_MPI )
     SET( MPI_COMM "#include \"mpi.h\"" )
 ELSE()
     SET( MPI_COMM "typedef int MPI_Comm;" )
+ENDIF()
+
+
+# Check if we want to enable coverage
+IF ( ENABLE_GCOV OR ENABLE_COVERAGE )
+    FIND_PACKAGE( Coverage )
+ENDIF()
+IF ( COVERAGE_FOUND )
+    SET( ENABLE_COVERAGE true )
+    SET( COVERAGE_FLAGS ${COVERAGE_FLAGS} )
+    SET( COVERAGE_LIBS  ${COVERAGE_LIBS} )
 ENDIF()
 
 
@@ -129,21 +140,28 @@ ENDFOREACH()
 ADD_LIBRARY( stacktrace STATIC Utilities.cpp StackTrace.cpp )
 ADD_DEPENDENCIES( stacktrace StackTrace-include )
 INSTALL( TARGETS stacktrace DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+TARGET_COMPILE_DEFINITIONS( stacktrace PUBLIC ${COVERAGE_FLAGS} )
 
 
-# Add an executable
-ADD_EXECUTABLE( TestStack TestStack.cpp )
-TARGET_LINK_LIBRARIES( TestStack stacktrace )
-TARGET_LINK_LIBRARIES( TestStack ${TIMER_LIB} ${MPI_CXX_LIBRARIES} "${SYSTEM_LIBS}" )
-INSTALL( TARGETS TestStack DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" )
+# Add the tests
+ADD_EXE( TestStack TestStack.cpp )
+ADD_EXE( TestTerminate TestTerminate.cpp )
 CONFIGURE_FILE( "data/ExampleStack.txt" "${CMAKE_CURRENT_BINARY_DIR}/ExampleStack.txt" @ONLY )
 CONFIGURE_FILE( "data/ExampleStack.txt" "${CMAKE_INSTALL_PREFIX}/bin/ExampleStack.txt" @ONLY )
 IF ( USE_MPI )
-    ADD_TEST( NAME TestStack COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 $<TARGET_FILE:TestStack> )
+    ADD_TEST( NAME TestStack COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:TestStack> )
     ADD_TEST( NAME TestStack-4procs COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4 $<TARGET_FILE:TestStack> )
 ELSE()
     ADD_TEST( NAME TestStack COMMAND $<TARGET_FILE:TestStack> )
 ENDIF()
+ADD_TEST( NAME TestTerminate-signal   COMMAND $<TARGET_FILE:TestTerminate> signal   "2>&1" )
+ADD_TEST( NAME TestTerminate-abort    COMMAND $<TARGET_FILE:TestTerminate> abort    "2>&1" )
+ADD_TEST( NAME TestTerminate-throw    COMMAND $<TARGET_FILE:TestTerminate> throw    "2>&1" )
+ADD_TEST( NAME TestTerminate-segfault COMMAND $<TARGET_FILE:TestTerminate> segfault "2>&1" )
+SET_TESTS_PROPERTIES( TestTerminate-signal   PROPERTIES WILL_FAIL TRUE PASS_REGULAR_EXPRESSION "Unhandled signal (6) caught"  )
+SET_TESTS_PROPERTIES( TestTerminate-abort    PROPERTIES WILL_FAIL TRUE PASS_REGULAR_EXPRESSION "Program abort called in file" )
+SET_TESTS_PROPERTIES( TestTerminate-throw    PROPERTIES WILL_FAIL TRUE PASS_REGULAR_EXPRESSION "Unhandled exception caught"   )
+SET_TESTS_PROPERTIES( TestTerminate-segfault PROPERTIES WILL_FAIL TRUE PASS_REGULAR_EXPRESSION "Unhandled signal (11) caught" )
 
 
 # Create FindStackTrace.cmake
