@@ -76,9 +76,16 @@ FUNCTION( SAVE_VERSION_INFO )
     ENDIF()
 
     # Get version info from mercurial
-    EXECUTE_PROCESS( COMMAND hg head  WORKING_DIRECTORY "${src_dir}"  OUTPUT_VARIABLE HG_INFO )
+    EXECUTE_PROCESS( COMMAND hg head  WORKING_DIRECTORY "${src_dir}"  OUTPUT_VARIABLE HG_INFO ERROR_VARIABLE HG_ERR )
     IF ( "${HG_INFO}" MATCHES "changeset")
         WRITE_HG_INFO()
+        RETURN()
+    ENDIF()
+
+    # Get version info from git
+    EXECUTE_PROCESS( COMMAND git log -n 1  WORKING_DIRECTORY "${src_dir}"  OUTPUT_VARIABLE GIT_INFO ERROR_VARIABLE GIT_ERR )
+    IF ( "${GIT_INFO}" MATCHES "commit ")
+        WRITE_GIT_INFO()
         RETURN()
     ENDIF()
 
@@ -129,6 +136,39 @@ FUNCTION( WRITE_HG_INFO )
         FILE(APPEND "SET( ${PROJ}_REPO_VERSION_REV ${VERSION_REV_OUT} )\n" )
         FILE(APPEND "SET( ${PROJ}_REPO_VERSION_REV ${VERSION_NODE_OUT} )\n" )
     ENDIF()
+
+    # Copy the file only if it is different (to avoid rebuilding project)
+    EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${tmp_file}" "${filename}" )
+
+ENDFUNCTION()
+
+
+FUNCTION( WRITE_GIT_INFO )
+
+    # Set the major/minor versions if they are not set
+    IF ( NOT ${PROJ}_MAJOR_VERSION )
+        SET( ${PROJ}_MAJOR_VERSION 0 )
+    ENDIF()
+    IF ( NOT ${PROJ}_MINOR_VERSION )
+        SET( ${PROJ}_MINOR_VERSION 0 )
+    ENDIF()
+
+    # Get the repo version
+    EXECUTE_PROCESS( COMMAND git rev-list --count HEAD  WORKING_DIRECTORY "${src_dir}"  OUTPUT_VARIABLE rev )
+    EXECUTE_PROCESS( COMMAND git rev-parse --short HEAD  WORKING_DIRECTORY "${src_dir}"  OUTPUT_VARIABLE short_hash )
+    EXECUTE_PROCESS( COMMAND git rev-parse HEAD  WORKING_DIRECTORY "${src_dir}"  OUTPUT_VARIABLE long_hash )
+    STRING(REGEX REPLACE "(\r?\n)+$" "" rev "${rev}")
+    STRING(REGEX REPLACE "(\r?\n)+$" "" short_hash "${short_hash}")
+    STRING(REGEX REPLACE "(\r?\n)+$" "" long_hash "${long_hash}")
+
+    # Write the results to the file
+    STRING(REGEX REPLACE " " "_" namespace "${${PROJ}_NAMESPACE}")
+    SET( tmp_file "${CMAKE_CURRENT_BINARY_DIR}/tmp/version.cmake" )
+    FILE(WRITE  "${tmp_file}" "SET( ${PROJ}_MAJOR_VERSION ${${PROJ}_MAJOR_VERSION} )\n" )
+    FILE(APPEND "${tmp_file}" "SET( ${PROJ}_MINOR_VERSION ${${PROJ}_MINOR_VERSION} )\n" )
+    FILE(APPEND "${tmp_file}" "SET( ${PROJ}_BUILD_VERSION ${rev} )\n" )
+    FILE(APPEND "${tmp_file}" "SET( ${PROJ}_SHORT_HASH_VERSION \"${short_hash}\" )\n" )
+    FILE(APPEND "${tmp_file}" "SET( ${PROJ}_LONG_HASH_VERSION  \"${long_hash}\" )\n" )
 
     # Copy the file only if it is different (to avoid rebuilding project)
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${tmp_file}" "${filename}" )
