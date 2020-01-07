@@ -25,7 +25,14 @@
 # Find cppcheck if availible
 FIND_PROGRAM( CPPCHECK 
     NAMES cppcheck cppcheck.exe 
-    PATHS "${CPPCHECK_DIRECTORY}" "C:/Program Files/Cppcheck" "C:/Program Files (x86)/Cppcheck" 
+    PATHS "${CPPCHECK_DIRECTORY}" "${CPPCHECK_DIRECTORY}/bin" NO_DEFAULT_PATH
+)
+FIND_PROGRAM( CPPCHECK 
+    NAMES cppcheck cppcheck.exe 
+    PATHS "C:/Program Files/Cppcheck" "C:/Program Files (x86)/Cppcheck" NO_DEFAULT_PATH
+)
+FIND_PROGRAM( CPPCHECK 
+    NAMES cppcheck cppcheck.exe 
 )
 IF ( CPPCHECK )
     SET( CPPCHECK_FOUND TRUE )
@@ -72,11 +79,11 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
             SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c11 )
         ENDIF()
         IF ( CMAKE_CXX_STANDARD STREQUAL 98 )
-            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c++03 --std=posix )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c++03 )
         ELSEIF ( CMAKE_CXX_STANDARD STREQUAL 11 )
-            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c++11 --std=posix )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c++11 )
         ELSEIF ( CMAKE_CXX_STANDARD STREQUAL 14 )
-            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c++14 --std=posix )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --std=c++14 )
         ENDIF()
         # Set definitions
         IF ( PROCESSED )
