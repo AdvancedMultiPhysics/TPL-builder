@@ -10,7 +10,11 @@
 // List of valid TPLs that we can test
 enum class TPL_Enum { BOOST, FFTW, HDF5, HYPRE, KOKKOS, LAPACK, LAPACK_WRAPPERS, 
     OPENBLAS, LIBMESH, MATLAB, NETCDF, OGRE, PETSC, SAMRAI, SILO, STACKTRACE, 
-    SUNDIALS, TIMER, TRILINOS, ZLIB, UNKNOWN };
+    SUNDIALS, TIMER, TRILINOS, ZLIB, NULL_TPL, UNKNOWN };
+
+
+// List of TPLs that are not used for compiling/linking (e.g. cppcheck)
+const char* nullTPLs[] = { "CPPCHECK" };
 
 
 // Get the string for an TPL enum
@@ -56,6 +60,8 @@ inline std::string getName( TPL_Enum tpl )
         return "TRILINOS";
     if ( tpl == TPL_Enum::ZLIB )
         return "ZLIB";
+    if ( tpl == TPL_Enum::NULL_TPL )
+        return "NULL_TPL";
     return "UNKNOWN";
 }
 
@@ -103,6 +109,10 @@ inline TPL_Enum getTPL( const std::string &tpl )
         return TPL_Enum::TRILINOS;
     if ( tpl == "ZLIB" )
         return TPL_Enum::ZLIB;
+    for ( const auto& tmp : nullTPLs ) {
+        if ( tpl == tmp )
+            return TPL_Enum::NULL_TPL;
+    }
     return TPL_Enum::UNKNOWN;
 }
 
@@ -115,6 +125,8 @@ std::vector<TPL_Enum> enabledTPls( )
     std::string tok;
     while ( getline(ss,tok,';') ) {
         auto tmp = getTPL(tok);
+        if ( tmp == TPL_Enum::NULL_TPL )
+            continue;
         if ( tmp == TPL_Enum::UNKNOWN ) {
             std::string msg = "Unkown TPL: " + tok;
             throw std::logic_error(msg);
