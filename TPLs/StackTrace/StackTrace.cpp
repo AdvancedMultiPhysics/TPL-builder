@@ -358,13 +358,16 @@ static inline int exec3( const char *cmd, FUNCTION &fun )
     resetSignal( SIGCHLD );    // Clear child exited
     return code;
 }
-template<std::size_t blocKSize>
-static void exec2( const char *cmd, staticVector<std::array<char, 1024>, blocKSize> &out )
+template<std::size_t blockSize>
+static void exec2( const char *cmd, staticVector<std::array<char, 512>, blockSize> &out )
 {
     out.clear();
     auto fun = [&out]( const char *line ) {
-        size_t N = strlen( line );
         size_t k = out.size();
+        if ( k == blockSize )
+            return;
+        size_t N = strlen( line );
+        N        = std::min<size_t>( N, 512 );
         out.resize( k + 1 );
         out[k].fill( 0 );
         memcpy( out[k].data(), line, N );
@@ -832,7 +835,7 @@ static void getFileAndLineObject( staticVector<StackTrace::stack_info*,blockSize
         }
         N += sprintf(&cmd[N]," 2> /dev/null");
         // Get the function/line/file
-        staticVector<std::array<char, 1024>,4*blockSize> output;
+        staticVector<std::array<char, 512>,4*blockSize> output;
         exec2( cmd, output );
         if ( output.size() != 4*info.size() )
             return;
@@ -881,7 +884,7 @@ static void getFileAndLineObject( staticVector<StackTrace::stack_info*,blockSize
             N += sprintf( &cmd[N], " %lx", reinterpret_cast<unsigned long>( info[i]->address ) );
         N += sprintf(&cmd[N]," 2> /dev/null");
         // Get the function/line/file
-        staticVector<std::array<char, 1024>,blockSize> output;
+        staticVector<std::array<char, 512>,blockSize> output;
         exec2( cmd, output );
         if ( output.size() != info.size() )
             return;
@@ -905,7 +908,8 @@ static void getFileAndLineObject( staticVector<StackTrace::stack_info*,blockSize
 }
 static void getFileAndLine( size_t N, StackTrace::stack_info *info )
 {
-    constexpr size_t blockSize = 1024;
+    // Limit block size to prevent blowing out the stack
+    constexpr size_t blockSize = 256;
     // Operate on blocks
     size_t i0 = 0;
     while ( i0 < N ) {
@@ -1088,8 +1092,8 @@ static int thread_callstack_signal = get_thread_callstack_signal();
 *  Function to get the list of all active threads                           *
 ****************************************************************************/
 #if defined( USE_LINUX ) || defined( USE_MAC )
-static std::thread::native_handle_type thread_handle;
-static bool thread_id_finished;
+static volatile std::thread::native_handle_type thread_handle;
+static volatile bool thread_id_finished;
 static void _activeThreads_signal_handler( int )
 {
     auto handle = StackTrace::thisThread( );
@@ -1135,6 +1139,7 @@ static staticVector<std::thread::native_handle_type,1024> getActiveThreads( )
 {
     staticVector<std::thread::native_handle_type,1024> threads;
     #if defined( USE_LINUX )
+        // Get the system thread ids
         int N_tid = 0, tid[1024];
         int pid = getpid();
         char cmd[128];
@@ -1150,22 +1155,25 @@ static staticVector<std::thread::native_handle_type,1024> getActiveThreads( )
             if ( tid[i] == myid )
                 std::swap( tid[i], tid[--N_tid] );
         }
-        auto old = signal( thread_callstack_signal, _activeThreads_signal_handler );
+        // Get the thread id using signaling
+        StackTrace_mutex.lock();
+        auto thread0 = StackTrace::thisThread();
+        auto old     = signal( thread_callstack_signal, _activeThreads_signal_handler );
         for ( int i=0; i<N_tid; i++) {
-            StackTrace_mutex.lock();
             thread_id_finished = false;
-            thread_handle = StackTrace::thisThread();
+            thread_handle = thread0;
             syscall( SYS_tgkill, pid, tid[i], thread_callstack_signal );
             auto t1 = std::chrono::high_resolution_clock::now();
-            auto t2 = std::chrono::high_resolution_clock::now();
+            auto t2 = t1;
             while ( !thread_id_finished && std::chrono::duration<double>(t2-t1).count()<0.1 ) {
                 std::this_thread::yield();
                 t2 = std::chrono::high_resolution_clock::now();
             }
-            threads.push_back( thread_handle );
-            StackTrace_mutex.unlock();
+            if ( thread_handle != thread0 )
+                threads.push_back( const_cast<decltype(thread0)&>( thread_handle ) );
         }
         signal( thread_callstack_signal, old );
+        StackTrace_mutex.unlock();
     #elif defined( USE_MAC )
         thread_act_port_array_t thread_list;
         mach_msg_type_number_t thread_count = 0;
