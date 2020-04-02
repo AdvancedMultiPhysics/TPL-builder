@@ -267,7 +267,7 @@ index 58f831152..89ccdbdb3 100644
        d_vector = rhs.d_vector;
  
 diff --git a/source/SAMRAI/hier/PatchGeometry.C b/source/SAMRAI/hier/PatchGeometry.C
-index 55cede5fd..94176676e 100644
+index 55cede5fd..e7115897d 100644
 --- a/source/SAMRAI/hier/PatchGeometry.C
 +++ b/source/SAMRAI/hier/PatchGeometry.C
 @@ -25,6 +25,7 @@ namespace hier {
@@ -287,17 +287,16 @@ index 55cede5fd..94176676e 100644
  
  #ifdef DEBUG_CHECK_ASSERTIONS
  
-@@ -64,7 +65,9 @@ PatchGeometry::PatchGeometry(
+@@ -64,6 +65,9 @@ PatchGeometry::PatchGeometry(
           if (d_touches_regular_bdry(axis, dir)) {
              d_has_regular_boundary = true;
           }
--      }
 +	 if (touches_periodic_bdry(axis, dir)) {
 +            d_has_periodic_boundary = true;
 +	 }
+       }
     }
  }
- 
 diff --git a/source/SAMRAI/hier/PatchGeometry.h b/source/SAMRAI/hier/PatchGeometry.h
 index ba58d811f..52563cae1 100644
 --- a/source/SAMRAI/hier/PatchGeometry.h
@@ -1578,7 +1577,7 @@ index aedb23af9..1cd57de96 100644
  
     /**
 diff --git a/source/SAMRAI/tbox/SAMRAI_MPI.C b/source/SAMRAI/tbox/SAMRAI_MPI.C
-index 554bea725..3b76f54f3 100644
+index 554bea725..accf6a403 100644
 --- a/source/SAMRAI/tbox/SAMRAI_MPI.C
 +++ b/source/SAMRAI/tbox/SAMRAI_MPI.C
 @@ -19,6 +19,7 @@
@@ -1621,25 +1620,79 @@ index 554bea725..3b76f54f3 100644
     } else {
        exit(-1);
     }
-@@ -521,7 +523,16 @@ SAMRAI_MPI::Waitall(
+@@ -494,7 +496,16 @@ SAMRAI_MPI::Wait(
+    }
+ #ifdef HAVE_MPI
+    else {
+-      rval = MPI_Wait(request, status);
++     if ( SAMRAI_MPI::use_MPI_Test ) {
++        int flag = 0;
++         rval = MPI_Test( request, &flag, status );
++         while ( !flag && rval==MPI_SUCCESS ) {
++            sched_yield();
++            rval = MPI_Test( request, &flag, status );
++         }
++     } else {
++       rval = MPI_Wait(request, status);
++     }
+    }
+ #endif
+    return rval;
+@@ -507,13 +518,13 @@ SAMRAI_MPI::Wait(
+ int
+ SAMRAI_MPI::Waitall(
+    int count,
+-   Request* reqs,
+-   Status* stats)
++   Request* request,
++   Status* status)
+ {
+ #ifndef HAVE_MPI
+    NULL_USE(count);
+-   NULL_USE(reqs);
+-   NULL_USE(stats);
++   NULL_USE(request);
++   NULL_USE(status);
+ #endif
+    int rval = MPI_SUCCESS;
+    if (!s_mpi_is_initialized) {
+@@ -521,7 +532,16 @@ SAMRAI_MPI::Waitall(
     }
  #ifdef HAVE_MPI
     else {
 -      rval = MPI_Waitall(count, reqs, stats);
 +      if ( SAMRAI_MPI::use_MPI_Test ) {
 +         int flag = 0;
-+         rval = MPI_Test( request, &flag, status );
++         rval = MPI_Testall( count, request, &flag, status );
 +         while ( !flag && rval==MPI_SUCCESS ) {
 +            sched_yield();
-+            rval = MPI_Test( request, &flag, status );
++            rval = MPI_Testall( count, request, &flag, status );
 +         }
 +      } else {
-+          rval = MPI_Wait(request, status);
++         rval = MPI_Waitall(count, request, status);
 +      }
     }
  #endif
     return rval;
-@@ -581,7 +592,16 @@ SAMRAI_MPI::Waitsome(
+@@ -550,7 +570,16 @@ SAMRAI_MPI::Waitany(
+    }
+ #ifdef HAVE_MPI
+    else {
+-      rval = MPI_Waitany(count, array_of_requests, index, status);
++      if ( SAMRAI_MPI::use_MPI_Test ) {
++         int flag = 0;
++         rval = MPI_Testany( count, array_of_requests, index, &flag, status );
++         while ( !flag && rval==MPI_SUCCESS ) {
++            sched_yield();
++            rval = MPI_Testany( count, array_of_requests, index, &flag, status );
++         }
++      } else {
++        rval = MPI_Waitany(count, array_of_requests, index, status);
++      }
+    }
+ #endif
+    return rval;
+@@ -581,7 +610,16 @@ SAMRAI_MPI::Waitsome(
     }
  #ifdef HAVE_MPI
     else {
