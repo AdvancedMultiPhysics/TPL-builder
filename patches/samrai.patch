@@ -1,0 +1,1882 @@
+diff --git a/cmake/CMakeConfigureFile.cmake b/cmake/CMakeConfigureFile.cmake
+index 463167e10..ca6fd43c4 100644
+--- a/cmake/CMakeConfigureFile.cmake
++++ b/cmake/CMakeConfigureFile.cmake
+@@ -85,3 +85,5 @@ configure_file(${PROJECT_SOURCE_DIR}/config/SAMRAI_config.h.cmake.in ${CMAKE_BIN
+ install(FILES ${CMAKE_BINARY_DIR}/include/SAMRAI/SAMRAI_config.h
+   DESTINATION ${CMAKE_INSTALL_PREFIX}/include/SAMRAI)
+ 
++install(DIRECTORY ${CMAKE_SOURCE_DIR}/source/SAMRAI/pdat/fortran
++  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/SAMRAI/pdat)
+diff --git a/cmake/thirdparty/SetupSAMRAIThirdParty.cmake b/cmake/thirdparty/SetupSAMRAIThirdParty.cmake
+index ddcd56e23..27b508fe2 100644
+--- a/cmake/thirdparty/SetupSAMRAIThirdParty.cmake
++++ b/cmake/thirdparty/SetupSAMRAIThirdParty.cmake
+@@ -8,9 +8,6 @@ else ()
+ endif ()
+ 
+ if (ENABLE_HDF5)
+-  if (NOT ENABLE_MPI)
+-    message(FATAL_ERROR "HDF5 requires MPI.")
+-  endif ()
+ 
+   find_package(HDF5 REQUIRED)
+ 
+diff --git a/source/SAMRAI/geom/CartesianGridGeometry.C b/source/SAMRAI/geom/CartesianGridGeometry.C
+index 6c7a9b01f..9db713371 100644
+--- a/source/SAMRAI/geom/CartesianGridGeometry.C
++++ b/source/SAMRAI/geom/CartesianGridGeometry.C
+@@ -325,7 +325,8 @@ void
+ CartesianGridGeometry::setGeometryDataOnPatch(
+    hier::Patch& patch,
+    const hier::IntVector& ratio_to_level_zero,
+-   const TwoDimBool& touches_regular_bdry) const
++   const TwoDimBool& touches_regular_bdry,
++   const TwoDimBool& touches_periodic_bdry) const
+ {
+    const tbox::Dimension& dim(getDim());
+ 
+@@ -387,7 +388,8 @@ CartesianGridGeometry::setGeometryDataOnPatch(
+    std::shared_ptr<CartesianPatchGeometry> geom(
+       std::make_shared<CartesianPatchGeometry>(ratio_to_level_zero,
+          touches_regular_bdry,
+-         block_id,
++	 touches_periodic_bdry,
++	 block_id,
+          dx, x_lo, x_up));
+ 
+    patch.setPatchGeometry(geom);
+diff --git a/source/SAMRAI/geom/CartesianGridGeometry.h b/source/SAMRAI/geom/CartesianGridGeometry.h
+index 10bd188b3..89dbb5eb9 100644
+--- a/source/SAMRAI/geom/CartesianGridGeometry.h
++++ b/source/SAMRAI/geom/CartesianGridGeometry.h
+@@ -233,7 +233,8 @@ public:
+    setGeometryDataOnPatch(
+       hier::Patch& patch,
+       const hier::IntVector& ratio_to_level_zero,
+-      const TwoDimBool& touches_regular_bdry) const;
++      const TwoDimBool& touches_regular_bdry,
++      const TwoDimBool& touches_periodic_bdry) const;
+ 
+    /**
+     * Set data members for this CartesianGridGeometry object.
+diff --git a/source/SAMRAI/geom/CartesianPatchGeometry.C b/source/SAMRAI/geom/CartesianPatchGeometry.C
+index 2d0cc5f30..8282f9ef0 100644
+--- a/source/SAMRAI/geom/CartesianPatchGeometry.C
++++ b/source/SAMRAI/geom/CartesianPatchGeometry.C
+@@ -25,13 +25,15 @@ namespace geom {
+ CartesianPatchGeometry::CartesianPatchGeometry(
+    const hier::IntVector& ratio_to_level_zero,
+    const TwoDimBool& touches_regular_bdry,
++   const TwoDimBool& touches_periodic_bdry,
+    const hier::BlockId& block_id,
+    const double* dx,
+    const double* x_lo,
+    const double* x_up):
+    hier::PatchGeometry(ratio_to_level_zero,
+                        touches_regular_bdry,
+-                       block_id)
++                       touches_periodic_bdry,
++		       block_id)
+ {
+    TBOX_ASSERT(dx != 0);
+    TBOX_ASSERT(x_lo != 0);
+diff --git a/source/SAMRAI/geom/CartesianPatchGeometry.h b/source/SAMRAI/geom/CartesianPatchGeometry.h
+index 9fe729ff4..9c3af31f6 100644
+--- a/source/SAMRAI/geom/CartesianPatchGeometry.h
++++ b/source/SAMRAI/geom/CartesianPatchGeometry.h
+@@ -51,6 +51,7 @@ public:
+    CartesianPatchGeometry(
+       const hier::IntVector& ratio_to_level_zero,
+       const TwoDimBool& touches_regular_bdry,
++      const TwoDimBool& touches_periodic_bdry,
+       const hier::BlockId& block_id,
+       const double * dx,
+       const double * x_lo,
+diff --git a/source/SAMRAI/hier/BaseGridGeometry.C b/source/SAMRAI/hier/BaseGridGeometry.C
+index 96589785b..2685d4a0c 100644
+--- a/source/SAMRAI/hier/BaseGridGeometry.C
++++ b/source/SAMRAI/hier/BaseGridGeometry.C
+@@ -456,6 +456,7 @@ BaseGridGeometry::setGeometryOnPatches(
+    PatchLevel& level,
+    const IntVector& ratio_to_level_zero,
+    const std::map<BoxId, TwoDimBool>& touches_regular_bdry,
++   const std::map<BoxId, TwoDimBool>& touches_periodic_bdry,
+    const bool defer_boundary_box_creation)
+ {
+    TBOX_ASSERT_OBJDIM_EQUALITY3(*this, level, ratio_to_level_zero);
+@@ -486,7 +487,8 @@ BaseGridGeometry::setGeometryOnPatches(
+    for (PatchLevel::iterator ip(level.begin()); ip != level.end(); ++ip) {
+       const std::shared_ptr<Patch>& patch = *ip;
+       setGeometryDataOnPatch(*patch, ratio_to_level_zero,
+-         (*touches_regular_bdry.find(ip->getBox().getBoxId())).second);
++			     (*touches_regular_bdry.find(ip->getBox().getBoxId())).second,
++			     (*touches_periodic_bdry.find(ip->getBox().getBoxId())).second);
+    }
+    t_set_geometry_data_on_patches->stop();
+ 
+@@ -559,13 +561,14 @@ void
+ BaseGridGeometry::setGeometryDataOnPatch(
+    Patch& patch,
+    const IntVector& ratio_to_level_zero,
+-   const PatchGeometry::TwoDimBool& touches_regular_bdry) const
++   const PatchGeometry::TwoDimBool& touches_regular_bdry,
++   const PatchGeometry::TwoDimBool& touches_periodic_bdry) const
+ {
+ #ifdef DEBUG_CHECK_ASSERTIONS
+    const tbox::Dimension& dim(getDim());
+ 
+-   TBOX_ASSERT_DIM_OBJDIM_EQUALITY3(dim, patch, ratio_to_level_zero,
+-      touches_regular_bdry);
++   TBOX_ASSERT_DIM_OBJDIM_EQUALITY4(dim, patch, ratio_to_level_zero,
++				    touches_regular_bdry, touches_periodic_bdry);
+ 
+    /*
+     * All components of ratio must be nonzero.  Additionally,
+@@ -590,7 +593,8 @@ BaseGridGeometry::setGeometryDataOnPatch(
+       std::make_shared<PatchGeometry>(
+          ratio_to_level_zero,
+          touches_regular_bdry,
+-         patch.getBox().getBlockId()));
++         touches_periodic_bdry,
++	 patch.getBox().getBlockId()));
+ 
+    patch.setPatchGeometry(geometry);
+ 
+diff --git a/source/SAMRAI/hier/BaseGridGeometry.h b/source/SAMRAI/hier/BaseGridGeometry.h
+index 9473ed8d3..acba6e88c 100644
+--- a/source/SAMRAI/hier/BaseGridGeometry.h
++++ b/source/SAMRAI/hier/BaseGridGeometry.h
+@@ -189,6 +189,7 @@ public:
+       PatchLevel& level,
+       const IntVector& ratio_to_level_zero,
+       const std::map<BoxId, TwoDimBool>& touches_regular_bdry,
++      const std::map<BoxId, TwoDimBool>& touches_periodic_bdry,
+       const bool defer_boundary_box_creation);
+ 
+    /*!
+@@ -515,7 +516,8 @@ public:
+    setGeometryDataOnPatch(
+       Patch& patch,
+       const IntVector& ratio_to_level_zero,
+-      const TwoDimBool& touches_regular_bdry) const;
++      const TwoDimBool& touches_regular_bdry,
++      const TwoDimBool& touches_periodic_bdry) const;
+ 
+    /*!
+     * @brief Compute boundary boxes for each patch in patch level.
+diff --git a/source/SAMRAI/hier/BoxContainer.C b/source/SAMRAI/hier/BoxContainer.C
+index a0143ff6d..f5b91dd65 100644
+--- a/source/SAMRAI/hier/BoxContainer.C
++++ b/source/SAMRAI/hier/BoxContainer.C
+@@ -281,6 +281,8 @@ BoxContainer::insert(
+    if (d_set.size() == old_size) {
+       d_list.erase(list_iter);
+    } else {
++      if ( !box.isSpatiallyEqual(*(*insert_iter.d_set_iter)) )       
++         TBOX_ERROR("Attempting to insert a box with the same ID but different spatial extent as an existing box");
+       list_iter->lockId();
+    }
+    return insert_iter;
+@@ -312,10 +314,13 @@ BoxContainer::insert(
+ 
+    const std::list<Box>::iterator& iter = d_list.insert(d_list.end(), box);
+    Box * box_ptr(&(*iter));
+-   if (d_set.insert(box_ptr).second) {
++   auto result = d_set.insert(box_ptr);
++   if (result.second) {
+       box_ptr->lockId();
+       return true;
+    } else {
++      if ( !box.isSpatiallyEqual(*(*result.first)) )
++         TBOX_ERROR("Attempting to insert a box with the same ID but different spatial extent as an existing box");
+       d_list.erase(iter);
+       return false;
+    }
+diff --git a/source/SAMRAI/hier/Connector.C b/source/SAMRAI/hier/Connector.C
+index 719a9383c..b9035199d 100644
+--- a/source/SAMRAI/hier/Connector.C
++++ b/source/SAMRAI/hier/Connector.C
+@@ -1090,8 +1090,18 @@ Connector::computeRatioInfo(
+       head_coarser = true;
+       ratio_is_exact = (ratio * headRefinementRatio) == baseRefinementRatio;
+    }
+-   if (baseRefinementRatio * headRefinementRatio <
+-       IntVector::getZero(baseRefinementRatio.getDim())) {
++
++   auto dim = headRefinementRatio.getDim();
++   auto bdim = baseRefinementRatio.getDim();
++   TBOX_ASSERT(dim==bdim);
++
++   auto same_sign = (headRefinementRatio > IntVector::getZero(dim)) 
++                 && (baseRefinementRatio > IntVector::getZero(dim));
++
++   same_sign = same_sign || ( (headRefinementRatio < IntVector::getZero(dim)) 
++			      && (baseRefinementRatio < IntVector::getZero(dim)));
++
++   if (!same_sign) {
+       // Note that negative ratios like -N really mean 1/N (negative reciprocal).
+       ratio = -headRefinementRatio * baseRefinementRatio;
+       ratio_is_exact = true;
+diff --git a/source/SAMRAI/hier/Index.h b/source/SAMRAI/hier/Index.h
+index fad5811d4..0068af961 100644
+--- a/source/SAMRAI/hier/Index.h
++++ b/source/SAMRAI/hier/Index.h
+@@ -108,7 +108,6 @@ public:
+    operator = (
+       const Index& rhs)
+    {
+-      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
+       for (unsigned int i = 0; i < d_dim.getValue(); ++i) {
+          d_index[i] = rhs.d_index[i];
+       }
+@@ -758,6 +757,22 @@ public:
+       tmp.min(b);
+       return tmp;
+    }
++   
++   /**
++    * @brief Utility function to take the maximum of two Index objects.
++    *
++    * @pre a.getDim() == b.getDim()
++    */
++   static Index
++   max(
++      const Index& a,
++      const Index& b)
++   {
++      TBOX_ASSERT_OBJDIM_EQUALITY2(a, b);
++      Index tmp = a;
++      tmp.max(b);
++      return tmp;
++   }
+ 
+ private:
+    /*
+diff --git a/source/SAMRAI/hier/IntVector.h b/source/SAMRAI/hier/IntVector.h
+index 58f831152..89ccdbdb3 100644
+--- a/source/SAMRAI/hier/IntVector.h
++++ b/source/SAMRAI/hier/IntVector.h
+@@ -184,7 +184,7 @@ public:
+    operator = (
+       const IntVector& rhs)
+    {
+-      TBOX_ASSERT_OBJDIM_EQUALITY2(*this, rhs);
++      d_dim = rhs.getDim();
+       d_num_blocks = rhs.d_num_blocks;
+       d_vector = rhs.d_vector;
+ 
+diff --git a/source/SAMRAI/hier/PatchGeometry.C b/source/SAMRAI/hier/PatchGeometry.C
+index 55cede5fd..94176676e 100644
+--- a/source/SAMRAI/hier/PatchGeometry.C
++++ b/source/SAMRAI/hier/PatchGeometry.C
+@@ -25,6 +25,7 @@ namespace hier {
+ PatchGeometry::PatchGeometry(
+    const IntVector& ratio_to_level_zero,
+    const TwoDimBool& touches_regular_bdry,
++   const TwoDimBool& touches_periodic_bdry,
+    const BlockId& block_id):
+    d_dim(ratio_to_level_zero.getDim()),
+    d_ratio_to_level_zero(ratio_to_level_zero),
+@@ -33,7 +34,7 @@ PatchGeometry::PatchGeometry(
+    d_block_id(block_id)
+ 
+ {
+-   TBOX_ASSERT_OBJDIM_EQUALITY2(ratio_to_level_zero, touches_regular_bdry);
++  TBOX_ASSERT_OBJDIM_EQUALITY3(ratio_to_level_zero, touches_regular_bdry,touches_periodic_bdry);
+ 
+ #ifdef DEBUG_CHECK_ASSERTIONS
+ 
+@@ -64,7 +65,9 @@ PatchGeometry::PatchGeometry(
+          if (d_touches_regular_bdry(axis, dir)) {
+             d_has_regular_boundary = true;
+          }
+-      }
++	 if (touches_periodic_bdry(axis, dir)) {
++            d_has_periodic_boundary = true;
++	 }
+    }
+ }
+ 
+diff --git a/source/SAMRAI/hier/PatchGeometry.h b/source/SAMRAI/hier/PatchGeometry.h
+index ba58d811f..52563cae1 100644
+--- a/source/SAMRAI/hier/PatchGeometry.h
++++ b/source/SAMRAI/hier/PatchGeometry.h
+@@ -116,6 +116,7 @@ private:
+    PatchGeometry(
+       const IntVector& ratio_to_level_zero,
+       const TwoDimBool& touches_regular_bdry,
++      const TwoDimBool& touches_periodic_bdry,
+       const BlockId& block_id);
+ 
+    /**
+diff --git a/source/SAMRAI/hier/PatchLevel.C b/source/SAMRAI/hier/PatchLevel.C
+index 0fa49d1b2..4df2895dd 100644
+--- a/source/SAMRAI/hier/PatchLevel.C
++++ b/source/SAMRAI/hier/PatchLevel.C
+@@ -173,6 +173,7 @@ PatchLevel::PatchLevel(
+       *this,
+       d_ratio_to_level_zero,
+       touches_regular_bdry,
++      touches_periodic_bdry,
+       defer_boundary_box_creation);
+    t_constructor_set_geometry->stop();
+ 
+@@ -285,6 +286,7 @@ PatchLevel::PatchLevel(
+       *this,
+       d_ratio_to_level_zero,
+       touches_regular_bdry,
++      touches_periodic_bdry,
+       defer_boundary_box_creation);
+    t_constructor_set_geometry->stop();
+ 
+@@ -349,6 +351,7 @@ PatchLevel::PatchLevel(
+       *this,
+       d_ratio_to_level_zero,
+       touches_regular_bdry,
++      touches_periodic_bdry,
+       defer_boundary_box_creation);
+    t_constructor_set_geometry->stop();
+ 
+@@ -489,7 +492,8 @@ PatchLevel::setRefinedPatchLevel(
+    }
+ 
+    std::map<BoxId, PatchGeometry::TwoDimBool> touches_regular_bdry;
+-
++   std::map<BoxId, PatchGeometry::TwoDimBool> touches_periodic_bdry;
++   
+    for (iterator ip(coarse_level->begin()); ip != coarse_level->end(); ++ip) {
+       std::shared_ptr<PatchGeometry> coarse_pgeom((*ip)->getPatchGeometry());
+ 
+@@ -504,6 +508,16 @@ PatchLevel::setRefinedPatchLevel(
+                   PatchGeometry::TwoDimBool(getDim())));
+       }
+ 
++      std::map<BoxId,
++               PatchGeometry::TwoDimBool>::iterator iter_touches_periodic_bdry(
++         touches_regular_bdry.find(ip->getBox().getBoxId()));
++      if (iter_touches_periodic_bdry == touches_periodic_bdry.end()) {	
++         iter_touches_periodic_bdry = touches_periodic_bdry.insert(
++               iter_touches_periodic_bdry,
++               std::pair<BoxId, PatchGeometry::TwoDimBool>(ip->getBox().getBoxId(),
++                  PatchGeometry::TwoDimBool(getDim())));
++      }
++ 
+       PatchGeometry::TwoDimBool&
+       touches_regular_bdry_ip((*iter_touches_regular_bdry).second);
+ 
+@@ -513,12 +527,14 @@ PatchLevel::setRefinedPatchLevel(
+                coarse_pgeom->getTouchesRegularBoundary(axis, side);
+          }
+       }
++      // BP, 12/16/2019, revisit whether a loop over periodic is required
+    }
+ 
+    d_geometry->setGeometryOnPatches(
+       *this,
+       d_ratio_to_level_zero,
+       touches_regular_bdry,
++      touches_periodic_bdry,
+       defer_boundary_box_creation);
+ 
+    if (!defer_boundary_box_creation) {
+@@ -663,7 +679,8 @@ PatchLevel::setCoarsenedPatchLevel(
+    d_boundary_boxes_created = false;
+ 
+    std::map<BoxId, PatchGeometry::TwoDimBool> touches_regular_bdry;
+-
++   std::map<BoxId, PatchGeometry::TwoDimBool> touches_periodic_bdry;
++   
+    for (iterator ip(fine_level->begin()); ip != fine_level->end(); ++ip) {
+       std::shared_ptr<PatchGeometry> fine_pgeom((*ip)->getPatchGeometry());
+ 
+@@ -677,6 +694,16 @@ PatchLevel::setCoarsenedPatchLevel(
+                std::pair<BoxId, PatchGeometry::TwoDimBool>(ip->getBox().getBoxId(),
+                   PatchGeometry::TwoDimBool(getDim())));
+       }
++      
++      std::map<BoxId,
++               PatchGeometry::TwoDimBool>::iterator iter_touches_periodic_bdry(
++         touches_periodic_bdry.find(ip->getBox().getBoxId()));
++      if (iter_touches_periodic_bdry == touches_periodic_bdry.end()) {
++         iter_touches_periodic_bdry = touches_periodic_bdry.insert(
++               iter_touches_periodic_bdry,
++               std::pair<BoxId, PatchGeometry::TwoDimBool>(ip->getBox().getBoxId(),
++                  PatchGeometry::TwoDimBool(getDim())));
++      }
+ 
+       PatchGeometry::TwoDimBool&
+       touches_regular_bdry_ip((*iter_touches_regular_bdry).second);
+@@ -687,12 +714,15 @@ PatchLevel::setCoarsenedPatchLevel(
+                fine_pgeom->getTouchesRegularBoundary(axis, side);
+          }
+       }
++      
++      // BP, 12/16/2019, revisit whether a loop over periodic is required
+    }
+ 
+    d_geometry->setGeometryOnPatches(
+       *this,
+       d_ratio_to_level_zero,
+       touches_regular_bdry,
++      touches_periodic_bdry,
+       defer_boundary_box_creation);
+ 
+    if (!defer_boundary_box_creation) {
+diff --git a/source/SAMRAI/math/HierarchyDataOpsReal.C b/source/SAMRAI/math/HierarchyDataOpsReal.C
+index d0cc83417..cd55c4d2d 100644
+--- a/source/SAMRAI/math/HierarchyDataOpsReal.C
++++ b/source/SAMRAI/math/HierarchyDataOpsReal.C
+@@ -25,6 +25,18 @@ template<class TYPE>
+ HierarchyDataOpsReal<TYPE>::~HierarchyDataOpsReal()
+ {
+ }
++  
++template<class TYPE>
++void HierarchyDataOpsReal<TYPE>::stridedGather( const int, const int, int, int)
++{
++  TBOX_ERROR("Base class routine being called - stridedGather not implemented for the datatype..." << std::endl);
++}
++
++template<class TYPE>
++void HierarchyDataOpsReal<TYPE>::stridedScatter( const int, const int, int, int)
++{
++  TBOX_ERROR("Base class routine being called - stridedScatter not implemented for the datatype..." << std::endl);
++}
+ 
+ }
+ }
+diff --git a/source/SAMRAI/math/HierarchyDataOpsReal.h b/source/SAMRAI/math/HierarchyDataOpsReal.h
+index 4e0d2421f..d62acebe2 100644
+--- a/source/SAMRAI/math/HierarchyDataOpsReal.h
++++ b/source/SAMRAI/math/HierarchyDataOpsReal.h
+@@ -475,6 +475,21 @@ public:
+       const int data_id,
+       const bool interior_only = true) const = 0;
+ 
++   /*!
++    * strided gather operation
++    */
++   virtual void stridedGather(const int dst_id,
++			 const int src_id,
++			      int start,     
++			      int addv);
++   
++   /*!
++    * strided scatter operation
++    */
++   virtual void stridedScatter(const int dst_id, const int src_id,
++			       int start,
++			       int addv);
++ 
+ private:
+    // The following are not implemented
+    HierarchyDataOpsReal(
+diff --git a/source/SAMRAI/mesh/CascadePartitionerTree.C b/source/SAMRAI/mesh/CascadePartitionerTree.C
+index d6f888dc9..d584ed517 100644
+--- a/source/SAMRAI/mesh/CascadePartitionerTree.C
++++ b/source/SAMRAI/mesh/CascadePartitionerTree.C
+@@ -753,7 +753,7 @@ CascadePartitionerTree::computeConnectorUpdateInterval() const
+    const int number_of_updates =
+       static_cast<int>(ceil(log(fanout_size) / log(static_cast<double>(d_common->d_max_spread_procs))));
+    const int tree_depth = CascadePartitioner::lgInt(d_common->d_mpi.getSize());
+-   const double update_interval = static_cast<double>(tree_depth) / number_of_updates;
++   const double update_interval = (tree_depth==0)?0:static_cast<double>(tree_depth) / number_of_updates;
+    if (d_common->d_print_steps) {
+       tbox::plog << d_common->d_object_name << "::computeConnectorUpdateInterval"
+                  << "  max_spread_procs=" << d_common->d_max_spread_procs
+diff --git a/source/SAMRAI/mesh/GriddingAlgorithm.C b/source/SAMRAI/mesh/GriddingAlgorithm.C
+index 145cac905..5f1af4f2f 100644
+--- a/source/SAMRAI/mesh/GriddingAlgorithm.C
++++ b/source/SAMRAI/mesh/GriddingAlgorithm.C
+@@ -2557,9 +2557,8 @@ GriddingAlgorithm::checkNonrefinedTags(
+ {
+ #ifdef DEBUG_CHECK_ASSERTIONS
+    const tbox::Dimension& dim = d_hierarchy->getDim();
+-#endif
+-
+    TBOX_ASSERT_DIM_OBJDIM_EQUALITY1(dim, level);
++#endif
+ 
+    const hier::BoxLevel& tag_box_level = *d_hierarchy->getBoxLevel(tag_ln);
+    std::shared_ptr<hier::BoxLevel> violator;
+@@ -3626,8 +3625,8 @@ GriddingAlgorithm::renumberBoxes(
+ {
+ #ifdef DEBUG_CHECK_ASSERTIONS
+    const tbox::Dimension& dim = d_hierarchy->getDim();
+-#endif
+    TBOX_ASSERT_DIM_OBJDIM_EQUALITY1(dim, new_box_level);
++#endif
+ 
+    t_renumber_boxes->barrierAndStart();
+ 
+@@ -4030,9 +4029,8 @@ GriddingAlgorithm::makeProperNestingMap(
+    TBOX_ASSERT(unnested_to_hierarchy.hasTranspose());
+ #ifdef DEBUG_CHECK_ASSERTIONS
+    const tbox::Dimension& dim = d_hierarchy->getDim();
+-#endif
+-
+    TBOX_ASSERT_DIM_OBJDIM_EQUALITY1(dim, unnested_box_level);
++#endif
+ 
+    if (d_print_steps) {
+       tbox::plog
+diff --git a/source/SAMRAI/pdat/CMakeLists.txt b/source/SAMRAI/pdat/CMakeLists.txt
+index 38d6e0a24..da47e06d4 100644
+--- a/source/SAMRAI/pdat/CMakeLists.txt
++++ b/source/SAMRAI/pdat/CMakeLists.txt
+@@ -336,3 +336,10 @@ install(TARGETS SAMRAI_pdat
+ 
+ install(FILES ${pdat_headers}
+   DESTINATION include/SAMRAI/pdat)
++
++install(FILES
++  fortran/pdat_m4arrdim1d.i
++  fortran/pdat_m4arrdim2d.i
++  fortran/pdat_m4arrdim3d.i
++  DESTINATION include/SAMRAI/pdat/fortran )
++ 
+diff --git a/source/SAMRAI/pdat/FaceGeometry.C b/source/SAMRAI/pdat/FaceGeometry.C
+index aac1b3510..09957ebdc 100644
+--- a/source/SAMRAI/pdat/FaceGeometry.C
++++ b/source/SAMRAI/pdat/FaceGeometry.C
+@@ -103,18 +103,19 @@ FaceGeometry::toFaceBox(
+ 
+    hier::Box face_box(dim);
+ 
+-   if (!box.empty()) {
+-      const tbox::Dimension::dir_t x = face_normal;
+-      face_box.setLower(0, box.lower(x));
+-      face_box.setUpper(0, box.upper(x) + 1);
+-      for (tbox::Dimension::dir_t i = 1; i < dim.getValue(); ++i) {
+-         const tbox::Dimension::dir_t y =
+-            static_cast<tbox::Dimension::dir_t>((face_normal + i) % dim.getValue());
+-         face_box.setLower(i, box.lower(y));
+-         face_box.setUpper(i, box.upper(y));
+-      }
+-      face_box.setBlockId(box.getBlockId());
++   const tbox::Dimension::dir_t x = face_normal;
++   face_box.setLower(0, box.lower(x));
++   face_box.setUpper(0, box.upper(x) + 1);
++   for (tbox::Dimension::dir_t i = 1; i < dim.getValue(); ++i) {
++       const tbox::Dimension::dir_t y =
++	 static_cast<tbox::Dimension::dir_t>((face_normal + i) % dim.getValue());
++       face_box.setLower(i, box.lower(y));
++       face_box.setUpper(i, box.upper(y));
+    }
++   face_box.setBlockId(box.getBlockId());
++
++   if ( face_box.empty() )
++      face_box = hier::Box(dim);
+ 
+    return face_box;
+ }
+@@ -248,7 +249,7 @@ FaceGeometry::setUpOverlap(
+         b != boxes.end(); ++b) {
+       for (tbox::Dimension::dir_t d = 0; d < dim.getValue(); ++d) {
+          hier::Box face_box(FaceGeometry::toFaceBox(*b, d));
+-         dst_boxes[d].pushBack(face_box);
++         if ( !face_box.empty() ) dst_boxes[d].pushBack(face_box);
+       }
+    }
+ 
+diff --git a/source/SAMRAI/tbox/Array.C b/source/SAMRAI/tbox/Array.C
+deleted file mode 100644
+index 5773edf90..000000000
+--- a/source/SAMRAI/tbox/Array.C
++++ /dev/null
+@@ -1,339 +0,0 @@
+-/*************************************************************************
+- *
+- * This file is part of the SAMRAI distribution.  For full copyright
+- * information, see COPYRIGHT and LICENSE.
+- *
+- * Copyright:     (c) 1997-2020 Lawrence Livermore National Security, LLC
+- * Description:   A simple array template class
+- *
+- ************************************************************************/
+-
+-#ifndef included_tbox_Array_C
+-#define included_tbox_Array_C
+-
+-#include "SAMRAI/tbox/Array.h"
+-
+-#include <new>
+-#include <cstdlib>
+-
+-#if !defined(__BGL_FAMILY__) && defined(__xlC__)
+-/*
+- * Suppress XLC warnings
+- */
+-#pragma report(disable, CPPC5334)
+-#pragma report(disable, CPPC5328)
+-#endif
+-
+-namespace SAMRAI {
+-namespace tbox {
+-
+-template<class TYPE>
+-const typename Array<TYPE>::DoNotInitialize Array<TYPE>::UNINITIALIZED;
+-
+-/*
+- * Note that this class is specialized for the built-in types to avoid
+- * invoking the default ctor for TYPE.   A simple assignment is
+- * used for the built-in types.
+- */
+-
+-template<class TYPE>
+-Array<TYPE>::Array():
+-   d_objects(0),
+-   d_counter(0),
+-   d_elements(0)
+-{
+-}
+-
+-template<class TYPE>
+-Array<TYPE>::Array(
+-   const Array<TYPE>& rhs):
+-   d_objects(rhs.d_objects),
+-   d_counter(rhs.d_counter),
+-   d_elements(rhs.d_elements)
+-{
+-   if (d_counter) {
+-      d_counter->addReference();
+-   }
+-}
+-
+-template<class TYPE>
+-Array<TYPE>::Array(
+-   const int n,
+-   const TYPE& default_value)
+-{
+-   if (n > 0) {
+-
+-      d_objects = reinterpret_cast<TYPE *>(malloc(sizeof(TYPE) * n));
+-      d_counter = new ReferenceCounter;
+-      d_elements = n;
+-
+-      for (int i = 0; i < d_elements; ++i) {
+-         void* p = &d_objects[i];
+-         (void)new (p)TYPE(default_value);
+-      }
+-   } else {
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-}
+-
+-template<class TYPE>
+-Array<TYPE>::Array(
+-   const int n,
+-   const typename Array::DoNotInitialize& do_not_initialize_flag)
+-{
+-   NULL_USE(do_not_initialize_flag);
+-
+-   if (n > 0) {
+-      d_objects = reinterpret_cast<TYPE *>(malloc(sizeof(TYPE) * n));
+-      d_counter = new ReferenceCounter;
+-      d_elements = n;
+-   } else {
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-}
+-
+-template<class TYPE>
+-Array<TYPE>::~Array()
+-{
+-   if (d_counter && d_counter->deleteReference()) {
+-      deleteObjects();
+-   }
+-}
+-
+-template<class TYPE>
+-Array<TYPE>&
+-Array<TYPE>::operator = (
+-   const Array<TYPE>& rhs)
+-{
+-   if (this != &rhs) {
+-      if (d_counter && d_counter->deleteReference()) {
+-         deleteObjects();
+-      }
+-      d_objects = rhs.d_objects;
+-      d_counter = rhs.d_counter;
+-      d_elements = rhs.d_elements;
+-      if (d_counter) {
+-         d_counter->addReference();
+-      }
+-   }
+-   return *this;
+-}
+-
+-template<class TYPE>
+-void
+-Array<TYPE>::resizeArray(
+-   const int n,
+-   const TYPE& default_value)
+-{
+-   if (n != d_elements) {
+-      Array<TYPE> array(n, default_value);
+-      const int s = (d_elements < n ? d_elements : n);
+-      for (int i = 0; i < s; ++i) {
+-         array.d_objects[i] = d_objects[i];
+-      }
+-
+-      this->
+-      operator = (
+-         array);
+-   }
+-}
+-
+-template<class TYPE>
+-void
+-Array<TYPE>::erase(
+-   const int position)
+-{
+-   TBOX_ASSERT((position >= 0) && (position < size()));
+-
+-   if (d_elements > 1) {
+-
+-      int new_d_elements(d_elements - 1);
+-
+-      TYPE* new_d_objects = reinterpret_cast<TYPE *>(
+-            malloc(sizeof(TYPE) * new_d_elements));
+-
+-      /* copy lower part of array */
+-      for (int j = 0; j < position; ++j) {
+-         void* p = &new_d_objects[j];
+-         (void)new (p)TYPE(d_objects[j]);
+-      }
+-
+-      /* copy upper part of array */
+-      for (int j = position + 1; j < d_elements; ++j) {
+-         void* p = &new_d_objects[j - 1];
+-         (void)new (p)TYPE(d_objects[j]);
+-      }
+-
+-      if (d_counter && d_counter->deleteReference()) {
+-         deleteObjects();
+-      }
+-
+-      d_objects = new_d_objects;
+-      d_counter = new ReferenceCounter;
+-      d_elements = new_d_elements;
+-
+-   } else {
+-      if (d_counter && d_counter->deleteReference()) {
+-         deleteObjects();
+-      }
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-
+-}
+-
+-template<class TYPE>
+-void
+-Array<TYPE>::deleteObjects()
+-{
+-   if (d_objects) {
+-      for (int i = 0; i < d_elements; ++i) {
+-         d_objects[i].~TYPE();
+-      }
+-      free(reinterpret_cast<char *>(d_objects));
+-      delete d_counter;
+-   }
+-
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-template<class TYPE>
+-TYPE&
+-Array<TYPE>::operator [] (
+-   const int i)
+-{
+-   TBOX_ASSERT((i >= 0) && (i < size()));
+-
+-   return d_objects[i];
+-}
+-
+-template<class TYPE>
+-const TYPE&
+-Array<TYPE>::operator [] (
+-   const int i) const
+-{
+-   TBOX_ASSERT((i >= 0) && (i < size()));
+-
+-   return d_objects[i];
+-}
+-
+-template<class TYPE>
+-void
+-Array<TYPE>::setNull()
+-{
+-   if (d_counter && d_counter->deleteReference()) {
+-      deleteObjects();
+-   }
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-template<class TYPE>
+-void
+-Array<TYPE>::clear()
+-{
+-   if (d_counter && d_counter->deleteReference()) {
+-      deleteObjects();
+-   }
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-template<class TYPE>
+-bool
+-Array<TYPE>::isNull() const
+-{
+-   return !d_objects;
+-}
+-
+-template<class TYPE>
+-bool
+-Array<TYPE>::empty() const
+-{
+-   return !d_objects;
+-}
+-
+-template<class TYPE>
+-TYPE *
+-Array<TYPE>::getPointer(
+-   const int i)
+-{
+-   TBOX_ASSERT((i >= 0) && (i < size()));
+-
+-   return &d_objects[i];
+-}
+-
+-template<class TYPE>
+-const TYPE *
+-Array<TYPE>::getPointer(
+-   const int i) const
+-{
+-   TBOX_ASSERT((i >= 0) && (i < size()));
+-
+-   return &d_objects[i];
+-}
+-
+-template<class TYPE>
+-int
+-Array<TYPE>::getSize() const
+-{
+-   return d_elements;
+-}
+-
+-template<class TYPE>
+-int
+-Array<TYPE>::size() const
+-{
+-   return d_elements;
+-}
+-
+-template<class TYPE>
+-size_t
+-Array<TYPE>::align(
+-   const size_t bytes)
+-{
+-   size_t aligned = bytes + ALLOCATION_ALIGNMENT - 1;
+-   aligned -= aligned % ALLOCATION_ALIGNMENT;
+-   return aligned;
+-}
+-
+-template<class TYPE>
+-void
+-Array<TYPE>::push_back(
+-   const TYPE& value)
+-{
+-   int i = d_elements;
+-   resizeArray(i + 1);
+-   d_objects[i] = value;
+-}
+-
+-template<class TYPE>
+-const TYPE&
+-Array<TYPE>::back()
+-{
+-   TBOX_ASSERT(size() > 0);
+-
+-   return d_objects[d_elements - 1];
+-}
+-
+-}
+-}
+-
+-#if !defined(__BGL_FAMILY__) && defined(__xlC__)
+-/*
+- * Unsuppress XLC warnings
+- */
+-#pragma report(enable, CPPC5334)
+-#pragma report(enable, CPPC5328)
+-#endif
+-
+-#endif
+diff --git a/source/SAMRAI/tbox/Array.h b/source/SAMRAI/tbox/Array.h
+deleted file mode 100644
+index bd6901b4e..000000000
+--- a/source/SAMRAI/tbox/Array.h
++++ /dev/null
+@@ -1,347 +0,0 @@
+-/*************************************************************************
+- *
+- * This file is part of the SAMRAI distribution.  For full copyright
+- * information, see COPYRIGHT and LICENSE.
+- *
+- * Copyright:     (c) 1997-2020 Lawrence Livermore National Security, LLC
+- * Description:   A simple array template class
+- *
+- ************************************************************************/
+-
+-#ifndef included_tbox_Array
+-#define included_tbox_Array
+-
+-#include "SAMRAI/SAMRAI_config.h"
+-#include "SAMRAI/tbox/ReferenceCounter.h"
+-#include "SAMRAI/tbox/Utilities.h"
+-
+-namespace SAMRAI {
+-namespace tbox {
+-
+-/**
+- * Class Array<TYPE> defines a smart pointer to an array of TYPE and
+- * manages all reference counting and deallocation of the array (even
+- * if the data was originally allocated from an arena).  When the
+- * reference count on a Array<TYPE> object goes to zero, the array
+- * objects are automatically deallocated.  The array class frees the
+- * user from deleting and tracking aliases for object arrays.
+- *
+- * A block with references count and arena pointer is allocated for
+- * all non-empty arrays.  These reference counted blocks are freed at
+- * the end of the lifetime of the array.
+- *
+- * Class TYPE must define a copy constructor and an assignment
+- * operator.
+- *
+- * @see ReferenceCounter
+- */
+-
+-template<class TYPE>
+-class Array
+-{
+-public:
+-   /*
+-    * This is a class used as a flag to ensure a different constructor
+-    * type signature for the uninitialized Array constructor.  Only
+-    * the Array::UNINITIALIZED value is every expected to be of this
+-    * type.
+-    */
+-   class DoNotInitialize
+-   {
+-public:
+-      DoNotInitialize() {
+-      }
+-   };
+-
+-   /*
+-    * The flag value for use in the Array uninitialized constructor.
+-    */
+-   static const typename Array<TYPE>::DoNotInitialize UNINITIALIZED;
+-
+-   /**
+-    * Create an array of zero elements.
+-    */
+-   Array();
+-
+-   /**
+-    * Create an array of ``n'' elements.
+-    *
+-    * Elements will be initialized with "n" copies of default_value.
+-    * If not default_value is supplied the default_constructor is
+-    * invoked to create a default value.
+-    *
+-    */
+-   explicit Array(
+-      const int n,
+-      const TYPE& default_value = TYPE());
+-
+-   /**
+-    * Create an array of ``n'' uninitialized elements.
+-    *
+-    * The Array::UNINITIALIZED value should be used for the
+-    * second argument to flag that the array is uninitialized.
+-    *
+-    * CAUTION: Invoking this constructor will potentially result in a
+-    * core dump as the element objects will not be initialized (the
+-    * default constructor is not invoked).  If TYPE is a builtin type
+-    * the arrays values should be assigned before use.  If TYPE is a
+-    * class, use the new placement operator on each array element
+-    * location to invoke a constructor.  This is shown in the
+-    * following example:
+-    *
+-    * \code
+-    * for(int i = 0; i < d_elements; ++i) {
+-    *       void *p = &d_objects[i];
+-    *       (void) new (p) TYPE(arg1, arg2);
+-    *    }
+-    *
+-    * \endcode
+-    *
+-    * This constructor may be used to optimize the construction of
+-    * Arrays when the elements are known to be assigned to some value
+-    * after construction and thus does not need to be initialized.  A
+-    * loop over the array elements doing an assiggment to the
+-    * default_value is avoided.
+-    *
+-    * @param n
+-    * @param do_not_initialize_flag
+-    */
+-
+-   Array(
+-      const int n,
+-      const typename Array::DoNotInitialize& do_not_initialize_flag);
+-
+-   /**
+-    * Copy constructor for the array.  This creates an alias to the
+-    * right hand side and increments the reference count.
+-    *
+-    * CAUTION: invoking resizeArray() forces a deep copy.
+-    * Upon return, two objects that formerly were aliases to the
+-    * same underlying data will point to separate data.  For this
+-    * reason, it is best to pass a Array by reference, instead
+-    * of by value.
+-    */
+-   Array(
+-      const Array& rhs);
+-
+-   /**
+-    * Destructor for the array.  If the reference count for the array data
+-    * has gone to zero, then the array data is deallocated from the memory
+-    * arena from which it was allocated.
+-    */
+-   ~Array();
+-
+-   /**
+-    * Array assignment.  The assignment operator copies a pointer to the
+-    * array data and increments the reference count.  Both array objects refer
+-    * to the same data, and changes to individual array entry values in one will
+-    * be reflected in the other array.  However, this assignment operation DOES NOT
+-    * involve a "deep copy" (see the resizeArray() routines below). Thus, changes
+-    * to one Array object container will not necessarily be reflected in the
+-    * other container.
+-    */
+-   Array&
+-   operator = (
+-      const Array& rhs);
+-
+-   /**
+-    * Non-const array subscripting.  Return a reference the object at array
+-    * index ``i'' (between 0 and N-1, where N is the number of elements in
+-    * the array.
+-    *
+-    * @param i Array index of item whose reference is to be returned.
+-    *
+-    * @pre (i >= 0) && (i < size())
+-    */
+-   TYPE&
+-   operator [] (
+-      const int i);
+-
+-   /**
+-    * Const array subscripting.  Return a const reference to the object
+-    * at array index ``i'' (between 0 and N-1, where N is the number of
+-    * elements in the array.
+-    *
+-    * @param i Array index of item whose reference is to be returned.
+-    *
+-    * @pre (i >= 0) && (i < size())
+-    */
+-   const TYPE&
+-   operator [] (
+-      const int i) const;
+-
+-   /**
+-    * Test whether the array is NULL (has any elements).
+-    */
+-   bool
+-   isNull() const;
+-
+-   /**
+-    * Test whether the array is empty (has no elements).
+-    *
+-    * Identical to isNull() but this method is common to several
+-    * container classes, including STL classes.
+-    */
+-   bool
+-   empty() const;
+-
+-   /**
+-    * Set the length of the array to zero.  If the reference count for
+-    * the objects has dropped to zero, then the array data is deallocated.
+-    */
+-   void
+-   setNull();
+-
+-   /**
+-    * Set the length of the array to zero.  If the reference count for
+-    * the objects has dropped to zero, then the array data is deallocated.
+-    *
+-    * Identical to setNull() but  this method is common to several
+-    * container classes, including STL classes.
+-    */
+-   void
+-   clear();
+-
+-   /**
+-    * Return a non-const pointer to the i-th object.  The index must be
+-    * between 0 and N-1, where N is the number of elements in the array.
+-    *
+-    * @param i Array index of item whose reference is to be returned.
+-    *
+-    * @pre (i >= 0) && (i < size())
+-    */
+-   TYPE *
+-   getPointer(
+-      const int i = 0);
+-
+-   /**
+-    * Return a const pointer to the i-th object.  The index must be
+-    * between 0 and N-1, where N is the number of elements in the array.
+-    *
+-    * @param i Array index of item whose reference is to be returned.
+-    *
+-    * @pre (i >= 0) && (i < size())
+-    */
+-   const TYPE *
+-   getPointer(
+-      const int i = 0) const;
+-
+-   /**
+-    * Return the number of elements in the array.
+-    */
+-   int
+-   getSize() const;
+-
+-   /**
+-    * Return the number of elements in the array.  Identical to getSize(),
+-    * but this method is common to several container classes.
+-    */
+-   int
+-   size() const;
+-
+-   /**
+-    * Resize the array by allocating new array storage and copying from the
+-    * old array into the new; i.e., a "deep" copy.  Space for the new array
+-    * is allocated via the standard ``new'' operator.
+-    *
+-    * Elements added be initialized with copies of "default" using the
+-    * copy constructor for classes and assignment for internal types.
+-    */
+-   void
+-   resizeArray(
+-      const int n,
+-      const TYPE& default_value = TYPE());
+-
+-   /**
+-    *
+-    * Adds a new element at the end of the array, after its current
+-    * last element. The content of this new element is initialized to
+-    * a copy of value.
+-    *
+-    */
+-   void
+-   push_back(
+-      const TYPE& value);
+-
+-   /**
+-    * Returns a reference to the last element in the array container.
+-    *
+-    * @pre size() > 0
+-    */
+-   const TYPE&
+-   back();
+-
+-   /**
+-    *
+-    * Removes from the array container a single element at position.
+-    *
+-    * @param position Array index of element to be removed.
+-    *
+-    * @pre (position >= 0) && (position < size())
+-    */
+-   void
+-   erase(
+-      const int position);
+-
+-private:
+-   size_t
+-   align(
+-      const size_t bytes);
+-
+-   static const size_t ALLOCATION_ALIGNMENT = 16;
+-
+-   void
+-   deleteObjects();
+-
+-   TYPE* d_objects;
+-   ReferenceCounter* d_counter;
+-   int d_elements;
+-};
+-
+-template<>
+-Array<bool>::Array(
+-   const int n,
+-   const bool& default_value);
+-template<>
+-Array<char>::Array(
+-   const int n,
+-   const char& default_value);
+-template<>
+-Array<int>::Array(
+-   const int n,
+-   const int& default_value);
+-template<>
+-Array<float>::Array(
+-   const int n,
+-   const float& default_value);
+-template<>
+-Array<double>::Array(
+-   const int n,
+-   const double& default_value);
+-
+-template<>
+-void
+-Array<bool>::deleteObjects();
+-template<>
+-void
+-Array<char>::deleteObjects();
+-template<>
+-void
+-Array<int>::deleteObjects();
+-template<>
+-void
+-Array<float>::deleteObjects();
+-template<>
+-void
+-Array<double>::deleteObjects();
+-
+-}
+-}
+-
+-/*
+- * Default assume Array is not a standard type
+- */
+-
+-#include "SAMRAI/tbox/Array.C"
+-
+-#endif
+diff --git a/source/SAMRAI/tbox/ArraySpecial.C b/source/SAMRAI/tbox/ArraySpecial.C
+deleted file mode 100644
+index 78ce9ae69..000000000
+--- a/source/SAMRAI/tbox/ArraySpecial.C
++++ /dev/null
+@@ -1,210 +0,0 @@
+-/*************************************************************************
+- *
+- * This file is part of the SAMRAI distribution.  For full copyright
+- * information, see COPYRIGHT and LICENSE.
+- *
+- * Copyright:     (c) 1997-2020 Lawrence Livermore National Security, LLC
+- * Description:   Array specializations
+- *
+- ************************************************************************/
+-
+-#include "SAMRAI/tbox/Array.h"
+-
+-#include <new>
+-#include <cstdlib>
+-
+-#if !defined(__BGL_FAMILY__) && defined(__xlC__)
+-/*
+- * Suppress XLC warnings
+- */
+-#pragma report(disable, CPPC5334)
+-#pragma report(disable, CPPC5328)
+-#endif
+-
+-namespace SAMRAI {
+-namespace tbox {
+-
+-template<>
+-Array<bool>::Array(
+-   const int n,
+-   const bool& default_value)
+-{
+-   if (n > 0) {
+-      d_objects = reinterpret_cast<bool *>(malloc(sizeof(bool) * n));
+-      d_counter = new ReferenceCounter;
+-      d_elements = n;
+-
+-      for (int i = 0; i < d_elements; ++i) {
+-         d_objects[i] = default_value;
+-      }
+-
+-   } else {
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-}
+-
+-template<>
+-Array<char>::Array(
+-   const int n,
+-   const char& default_value)
+-{
+-   if (n > 0) {
+-      d_objects = reinterpret_cast<char *>(malloc(sizeof(char) * n));
+-      d_counter = new ReferenceCounter;
+-      d_elements = n;
+-
+-      for (int i = 0; i < d_elements; ++i) {
+-         d_objects[i] = default_value;
+-      }
+-
+-   } else {
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-}
+-
+-template<>
+-Array<int>::Array(
+-   const int n,
+-   const int& default_value)
+-{
+-   if (n > 0) {
+-      d_objects = reinterpret_cast<int *>(malloc(sizeof(int) * n));
+-      d_counter = new ReferenceCounter;
+-      d_elements = n;
+-
+-      for (int i = 0; i < d_elements; ++i) {
+-         d_objects[i] = default_value;
+-      }
+-
+-   } else {
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-}
+-
+-template<>
+-Array<float>::Array(
+-   const int n,
+-   const float& default_value)
+-{
+-   if (n > 0) {
+-      d_objects = reinterpret_cast<float *>(malloc(sizeof(float) * n));
+-      d_counter = new ReferenceCounter;
+-      d_elements = n;
+-
+-      for (int i = 0; i < d_elements; ++i) {
+-         d_objects[i] = default_value;
+-      }
+-
+-   } else {
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-}
+-
+-template<>
+-Array<double>::Array(
+-   const int n,
+-   const double& default_value)
+-{
+-   if (n > 0) {
+-      d_objects = reinterpret_cast<double *>(malloc(sizeof(double) * n));
+-      d_counter = new ReferenceCounter;
+-      d_elements = n;
+-
+-      for (int i = 0; i < d_elements; ++i) {
+-         d_objects[i] = default_value;
+-      }
+-
+-   } else {
+-      d_objects = 0;
+-      d_counter = 0;
+-      d_elements = 0;
+-   }
+-}
+-
+-template<>
+-void
+-Array<bool>::deleteObjects()
+-{
+-   if (d_objects) {
+-      free(reinterpret_cast<char *>(d_objects));
+-      delete d_counter;
+-   }
+-
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-template<>
+-void
+-Array<char>::deleteObjects()
+-{
+-   if (d_objects) {
+-      free(reinterpret_cast<char *>(d_objects));
+-      delete d_counter;
+-   }
+-
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-template<>
+-void
+-Array<int>::deleteObjects()
+-{
+-   if (d_objects) {
+-      free(reinterpret_cast<char *>(d_objects));
+-      delete d_counter;
+-   }
+-
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-template<>
+-void
+-Array<float>::deleteObjects()
+-{
+-   if (d_objects) {
+-      free(reinterpret_cast<char *>(d_objects));
+-      delete d_counter;
+-   }
+-
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-template<>
+-void
+-Array<double>::deleteObjects()
+-{
+-   if (d_objects) {
+-      free(reinterpret_cast<char *>(d_objects));
+-      delete d_counter;
+-   }
+-
+-   d_objects = 0;
+-   d_counter = 0;
+-   d_elements = 0;
+-}
+-
+-}
+-}
+-#if !defined(__BGL_FAMILY__) && defined(__xlC__)
+-/*
+- * Suppress XLC warnings
+- */
+-#pragma report(enable, CPPC5334)
+-#pragma report(enable, CPPC5328)
+-#endif
+diff --git a/source/SAMRAI/tbox/CMakeLists.txt b/source/SAMRAI/tbox/CMakeLists.txt
+index 2378a2db5..fdd7949e0 100644
+--- a/source/SAMRAI/tbox/CMakeLists.txt
++++ b/source/SAMRAI/tbox/CMakeLists.txt
+@@ -1,6 +1,4 @@
+ set ( tbox_headers
+-  Array.h
+-  Array.C
+   AsyncCommGroup.h
+   AsyncCommPeer.h
+   AsyncCommPeer.C
+@@ -56,13 +54,11 @@ set ( tbox_headers
+   Utilities.h)
+ 
+ set_source_files_properties(
+-  Array.C
+   MathUtilities.C
+   AsyncCommPeer.C
+   PROPERTIES HEADER_FILE_ONLY TRUE)
+ 
+ set (tbox_sources
+-  ArraySpecial.C
+   AsyncCommGroup.C
+   AsyncCommStage.C
+   BalancedDepthFirstTree.C
+diff --git a/source/SAMRAI/tbox/Dimension.h b/source/SAMRAI/tbox/Dimension.h
+index d36b06221..a7888450b 100644
+--- a/source/SAMRAI/tbox/Dimension.h
++++ b/source/SAMRAI/tbox/Dimension.h
+@@ -162,13 +162,8 @@ public:
+       std::ostream& s,
+       const Dimension& rhs);
+ 
+-private:
+-   /*
+-    * Unimplemented default constructor.
+-    */
+-   Dimension();
+-
+    /**
++    * BP: assignment operator is made public overriding SAMRAI design choice
+     * Assignment operator is private to prevent dimensions
+     * from being assigned.  This was done to improve type
+     * safety.
+@@ -181,6 +176,12 @@ private:
+       return *this;
+    }
+ 
++private:
++   /*
++    * Unimplemented default constructor.
++    */
++   Dimension();
++
+    dir_t d_dim;
+ };
+ 
+diff --git a/source/SAMRAI/tbox/InputManager.h b/source/SAMRAI/tbox/InputManager.h
+index 707208cc5..36b94fd7d 100644
+--- a/source/SAMRAI/tbox/InputManager.h
++++ b/source/SAMRAI/tbox/InputManager.h
+@@ -78,7 +78,7 @@ public:
+    static bool
+    inputDatabaseExists()
+    {
+-      return s_input_db.get();
++      return (s_input_db!=nullptr);
+    }
+ 
+    /**
+diff --git a/source/SAMRAI/tbox/RestartManager.h b/source/SAMRAI/tbox/RestartManager.h
+index aedb23af9..1cd57de96 100644
+--- a/source/SAMRAI/tbox/RestartManager.h
++++ b/source/SAMRAI/tbox/RestartManager.h
+@@ -137,7 +137,7 @@ public:
+    bool
+    hasRootDatabase()
+    {
+-      return d_database_root.get();
++      return (d_database_root!=nullptr);
+    }
+ 
+    /**
+diff --git a/source/SAMRAI/tbox/SAMRAI_MPI.C b/source/SAMRAI/tbox/SAMRAI_MPI.C
+index 554bea725..3b76f54f3 100644
+--- a/source/SAMRAI/tbox/SAMRAI_MPI.C
++++ b/source/SAMRAI/tbox/SAMRAI_MPI.C
+@@ -19,6 +19,7 @@
+ #endif
+ 
+ #include <stdlib.h>
++#include <sched.h>
+ 
+ #include "SAMRAI/tbox/SAMRAIManager.h"
+ #include "SAMRAI/tbox/Utilities.h"
+@@ -56,6 +57,7 @@ SAMRAI_MPI SAMRAI_MPI::s_samrai_world(MPI_COMM_NULL);
+ bool SAMRAI_MPI::s_call_abort_in_serial_instead_of_exit = false;
+ bool SAMRAI_MPI::s_call_abort_in_parallel_instead_of_mpiabort = false;
+ int SAMRAI_MPI::s_invalid_rank = -1;
++bool SAMRAI_MPI::use_MPI_Test = false;
+ 
+ /*
+  **************************************************************************
+@@ -110,20 +112,20 @@ SAMRAI_MPI::abort()
+    const SAMRAI_MPI& mpi(SAMRAI_MPI::getSAMRAIWorld());
+    if (mpi.getSize() > 1) {
+       if (s_call_abort_in_parallel_instead_of_mpiabort) {
+-         ::abort();
++	throw -1;
+       } else {
+          MPI_Abort(mpi.getCommunicator(), -1);
+       }
+    } else {
+       if (s_call_abort_in_serial_instead_of_exit) {
+-         ::abort();
++         throw -1;
+       } else {
+          exit(-1);
+       }
+    }
+ #else
+    if (s_call_abort_in_serial_instead_of_exit) {
+-      ::abort();
++      throw -1;
+    } else {
+       exit(-1);
+    }
+@@ -521,7 +523,16 @@ SAMRAI_MPI::Waitall(
+    }
+ #ifdef HAVE_MPI
+    else {
+-      rval = MPI_Waitall(count, reqs, stats);
++      if ( SAMRAI_MPI::use_MPI_Test ) {
++         int flag = 0;
++         rval = MPI_Test( request, &flag, status );
++         while ( !flag && rval==MPI_SUCCESS ) {
++            sched_yield();
++            rval = MPI_Test( request, &flag, status );
++         }
++      } else {
++          rval = MPI_Wait(request, status);
++      }
+    }
+ #endif
+    return rval;
+@@ -581,7 +592,16 @@ SAMRAI_MPI::Waitsome(
+    }
+ #ifdef HAVE_MPI
+    else {
+-      rval = MPI_Waitsome(incount, array_of_requests, outcount, array_of_indices, array_of_statuses);
++      if ( SAMRAI_MPI::use_MPI_Test ) {
++         *outcount = 0;
++         rval = MPI_Testsome( incount, array_of_requests, outcount, array_of_indices, array_of_statuses);
++         while ( *outcount==0 && rval==MPI_SUCCESS ) {
++            sched_yield();
++            rval = MPI_Testsome( incount, array_of_requests, outcount, array_of_indices, array_of_statuses);
++         }
++      } else {
++         rval = MPI_Waitsome(incount, array_of_requests, outcount, array_of_indices, array_of_statuses);
++      }
+    }
+ #endif
+    return rval;
+diff --git a/source/SAMRAI/tbox/SAMRAI_MPI.h b/source/SAMRAI/tbox/SAMRAI_MPI.h
+index 5bbde2c8d..e74f3f9c9 100644
+--- a/source/SAMRAI/tbox/SAMRAI_MPI.h
++++ b/source/SAMRAI/tbox/SAMRAI_MPI.h
+@@ -50,12 +50,13 @@ enum {
+    MPI_DOUBLE,
+    MPI_FLOAT,
+    MPI_INT,
++   MPI_UNSIGNED,
+    MPI_LONG,
++   MPI_UNSIGNED_LONG,
+    MPI_C_DOUBLE_COMPLEX,
+    MPI_2INT,
+    MPI_DOUBLE_INT,
+    MPI_FLOAT_INT,
+-   MPI_UNSIGNED_LONG,
+    // Operations:
+    MPI_MIN,
+    MPI_MINLOC,
+@@ -891,7 +892,16 @@ public:
+     */
+    static void
+    finalize();
+-
++   
++   /*!
++    * @brief Control how we wait
++    *
++    * This is a global variable for SAMRAI that will use MPI_Test/sched_yield
++    * in place of MPI_Wait if set.  This can have a significant effect on the
++    * performance of MPI in multi-threaded code depending on the MPI implementation. 
++    * The default value is false (use MPI_Wait).
++    */
++   static bool use_MPI_Test;
+ private:
+    // Unimplemented default constructor.
+    SAMRAI_MPI();
+diff --git a/source/SAMRAI/tbox/Utilities.h b/source/SAMRAI/tbox/Utilities.h
+index 0ba47415d..b4374d571 100644
+--- a/source/SAMRAI/tbox/Utilities.h
++++ b/source/SAMRAI/tbox/Utilities.h
+@@ -53,9 +53,10 @@ typedef int mode_t;
+  * A null use of a variable, use to avoid GNU compiler
+  * warnings about unused variables.
+  */
+-#define NULL_USE(variable)                               \
++#ifndef NULL_USE
++#define NULL_USE(variable)			\
+    static_cast< void >( variable )
+-
++#endif
+ /*!
+  * Throw an error assertion from within any C++ source code.  The
+  * macro argument may be any standard ostream expression.  The file and
+diff --git a/source/SAMRAI/xfer/CoarsenSchedule.C b/source/SAMRAI/xfer/CoarsenSchedule.C
+index 6febfc7a8..756061d83 100644
+--- a/source/SAMRAI/xfer/CoarsenSchedule.C
++++ b/source/SAMRAI/xfer/CoarsenSchedule.C
+@@ -1279,5 +1279,24 @@ CoarsenSchedule::finalizeCallback()
+    t_coarse_data_fill.reset();
+ }
+ 
++/*
++ ***************************************************************************
++ *
++ * Specify MPI tag values to use in communication.
++ *
++ ***************************************************************************
++ */
++
++void
++CoarsenSchedule::setMPITag(
++    const int first_tag,
++    const int second_tag )
++{
++   if ( d_schedule!=nullptr )
++      d_schedule->setMPITag(first_tag,second_tag);
++   if ( d_precoarsen_refine_schedule!=nullptr )
++      d_precoarsen_refine_schedule->setMPITag(first_tag,second_tag);
++}
++
+ }
+ }
+diff --git a/source/SAMRAI/xfer/CoarsenSchedule.h b/source/SAMRAI/xfer/CoarsenSchedule.h
+index fcb0cae8c..05af03d3a 100644
+--- a/source/SAMRAI/xfer/CoarsenSchedule.h
++++ b/source/SAMRAI/xfer/CoarsenSchedule.h
+@@ -205,6 +205,22 @@ public:
+    printClassData(
+       std::ostream& stream) const;
+ 
++   /*!
++    * @brief Specify MPI tag values to use in communication.
++    *
++    * If you are using MPI communicators that are not sufficiently
++    * isolated from other communications, you can specify distinct
++    * tags to avoid message mix-ups.  Up to two messages are sent from
++    * each communicating pairs.  Specify two distinct tags.
++    *
++    * @pre first_tag >= 0
++    * @pre second_tag >= 0
++    */
++   void
++   setMPITag(
++      const int first_tag,
++      const int second_tag);
++   
+ private:
+    CoarsenSchedule(
+       const CoarsenSchedule&);              // not implemented
+diff --git a/source/SAMRAI/xfer/RefineSchedule.C b/source/SAMRAI/xfer/RefineSchedule.C
+index a3742c6f0..ca2364c39 100644
+--- a/source/SAMRAI/xfer/RefineSchedule.C
++++ b/source/SAMRAI/xfer/RefineSchedule.C
+@@ -5370,6 +5370,33 @@ RefineSchedule::finalizeCallback()
+    t_construct_recv_trans.reset();
+ }
+ 
++/*
++ ***************************************************************************
++ *
++ * Specify MPI tag values to use in communication.
++ *
++ ***************************************************************************
++ */
++
++void
++RefineSchedule::setMPITag(
++    const int first_tag,
++    const int second_tag )
++{
++   if ( d_coarse_priority_level_schedule!=nullptr )
++      d_coarse_priority_level_schedule->setMPITag(first_tag,second_tag);
++
++   if ( d_fine_priority_level_schedule!=nullptr )
++      d_fine_priority_level_schedule->setMPITag(first_tag,second_tag);
++
++   if ( d_coarse_interp_schedule!=nullptr )
++      d_coarse_interp_schedule->setMPITag(first_tag,second_tag);
++
++   if ( d_coarse_interp_encon_schedule!=nullptr )
++      d_coarse_interp_encon_schedule->setMPITag(first_tag,second_tag);
++
++}
++
+ }
+ }
+ 
+diff --git a/source/SAMRAI/xfer/RefineSchedule.h b/source/SAMRAI/xfer/RefineSchedule.h
+index b0c185d59..ca525bf20 100644
+--- a/source/SAMRAI/xfer/RefineSchedule.h
++++ b/source/SAMRAI/xfer/RefineSchedule.h
+@@ -322,6 +322,22 @@ public:
+    printClassData(
+       std::ostream& stream) const;
+ 
++   /*!
++    * @brief Specify MPI tag values to use in communication.
++    *
++    * If you are using MPI communicators that are not sufficiently
++    * isolated from other communications, you can specify distinct
++    * tags to avoid message mix-ups.  Up to two messages are sent from
++    * each communicating pairs.  Specify two distinct tags.
++    *
++    * @pre first_tag >= 0
++    * @pre second_tag >= 0
++    */
++   void
++   setMPITag(
++      const int first_tag,
++      const int second_tag);
++   
+ private:
+    /*
+     * Static integer constant describing the largest possible ghost cell width.
+diff --git a/source/scripts/source_manipulation/headers.data b/source/scripts/source_manipulation/headers.data
+index 5b595107e..50687264a 100644
+--- a/source/scripts/source_manipulation/headers.data
++++ b/source/scripts/source_manipulation/headers.data
+@@ -63,7 +63,6 @@ tbox ConstPointer.h
+ tbox ReferenceCounter.h
+ tbox ScratchArena.h
+ tbox FixedArena.h
+-tbox Array.h
+ tbox Pointer.h
+ tbox ArenaManager.h
+ tbox ConstPointerBase.h
+diff --git a/source/test/MappedBoxLevelConnectorUtilsTests/main-mblcu.C b/source/test/MappedBoxLevelConnectorUtilsTests/main-mblcu.C
+index 1aca68112..b464ec333 100644
+--- a/source/test/MappedBoxLevelConnectorUtilsTests/main-mblcu.C
++++ b/source/test/MappedBoxLevelConnectorUtilsTests/main-mblcu.C
+@@ -252,6 +252,7 @@ int main(
+          grid_geometry,
+          tbox::SAMRAI_MPI::getSAMRAIWorld());
+       const std::string exclude("exclude");
++      hier::LocalId last_local_id(-1);
+       for (hier::BlockId::block_t bn = 0; bn < grid_geometry->getNumberBlocks(); ++bn) {
+ 
+          const hier::BlockId block_id(bn);
+@@ -279,7 +280,6 @@ int main(
+             block_domain.unorder();
+             block_domain.removeIntersections(exclude_boxes);
+ 
+-            hier::LocalId last_local_id(-1);
+             for (hier::BoxContainer::iterator bi = block_domain.begin();
+                  bi != block_domain.end(); ++bi) {
+                big_box_level.addBoxWithoutUpdate(
+@@ -297,6 +297,7 @@ int main(
+             for (hier::BoxContainerSingleBlockIterator bi(domain_boxes.begin(block_id));
+                  bi != domain_boxes.end(block_id); ++bi) {
+                big_box_level.addBoxWithoutUpdate(*bi);
++	       ++last_local_id;
+             }
+ 
+          }
+@@ -823,6 +824,7 @@ void shrinkBoxLevel(
+           * This block should be excluded from shrinking.
+           */
+          small_box_level->addBoxWithoutUpdate(box);
++	 ++last_local_id;
+       } else {
+ 
+          hier::BoxContainer shrunken_boxes(box);
