@@ -1,5 +1,8 @@
 #include "LapackWrappers.h"
+
+#ifndef DISABLE_LAPACK
 #include "blas_lapack.h"
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -87,6 +90,7 @@ static inline std::string runCommand( std::function<void( void )> fun, const std
 /****************************************************************************
  *  Function to set an environemental variable                               *
  ****************************************************************************/
+#if defined( USE_MKL ) || defined( USE_MATLAB_LAPACK )
 static void setenv( const char *name, const char *value )
 {
     static std::mutex lock;
@@ -102,6 +106,7 @@ static void setenv( const char *name, const char *value )
 #endif
     lock.unlock();
 }
+#endif
 
 
 /******************************************************************
@@ -110,6 +115,7 @@ static void setenv( const char *name, const char *value )
 static int setThreads( int N )
 {
     int N2 = 0;
+    NULL_USE( N );
 #if defined( USE_MKL )
     setenv( "MKL_NUM_THREADS", std::to_string( N ).c_str() );
     N2 = N;
@@ -145,7 +151,9 @@ bool global_lapack_threads_disabled = disable_threads();
  * Set the vendor string                                           *
  ******************************************************************/
 // clang-format off
-#ifdef USE_ATLAS
+#ifdef DISABLE_LAPACK
+    static constexpr char LapackVendor[] = "Built-in lapack routines";
+#elif defined( USE_ATLAS )
     static constexpr char LapackVendor[] = "ATLAS";
 #elif defined( USE_ACML )
     static constexpr char LapackVendor[] = "ACML";

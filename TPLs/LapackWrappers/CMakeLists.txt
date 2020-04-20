@@ -50,7 +50,17 @@ INCLUDE( CTest )
 
 
 # Install the library
-BEGIN_PACKAGE_CONFIG( LapackWrappers )
-INSTALL_LapackWrappers_TARGET( LapackWrappers )
+FILE( COPY "${${PROJ}_SOURCE_DIR}/LapackWrappers.h" DESTINATION "${${PROJ}_INSTALL_DIR}/include" )
+CHECK_ENABLE_FLAG( DISABLE_BLAS 0 )
+CHECK_ENABLE_FLAG( DISABLE_LAPACK 0 )
+IF ( DISABLE_BLAS OR DISABLE_LAPACK )
+    SET( LapackWrappersSource LapackWrappers.cpp LapackWrappersInfo.cpp LapackWrappers.default.cpp )
+    ADD_DEFINITIONS( -DDISABLE_LAPACK )
+ELSE()
+    SET( LapackWrappersSource LapackWrappers.cpp LapackWrappers.double.cpp LapackWrappers.float.cpp LapackWrappersInfo.cpp LapackWrappersMachineParams.cpp )
+ENDIF()
+ADD_LIBRARY( LapackWrappers ${LIB_TYPE} ${LapackWrappersSource} )
+INSTALL( TARGETS LapackWrappers DESTINATION "${${PROJ}_INSTALL_DIR}/lib" )
+
 
 

@@ -1,6 +1,5 @@
 #define NOMINMAX
 #include "LapackWrappers.h"
-#include "blas_lapack.h"
 
 #include <algorithm>
 #include <chrono>

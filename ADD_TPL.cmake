@@ -13,7 +13,9 @@ MACRO( ADD_DISTCLEAN )
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLs.h"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/macros.cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/blas_lapack.h"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/LapackWrappers"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/StackTrace"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/tests"
         COMMAND ${CMAKE_COMMAND} -E remove_directory tmp
         COMMAND ${CMAKE_COMMAND} -E remove_directory CMakeFiles
