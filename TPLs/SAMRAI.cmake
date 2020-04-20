@@ -107,7 +107,7 @@ IF ( CMAKE_BUILD_SAMRAI )
         SET( SAMRAI_CONFIGURE_OPTS ${SAMRAI_CONFIGURE_OPTS} -DENABLE_TOOLS=OFF )
     ENDIF()
     # Enable the docs
-    CHECK_ENABLE_FLAG( SAMRAI_DOCS 1 )
+    CHECK_ENABLE_FLAG( SAMRAI_DOCS 0 )
     IF ( SAMRAI_DOCS )
         SET( SAMRAI_CONFIGURE_OPTS ${SAMRAI_CONFIGURE_OPTS} -DENABLE_DOCS=ON )
     ELSE()
@@ -166,7 +166,7 @@ IF ( CMAKE_BUILD_SAMRAI )
             SAMRAI
             build-docs
             COMMENT             "Compiling documentation"
-            COMMAND             make doxygen_docs -j ${PROCS_INSTALL} VERBOSE=1
+            COMMAND             make docs -j ${PROCS_INSTALL} VERBOSE=1
             COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/samrai-dox/html "${SAMRAI_INSTALL_DIR}/doxygen"
             COMMENT             ""
             DEPENDEES           install
