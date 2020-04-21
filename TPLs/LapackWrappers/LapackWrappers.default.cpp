@@ -1,5 +1,6 @@
 #include "LapackWrappers.h"
 
+#include <math.h>
 #include <stdexcept>
 
 
@@ -40,29 +41,57 @@ void Lapack<TYPE>::scal( int N, TYPE DA, TYPE *DX, int INCX )
 template<class TYPE>
 TYPE Lapack<TYPE>::nrm2( int N, const TYPE *DX, int INCX )
 {
-    NULL_USE( N );
-    NULL_USE( DX );
-    NULL_USE( INCX );
-    throw std::logic_error( "nrm2 is not currently supported without blas/lapack" );
+    double s = 0;
+    auto X   = DX;
+    for ( int i = 0; i < N; i++, X += INCX )
+        s += ( *X ) * ( *X );
+    return sqrt( s );
 }
 template<class TYPE>
 int Lapack<TYPE>::iamax( int N, const TYPE *DX, int INCX )
 {
-    NULL_USE( N );
-    NULL_USE( DX );
-    NULL_USE( INCX );
-    throw std::logic_error( "iamax is not currently supported without blas/lapack" );
+    if ( N <= 1 )
+        return N;
+    int k  = 0;
+    auto X = DX;
+    auto y = std::abs( *X );
+    for ( int i = 1; i < N; i++, X += INCX ) {
+        auto x = std::abs( *X );
+        if ( x > y ) {
+            k = i;
+            y = x;
+        }
+    }
+    return k;
 }
 template<class TYPE>
 void Lapack<TYPE>::axpy( int N, TYPE DA, const TYPE *DX, int INCX, TYPE *DY, int INCY )
 {
-    NULL_USE( N );
-    NULL_USE( DA );
-    NULL_USE( DX );
-    NULL_USE( DY );
-    NULL_USE( INCX );
-    NULL_USE( INCY );
-    throw std::logic_error( "axpy is not currently supported without blas/lapack" );
+    auto X = DX;
+    auto Y = DY;
+    for ( int i = 0; i < N; i++, X += INCX, Y += INCY )
+        *Y += DA * ( *X );
+}
+template<class TYPE>
+TYPE Lapack<TYPE>::asum( int N, const TYPE *DX, int INCX )
+{
+    if ( N <= 1 )
+        return N;
+    auto X   = DX;
+    double s = 0;
+    for ( int i = 0; i < N; i++, X += INCX )
+        s += std::abs( *X );
+    return s;
+}
+template<class TYPE>
+TYPE Lapack<TYPE>::dot( int N, const TYPE *DX, int INCX, const TYPE *DY, int INCY )
+{
+    TYPE s = 0;
+    auto X = DX;
+    auto Y = DY;
+    for ( int i = 0; i < N; i++, X += INCX, Y += INCY )
+        s += ( *X ) * ( *Y );
+    return s;
 }
 template<class TYPE>
 void Lapack<TYPE>::gemv( char TRANS, int M, int N, TYPE ALPHA, const TYPE *A, int LDA,
@@ -99,24 +128,6 @@ void Lapack<TYPE>::gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE ALP
     NULL_USE( C );
     NULL_USE( LDC );
     throw std::logic_error( "gemm is not currently supported without blas/lapack" );
-}
-template<class TYPE>
-TYPE Lapack<TYPE>::asum( int N, const TYPE *DX, int INCX )
-{
-    NULL_USE( N );
-    NULL_USE( DX );
-    NULL_USE( INCX );
-    throw std::logic_error( "asum is not currently supported without blas/lapack" );
-}
-template<class TYPE>
-TYPE Lapack<TYPE>::dot( int N, const TYPE *DX, int INCX, const TYPE *DY, int INCY )
-{
-    NULL_USE( N );
-    NULL_USE( DX );
-    NULL_USE( INCX );
-    NULL_USE( DY );
-    NULL_USE( INCY );
-    throw std::logic_error( "dot is not currently supported without blas/lapack" );
 }
 template<class TYPE>
 void Lapack<TYPE>::ger(

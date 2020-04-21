@@ -83,6 +83,7 @@ public:
 
 
 // Lists the tests availible to run
+#ifndef DISABLE_LAPACK
 template<>
 std::vector<std::string> Lapack<double>::list_all_tests()
 {
@@ -95,6 +96,18 @@ std::vector<std::string> Lapack<float>::list_all_tests()
     return { "scopy", "sscal", "snrm2", "saxpy", "sgemv", "sgemm", "sasum", "sdot", "sgesv",
         "sgtsv", "sgbsv", "sgetrf", "sgttrf", "sgbtrf", "sgetrs", "sgttrs", "sgetri", "srand" };
 }
+#else
+template<>
+std::vector<std::string> Lapack<double>::list_all_tests()
+{
+    return { "dcopy", "dscal", "dnrm2", "daxpy", "dasum", "ddot", "drand" };
+}
+template<>
+std::vector<std::string> Lapack<float>::list_all_tests()
+{
+    return { "scopy", "sscal", "snrm2", "saxpy", "sasum", "sdot", "srand" };
+}
+#endif
 
 
 // Run all the tests
