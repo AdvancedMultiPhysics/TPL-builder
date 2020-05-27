@@ -322,3 +322,34 @@ MACRO( CHECK_ENABLE_FLAG FLAG DEFAULT )
 ENDMACRO()
 
 
+# Set the number of processors
+FUNCTION( SET_N_PROCS )
+    IF ( PROCS_INSTALL )
+        SET( N_PROCS ${PROCS_INSTALL} )
+    ELSEIF ( NOT DEFINED N_PROCS )
+        SET( N_PROCS $ENV{N_PROCS} )
+    ENDIF()
+    IF ( NOT DEFINED N_PROCS )
+        SET(N_PROCS 1)
+        # Linux:
+        SET(cpuinfo_file "/proc/cpuinfo")
+        IF(EXISTS "${cpuinfo_file}")
+            FILE(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
+            list(LENGTH procs N_PROCS)
+        ENDIF()
+        # Mac:
+        IF(APPLE)
+            find_program(cmd_sys_pro "system_profiler")
+            if(cmd_sys_pro)
+                execute_process(COMMAND ${cmd_sys_pro} OUTPUT_VARIABLE info)
+                STRING(REGEX REPLACE "^.*Total Number of Cores: ([0-9]+).*$" "\\1" N_PROCS "${info}")
+            ENDIF()
+        ENDIF()
+        # Windows:
+        IF(WIN32)
+            SET(N_PROCS "$ENV{NUMBER_OF_PROCESSORS}")
+        ENDIF()
+    ENDIF()
+    SET( PROCS_INSTALL ${N_PROCS} PARENT_SCOPE )
+ENDFUNCTION(SET_N_PROCS)
+
