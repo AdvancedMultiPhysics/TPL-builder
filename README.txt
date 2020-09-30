@@ -71,7 +71,7 @@ root_dir
     | -- TPL_BUILDER
     | -- TPL_ROOT
     |       | -- petsc-3.14.0.tar.gz
-    |       | -- SAMRAI_v3.11.2
+    |       | -- SAMRAI_v3.15.0
     |       | -- AMP
     |       | ...
     | -- build
@@ -84,8 +84,8 @@ root_dir
 In this example layout if we are creating an opt installation where
 TPL_BUILDER=root_dir/TPL_BUILDER,
 TPL_SRC_DIR=root_dir/TPL_BUILDER, 
-BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.11.2, 
+PETSC_URL=root_dir/TPL_ROOT/petsc-3.14.0.tar.gz,
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.15.0, 
 AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
 BUILD_DIR=root_dir/build/opt, 
 and INSTALL_DIR=root_dir/install/opt.  
