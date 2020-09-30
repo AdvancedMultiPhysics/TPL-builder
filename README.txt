@@ -33,7 +33,7 @@ The current TPL list and tested versions are:
     PETSc (3.14.0)
     TRILINOS (12.10.1)
     SAMRAI (3.15.0-modified)
-    LIBMESH (.5.1)
+    LIBMESH (1.5.1)
     SUNDIALS (2.6.2)
     SCALAPACK (2.0.2)
     MUMPS (5.0.1)
