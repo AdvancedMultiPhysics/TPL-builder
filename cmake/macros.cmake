@@ -459,7 +459,7 @@ MACRO( SET_WARNINGS )
   ELSEIF ( USING_ICC )
     # Add Intel specifc compiler options
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall" )
-    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall" )
+    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -wd1011" )
   ELSEIF ( USING_CRAY )
     # Add default compiler options
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS}")
