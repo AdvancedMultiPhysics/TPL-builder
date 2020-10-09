@@ -48,9 +48,10 @@ ENDIF()
 
 
 # Check for gold linker
-IF ( UNIX AND NOT APPLE )
+IF ( UNIX AND NOT APPLE AND NOT DISABLE_GOLD )
     EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE LD_VERSION )
     IF ( "${LD_VERSION}" MATCHES "GNU gold" )
+        MESSAGE( "Using gold linker" )
         SET( GOLD_LINK_FLAGS "-fuse-ld=gold -Wl,--disable-new-dtags -Wl,--no-map-whole-files" )
         SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GOLD_LINK_FLAGS}" )
         SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GOLD_LINK_FLAGS}" )
