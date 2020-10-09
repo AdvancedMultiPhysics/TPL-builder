@@ -9,7 +9,7 @@ to CMake as one of the arguments in the configure scripts (discussed later).
 This assumes the users is familiar with basic builds on their system and
 CMake is already installed.  If CMake is required it can be obtained from
    http://www.cmake.org/cmake/resources/software.html
-Note that we require CMake 3.2 or higher. 
+Note that we require CMake 3.10 or higher. 
 
 If the recommended versions of the TPLs are required they can be obtained from
 https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads
@@ -27,14 +27,13 @@ locate using TPL_URL.
 
 The current TPL list and tested versions are:
     BLAS/LAPACK (any version, NOTE: only netlib versions <= 3.5.0 work with Trilinos 12.10.1)
-    BOOST (1.47-1.55)
     ZLIB
     HDF5 (1.8.12)
-    HYPRE (2.11.2)
-    PETSc (3.7.5)
+    HYPRE (2.19.0)
+    PETSc (3.14.0)
     TRILINOS (12.10.1)
-    SAMRAI (3.11.2-modified)
-    LIBMESH (custom version available on bitbucket)
+    SAMRAI (3.15.0-modified)
+    LIBMESH (1.5.1)
     SUNDIALS (2.6.2)
     SCALAPACK (2.0.2)
     MUMPS (5.0.1)
@@ -71,8 +70,8 @@ An example folder layout is:
 root_dir
     | -- TPL_BUILDER
     | -- TPL_ROOT
-    |       | -- boost_1_55_0.tar.gz
-    |       | -- SAMRAI_v3.11.2
+    |       | -- petsc-3.14.0.tar.gz
+    |       | -- SAMRAI_v3.15.0
     |       | -- AMP
     |       | ...
     | -- build
@@ -85,8 +84,8 @@ root_dir
 In this example layout if we are creating an opt installation where
 TPL_BUILDER=root_dir/TPL_BUILDER,
 TPL_SRC_DIR=root_dir/TPL_BUILDER, 
-BOOST_URL=root_dir/TPL_ROOT/boost_1_55_0.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.11.2, 
+PETSC_URL=root_dir/TPL_ROOT/petsc-3.14.0.tar.gz,
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.15.0, 
 AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
 BUILD_DIR=root_dir/build/opt, 
 and INSTALL_DIR=root_dir/install/opt.  
@@ -107,15 +106,13 @@ A sample configure script for SAMRAI is:
         -D ENABLE_SHARED:BOOL=OFF                       \
         -D INSTALL_DIR:PATH=${INSTALL_DIR}              \
         -D PROCS_INSTALL=4                              \
-        -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
-        -D BOOST_URL="${TPL_ROOT}/boost-1.55.0-headers.tar.gz" \
-        -D BOOST_ONLY_COPY_HEADERS:BOOL=true            \
+        -D TPL_LIST:STRING="LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
         -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"      \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"            \
-        -D PETSC_URL="${TPL_ROOT}/petsc-3.7.5.tar.gz"   \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.14.0.tar.gz"   \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"    \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.2.tar.gz"  \
-        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.11.2"  \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.19.0.tar.gz"  \
+        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.15.0"  \
         -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
         ${SAMR_BUILDER}
 
@@ -142,10 +139,10 @@ A sample debug configure script for AMP is:
         -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS" \
         -D LAPACK_URL="http://www.netlib.org/lapack/lapack-3.5.0.tgz"  \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"                           \
-        -D PETSC_URL="${TPL_ROOT}/petsc-3.7.5.tar.gz"                  \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.14.0.tar.gz"                  \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                   \
         -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                    \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.11.2.tar.gz"                 \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.19.0.tar.gz"                 \
         -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                    \
         -D TRILINOS_URL="${TPL_ROOT}/trilinos-12.10.1-Source.tar.gz"   \
         -D TRILINOS_PACKAGES="Epetra;EpetraExt;Thyra;Tpetra;ML;MueLu;Kokkos;Amesos;Ifpack;Ifpack2;Belos;NOX;Stratimikos" \
