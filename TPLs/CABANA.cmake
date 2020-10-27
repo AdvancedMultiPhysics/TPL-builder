@@ -41,7 +41,18 @@ IF ( CMAKE_BUILD_CABANA )
         -DCMAKE_INSTALL_PREFIX=${CABANA_CMAKE_INSTALL_DIR}
     )
     # Set third party library includes
-    SET( CABANA_DEPENDS KOKKOS )
+    IF ( TRILINOS_INSTALL_DIR )
+	SET( CABANA_DEPENDS TRILINOS )
+	SET( KOKKOS_INSTALL_DIR ${TRILINOS_INSTALL_DIR} )
+        MESSAGE( "Using Trilinos build of Kokkos")
+	MESSAGE( "Setting KOKKOS_INSTALL_DIR to ${KOKKOS_INSTALL_DIR}" )
+    ELSEIF ( KOKKOS_INSTALL_DIR )
+        MESSAGE( "Using standalone build of Kokkos")
+        SET( CABANA_DEPENDS KOKKOS )
+    ELSE()
+        MESSAGE(FATAL_ERROR "Please specify either Trilinos or Kokkos" )
+    ENDIF()
+    
     IF ( USE_MPI )
         SET( CABANA_CONFIGURE_OPTS ${CABANA_CONFIGURE_OPTS} -DCabana_ENABLE_MPI=ON )
     ELSE()
@@ -73,7 +84,7 @@ IF ( CMAKE_BUILD_CABANA )
 ENDIF()
 
 
-# Build cabana
+# Build Cabana
 IF ( CMAKE_BUILD_CABANA )
     SET( CABANA_CMAKE_TEST )
     IF ( CABANA_TEST )
