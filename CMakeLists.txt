@@ -152,6 +152,29 @@ IF ( ";${TPL_LIST};" MATCHES ";MATLAB;" )
 ENDIF()
 
 
+# Configure CUDA
+CHECK_ENABLE_FLAG( USE_CUDA 0 )
+IF ( USE_CUDA )
+    ADD_DEFINITIONS( -DUSE_CUDA )
+    ENABLE_LANGUAGE( CUDA )
+    SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} ${CXX_STD_FLAG} ${CUDA_FLAGS_EXTRA}" )
+
+    #GET_CMAKE_PROPERTY(_variableNames VARIABLES)
+    #FOREACH(_variableName ${_variableNames})
+    #    MESSAGE("${_variableName}=${${_variableName}}")
+    #ENDFOREACH()
+    #MESSAGE(FATAL_ERROR "stop")
+ENDIF()
+
+
+# Configure OpenMP
+CHECK_ENABLE_FLAG( USE_OPENMP 0 )
+IF ( USE_OPENMP )
+    ADD_DEFINITIONS( -DUSE_OPENMP )
+    FIND_PACKAGE( OpenMP )
+ENDIF()
+
+
 # Set TPL defaults
 SET_DEFAULT_TPL( ZLIB  URL http://zlib.net/zlib-1.2.11.tar.gz )
 SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.8.12.tar.gz  )
