@@ -191,7 +191,7 @@ ENDMACRO()
 
 
 # Macro to set the compile/link flags
-MACRO( SET_COMPILER_FLAGS )
+MACRO( SET_COMPILER_DEFAULTS )
     # Initilaize the compiler
     IDENTIFY_COMPILER()
     # Set the default flags for each build type
@@ -274,6 +274,11 @@ MACRO( SET_COMPILER_FLAGS )
         SET( ENV_LDFLAGS "${CMAKE_STATIC_LINKER_FLAGS}" )
         SET( LIB_TYPE SHARED )
     ENDIF()
+ENDMACRO()
+
+
+# Set ENV_VARS and CMAKE_ARGS
+MACRO( SET_CMAKE_ARGS )
     SET( ENV_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_STD_FLAG}" )
     SET( LDFLAGS "${LDFLAGS} ${ENV_LDFLAGS}" )
     SET( ENV_VARS CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} )

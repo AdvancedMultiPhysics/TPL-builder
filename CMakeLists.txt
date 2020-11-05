@@ -34,6 +34,7 @@ ENDIF()
 # Set the project name
 PROJECT( TPLS )
 
+
 # Set the install path
 IF( PREFIX )
     SET( CMAKE_INSTALL_PREFIX ${PREFIX} )
@@ -76,6 +77,10 @@ ELSE()
 ENDIF() 
 
 
+# Set the default compiler flags
+SET_COMPILER_DEFAULTS()
+
+
 # Configure MPI
 CHECK_ENABLE_FLAG( USE_MPI 1 )
 MESSAGE("MPIEXEC = ${MPIEXEC}")
@@ -110,8 +115,30 @@ IF ( USE_MPI AND NOT MPIEXEC )
 ENDIF()
 
 
+# Configure CUDA
+CHECK_ENABLE_FLAG( USE_CUDA 0 )
+IF ( USE_CUDA )
+    ADD_DEFINITIONS( -DUSE_CUDA )
+    ENABLE_LANGUAGE( CUDA )
+    SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} ${CXX_STD_FLAG} ${CUDA_FLAGS_EXTRA}" )
+    #PRINT_ALL_VARIABLES()
+    #MESSAGE( FATAL_ERROR "Stop")
+ENDIF()
+
+
+# Configure OpenMP
+CHECK_ENABLE_FLAG( USE_OPENMP 0 )
+IF ( USE_OPENMP )
+    ADD_DEFINITIONS( -DUSE_OPENMP )
+    FIND_PACKAGE( OpenMP )
+    SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
+    SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
+    SET( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}" )
+ENDIF()
+
+
 # SET the global compile and link flags
-SET_COMPILER_FLAGS()
+SET_CMAKE_ARGS()
 
 
 # Set TPL list
@@ -149,29 +176,6 @@ MESSAGE( "TPL_LIST = ${TPL_LIST}" )
 # Disable LTO for certain configurations
 IF ( ";${TPL_LIST};" MATCHES ";MATLAB;" )
     SET( DISABLE_LTO TRUE )
-ENDIF()
-
-
-# Configure CUDA
-CHECK_ENABLE_FLAG( USE_CUDA 0 )
-IF ( USE_CUDA )
-    ADD_DEFINITIONS( -DUSE_CUDA )
-    ENABLE_LANGUAGE( CUDA )
-    SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} ${CXX_STD_FLAG} ${CUDA_FLAGS_EXTRA}" )
-
-    #GET_CMAKE_PROPERTY(_variableNames VARIABLES)
-    #FOREACH(_variableName ${_variableNames})
-    #    MESSAGE("${_variableName}=${${_variableName}}")
-    #ENDFOREACH()
-    #MESSAGE(FATAL_ERROR "stop")
-ENDIF()
-
-
-# Configure OpenMP
-CHECK_ENABLE_FLAG( USE_OPENMP 0 )
-IF ( USE_OPENMP )
-    ADD_DEFINITIONS( -DUSE_OPENMP )
-    FIND_PACKAGE( OpenMP )
 ENDIF()
 
 
