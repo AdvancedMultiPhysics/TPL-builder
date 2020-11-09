@@ -63,6 +63,10 @@ IF ( NOT TPLs_FOUND )
     # Set CMAKE_MODULE_PATH
     SET( CMAKE_MODULE_PATH "@CMAKE_INSTALL_PREFIX@/cmake" ${CMAKE_MODULE_PATH} )
 
+    # Initialize the include paths / libraries
+    SET( TPL_INCLUDE_DIRS )
+    SET( TPL_LIBRARIES )
+
     # Set the compilers and compile flags
     SET( CMAKE_BUILD_TYPE   @CMAKE_BUILD_TYPE@  CACHE STRING "documentation for this variable")
     SET( ENABLE_STATIC      @ENABLE_STATIC@ )
@@ -107,9 +111,20 @@ IF ( NOT TPLs_FOUND )
         ENABLE_LANGUAGE( Fortran )
     ENDIF()
     IF ( USE_CUDA )
+        # Check the CMake version
+        IF ( ${CMAKE_VERSION} VERSION_LESS "3.17" )
+            MESSAGE( FATAL_ERROR "We require CMake 3.17 or newer when compiling with CUDA" )
+        ENDIF()
+        # Enable CUDA
         ENABLE_LANGUAGE( CUDA )
+        SET( CMAKE_CUDA_STANDARD_REQUIRED @CMAKE_CUDA_STANDARD_REQUIRED@ )
+        SET( CMAKE_CUDA_STANDARD @CMAKE_CUDA_STANDARD@ )
+        SET( CMAKE_CUDA_ARCHITECTURES "@CMAKE_CUDA_ARCHITECTURES@" )
         SET( CMAKE_CUDA_FLAGS  "@CMAKE_CUDA_FLAGS@" )
         ADD_DEFINITIONS( -DUSE_CUDA )
+        # Enable CUDA toolkit
+        FIND_PACKAGE( CUDAToolkit )
+        SET( TPL_LIBRARIES ${TPL_LIBRARIES} CUDA::curand )
     ENDIF()
     IF ( USE_OPENMP )
         ADD_DEFINITIONS( -DUSE_OPENMP )
@@ -124,10 +139,6 @@ IF ( NOT TPLs_FOUND )
         MESSAGE( STATUS "CMAKE_CXX_COMPILER = ${CMAKE_CXX_COMPILER}")
         MESSAGE( STATUS "CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
     ENDIF()
-
-    # Initialize the include paths / libraries
-    SET( TPL_INCLUDE_DIRS )
-    SET( TPL_LIBRARIES )
 
     # Disable LTO
     IF ( NOT DEFINED DISABLE_LTO )
