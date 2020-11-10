@@ -124,7 +124,7 @@ IF ( NOT TPLs_FOUND )
         ADD_DEFINITIONS( -DUSE_CUDA )
         # Enable CUDA toolkit
         FIND_PACKAGE( CUDAToolkit )
-        SET( TPL_LIBRARIES ${TPL_LIBRARIES} CUDA::curand )
+        SET( TPL_LIBRARIES ${TPL_LIBRARIES} CUDA::curand CUDA::cudart CUDA::cuda_driver )
     ENDIF()
     IF ( USE_OPENMP )
         ADD_DEFINITIONS( -DUSE_OPENMP )
@@ -147,8 +147,9 @@ IF ( NOT TPLs_FOUND )
 
     # Include additional cmake files
     SET( TPL_MACRO_CMAKE "@CMAKE_INSTALL_PREFIX@/cmake/macros.cmake" )
+    SET( TPL_WRITE_REPO "@CMAKE_INSTALL_PREFIX@/cmake/WriteRepoVersion.cmake" )
     INCLUDE( "${TPL_MACRO_CMAKE}" )
-    INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/WriteRepoVersion.cmake" )
+    INCLUDE( "${TPL_WRITE_REPO}" )
 
     # Get the compiler and set the compiler flags
     CHECK_ENABLE_FLAG( USE_STATIC 0 )

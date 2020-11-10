@@ -1,3 +1,4 @@
+CMAKE_POLICY( SET CMP0057 NEW )
 INCLUDE(CheckCCompilerFlag)
 INCLUDE(CheckCSourceCompiles)
 INCLUDE(CheckCXXCompilerFlag)
@@ -678,24 +679,15 @@ ENDMACRO()
 
 # Link the libraries to the given target
 MACRO( TARGET_LINK_EXTERNAL_LIBRARIES TARGET_NAME )
-    FOREACH ( tmp ${TPL_LIBS} )
-        TARGET_LINK_LIBRARIES( ${TARGET_NAME} ${ARGN} ${tmp} )
-    ENDFOREACH()
+    # Include external libraries
     FOREACH ( tmp ${EXTERNAL_LIBS} )
         TARGET_LINK_LIBRARIES( ${TARGET_NAME} ${ARGN} ${tmp} )
     ENDFOREACH()
-    FOREACH ( tmp ${LAPACK_LIBS} )
+    # Include libraries found through the TPL builder
+    FOREACH ( tmp ${TPL_LIBS} )
         TARGET_LINK_LIBRARIES( ${TARGET_NAME} ${ARGN} ${tmp} )
     ENDFOREACH()
-    FOREACH ( tmp ${BLAS_LIBS} )
-        TARGET_LINK_LIBRARIES( ${TARGET_NAME} ${ARGN} ${tmp} )
-    ENDFOREACH()
-    FOREACH ( tmp ${BLAS_LAPACK_LIBS} )
-        TARGET_LINK_LIBRARIES( ${TARGET_NAME} ${ARGN} ${tmp} )
-    ENDFOREACH()
-    FOREACH ( MPI_LIBRARIES )
-        TARGET_LINK_LIBRARIES( ${EXE} ${ARGN} ${tmp} )
-    ENDFOREACH()
+    # Include CMake implicit libraries
     FOREACH ( tmp ${CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES} ${CMAKE_C_IMPLICIT_LINK_LIBRARIES}
         ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES} ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} )
         TARGET_LINK_LIBRARIES( ${TARGET_NAME} ${ARGN} ${tmp} )
