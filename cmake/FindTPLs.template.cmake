@@ -205,6 +205,11 @@ IF ( NOT TPLs_FOUND )
     ELSE()
         MESSAGE( FATAL_ERROR "OS not detected" )
     ENDIF()
+
+    IF ( USE_CUDA )
+         SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -I${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}" )
+    ENDIF()
+
     # Print some flags
     IF ( NOT TPLs_FIND_QUIETLY )
         MESSAGE( STATUS "LDLIBS = ${LDLIBS}" )
