@@ -101,18 +101,18 @@ IF ( CMAKE_BUILD_KOKKOS )
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
     IF ( KOKKOS_USE_CUDA )
+        CONFIGURE_FILE( "${CMAKE_CURRENT_LIST_DIR}/KOKKOS-nvcc.cmake" "${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake" @ONLY )
         EXTERNALPROJECT_ADD_STEP(
             KOKKOS
             install-nvcc
             COMMENT             "Installing nvcc"
-            COMMAND             cmake -P "${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake"
+            COMMAND             "cmake -P ${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake"
             COMMENT             ""
             DEPENDEES           download
             DEPENDERS           build
             WORKING_DIRECTORY   "${KOKKOS_BUILD_DIR}"
             LOG                 1
         )
-        CONFIGURE_FILE( "${CMAKE_CURRENT_LIST_DIR}/KOKKOS-nvcc.cmake" "${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake" @ONLY )
     ENDIF()
     ADD_TPL_SAVE_LOGS( KOKKOS )
     ADD_TPL_CLEAN( KOKKOS )
