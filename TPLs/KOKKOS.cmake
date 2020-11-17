@@ -106,7 +106,7 @@ IF ( CMAKE_BUILD_KOKKOS )
             KOKKOS
             install-nvcc
             COMMENT             "Installing nvcc"
-            COMMAND             "cmake -P ${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake"
+            COMMAND             ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake"
             COMMENT             ""
             DEPENDEES           download
             DEPENDERS           build
