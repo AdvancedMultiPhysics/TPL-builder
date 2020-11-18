@@ -53,20 +53,30 @@ IF ( CMAKE_BUILD_KOKKOS )
         IF ( NOT KOKKOS_HOST_COMPILER )
             MESSAGE(FATAL_ERROR "KOKKOS_HOST_COMPILER must be set")
         ENDIF()
-        IF ( NOT KOKKOS_CUDA_CXX_FLAGS )
-            MESSAGE(FATAL_ERROR "KOKKOS_CUDA_CXX_FLAGS must be set")
+        IF ( NOT DEFINED KOKKOS_CUDA_CXX_FLAGS )
+            SET( KOKKOS_CUDA_CXX_FLAGS "${CMAKE_CUDA_FLAGS}" )
+            IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
+                SET( KOKKOS_CUDA_CXX_FLAGS "${KOKKOS_CUDA_CXX_FLAGS} ${CMAKE_CUDA_FLAGS_DEBUG}" )
+            ELSEIF ( ${CMAKE_CUDA_STANDARD} STREQUAL "Release" )
+                SET( KOKKOS_CUDA_CXX_FLAGS "${KOKKOS_CUDA_CXX_FLAGS} ${CMAKE_CUDA_FLAGS_RELEASE}" )
+            ELSEIF ( ${CMAKE_CUDA_STANDARD} STREQUAL "RelWithDebInfo" )
+                SET( KOKKOS_CUDA_CXX_FLAGS "${KOKKOS_CUDA_CXX_FLAGS} ${CMAKE_CUDA_FLAGS_RELWITHDEBINFO}" )
+            ELSE()
+                MESSAGE( FATAL_ERROR "Unknown build type" )
+            ENDIF()
         ENDIF()
         # Set more options
-        SET( NVCC_WRAPPER_OUT "${CMAKE_INSTALL_PREFIX}/kokkos/nvcc_wrapper" )
-        SET( KOKKOS_CONFIGURE_OPTIONS ${KOKKOS_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${NVCC_WRAPPER_OUT} )
+        SET( KOKKOS_CONFIGURE_OPTIONS ${KOKKOS_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${KOKKOS_BUILD_DIR}/nvcc_wrapper )
         SET( KOKKOS_CONFIGURE_OPTIONS ${KOKKOS_CONFIGURE_OPTIONS} -DKokkos_USE_ATOMICS=OFF )
         SET( KOKKOS_CONFIGURE_OPTIONS ${KOKKOS_CONFIGURE_OPTIONS} -DKokkos_ENABLE_CUDA_LAMBDA=ON )
-        MESSAGE("   KOKKOS configured with cuda (${CUDA_INSTALL})")
+        MESSAGE("   KOKKOS configured with cuda:")
+        MESSAGE("      KOKKOS_CUDA_ARCH=${KOKKOS_CUDA_ARCH}")
+        MESSAGE("      KOKKOS_HOST_COMPILER=${KOKKOS_HOST_COMPILER}")
+        MESSAGE("      KOKKOS_CUDA_CXX_FLAGS=${KOKKOS_CUDA_CXX_FLAGS}")
     ELSE()
         SET( KOKKOS_CONFIGURE_OPTIONS ${KOKKOS_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} )
         MESSAGE("   KOKKOS configured without cuda")
     ENDIF()
-
     IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
         SET( KOKKOS_CONFIGURE_OPTIONS ${KOKKOS_CONFIGURE_OPTIONS} -DCMAKE_BUILD_TYPE=Debug )
     ELSEIF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" )
@@ -104,12 +114,23 @@ IF ( CMAKE_BUILD_KOKKOS )
         CONFIGURE_FILE( "${CMAKE_CURRENT_LIST_DIR}/KOKKOS-nvcc.cmake" "${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake" @ONLY )
         EXTERNALPROJECT_ADD_STEP(
             KOKKOS
-            install-nvcc
-            COMMENT             "Installing nvcc"
+            create-nvcc_wrapper
+            COMMENT             "Creating nvcc_wrapper"
             COMMAND             ${CMAKE_COMMAND} -P "${CMAKE_BINARY_DIR}/KOKKOS-prefix/src/KOKKOS-nvcc.cmake"
             COMMENT             ""
             DEPENDEES           download
             DEPENDERS           build
+            WORKING_DIRECTORY   "${KOKKOS_BUILD_DIR}"
+            LOG                 1
+        )
+        EXTERNALPROJECT_ADD_STEP(
+            KOKKOS
+            install-nvcc_wrapper
+            COMMENT             "Installing nvcc_wrapper"
+            COMMAND             ${CMAKE_COMMAND} -E copy "${KOKKOS_BUILD_DIR}/nvcc_wrapper" "${KOKKOS_INSTALL_DIR}/bin"
+            COMMENT             ""
+            DEPENDEES           install
+            DEPENDERS           
             WORKING_DIRECTORY   "${KOKKOS_BUILD_DIR}"
             LOG                 1
         )
