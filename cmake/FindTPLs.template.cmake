@@ -64,7 +64,7 @@ IF ( NOT TPLs_FOUND )
     SET( CMAKE_MODULE_PATH "@CMAKE_INSTALL_PREFIX@/cmake" ${CMAKE_MODULE_PATH} )
 
     # Initialize the include paths / libraries
-    SET( TPL_INCLUDE_DIRS )
+    SET( TPL_INCLUDE_DIRS ${USER_INCLUDE_DIRS} )
     SET( TPL_LIBRARIES )
 
     # Set the compilers and compile flags
@@ -74,8 +74,12 @@ IF ( NOT TPLs_FOUND )
     SET( DISABLE_GOLD       @DISABLE_GOLD@ )
     SET( BUILD_STATIC_LIBS  @BUILD_STATIC_LIBS@ )
     SET( BUILD_SHARED_LIBS  @BUILD_SHARED_LIBS@ )
-    SET( USE_CUDA           @USE_CUDA@ )
-    SET( USE_OPENMP         @USE_OPENMP@ )
+    IF ( NOT DEFINED DISABLE_CUDA )
+        SET( USE_CUDA       @USE_CUDA@ )
+    ENDIF()
+    IF ( NOT DEFINED DISABLE_OPENMP )
+        SET( USE_OPENMP     @USE_OPENMP@ )
+    ENDIF()
     IF ( NOT CMAKE_C_COMPILER )
         SET( CMAKE_C_COMPILER    @CMAKE_C_COMPILER@    )
         SET( CMAKE_C_COMPILER_ID @CMAKE_C_COMPILER_ID@ )
