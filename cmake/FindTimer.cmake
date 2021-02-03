@@ -4,7 +4,7 @@
 #    CONFIGURE_TIMER( DEFAULT_USE_TIMER NULL_TIMER_DIR )
 # This function assumes that USE_TIMER is set to indicate if the timer should be used
 # If USE_TIMER is set, TIMER_DIRECTORY specifies the install path for the timer
-# If USE_TIMER is not set we will create a summy timer that does nothing.
+# If USE_TIMER is not set we will create a dummy timer that does nothing.
 # The input argument DEFAULT_USE_TIMER specifies if the timer library is included by default.
 # The input argument NULL_TIMER_DIR specifies the location to install the dummy timer.  
 #    If it is an empty string, the default install path "${CMAKE_CURRENT_BINARY_DIR}/null_timer" is used.
