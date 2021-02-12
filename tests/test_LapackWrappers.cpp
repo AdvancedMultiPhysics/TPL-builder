@@ -28,7 +28,8 @@ void run_test( const std::string &routine, int N, int &us, TYPE &error, int &err
 
 
 // Print test result
-void printTest( bool pass, bool print, const std::string &name, int us, double error, int &N_errors )
+void printTest(
+    bool pass, bool print, const std::string &name, int us, double error, int &N_errors )
 {
     if ( pass && print ) {
         printf( "%7s:  passed:  %5i us  (%e)\n", name.c_str(), us, error );
@@ -128,11 +129,11 @@ int runAll( bool print_all )
                     std::ref( error2[j] ), std::ref( err2[j] ) );
             for ( int j = 0; j < N_threads; j++ )
                 threads[j].join();
-            auto t2   = std::chrono::system_clock::now();
-            bool pass = true;
+            auto t2      = std::chrono::system_clock::now();
+            bool pass    = true;
             double error = 0;
             for ( int j = 0; j < N_threads; j++ ) {
-                pass = pass && err2[j] == 0;
+                pass  = pass && err2[j] == 0;
                 error = std::max( error, error2[j] );
             }
             auto us = static_cast<int>( diff( t1, t2 ) / ( N_test * N_threads ) );
@@ -148,16 +149,16 @@ int runAll( bool print_all )
 int main( int argc, char *argv[] )
 {
     // Read inputs
-    int N = 1;
+    int N      = 1;
     bool print = true;
     if ( argc == 2 ) {
         print = false;
-        N = std::stoi( argv[1] );
+        N     = std::stoi( argv[1] );
     } else if ( argc > 2 ) {
         std::cerr << "Invald call";
         return 1;
     }
-    
+
     // Set the number of threads
     Lapack<double>::set_num_threads( 1 );
 
@@ -167,7 +168,7 @@ int main( int argc, char *argv[] )
 
     // Run the tests
     int N_errors = 0;
-    for ( int i=0; i<N; i++ )
+    for ( int i = 0; i < N; i++ )
         N_errors += runAll( print );
 
     // Finished
@@ -177,5 +178,3 @@ int main( int argc, char *argv[] )
         std::cout << "\nSome tests failed\n";
     return N_errors == 0 ? 0 : 1;
 }
-
-
