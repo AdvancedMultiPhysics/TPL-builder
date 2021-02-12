@@ -249,8 +249,8 @@ void extractTriDiag( int N, const TYPE *A, TYPE *DL, TYPE *D, TYPE *DU )
 template<typename TYPE>
 static bool test_random( int N, TYPE &error )
 {
-    constexpr int Nb = 25; // NUmber of bins
-    int K            = TEST_SIZE_VEC / 8;
+    constexpr int Nb = 25; // Number of bins
+    int K            = TEST_SIZE_VEC / 4;
     TYPE *x          = new TYPE[K];
     int count[Nb]    = { 0 };
     error            = 0;
@@ -743,7 +743,7 @@ static bool test_gttrf( int N, TYPE &error )
     Lapack<TYPE>::gttrs( 'N', K, 1, DL2, D2, DU2, DU3, IPIV, x2, K, err );
     TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
     TYPE err2 = L2Error( K, x1, x2 );
-    if ( err2 > 10 * K * norm * std::numeric_limits<TYPE>::epsilon() )
+    if ( err2 > 100 * K * norm * std::numeric_limits<TYPE>::epsilon() )
         N_errors++;
     error = err2 / norm;
     delete[] D;
@@ -883,7 +883,7 @@ static bool test_gttrs( int N, TYPE &error )
         N_errors += err == 0 ? 0 : 1;
         TYPE norm = Lapack<TYPE>::nrm2( K, x1, 1 );
         TYPE err2 = L2Error( K, x1, x2 );
-        if ( err2 > 5 * K * norm * std::numeric_limits<TYPE>::epsilon() )
+        if ( err2 > 100 * K * norm * std::numeric_limits<TYPE>::epsilon() )
             N_errors++;
         error = std::max( error, err2 / norm );
     }
