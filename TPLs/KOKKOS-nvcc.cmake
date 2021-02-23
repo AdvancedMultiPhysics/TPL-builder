@@ -15,6 +15,7 @@ STRING( REGEX REPLACE "#default_arch=[^\n]*" "" NVCC_WRAPPER_CONTENTS "${NVCC_WR
 STRING( REGEX REPLACE "#host_compiler=[^\n]*" "" NVCC_WRAPPER_CONTENTS "${NVCC_WRAPPER_CONTENTS}" )
 STRING( REGEX REPLACE "#default_compiler=[^\n]*" "" NVCC_WRAPPER_CONTENTS "${NVCC_WRAPPER_CONTENTS}" )
 STRING( REGEX REPLACE "cuda_args=[^\n]*" "cuda_args=\"${KOKKOS_CUDA_CXX_FLAGS} -arch=$default_arch\"" NVCC_WRAPPER_CONTENTS "${NVCC_WRAPPER_CONTENTS}")
+STRING( REGEX REPLACE "#Handle unsupported standard flags" "#Handle c++1z\n  -std=c++1z)\n    std_flag=-std=c++17\n    shared_args=\"$shared_args $std_flag\"\n    ;;\n  #Handle unsupported standard flags" NVCC_WRAPPER_CONTENTS "${NVCC_WRAPPER_CONTENTS}" )
 FILE( WRITE "${KOKKOS_BUILD_DIR}/tmp/nvcc_wrapper" "${NVCC_WRAPPER_CONTENTS}")
 
 # Install nvcc_wrapper
