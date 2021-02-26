@@ -276,6 +276,7 @@ EXTERNALPROJECT_ADD(
 ADD_TPL_SAVE_LOGS( environment )
 ADD_TPL_CLEAN( environment )
 
+
 # Run the test project as an external project
 CHECK_ENABLE_FLAG( ENABLE_TESTS TRUE )
 IF ( ENABLE_TESTS )

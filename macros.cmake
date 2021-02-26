@@ -20,7 +20,7 @@ NULL_USE( CMAKE_C_FLAGS )
 
 
 # Macro to set a global variable
-MACRO(GLOBAL_SET VARNAME)
+MACRO( GLOBAL_SET VARNAME )
     SET(${VARNAME} ${ARGN} CACHE INTERNAL "")
 ENDMACRO()
 
@@ -28,14 +28,23 @@ ENDMACRO()
 # Macro to print all variables
 MACRO( PRINT_ALL_VARIABLES )
     GET_CMAKE_PROPERTY(_variableNames VARIABLES)
-    FOREACH(_variableName ${_variableNames})
-        message(STATUS "${_variableName}=${${_variableName}}")
+    FOREACH ( _variableName ${_variableNames} )
+        MESSAGE( STATUS "${_variableName}=${${_variableName}}" )
     ENDFOREACH()
 ENDMACRO()
 
 
+# Macro to clean whitespace
+MACRO( CLEAN_WHITESPACE VAR )
+    STRING( STRIP ${${VAR}} ${VAR} )
+    STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
+    STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
+    STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
+ENDMACRO()
+
+
 # CMake assert
-MACRO(ASSERT test comment)
+MACRO( ASSERT test comment )
     IF (NOT ${test})
         MESSSAGE(FATAL_ERROR "Assertion failed: ${comment}")
     ENDIF(NOT ${test})
@@ -139,14 +148,6 @@ MACRO( IDENTIFY_COMPILER )
 ENDMACRO()
 
 
-# Macro to add user compile flags
-MACRO( ADD_USER_FLAGS )
-    SET(CMAKE_C_FLAGS   " ${CMAKE_C_FLAGS} ${CFLAGS} ${CFLAGS_EXTRA}" )
-    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CXXFLAGS} ${CXXFLAGS_EXTRA}" )
-    SET(CMAKE_Fortran_FLAGS " ${CMAKE_Fortran_FLAGS} ${FFLAGS} ${FFLAGS_EXTRA}" )
-ENDMACRO()
-
-
 # Macro to add user c++ std 
 MACRO( SET_CXX_STD )
     # Set the C++ standard
@@ -195,27 +196,11 @@ ENDMACRO()
 MACRO( SET_COMPILER_DEFAULTS )
     # Initilaize the compiler
     IDENTIFY_COMPILER()
-    # Set the default flags for each build type
-    IF ( USING_MSVC )
-        SET(CMAKE_C_FLAGS_DEBUG       "-D_DEBUG /DEBUG /Od /EHsc /MDd /Zi /Z7" )
-        SET(CMAKE_C_FLAGS_RELEASE     "/O2 /EHsc /MD"                      )
-        SET(CMAKE_CXX_FLAGS_DEBUG     "-D_DEBUG /DEBUG /Od /EHsc /MDd /Zi /Z7" )
-        SET(CMAKE_CXX_FLAGS_RELEASE   "/O2 /EHsc /MD"                      )
-        SET(CMAKE_Fortran_FLAGS_DEBUG ""                                   )
-        SET(CMAKE_Fortran_FLAGS_RELEASE ""                                 )
-    ELSE()
-        SET(CMAKE_C_FLAGS_DEBUG       "-g -D_DEBUG -O0" )
-        SET(CMAKE_C_FLAGS_RELEASE     "-O2"             )
-        SET(CMAKE_CXX_FLAGS_DEBUG     "-g -D_DEBUG -O0" )
-        SET(CMAKE_CXX_FLAGS_RELEASE   "-O2"             )
-        SET(CMAKE_Fortran_FLAGS_DEBUG "-g -O0"          )
-        SET(CMAKE_Fortran_FLAGS_RELEASE "-O2"           )
-    ENDIF()
     # Set the compiler flags to use
     IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "DEBUG")
-        SET(CMAKE_C_FLAGS       ${CMAKE_C_FLAGS_DEBUG}       )
-        SET(CMAKE_CXX_FLAGS     ${CMAKE_CXX_FLAGS_DEBUG}     )
-        SET(CMAKE_Fortran_FLAGS ${CMAKE_Fortran_FLAGS_DEBUG} )
+        SET(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG"   )
+        SET(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG" )
+        SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_DEBUG}"      )
     ELSEIF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "RELEASE")
         SET(CMAKE_C_FLAGS       ${CMAKE_C_FLAGS_RELEASE}       )
         SET(CMAKE_CXX_FLAGS     ${CMAKE_CXX_FLAGS_RELEASE}     )
@@ -242,7 +227,9 @@ MACRO( SET_COMPILER_DEFAULTS )
         SET( DISABLE_GXX_DEBUG ON )
     ENDIF()
     # Add the user flags
-    ADD_USER_FLAGS()
+    SET(CMAKE_C_FLAGS   " ${CMAKE_C_FLAGS} ${CFLAGS} ${CFLAGS_EXTRA}" )
+    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CXXFLAGS} ${CXXFLAGS_EXTRA}" )
+    SET(CMAKE_Fortran_FLAGS " ${CMAKE_Fortran_FLAGS} ${FFLAGS} ${FFLAGS_EXTRA}" )
     # Add the c++ standard flags
     SET_CXX_STD()
     # Test the compile flags
@@ -280,13 +267,12 @@ ENDMACRO()
 
 # Set ENV_VARS and CMAKE_ARGS
 MACRO( SET_CMAKE_ARGS )
-    SET( ENV_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}" )
-    SET( ENV_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_STD_FLAG} ${MPI_CXX_COMPILE_FLAGS}" )
-    SET( ENV_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${MPI_Fortran_COMPILE_FLAGS}" )
-    FOREACH ( tmp ${MPI_CXX_INCLUDE_PATH} )
-        SET( ENV_C_FLAGS "${ENV_C_FLAGS} -I${tmp}" )
-        SET( ENV_CXX_FLAGS "${ENV_CXX_FLAGS} -I${tmp}" )
-        SET( ENV_Fortran_FLAGS "${ENV_Fortran_FLAGS} -I${tmp}" )
+    FOREACH ( LANG C CXX Fortran )
+        SET( ENV_${LANG}_FLAGS "${CMAKE_${LANG}_FLAGS} ${MPI_${LANG}_COMPILE_FLAGS}" )
+        FOREACH ( tmp ${MPI_${LANG}_INCLUDE_PATH} )
+            SET( ENV_${LANG}_FLAGS "${ENV_${LANG}_FLAGS} -I${tmp}" )
+        ENDFOREACH()
+        CLEAN_WHITESPACE( ENV_${LANG}_FLAGS )
     ENDFOREACH()
     SET( LDFLAGS "${LDFLAGS} ${ENV_LDFLAGS}" )
     SET( ENV_VARS CC=${CMAKE_C_COMPILER} CFLAGS=${ENV_C_FLAGS} )
@@ -295,11 +281,14 @@ MACRO( SET_CMAKE_ARGS )
     SET( ENV_VARS ${ENV_VARS} FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${ENV_Fortran_FLAGS} )
     SET( ENV_LDFLAGS "${LDFLAGS} ${LDLIBS} ${MPI_CXX_LINK_FLAGS}" )
     SET( ENV_LIBS "${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES}" )
+    CLEAN_WHITESPACE( ENV_LIBS )
+    CLEAN_WHITESPACE( ENV_LDFLAGS )
     check_linker_flag( C -ldl  test_dl )
     IF ( test_dl )
         SET( ENV_LIBS "${ENV_LIBS} -ldl" )
     ENDIF()
     SET( ENV_VARS ${ENV_VARS} LD=${CMAKE_LINKER} LDFLAGS=${ENV_LDFLAGS} LIBS=${ENV_LIBS} )
+    MESSAGE( "ENV_VARS=${ENV_VARS}" )
     SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}" )
     SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}" )
     SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}" )
