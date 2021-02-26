@@ -36,10 +36,12 @@ ENDMACRO()
 
 # Macro to clean whitespace
 MACRO( CLEAN_WHITESPACE VAR )
-    STRING( STRIP ${${VAR}} ${VAR} )
-    STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
-    STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
-    STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
+    IF ( NOT "${${VAR}}" STREQUAL "" )
+        STRING( STRIP ${${VAR}} ${VAR} )
+        STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
+        STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
+        STRING( REPLACE "  " " " ${VAR} "${${VAR}}" )
+    ENDIF()
 ENDMACRO()
 
 
