@@ -113,12 +113,12 @@ A sample configure script for SAMRAI is:
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"    \
         -D HYPRE_URL="${TPL_ROOT}/hypre-2.19.0.tar.gz"  \
         -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.15.0"  \
-        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src" \
-        ${SAMR_BUILDER}
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility" \
+        ${TPL_BUILDER}
 
 
 A sample debug configure script for AMP is:
-    export AMP_BUILDER=/projects/AMP/TPLs/TPL-builder
+    export TPL_BUILDER=/projects/AMP/TPLs/TPL-builder
     export TPL_ROOT=/packages/TPLs/src
     export INSTALL_DIR=/projects/AMP/TPLs/install/debug
 
@@ -150,7 +150,7 @@ A sample debug configure script for AMP is:
         -D AMP_SRC_DIR="/projects/AMP/AMP"                             \
         -D AMP_DATA:PATH=/projects/AMP/AMP-Data                        \
         -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src"                \
-        ${AMP_BUILDER}
+        ${TPL_BUILDER}
 
 
 More sample script may be found in the scripts subdirectory.
