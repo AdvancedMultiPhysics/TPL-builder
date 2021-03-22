@@ -56,6 +56,8 @@ ADD_CUSTOM_TARGET( build-test )
 
 # Include the TPL inclde paths and libraries
 INCLUDE_DIRECTORIES( ${TPL_INCLUDE_DIRS} )
+MESSAGE("  Include Paths: ${TPL_INCLUDE_DIRS}")
+MESSAGE("  Libraries: ${TPL_LIBRARIES}")
 SET( TPL_LIBS ${TPL_LIBRARIES} )
 
 
@@ -64,6 +66,13 @@ ADD_TPLS_Tests_EXECUTABLE( hello_world )
 ADD_TPLS_Tests_EXECUTABLE( test_all_libraries )
 ADD_TPLS_Tests_TEST( hello_world )
 ADD_TPLS_Tests_TEST( test_all_libraries )
+
+get_target_property(OUT_LIBRARIES hello_world LINK_LIBRARIES)
+get_target_property(OUT_FLAGS hello_world LINK_FLAGS)
+message( "hello_world:" )
+message( "   LINK_LIBRARIES: ${OUT_LIBRARIES}")
+message( "   LINK_FLAGS: ${OUT_FLAGS}")
+
 IF ( USE_MPI )
     ADD_TPLS_Tests_TEST_PARALLEL( test_MPI 4 )
 ENDIF()
