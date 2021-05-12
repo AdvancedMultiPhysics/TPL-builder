@@ -113,7 +113,7 @@ public:
      * @param[in] INCX      The spacing between points in x
      * @param[in] beta      The scale factor beta
      * @param[in,out] y     The destination vector
-     * @param[in] INCY      The spacing between points in x
+     * @param[in] INCY      The spacing between points in y
      */
     static void gemv( char TRANS, int M, int N, TYPE alpha, const TYPE *A, int LDA, const TYPE *x,
         int INCX, TYPE beta, TYPE *y, int INCY );
