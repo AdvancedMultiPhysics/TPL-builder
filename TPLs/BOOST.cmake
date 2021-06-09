@@ -100,7 +100,7 @@ ENDIF()
 # Build boost
 IF ( CMAKE_BUILD_BOOST ) 
     IF ( BOOST_ONLY_COPY_HEADERS )
-        EXTERNALPROJECT_ADD(
+        ADD_TPL(
             BOOST
             URL                 "${BOOST_CMAKE_URL}"
             DOWNLOAD_DIR        "${BOOST_CMAKE_DOWNLOAD_DIR}"
@@ -115,7 +115,7 @@ IF ( CMAKE_BUILD_BOOST )
             LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
         )
     ELSE()
-        EXTERNALPROJECT_ADD(
+        ADD_TPL(
             BOOST
             URL                 "${BOOST_CMAKE_URL}"
             DOWNLOAD_DIR        "${BOOST_CMAKE_DOWNLOAD_DIR}"
@@ -129,8 +129,6 @@ IF ( CMAKE_BUILD_BOOST )
             LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
         )
     ENDIF()
-    ADD_TPL_SAVE_LOGS( BOOST )
-    ADD_TPL_CLEAN( BOOST )
 ELSE()
     ADD_TPL_EMPTY( BOOST )
 ENDIF()

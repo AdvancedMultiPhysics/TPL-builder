@@ -107,78 +107,38 @@ ENDIF()
 
 
 # Build Cabana
-IF ( CMAKE_BUILD_CABANA )
-    SET( CABANA_CMAKE_TEST )
-    IF ( CABANA_TEST )
-        SET( CABANA_CMAKE_TEST   TEST_AFTER_INSTALL 1   TEST_COMMAND make check )
-    ENDIF()
-    EXTERNALPROJECT_ADD(
-        CABANA
-        URL                 "${CABANA_CMAKE_URL}"
-        DOWNLOAD_DIR        "${CABANA_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${CABANA_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        CMAKE_ARGS          ${CABANA_CONFIGURE_OPTS}
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
-        BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
-        ${CABANA_CMAKE_TEST}
-        DEPENDS             ${CABANA_DEPENDS}
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+SET( CABANA_CMAKE_TEST )
+SET( CABANA_DOC_COMMAND )
+IF ( CABANA_TEST )
+    SET( CABANA_CMAKE_TEST
+        TEST_AFTER_INSTALL  1
+        TEST_COMMAND        make check
+        BUILD_TEST          make checkcompile -j ${PROCS_INSTALL}
+        CHECK_TEST          ! grep "FAILED" CABANA-test-out.log > /dev/null
     )
-    SET( CABANA_CLEAN_DEPENDENCIES install )
-    IF ( CABANA_TEST )
-        EXTERNALPROJECT_ADD_STEP(
-            CABANA
-            build-test
-            COMMENT             "Compiling tests"
-            COMMAND             make checkcompile -j ${PROCS_INSTALL} 
-            COMMENT             ""
-            DEPENDEES           build
-            DEPENDERS           test
-            WORKING_DIRECTORY   "${CABANA_BUILD_DIR}"
-            LOG                 1
-        )
-        EXTERNALPROJECT_ADD_STEP(
-            CABANA
-            check-test
-            COMMENT             "Checking test results"
-            COMMAND             ! grep "FAILED" CABANA-test-out.log > /dev/null 
-            COMMENT             ""
-            DEPENDEES           test
-            WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/CABANA-prefix/src/CABANA-stamp"
-            LOG                 0
-        )
-        SET( CABANA_CLEAN_DEPENDENCIES ${CABANA_CLEAN_DEPENDENCIES} check-test )
-    ENDIF()
-#    IF ( CABANA_DOCS )
-#        EXTERNALPROJECT_ADD_STEP(
-#            CABANA
-#            build-docs
-#            COMMENT             "Compiling documentation"
-#            COMMAND             make docs -j ${PROCS_INSTALL} VERBOSE=1
-#            COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/cabana-dox/html "${CABANA_INSTALL_DIR}/doxygen"
-#            COMMENT             ""
-#            DEPENDEES           install
-#            DEPENDERS           
-#            WORKING_DIRECTORY   "${CABANA_BUILD_DIR}"
-#            LOG                 1
-#        )
-#        SET( CABANA_CLEAN_DEPENDENCIES ${CABANA_CLEAN_DEPENDENCIES} build-docs )
-#    ENDIF()
-    EXTERNALPROJECT_ADD_STEP(
-        CABANA
-        clean
-        COMMAND             make clean
-        DEPENDEES           ${CABANA_CLEAN_DEPENDENCIES}
-        WORKING_DIRECTORY   "${CABANA_BUILD_DIR}"
-        LOG                 1
-    )
-    ADD_TPL_SAVE_LOGS( CABANA )
-    ADD_TPL_CLEAN( CABANA )
-ELSE()
-    ADD_TPL_EMPTY( CABANA )
 ENDIF()
+#IF ( CABANA_DOCS )
+#    SET( CABANA_DOC_COMMAND
+#        DOC_COMMAND         make docs -j ${PROCS_INSTALL} VERBOSE=1
+#        COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/cabana-dox/html "${CABANA_INSTALL_DIR}/doxygen"
+#    )
+#ENDIF()
+ADD_TPL(
+    CABANA
+    URL                 "${CABANA_CMAKE_URL}"
+    DOWNLOAD_DIR        "${CABANA_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${CABANA_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    CMAKE_ARGS          ${CABANA_CONFIGURE_OPTS}
+    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_IN_SOURCE     0
+    INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
+    CLEAN_COMMAND       make clean
+    ${CABANA_DOC_COMMAND}
+    ${CABANA_CMAKE_TEST}
+    DEPENDS             ${CABANA_DEPENDS}
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 # Add the appropriate fields to FindTPLs.cmake

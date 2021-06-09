@@ -38,25 +38,19 @@ IF ( CMAKE_BUILD_SWIG )
 ENDIF()
 
 # Build swig
-IF ( CMAKE_BUILD_SWIG )
-    EXTERNALPROJECT_ADD(
-        SWIG
-        URL                 "${SWIG_CMAKE_URL}"
-        DOWNLOAD_DIR        "${SWIG_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${SWIG_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ${SWIG_CMAKE_SOURCE_DIR}/configure ${CONFIGURE_OPTIONS} ${ENV_VARS}
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
-        BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     make install
-        DEPENDS             ZLIB
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    ADD_TPL_SAVE_LOGS( SWIG )
-    ADD_TPL_CLEAN( SWIG )
-ELSE()
-    ADD_TPL_EMPTY( SWIG )
-ENDIF()
+ADD_TPL(
+    SWIG
+    URL                 "${SWIG_CMAKE_URL}"
+    DOWNLOAD_DIR        "${SWIG_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${SWIG_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    CONFIGURE_COMMAND   ${SWIG_CMAKE_SOURCE_DIR}/configure ${CONFIGURE_OPTIONS} ${ENV_VARS}
+    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_IN_SOURCE     0
+    INSTALL_COMMAND     make install
+    DEPENDS             ZLIB
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 # Add the appropriate fields to FindTPLs.cmake

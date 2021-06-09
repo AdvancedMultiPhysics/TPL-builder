@@ -49,42 +49,26 @@ IF ( CMAKE_BUILD_AMP )
     ENDIF()
     STRING(REGEX REPLACE ";AMP.*" "" AMP_DEPENDS "${TPL_LIST}" )
     CHECK_ENABLE_FLAG( AMP_DOCS 1 )
-ENDIF()
-
-
-# Configure amp
-IF ( CMAKE_BUILD_AMP )
-    EXTERNALPROJECT_ADD(
-        AMP
-        URL                 "${AMP_CMAKE_URL}"
-        DOWNLOAD_DIR        "${AMP_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${AMP_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        BUILD_IN_SOURCE     0
-        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/amp
-        CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
-        BUILD_COMMAND       make install -j ${PROCS_INSTALL}  VERBOSE=1
-        DEPENDS             ${AMP_DEPENDS}
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
     IF ( AMP_DOCS )
-        EXTERNALPROJECT_ADD_STEP(
-            AMP
-            build-docs
-            COMMENT             "Compiling documentation"
-            COMMAND             make doc -j ${PROCS_INSTALL}
-            COMMENT             ""
-            DEPENDEES           install
-            DEPENDERS           
-            WORKING_DIRECTORY   "${AMP_BUILD_DIR}"
-            LOG                 1
-        )
-
+        SET( AMP_DOC_COMMAND  DOC_COMMAND  make doc -j ${PROCS_INSTALL} )
     ENDIF()
-    ADD_TPL_SAVE_LOGS( AMP )
-    ADD_TPL_CLEAN( AMP )
-ELSE()
-    ADD_TPL_EMPTY( AMP )
 ENDIF()
+
+
+# Build amp
+ADD_TPL(
+    AMP
+    URL                 "${AMP_CMAKE_URL}"
+    DOWNLOAD_DIR        "${AMP_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${AMP_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    BUILD_IN_SOURCE     0
+    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/amp
+    CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
+    BUILD_COMMAND       make install -j ${PROCS_INSTALL}  VERBOSE=1
+    ${AMP_DOC_COMMAND}
+    DEPENDS             ${AMP_DEPENDS}
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 

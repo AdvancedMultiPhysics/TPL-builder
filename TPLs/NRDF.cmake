@@ -46,24 +46,18 @@ ENDIF()
 
 
 # Build NRDF
-IF ( CMAKE_BUILD_NRDF )
-    EXTERNALPROJECT_ADD(
-        NRDF
-        URL                 "${NRDF_CMAKE_URL}"
-        DOWNLOAD_DIR        "${NRDF_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${NRDF_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
-        BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     make install
-        DEPENDS             SAMRSOLVERS
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    ADD_TPL_SAVE_LOGS( NRDF )
-    ADD_TPL_CLEAN( NRDF )
-ELSE()
-    ADD_TPL_EMPTY( NRDF )
-ENDIF()
+ADD_TPL(
+    NRDF
+    URL                 "${NRDF_CMAKE_URL}"
+    DOWNLOAD_DIR        "${NRDF_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${NRDF_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
+    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_IN_SOURCE     0
+    INSTALL_COMMAND     make install
+    DEPENDS             SAMRSOLVERS
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 

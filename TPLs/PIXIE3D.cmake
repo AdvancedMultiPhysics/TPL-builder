@@ -53,7 +53,7 @@ ENDIF()
 
 # Build pixie3d
 IF ( CMAKE_BUILD_PIXIE3D )
-    EXTERNALPROJECT_ADD(
+    ADD_TPL(
         PIXIE3D
         URL                 "${PIXIE3D_CMAKE_URL}"
         DOWNLOAD_DIR        "${PIXIE3D_CMAKE_DOWNLOAD_DIR}"
@@ -122,8 +122,6 @@ IF ( CMAKE_BUILD_PIXIE3D )
             LOG                 1
         )
     ENDIF()
-    ADD_TPL_SAVE_LOGS( PIXIE3D )
-    ADD_TPL_CLEAN( PIXIE3D )
 ELSE()
     ADD_TPL_EMPTY( PIXIE3D )
 ENDIF()

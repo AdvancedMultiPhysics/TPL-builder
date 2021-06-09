@@ -51,23 +51,17 @@ ENDIF()
 
 
 # Build chaco
-IF ( CMAKE_BUILD_CHACO )
-    EXTERNALPROJECT_ADD(
-        CHACO
-        URL                 "${CHACO_CMAKE_URL}"
-        DOWNLOAD_DIR        "${CHACO_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${CHACO_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ""
-        BUILD_COMMAND       make ${CHACO_VARS} AR=ar lib  VERBOSE=1
-        BUILD_IN_SOURCE     1
-        INSTALL_COMMAND     ${CMAKE_COMMAND} -E copy_directory "${CHACO_SRC_DIR}/code/libchaco.a" "${CMAKE_INSTALL_PREFIX}/chaco/libchaco.a"
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    ADD_TPL_SAVE_LOGS( CHACO )
-    ADD_TPL_CLEAN( CHACO )
-ELSE()
-    ADD_TPL_EMPTY( CHACO )
-ENDIF()
+ADD_TPL(
+    CHACO
+    URL                 "${CHACO_CMAKE_URL}"
+    DOWNLOAD_DIR        "${CHACO_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${CHACO_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    CONFIGURE_COMMAND   ""
+    BUILD_COMMAND       make ${CHACO_VARS} AR=ar lib  VERBOSE=1
+    BUILD_IN_SOURCE     1
+    INSTALL_COMMAND     ${CMAKE_COMMAND} -E copy_directory "${CHACO_SRC_DIR}/code/libchaco.a" "${CMAKE_INSTALL_PREFIX}/chaco/libchaco.a"
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 

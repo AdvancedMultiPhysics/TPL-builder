@@ -104,7 +104,7 @@ IF ( CMAKE_BUILD_MUMPS )
 	#            MESSAGE(FATAL_ERROR "MUMPS depends on ${TPL}, but it is not configured")
 	#        ENDIF()
 	#    ENDFOREACH()
-    EXTERNALPROJECT_ADD( 
+    ADD_TPL( 
         MUMPS
         URL                 "${MUMPS_CMAKE_URL}"
         DOWNLOAD_DIR        "${MUMPS_CMAKE_DOWNLOAD_DIR}"
@@ -130,8 +130,6 @@ IF ( CMAKE_BUILD_MUMPS )
         WORKING_DIRECTORY   "${MUMPS_BUILD_DIR}"
         LOG                 1
     )
-    ADD_TPL_SAVE_LOGS( MUMPS )
-    ADD_TPL_CLEAN( MUMPS )
 ELSE()
     ADD_TPL_EMPTY( MUMPS )
 ENDIF()

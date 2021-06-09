@@ -56,25 +56,19 @@ ENDIF()
 
 
 # Build moab
-IF ( CMAKE_BUILD_MOAB )
-    EXTERNALPROJECT_ADD(
-        MOAB
-        URL                 "${MOAB_CMAKE_URL}"
-        DOWNLOAD_DIR        "${MOAB_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${MOAB_CMAKE_SOURCE_DIR}"
+ADD_TPL(
+    MOAB
+    URL                 "${MOAB_CMAKE_URL}"
+    DOWNLOAD_DIR        "${MOAB_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${MOAB_CMAKE_SOURCE_DIR}"
 
-        UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ${MOAB_SRC_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}/moab ${CONFIGURE_OPTIONS} ${ENV_VARS}
-        BUILD_COMMAND       make install -j ${PROCS_INSTALL} VERBOSE=1
-        BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     ""
-        DEPENDS             QT
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    ADD_TPL_SAVE_LOGS( MOAB )
-    ADD_TPL_CLEAN( MOAB )
-ELSE()
-    ADD_TPL_EMPTY( MOAB )
-ENDIF()
+    UPDATE_COMMAND      ""
+    CONFIGURE_COMMAND   ${MOAB_SRC_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}/moab ${CONFIGURE_OPTIONS} ${ENV_VARS}
+    BUILD_COMMAND       make install -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_IN_SOURCE     0
+    INSTALL_COMMAND     ""
+    DEPENDS             QT
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 

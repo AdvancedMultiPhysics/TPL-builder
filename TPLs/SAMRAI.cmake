@@ -119,78 +119,38 @@ ENDIF()
 
 
 # Build samrai
-IF ( CMAKE_BUILD_SAMRAI )
-    SET( SAMRAI_CMAKE_TEST )
-    IF ( SAMRAI_TEST )
-        SET( SAMRAI_CMAKE_TEST   TEST_AFTER_INSTALL 1   TEST_COMMAND make check )
-    ENDIF()
-    EXTERNALPROJECT_ADD(
-        SAMRAI
-        URL                 "${SAMRAI_CMAKE_URL}"
-        DOWNLOAD_DIR        "${SAMRAI_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${SAMRAI_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        CMAKE_ARGS          ${SAMRAI_CONFIGURE_OPTS}
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
-        BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
-        ${SAMRAI_CMAKE_TEST}
-        DEPENDS             ${SAMRAI_DEPENDS}
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+SET( SAMRAI_CMAKE_TEST )
+SET( SAMRAI_DOC_COMMAND )
+IF ( SAMRAI_TEST )
+    SET( SAMRAI_CMAKE_TEST
+        TEST_AFTER_INSTALL  1
+        TEST_COMMAND        make check
+        BUILD_TEST          make checkcompile -j ${PROCS_INSTALL}
+        CHECK_TEST          ! grep "FAILED" SAMRAI-test-out.log > /dev/null
     )
-    SET( SAMRAI_CLEAN_DEPENDENCIES install )
-    IF ( SAMRAI_TEST )
-        EXTERNALPROJECT_ADD_STEP(
-            SAMRAI
-            build-test
-            COMMENT             "Compiling tests"
-            COMMAND             make checkcompile -j ${PROCS_INSTALL} 
-            COMMENT             ""
-            DEPENDEES           build
-            DEPENDERS           test
-            WORKING_DIRECTORY   "${SAMRAI_BUILD_DIR}"
-            LOG                 1
-        )
-        EXTERNALPROJECT_ADD_STEP(
-            SAMRAI
-            check-test
-            COMMENT             "Checking test results"
-            COMMAND             ! grep "FAILED" SAMRAI-test-out.log > /dev/null 
-            COMMENT             ""
-            DEPENDEES           test
-            WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/SAMRAI-prefix/src/SAMRAI-stamp"
-            LOG                 0
-        )
-        SET( SAMRAI_CLEAN_DEPENDENCIES ${SAMRAI_CLEAN_DEPENDENCIES} check-test )
-    ENDIF()
-    IF ( SAMRAI_DOCS )
-        EXTERNALPROJECT_ADD_STEP(
-            SAMRAI
-            build-docs
-            COMMENT             "Compiling documentation"
-            COMMAND             make docs -j ${PROCS_INSTALL} VERBOSE=1
-            COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/samrai-dox/html "${SAMRAI_INSTALL_DIR}/doxygen"
-            COMMENT             ""
-            DEPENDEES           install
-            DEPENDERS           
-            WORKING_DIRECTORY   "${SAMRAI_BUILD_DIR}"
-            LOG                 1
-        )
-        SET( SAMRAI_CLEAN_DEPENDENCIES ${SAMRAI_CLEAN_DEPENDENCIES} build-docs )
-    ENDIF()
-    EXTERNALPROJECT_ADD_STEP(
-        SAMRAI
-        clean
-        COMMAND             make clean
-        DEPENDEES           ${SAMRAI_CLEAN_DEPENDENCIES}
-        WORKING_DIRECTORY   "${SAMRAI_BUILD_DIR}"
-        LOG                 1
-    )
-    ADD_TPL_SAVE_LOGS( SAMRAI )
-    ADD_TPL_CLEAN( SAMRAI )
-ELSE()
-    ADD_TPL_EMPTY( SAMRAI )
 ENDIF()
+IF ( SAMRAI_DOCS )
+    SET( SAMRAI_DOC_COMMAND
+        DOC_COMMAND         make docs -j ${PROCS_INSTALL} VERBOSE=1
+        COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/samrai-dox/html "${SAMRAI_INSTALL_DIR}/doxygen"
+    )
+ENDIF()
+ADD_TPL(
+    SAMRAI
+    URL                 "${SAMRAI_CMAKE_URL}"
+    DOWNLOAD_DIR        "${SAMRAI_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${SAMRAI_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    CMAKE_ARGS          ${SAMRAI_CONFIGURE_OPTS}
+    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_IN_SOURCE     0
+    INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
+    ${SAMRAI_DOC_COMMAND}
+    ${SAMRAI_CMAKE_TEST}
+    DEPENDS             ${SAMRAI_DEPENDS}
+    CLEAN_COMMAND       make clean
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 # Add the appropriate fields to FindTPLs.cmake

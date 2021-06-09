@@ -67,7 +67,7 @@ ENDIF()
 
 # Build hypre
 IF ( CMAKE_BUILD_HYPRE )
-    EXTERNALPROJECT_ADD(
+    ADD_TPL(
         HYPRE
         URL                 "${HYPRE_CMAKE_URL}"
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
@@ -91,8 +91,6 @@ IF ( CMAKE_BUILD_HYPRE )
         WORKING_DIRECTORY   "${HYPRE_CMAKE_SOURCE_DIR}/.."
         LOG                 0
     )
-    ADD_TPL_SAVE_LOGS( HYPRE )
-    ADD_TPL_CLEAN( HYPRE )
 ELSE()
     ADD_TPL_EMPTY( HYPRE )
 ENDIF()

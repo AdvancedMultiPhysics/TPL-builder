@@ -140,24 +140,18 @@ ENDIF()
 
 
 # Build LMDB
-IF ( CMAKE_BUILD_LMDB )
-    EXTERNALPROJECT_ADD( 
-        LMDB
-        URL                 "${LMDB_CMAKE_URL}"
-        DOWNLOAD_DIR        "${LMDB_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${LMDB_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   cp ${LMDB_Makefile} ${LMDB_BUILD_DIR}/Makefile
-        BUILD_COMMAND       make VERBOSE=1
-        BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     make install
-        DEPENDS             ${LMDB_DEPENDENCIES}
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    ADD_TPL_SAVE_LOGS( LMDB )
-    ADD_TPL_CLEAN( LMDB )
-ELSE()
-    ADD_TPL_EMPTY( LMDB )
-ENDIF()
+ADD_TPL( 
+    LMDB
+    URL                 "${LMDB_CMAKE_URL}"
+    DOWNLOAD_DIR        "${LMDB_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${LMDB_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    CONFIGURE_COMMAND   cp ${LMDB_Makefile} ${LMDB_BUILD_DIR}/Makefile
+    BUILD_COMMAND       make VERBOSE=1
+    BUILD_IN_SOURCE     0
+    INSTALL_COMMAND     make install
+    DEPENDS             ${LMDB_DEPENDENCIES}
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 

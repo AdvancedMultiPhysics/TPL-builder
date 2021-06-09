@@ -25,9 +25,7 @@
 
 
 # Set some cmake policies
-IF ( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0" )
-    CMAKE_POLICY( SET CMP0074 OLD )
-ENDIF()
+CMAKE_POLICY( SET CMP0074 NEW )
 
 
 # Check that PROJ and ${PROJ}_INSTALL_DIR have been set

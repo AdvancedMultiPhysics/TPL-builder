@@ -39,24 +39,18 @@ ENDIF()
 
 
 # Build yajl
-IF ( CMAKE_BUILD_YAJL )
-    EXTERNALPROJECT_ADD(
+ADD_TPL(
         YAJL
-        URL                 "${YAJL_CMAKE_URL}"
-        DOWNLOAD_DIR        "${YAJL_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${YAJL_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        BUILD_IN_SOURCE     0
-        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/yajl
-        CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
-        BUILD_COMMAND       make install -j ${PROCS_INSTALL} VERBOSE=1
-        DEPENDS             
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    ADD_TPL_SAVE_LOGS( YAJL )
-    ADD_TPL_CLEAN( YAJL )
-ELSE()
-    ADD_TPL_EMPTY( YAJL )
-ENDIF()
+    URL                 "${YAJL_CMAKE_URL}"
+    DOWNLOAD_DIR        "${YAJL_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${YAJL_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    BUILD_IN_SOURCE     0
+    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/yajl
+    CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
+    BUILD_COMMAND       make install -j ${PROCS_INSTALL} VERBOSE=1
+    DEPENDS             
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 

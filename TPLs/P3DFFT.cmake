@@ -76,7 +76,7 @@ IF ( CMAKE_BUILD_P3DFFT )
         DEPENDS             FFTW
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
-    EXTERNALPROJECT_ADD_STEP(
+    ADD_TPL(
         ${TPL}
         fix-install
         COMMAND             ${CMAKE_COMMAND} -E copy ${P3DFFT_CMAKE_SOURCE_DIR}/include/config.h ${P3DFFT_INSTALL_DIR}/include/
@@ -87,8 +87,6 @@ IF ( CMAKE_BUILD_P3DFFT )
         ALWAYS              0
         LOG                 0
     )
-    ADD_TPL_SAVE_LOGS( P3DFFT )
-    ADD_TPL_CLEAN( P3DFFT )
 ELSE()
     ADD_TPL_EMPTY( P3DFFT )
 ENDIF()

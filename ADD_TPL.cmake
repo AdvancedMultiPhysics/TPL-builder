@@ -149,3 +149,101 @@ ENDMACRO()
 
 
 
+# Macro to add the TPL
+FUNCTION( ADD_TPL TPL )
+    IF ( NOT DEFINED CMAKE_BUILD_${TPL} )
+        SET( CMAKE_BUILD_${TPL} TRUE )
+    ENDIF()
+    IF ( CMAKE_BUILD_${TPL} )
+        # Set the variables that are reconized by EXTERNALPROJECT_ADD
+        SET(external_add_one URL GIT_REPOSITORY GIT_TAG DOWNLOAD_DIR SOURCE_DIR BUILD_IN_SOURCE INSTALL_DIR
+            TEST_AFTER_INSTALL LOG_DOWNLOAD LOG_UPDATE LOG_CONFIGURE LOG_BUILD LOG_TEST LOG_INSTALL )
+        SET(external_add_multiple TARGETS UPDATE_COMMAND PATCH_COMMAND CONFIGURE_COMMAND CMAKE_ARGS BUILD_COMMAND DEPENDS INSTALL_COMMAND TEST_COMMAND )
+        # Parse the input options
+        SET(options OPTIONAL )
+        SET(oneValueArgs ${external_add_one} )
+        SET(multiValueArgs ${external_add_multiple} CLEAN_COMMAND DOC_COMMAND BUILD_TEST CHECK_TEST )
+        cmake_parse_arguments( ADD_TPL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+        # Add the options for EXTERNALPROJECT_ADD
+        SET( TPL_OPTIONS )
+        FOREACH ( arg ${external_add_one} )
+            IF ( ADD_TPL_${arg} )
+                SET( TPL_OPTIONS ${TPL_OPTIONS} ${arg} ${ADD_TPL_${arg}} )
+            ENDIF()
+        ENDFOREACH()
+        FOREACH ( arg ${external_add_multiple} )
+            IF ( ADD_TPL_${arg} )
+                SET( TPL_OPTIONS ${TPL_OPTIONS} ${arg} ${ADD_TPL_${arg}} )
+            ENDIF()
+        ENDFOREACH()
+        # Add the external project
+        IF ( PRINT_DEBUG )
+            MESSAGE( "EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )" )
+        ENDIF()
+        EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )
+        # Add the logs and TPL-clean
+        ADD_TPL_SAVE_LOGS( ${TPL} )
+        ADD_TPL_CLEAN( ${TPL} )
+        SET( CLEAN_DEPENDEES install )
+        # Add build-docs
+        IF ( ADD_TPL_DOC_COMMAND )
+            EXTERNALPROJECT_ADD_STEP(
+                ${TPL}
+                build-docs
+                COMMENT             "Compiling documentation"
+                COMMAND             ${ADD_TPL_DOC_COMMAND}
+                COMMENT             ""
+                DEPENDEES           install
+                DEPENDERS           
+                WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
+                LOG                 1
+            )
+            SET( CLEAN_DEPENDEES ${CLEAN_DEPENDEES} build-docs )
+        ENDIF()
+        # Add tests
+        SET( CHECK_TEST_DEPENDEES install )
+        IF ( BUILD_TEST )
+            EXTERNALPROJECT_ADD_STEP(
+                ${TPL}
+                build-test
+                COMMENT             "Compiling tests"
+                COMMAND             ${ADD_TPL_BUILD_TEST}
+                COMMENT             ""
+                DEPENDEES           build
+                DEPENDERS           test
+                WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
+                LOG                 1
+            )
+            SET( CLEAN_DEPENDEES ${CLEAN_DEPENDEES} build-test )
+            SET( CHECK_TEST_DEPENDEES ${CHECK_TEST_DEPENDEES} build-test )
+        ENDIF()
+        IF ( CHECK_TEST )
+            EXTERNALPROJECT_ADD_STEP(
+                ${TPL}
+                check-test
+                COMMENT             "Checking test results"
+                COMMAND             ${ADD_TPL_BUILD_TEST}
+                COMMENT             ""
+                DEPENDEES           ${CHECK_TEST_DEPENDEES}
+                WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
+                LOG                 0
+            )
+            SET( CLEAN_DEPENDEES ${CLEAN_DEPENDEES} check-test )
+        ENDIF()
+        IF ( ADD_TPL_CLEAN_COMMAND )
+            EXTERNALPROJECT_ADD_STEP(
+                ${TPL}
+                clean
+                COMMAND             ${ADD_TPL_CLEAN_COMMAND}
+                DEPENDEES           ${CLEAN_DEPENDEES}
+                WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
+                LOG                 1
+            )
+        ENDIF()
+    ELSE()
+        ADD_TPL_EMPTY( ${TPL} )
+    ENDIF()
+ENDFUNCTION()
+
+
+

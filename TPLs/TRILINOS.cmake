@@ -176,34 +176,21 @@ ENDIF()
 
 
 # Configure trilinos
-IF ( CMAKE_BUILD_TRILINOS )
-    EXTERNALPROJECT_ADD(
-        TRILINOS
-        URL                 "${TRILINOS_CMAKE_URL}"
-        TIMEOUT             300
-        DOWNLOAD_DIR        "${TRILINOS_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${TRILINOS_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        BUILD_IN_SOURCE     0
-        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/trilinos
-        CMAKE_ARGS          ${TRILINOS_CONFIGURE_OPTS}
-        BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM} install ${PARALLEL_BUILD_OPTIONS} VERBOSE=1
-        DEPENDS             ${TRILINOS_DEPENDS}
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    EXTERNALPROJECT_ADD_STEP(
-        TRILINOS
-        clean
-        COMMAND             make clean
-        DEPENDEES           install
-        WORKING_DIRECTORY   "${TRILINOS_BUILD_DIR}"
-        LOG                 1
-    )
-    ADD_TPL_SAVE_LOGS( TRILINOS )
-    ADD_TPL_CLEAN( TRILINOS )
-ELSE()
-    ADD_TPL_EMPTY( TRILINOS )
-ENDIF()
+ADD_TPL(
+    TRILINOS
+    URL                 "${TRILINOS_CMAKE_URL}"
+    TIMEOUT             300
+    DOWNLOAD_DIR        "${TRILINOS_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${TRILINOS_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    BUILD_IN_SOURCE     0
+    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/trilinos
+    CMAKE_ARGS          ${TRILINOS_CONFIGURE_OPTS}
+    BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM} install ${PARALLEL_BUILD_OPTIONS} VERBOSE=1
+    DEPENDS             ${TRILINOS_DEPENDS}
+    CLEAN_COMMAND       make clean
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 # Add the appropriate fields to FindTPLs.cmake

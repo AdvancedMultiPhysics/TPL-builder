@@ -89,34 +89,21 @@ ENDIF()
 
 
 # Build petsc
-IF ( CMAKE_BUILD_PETSC )
-    EXTERNALPROJECT_ADD( 
-        PETSC
-        URL                 "${PETSC_CMAKE_URL}"
-        DOWNLOAD_DIR        "${PETSC_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${PETSC_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-	PATCH_COMMAND       patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/patches/petsc.snes.patch
-        CONFIGURE_COMMAND   ${PETSC_BUILD_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}/petsc ${CONFIGURE_OPTIONS}
-        BUILD_COMMAND       make -j 1 MAKE_NP=${PROCS_INSTALL} PETSC_DIR=${PETSC_CMAKE_SOURCE_DIR} PETSC_ARCH=${PETSC_ARCH} VERBOSE=1
-        BUILD_IN_SOURCE     1
-        INSTALL_COMMAND     make PETSC_DIR=${PETSC_CMAKE_SOURCE_DIR} PETSC_ARCH=${PETSC_ARCH} install
-        DEPENDS             LAPACK
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    EXTERNALPROJECT_ADD_STEP(
-        PETSC
-        clean
-        COMMAND             make clean
-        DEPENDEES           install
-        WORKING_DIRECTORY   "${PETSC_BUILD_DIR}"
-        LOG                 1
-    )
-    ADD_TPL_SAVE_LOGS( PETSC )
-    ADD_TPL_CLEAN( PETSC )
-ELSE()
-    ADD_TPL_EMPTY( PETSC )
-ENDIF()
+ADD_TPL( 
+    PETSC
+    URL                 "${PETSC_CMAKE_URL}"
+    DOWNLOAD_DIR        "${PETSC_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${PETSC_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    PATCH_COMMAND       patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/patches/petsc.snes.patch
+    CONFIGURE_COMMAND   ${PETSC_BUILD_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}/petsc ${CONFIGURE_OPTIONS}
+    BUILD_COMMAND       make -j 1 MAKE_NP=${PROCS_INSTALL} PETSC_DIR=${PETSC_CMAKE_SOURCE_DIR} PETSC_ARCH=${PETSC_ARCH} VERBOSE=1
+    BUILD_IN_SOURCE     1
+    INSTALL_COMMAND     make PETSC_DIR=${PETSC_CMAKE_SOURCE_DIR} PETSC_ARCH=${PETSC_ARCH} install
+    CLEAN_COMMAND       make clean
+    DEPENDS             LAPACK
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 # Add the appropriate fields to FindTPLs.cmake

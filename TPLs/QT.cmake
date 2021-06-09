@@ -73,19 +73,19 @@ ENDIF()
 
 
 # Build qt
+ADD_TPL( 
+    QT
+    URL                 "${QT_CMAKE_URL}"
+    DOWNLOAD_DIR        "${QT_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${QT_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    BUILD_IN_SOURCE     1
+    CONFIGURE_COMMAND   ./configure ${CONFIGURE_OPTIONS} 
+    BUILD_COMMAND       make ${QT_ENV_VARS} -j ${PROCS_INSTALL} VERBOSE=1
+    INSTALL_COMMAND     make install
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 IF ( CMAKE_BUILD_QT )
-    EXTERNALPROJECT_ADD( 
-        QT
-        URL                 "${QT_CMAKE_URL}"
-        DOWNLOAD_DIR        "${QT_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${QT_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        BUILD_IN_SOURCE     1
-        CONFIGURE_COMMAND   ./configure ${CONFIGURE_OPTIONS} 
-        BUILD_COMMAND       make ${QT_ENV_VARS} -j ${PROCS_INSTALL} VERBOSE=1
-        INSTALL_COMMAND     make install
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
     EXTERNALPROJECT_ADD_STEP(
         QT
         link
@@ -102,10 +102,6 @@ IF ( CMAKE_BUILD_QT )
         WORKING_DIRECTORY   "${QT_CMAKE_INSTALL_DIR}/lib"
         LOG                 0
     )
-    ADD_TPL_SAVE_LOGS( QT )
-    ADD_TPL_CLEAN( QT )
-ELSE()
-    ADD_TPL_EMPTY( QT )
 ENDIF()
 
 

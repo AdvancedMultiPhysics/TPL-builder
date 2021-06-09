@@ -56,33 +56,20 @@ ENDIF()
 
 
 # Configure sundials
-IF ( CMAKE_BUILD_SUNDIALS )
-    EXTERNALPROJECT_ADD(
-        SUNDIALS
-        URL                 "${SUNDIALS_CMAKE_URL}"
-        DOWNLOAD_DIR        "${SUNDIALS_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${SUNDIALS_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        BUILD_IN_SOURCE     0
-        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/sundials
-        CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
-        BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM} install ${PARALLEL_BUILD_OPTIONS} VERBOSE=1
-        DEPENDS             ${SUNDIALS_DEPENDS}
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    EXTERNALPROJECT_ADD_STEP(
-        SUNDIALS
-        clean
-        COMMAND             make clean
-        DEPENDEES           install
-        WORKING_DIRECTORY   "${SUNDIALS_BUILD_DIR}"
-        LOG                 1
-    )
-    ADD_TPL_SAVE_LOGS( SUNDIALS )
-    ADD_TPL_CLEAN( SUNDIALS )
-ELSE()
-    ADD_TPL_EMPTY( SUNDIALS )
-ENDIF()
+ADD_TPL(
+    SUNDIALS
+    URL                 "${SUNDIALS_CMAKE_URL}"
+    DOWNLOAD_DIR        "${SUNDIALS_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${SUNDIALS_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    BUILD_IN_SOURCE     0
+    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/sundials
+    CMAKE_ARGS          "${CONFIGURE_OPTIONS}"
+    BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM} install ${PARALLEL_BUILD_OPTIONS} VERBOSE=1
+    CLEAN_COMMAND       make clean
+    DEPENDS             ${SUNDIALS_DEPENDS}
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 # Add the appropriate fields to FindTPLs.cmake

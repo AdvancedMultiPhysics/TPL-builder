@@ -120,33 +120,20 @@ ENDIF()
 
 
 # Build libmesh
-IF ( CMAKE_BUILD_LIBMESH )
-    EXTERNALPROJECT_ADD( 
-        LIBMESH
-        URL                 "${LIBMESH_CMAKE_URL}"
-        DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
-        SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
-        UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
-        BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     make install
-        DEPENDS             
-        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-    )
-    EXTERNALPROJECT_ADD_STEP(
-        LIBMESH
-        clean
-        COMMAND             make clean
-        DEPENDEES           install
-        WORKING_DIRECTORY   "${LIBMESH_BUILD_DIR}"
-        LOG                 1
-    )
-    ADD_TPL_SAVE_LOGS( LIBMESH )
-    ADD_TPL_CLEAN( LIBMESH )
-ELSE()
-    ADD_TPL_EMPTY( LIBMESH )
-ENDIF()
+ADD_TPL( 
+    LIBMESH
+    URL                 "${LIBMESH_CMAKE_URL}"
+    DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
+    SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
+    UPDATE_COMMAND      ""
+    CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
+    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_IN_SOURCE     0
+    INSTALL_COMMAND     make install
+    CLEAN_COMMAND       make clean
+    DEPENDS             
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 # Add the appropriate fields to FindTPLs.cmake

@@ -86,7 +86,7 @@ ENDIF()
 
 # Build kokkos
 IF ( CMAKE_BUILD_KOKKOS )
-    EXTERNALPROJECT_ADD( 
+    ADD_TPL( 
         KOKKOS
         URL                 "${KOKKOS_CMAKE_URL}"
         DOWNLOAD_DIR        "${KOKKOS_CMAKE_DOWNLOAD_DIR}"
@@ -124,8 +124,6 @@ IF ( CMAKE_BUILD_KOKKOS )
             LOG                 1
         )
     ENDIF()
-    ADD_TPL_SAVE_LOGS( KOKKOS )
-    ADD_TPL_CLEAN( KOKKOS )
 ELSE()
     ADD_TPL_EMPTY( KOKKOS )
 ENDIF()
