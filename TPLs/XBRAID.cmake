@@ -59,7 +59,7 @@ IF ( CMAKE_BUILD_XBRAID )
     EXTERNALPROJECT_ADD_STEP(
         XBRAID
         copy-products
-        COMMAND             ${CMAKE_COMMAND} -E copy "${XBRAID_CMAKE_SOURCE_DIR}/braid/libbraid.a" "${XBRAID_INSTALL_DIR}/lib"
+        COMMAND             ${CMAKE_COMMAND} -E copy "${XBRAID_CMAKE_SOURCE_DIR}/braid/libbraid.a" "${XBRAID_INSTALL_DIR}/lib/libXBRAID.a"
         COMMAND             ${CMAKE_COMMAND} -E copy "${XBRAID_CMAKE_SOURCE_DIR}/braid/adjoint.h" "${XBRAID_INSTALL_DIR}/include"
         COMMAND             ${CMAKE_COMMAND} -E copy "${XBRAID_CMAKE_SOURCE_DIR}/braid/base.h" "${XBRAID_INSTALL_DIR}/include"
         COMMAND             ${CMAKE_COMMAND} -E copy "${XBRAID_CMAKE_SOURCE_DIR}/braid/braid_defs.h" "${XBRAID_INSTALL_DIR}/include"
