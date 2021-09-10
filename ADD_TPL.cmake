@@ -223,7 +223,6 @@ FUNCTION( ADD_TPL TPL )
                 check-test
                 COMMENT             "Checking test results"
                 COMMAND             ${ADD_TPL_BUILD_TEST}
-                COMMENT             ""
                 DEPENDEES           ${CHECK_TEST_DEPENDEES}
                 WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
                 LOG                 0
@@ -237,7 +236,7 @@ FUNCTION( ADD_TPL TPL )
                 COMMAND             ${ADD_TPL_CLEAN_COMMAND}
                 DEPENDEES           ${CLEAN_DEPENDEES}
                 WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
-                LOG                 1
+                LOG                 0
             )
         ENDIF()
     ELSE()
