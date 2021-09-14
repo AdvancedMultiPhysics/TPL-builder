@@ -133,7 +133,7 @@ ADD_TPL(
     BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
-    CLEAN_COMMAND       make clean
+#    CLEAN_COMMAND       make clean
     ${CABANA_DOC_COMMAND}
     ${CABANA_CMAKE_TEST}
     DEPENDS             ${CABANA_DEPENDS}
