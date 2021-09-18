@@ -186,7 +186,7 @@ FUNCTION( ADD_TPL TPL )
         ADD_TPL_CLEAN( ${TPL} )
         SET( CLEAN_DEPENDEES install )
         # Add build-docs
-        IF ( ADD_TPL_DOC_COMMAND )
+        IF ( ADD_TPL_DOC_COMMAND AND NOT DISABLE_DOCS )
             EXTERNALPROJECT_ADD_STEP(
                 ${TPL}
                 build-docs
@@ -202,7 +202,7 @@ FUNCTION( ADD_TPL TPL )
         ENDIF()
         # Add tests
         SET( CHECK_TEST_DEPENDEES install )
-        IF ( BUILD_TEST )
+        IF ( BUILD_TEST AND NOT DISABLE_TESTS )
             EXTERNALPROJECT_ADD_STEP(
                 ${TPL}
                 build-test
@@ -217,7 +217,7 @@ FUNCTION( ADD_TPL TPL )
             SET( CLEAN_DEPENDEES ${CLEAN_DEPENDEES} build-test )
             SET( CHECK_TEST_DEPENDEES ${CHECK_TEST_DEPENDEES} build-test )
         ENDIF()
-        IF ( CHECK_TEST )
+        IF ( CHECK_TEST AND NOT DISABLE_TESTS )
             EXTERNALPROJECT_ADD_STEP(
                 ${TPL}
                 check-test
@@ -229,14 +229,14 @@ FUNCTION( ADD_TPL TPL )
             )
             SET( CLEAN_DEPENDEES ${CLEAN_DEPENDEES} check-test )
         ENDIF()
-        IF ( ADD_TPL_CLEAN_COMMAND )
+        IF ( ADD_TPL_CLEAN_COMMAND AND NOT DISABLE_CLEAN )
             EXTERNALPROJECT_ADD_STEP(
                 ${TPL}
                 clean
                 COMMAND             ${ADD_TPL_CLEAN_COMMAND}
                 DEPENDEES           ${CLEAN_DEPENDEES}
                 WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
-                LOG                 0
+                LOG                 1
             )
         ENDIF()
     ELSE()
