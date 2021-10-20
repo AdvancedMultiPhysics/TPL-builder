@@ -130,7 +130,7 @@ ADD_TPL(
     BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     make install
-#    CLEAN_COMMAND       make clean
+    CLEAN_COMMAND       make clean -j ${PROCS_INSTALL}
     DEPENDS             
     LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
 )

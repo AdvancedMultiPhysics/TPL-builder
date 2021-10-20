@@ -213,6 +213,9 @@ how that that TPL is built.
 
 
 Special TPL FLAGS:
+DISABLE_CLEAN - If set this will disable individual TPLs from running their "make clean"
+    as part of the regular build process.  This can save time building the TPLs at the cost
+    of additional storage.  Commonly set for nightly builds.  Default value is FALSE (do not disable clean)
 BOOST:
     BOOST_ONLY_COPY_HEADERS - Only copy the headers from the URL/SRC/INSTALL location.
                        If this flag is set, we will copy the include directory and will not 
