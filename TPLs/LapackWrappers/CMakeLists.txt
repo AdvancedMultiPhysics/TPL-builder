@@ -37,6 +37,7 @@ IF ( NOT TPL_DIRECTORY )
 ENDIF()
 SET( CMAKE_MODULE_PATH "${TPL_DIRECTORY}" ${CMAKE_MODULE_PATH} )
 FIND_PACKAGE( TPLs REQUIRED COMPONENTS LAPACK )
+SET( CMAKE_INSTALL_RPATH "${${PROJ}_INSTALL_DIR}/lib" "${BLAS_DIR}" "${LAPACK_DIR}" ${CMAKE_INSTALL_RPATH} )
 
 
 # Include the TPL inclde paths and libraries
@@ -60,6 +61,7 @@ ELSE()
     SET( LapackWrappersSource LapackWrappers.cpp LapackWrappers.double.cpp LapackWrappers.float.cpp LapackWrappersInfo.cpp LapackWrappersMachineParams.cpp )
 ENDIF()
 ADD_LIBRARY( LapackWrappers ${LIB_TYPE} ${LapackWrappersSource} )
+TARGET_LINK_LIBRARIES( LapackWrappers ${TPL_LIBRARIES} )
 INSTALL( TARGETS LapackWrappers DESTINATION "${${PROJ}_INSTALL_DIR}/lib" )
 
 

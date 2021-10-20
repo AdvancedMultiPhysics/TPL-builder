@@ -51,12 +51,6 @@ ENABLE_TESTING()
 INCLUDE( CTest )
 
 
-# Include the macros file
-INCLUDE( "${TPL_MACRO_CMAKE}" )
-ADD_CUSTOM_TARGET( check )
-ADD_CUSTOM_TARGET( build-test )
-
-
 # Include the TPL inclde paths and libraries
 INCLUDE_DIRECTORIES( ${TPL_INCLUDE_DIRS} )
 MESSAGE("  Include Paths: ${TPL_INCLUDE_DIRS}")

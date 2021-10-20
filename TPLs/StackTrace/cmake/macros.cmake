@@ -5,7 +5,7 @@ MACRO( SET_WARNINGS )
     # Note: adding -Wlogical-op causes a wierd linking error on Titan using the nvcc wrapper:
     #    /usr/bin/ld: cannot find gical-op: No such file or directory
     SET(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra") 
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Woverloaded-virtual -Wsign-compare -pedantic")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Woverloaded-virtual -Wsign-compare -Wformat-security")
   ELSEIF ( USING_MSVC )
     # Add Microsoft specifc compiler options
     SET(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _ITERATOR_DEBUG_LEVEL=0 /wd4267" )
@@ -13,7 +13,7 @@ MACRO( SET_WARNINGS )
   ELSEIF ( USING_ICC )
     # Add Intel specifc compiler options
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall" )
-    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall" )
+    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -wd1011" )
   ELSEIF ( USING_CRAY )
     # Add default compiler options
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS}")
@@ -26,8 +26,8 @@ MACRO( SET_WARNINGS )
     SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} --diag_suppress 111,128,185")
   ELSEIF ( USING_CLANG )
     # Add default compiler options
-    SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall")
-    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -Wno-missing-braces -Wmissing-field-initializers -ftemplate-depth=1024")
+    SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall -Wextra")
+    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-missing-braces -Wmissing-field-initializers -ftemplate-depth=1024")
   ELSEIF ( USING_XL )
     # Add default compiler options
     SET(CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall")
@@ -89,7 +89,7 @@ MACRO( GET_SYSTEM_LIBS )
         # Linux specific system libraries
         SET( SYSTEM_LIBS "-ldl -lpthread" )
         IF ( NOT USE_STATIC )
-            SET( SYSTEM_LIBS "${SYSTEM_LIBS} -rdynamic" )   # Needed for backtrace to print function names
+            SET( SYSTEM_LIBS "${SYSTEM_LIBS} -rdynamic -Wl" )   # Needed for backtrace to print function names
         ENDIF()
     ELSEIF( ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin" )
         # Max specific system libraries

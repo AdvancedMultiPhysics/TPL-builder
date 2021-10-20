@@ -263,6 +263,40 @@ MACRO( ADD_EXTERNAL_DIRECTORY SUBDIR )
 ENDMACRO()
 
 
+# Add assembly target
+IF ( NOT TARGET assembly )
+    ADD_CUSTOM_TARGET( assembly )
+ENDIF()
+MACRO( ADD_ASSEMBLY PACKAGE SOURCE )
+    # Create the assembly targets
+    IF ( CMAKE_GENERATOR STREQUAL "Unix Makefiles" )
+        # The trick is that makefiles generator defines a [sourcefile].s target for each sourcefile of a target to generate the listing 
+        # of that file. We hook a command after build to invoke that target and copy the result file to our ourput directory:
+        SET( MAKE_TARGETS )
+        SET( COPY_COMMANDS )
+        FOREACH( src ${SOURCES} )
+            GET_SOURCE_FILE_PROPERTY( lang "${src}" LANGUAGE) 
+            IF ( lang STREQUAL "C" OR lang STREQUAL "CXX" OR lang STREQUAL "Fortran" )
+                STRING( REPLACE "${${PROJ}_SOURCE_DIR}/" "" src_out "${src}" )
+                STRING( REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" src "${src}" )
+                SET( MAKE_TARGETS ${MAKE_TARGETS} ${src}.s)
+                SET( COPY_COMMANDS ${COPY_COMMANDS} COMMAND ${CMAKE_COMMAND} -E copy
+                         "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${PACKAGE}.dir/${src}.s"
+                         "${CMAKE_BINARY_DIR}/assembly/${src_out}.s")
+            ENDIF()
+        ENDFOREACH()
+        IF ( MAKE_TARGETS )
+            ADD_CUSTOM_TARGET( ${PACKAGE}-assembly )
+            ADD_CUSTOM_COMMAND( TARGET ${PACKAGE}-assembly
+                 COMMAND $(MAKE) ${MAKE_TARGETS}
+                 ${COPY_COMMANDS}
+                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+            ADD_DEPENDENCIES( assembly ${PACKAGE}-assembly )
+        ENDIF()
+    ENDIF()
+ENDMACRO()
+
+
 # Install a package
 MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
     # Find all files in the current directory
@@ -315,6 +349,8 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
             ADD_LIBRARY( ${PACKAGE} ${LIB_TYPE} ${SOURCES} ${CUBINS} )
             TARGET_LINK_EXTERNAL_LIBRARIES( ${PACKAGE} )
         ENDIF()
+        # Create the assembly targets
+        ADD_ASSEMBLY( ${PACKAGE} ${SOURCES} )
         # Add coverage flags to target
         IF ( NOT DISABLE_TARGET_COVERAGE )
             TARGET_COMPILE_DEFINITIONS( ${PACKAGE} PUBLIC ${COVERAGE_FLAGS} )
@@ -735,6 +771,10 @@ MACRO( ADD_PROJ_EXE_DEP EXE )
         TARGET_LINK_LIBRARIES( ${EXE} ${PACKAGE_TEST_LIB} )
     ENDIF()
     # Add the executable to the dependencies of check and build-test
+    IF ( NOT TARGET check )
+        ADD_CUSTOM_TARGET( check )
+        ADD_CUSTOM_TARGET( build-test )
+    ENDIF()
     ADD_DEPENDENCIES( check ${EXE} )
     ADD_DEPENDENCIES( build-test ${EXE} )
     # Add the file copy targets to the dependency list
@@ -1265,6 +1305,7 @@ ENDFUNCTION()
 # cleans and removes cmake generated files etc.
 MACRO( ADD_DISTCLEAN ${ARGN} )
     SET(DISTCLEANED
+        assembly
         cmake.depends
         cmake.check_depends
         CMakeCache.txt
