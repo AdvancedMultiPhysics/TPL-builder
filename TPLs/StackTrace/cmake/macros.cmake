@@ -89,7 +89,7 @@ MACRO( GET_SYSTEM_LIBS )
         # Linux specific system libraries
         SET( SYSTEM_LIBS "-ldl -lpthread" )
         IF ( NOT USE_STATIC )
-            SET( SYSTEM_LIBS "${SYSTEM_LIBS} -rdynamic -Wl" )   # Needed for backtrace to print function names
+            SET( SYSTEM_LIBS "${SYSTEM_LIBS} -rdynamic" )   # Needed for backtrace to print function names
         ENDIF()
     ELSEIF( ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin" )
         # Max specific system libraries
@@ -106,11 +106,13 @@ ENDMACRO()
 # cleans and removes cmake generated files etc.
 MACRO( ADD_DISTCLEAN ${ARGN} )
     SET(DISTCLEANED
+        assembly
         cmake.depends
         cmake.check_depends
         CMakeCache.txt
         CMakeFiles
         CMakeTmp
+        CMakeDoxy*
         cmake.check_cache
         *.cmake
         compile.log
@@ -123,12 +125,14 @@ MACRO( ADD_DISTCLEAN ${ARGN} )
         include
         doc
         docs
+        examples
         latex_docs
         lib
         Makefile.config
         install_manifest.txt
         test
         matlab
+        Matlab
         mex
         tmp
         #tmp#
@@ -138,7 +142,7 @@ MACRO( ADD_DISTCLEAN ${ARGN} )
         compile_commands.json
         ${ARGN}
     )
-    ADD_CUSTOM_TARGET (distclean @echo cleaning for source distribution)
+    ADD_CUSTOM_TARGET(distclean @echo cleaning for source distribution)
     IF (UNIX)
         ADD_CUSTOM_COMMAND(
             DEPENDS clean
