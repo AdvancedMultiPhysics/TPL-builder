@@ -930,13 +930,13 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
     SET( ARGS ${CALL_ADD_TEST_ARGS} )
 
     # Set default values for threads/procs
-    IF ( NOT THREADS )
+    IF ( NOT DEFINED THREADS )
         SET( THREADS 1 )
     ENDIF()
-    IF ( NOT PROCS )
+    IF ( NOT DEFINED PROCS )
         SET( PROCS 1 )
     ENDIF()
-    IF ( NOT ARGS )
+    IF ( NOT DEFINED ARGS )
         SET( ARGS ${CALL_ADD_TEST_UNPARSED_ARGUMENTS} )
     ELSEIF( CALL_ADD_TEST_UNPARSED_ARGUMENTS )
         MESSAGE( FATAL_ERROR "Unprocessed arguments: ${CALL_ADD_TEST_UNPARSED_ARGUMENTS}" )
@@ -1160,6 +1160,10 @@ FUNCTION( ADD_${PROJ}_EXAMPLE EXEFILE PROCS ${ARGN} )
     ENDIF()
     # Add the provisional test
     ADD_PROJ_PROVISIONAL_TEST( ${EXEFILE} )
+    IF( ${PROCS} STREQUAL "0" )
+        RETURN()
+    ENDIF()
+    # Add the test command to ctest
     ADD_DEPENDENCIES( build-examples ${EXEFILE} )
     ADD_CUSTOM_COMMAND( TARGET ${EXEFILE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LAST_TEST}> "${EXAMPLE_INSTALL_DIR}/${EXEFILE}"
