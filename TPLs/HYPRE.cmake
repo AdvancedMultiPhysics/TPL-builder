@@ -33,9 +33,20 @@ MESSAGE( "   HYPRE_INSTALL_DIR = ${HYPRE_INSTALL_DIR}" )
 
 # Configure hypre
 IF ( CMAKE_BUILD_HYPRE )
+    IF( HYPRE_USE_CUDA )
+        SET( CONFIGURE_OPTIONS --with-cuda --enable-unified-memory )        
+        # Appears hypre only uses Umpire with CUDA so keep this if condition here
+        IF ( HYPRE_USE_UMPIRE )
+            SET( HYPRE_DEPENDS UMPIRE LAPACK )
+            MESSAGE( "Building HYPRE with Umpire support" )
+            SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-umpire --with-umpire-include=${UMPIRE_INSTALL_DIR}/include --with-umpire-lib-dirs=${UMPIRE_INSTALL_DIR}/lib --with-umpire-libs=umpire )
+	    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-umpire-um )
+	ENDIF()
+    ELSE()
+         SET( HYPRE_DEPENDS LAPACK )
+    ENDIF()      
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory "${HYPRE_INSTALL_DIR}/include" )
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory "${HYPRE_INSTALL_DIR}/lib" )
-    SET( CONFIGURE_OPTIONS --with-blas=yes --with-lapack=yes )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-blas-libs=${BLAS_LIBRARY} )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-blas-lib-dirs=${BLAS_DIR} )
     SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-lapack-libs=${LAPACK_LIBRARY} )
@@ -76,7 +87,7 @@ IF ( CMAKE_BUILD_HYPRE )
         BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
         BUILD_IN_SOURCE     1
         INSTALL_COMMAND     make install
-        DEPENDS             LAPACK
+        DEPENDS             ${HYPRE_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
     EXTERNALPROJECT_ADD_STEP(
