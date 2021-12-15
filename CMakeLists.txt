@@ -198,14 +198,16 @@ STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 
 
 # Add the StackTrace
-IF ( ";${TPL_LIST};" MATCHES ";TIMER;" )
-    STRING( REPLACE ";TIMER;" ";TIMER;STACKTRACE;" TPL_LIST "?;${TPL_LIST};?" )
-    STRING( REPLACE "?;" "" TPL_LIST "${TPL_LIST}" )
-    STRING( REPLACE ";?" "" TPL_LIST "${TPL_LIST}" )
-ELSE()
-    SET( TPL_LIST "STACKTRACE;${TPL_LIST}" )
+IF ( NOT DISABLE_STACKTRACE OR "${CXX_STD}" LESS "17" )
+    IF ( ";${TPL_LIST};" MATCHES ";TIMER;" )
+        STRING( REPLACE ";TIMER;" ";TIMER;STACKTRACE;" TPL_LIST "?;${TPL_LIST};?" )
+        STRING( REPLACE "?;" "" TPL_LIST "${TPL_LIST}" )
+        STRING( REPLACE ";?" "" TPL_LIST "${TPL_LIST}" )
+    ELSE()
+        SET( TPL_LIST "STACKTRACE;${TPL_LIST}" )
+    ENDIF()
 ENDIF()
-
+MESSAGE("TPL_LIST=${TPL_LIST}")
 
 # Add the lapack wrappers
 IF ( ";${TPL_LIST};" MATCHES ";LAPACK;" )
