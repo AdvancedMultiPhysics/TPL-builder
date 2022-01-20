@@ -58,12 +58,12 @@ IF ( NOT TPLs_FOUND )
     # Include project install directory
     INCLUDE_DIRECTORIES( "${${PROJ}_INSTALL_DIR}/include" )
 
+    # Initialize the include paths / libraries
+    SET( TPL_INCLUDE_DIRS )
+    SET( TPL_LIBRARIES )
+
     # Set CMAKE_MODULE_PATH
     SET( CMAKE_MODULE_PATH "@CMAKE_INSTALL_PREFIX@/cmake" ${CMAKE_MODULE_PATH} )
-
-    # Initialize the include paths / libraries
-    SET( TPL_INCLUDE_DIRS ${USER_INCLUDE_DIRS} )
-    SET( TPL_LIBRARIES )
 
     # Set the compilers and compile flags
     SET( CMAKE_BUILD_TYPE   @CMAKE_BUILD_TYPE@  CACHE STRING "documentation for this variable")
@@ -233,6 +233,17 @@ IF ( NOT TPLs_FOUND )
         MESSAGE( STATUS "CMAKE_CUDA_FLAGS = ${CMAKE_CUDA_FLAGS}" )
         MESSAGE( STATUS "CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}" )
     ENDIF()
+
+    # Exclude user-specified directors from cmake implicit directories
+    FOREACH ( dir ${USER_INCLUDE_DIRS} )
+        LIST( REMOVE_ITEM CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES "${dir}")
+        LIST( REMOVE_ITEM CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES "${dir}")
+        LIST( REMOVE_ITEM CMAKE_Fortran_IMPLICIT_INCLUDE_DIRECTORIES "${dir}")
+    ENDFOREACH()
+
+    # Add user include paths / libraries
+    SET( TPL_INCLUDE_DIRS ${TPL_INCLUDE_DIRS} ${USER_INCLUDE_DIRS} )
+    SET( TPL_LIBRARIES ${TPL_LIBRARIES} ${USER_LIBRARIES} )
 
 ENDIF()
 

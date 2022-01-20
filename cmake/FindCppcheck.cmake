@@ -11,11 +11,12 @@
 #
 # This module finds cppcheck and configures a test using the provided options
 #
-# This program reconizes the following options
-#   CPPCHECK_INCLUDE      - List of include folders
-#   CPPCHECK_OPTIONS      - List of cppcheck options
+# This program recognizes the following options
 #   CPPCHECK_SOURCE       - Source path to check
+#   CPPCHECK_INCLUDE      - List of include folders (will overwrite defaults)
+#   CPPCHECK_IGNORE       - List of files/folders to exclude
 #   CPPCHECK_TIMEOUT      - Timeout for each cppcheck test (default is 5 minutes)
+#   CPPCHECK_OPTIONS      - List of cppcheck options (expert use: will overwrite default options)
 #
 # The following variables are set by find_package( Cppcheck )
 #
@@ -125,7 +126,7 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
     ENDIF()
 
     # Add the test
-    ADD_TEST( ${TESTNAME} ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} ${ARGN} )
+    ADD_TEST( ${TESTNAME} ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} ${CPPCHECK_IGNORE} ${ARGN} )
     SET_TESTS_PROPERTIES( ${TESTNAME} PROPERTIES PROCESSORS 1 TIMEOUT ${CPPCHECK_TIMEOUT} COST ${CPPCHECK_TIMEOUT} )
 
 ENDFUNCTION()
