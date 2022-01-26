@@ -115,9 +115,9 @@ IF ( USE_MPI )
     ENDIF()
     ADD_DEFINITIONS( -DUSE_MPI )
     INCLUDE_DIRECTORIES( ${MPI_CXX_INCLUDE_PATH} )
-    SET( MPI_COMM "#include \"mpi.h\"" )
+    SET( SET_USE_MPI "1" )
 ELSE()
-    SET( MPI_COMM "typedef int MPI_Comm;" )
+    SET( SET_USE_MPI "0" )
 ENDIF()
 
 
