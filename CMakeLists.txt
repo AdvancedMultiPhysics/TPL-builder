@@ -373,7 +373,7 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 
 # Write the TPLs.h file for the TPLs we included 
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Write the TPLs.h\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPLs_HEADER \"$\{CMAKE_CURRENT_BINARY_DIR}/TPLs.h\" )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPLs_HEADER \"$\{CMAKE_CURRENT_BINARY_DIR}/tmp/TPLs.h\" )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( WRITE \"$\{TPLs_HEADER}\" \"// This file sets the TPL list for C/C++ codes\\n\")\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#ifndef TPL_LIST\\n\")\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#define TPL_LIST \\\"$\{TPL_LIST}\\\"\\n\")\n")
@@ -391,7 +391,7 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "        ENDFOREACH()\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#endif\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "EXECUTE_PROCESS( COMMAND $\{CMAKE_COMMAND} -E copy_if_different \"$\{TPLs_HEADER}\" \"$\{$\{PROJ}_INSTALL_DIR}/include/$\{$\{PROJ}_INC}/TPLs.h\" )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "EXECUTE_PROCESS( COMMAND $\{CMAKE_COMMAND} -E copy_if_different \"$\{TPLs_HEADER}\" \"$\{$\{PROJ}_INSTALL_DIR}/include/$\{$\{PROJ}_INC}/$\{PROJ}_TPLs.h\" )\n" )
 
 # Copy cmake files for cppcheck and cppclean
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCppcheck.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCppcheck.cmake" COPYONLY )

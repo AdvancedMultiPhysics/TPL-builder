@@ -1,7 +1,7 @@
 #ifndef included_TPL_headers
 #define included_TPL_headers
 
-#include "TPLs.h"
+#include "TPLS_Tests_TPLs.h"
 
 #include <string>
 #include <stdexcept>
