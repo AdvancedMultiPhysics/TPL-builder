@@ -12,19 +12,19 @@
 
 
 // Include appropriate TPL headers
-#ifdef USE_BOOST
+#ifdef TPLS_Tests_USE_BOOST
     #include "boost/shared_ptr.hpp"
 #endif
-#ifdef USE_HDF5
+#ifdef TPLS_Tests_USE_HDF5
     #include "hdf5.h"
 #endif
-#ifdef USE_LAPACK_WRAPPERS
+#ifdef TPLS_Tests_USE_LAPACK_WRAPPERS
     #include "LapackWrappers.h"
 #endif
-#ifdef USE_PETSC
+#ifdef TPLS_Tests_USE_PETSC
     #include "petsc.h"
 #endif
-#ifdef USE_STACKTRACE
+#ifdef TPLS_Tests_USE_STACKTRACE
     #include "StackTrace/StackTrace.h"
 #endif
 
@@ -46,8 +46,18 @@ std::vector<std::string> split( const std::string& str )
 template<TPL_Enum TPL> bool test( );
 
 
+// Test MPI
+#ifdef TPLS_Tests_USE_MPI
+template<> bool test<TPL_Enum::MPI>( )
+{
+    // Not implemented yet
+    return true;
+}
+#endif
+
+
 // Test BOOST
-#ifdef USE_BOOST
+#ifdef TPLS_Tests_USE_BOOST
 template<> bool test<TPL_Enum::BOOST>( )
 {
     bool pass = true;
@@ -61,7 +71,7 @@ template<> bool test<TPL_Enum::BOOST>( )
 
 
 // Test FFTW
-#ifdef USE_FFTW
+#ifdef TPLS_Tests_USE_FFTW
 template<> bool test<TPL_Enum::FFTW>( )
 {
     std::cout << "   -- No tests defined for fftw\n";
@@ -71,7 +81,7 @@ template<> bool test<TPL_Enum::FFTW>( )
 
 
 // Test HDF5
-#ifdef USE_HDF5
+#ifdef TPLS_Tests_USE_HDF5
 template<> bool test<TPL_Enum::HDF5>( )
 {
     hid_t H5Fcreate( const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id );
@@ -81,7 +91,7 @@ template<> bool test<TPL_Enum::HDF5>( )
 
 
 // Test HYPRE
-#ifdef USE_HYPRE
+#ifdef TPLS_Tests_USE_HYPRE
 template<> bool test<TPL_Enum::HYPRE>( )
 {
     std::cout << "   -- No tests defined for hypre\n";
@@ -91,7 +101,7 @@ template<> bool test<TPL_Enum::HYPRE>( )
 
 
 // Test KOKKOS
-#ifdef USE_KOKKOS
+#ifdef TPLS_Tests_USE_KOKKOS
 template<> bool test<TPL_Enum::KOKKOS>( )
 {
     std::cout << "   -- No tests defined for kokkos\n";
@@ -101,7 +111,7 @@ template<> bool test<TPL_Enum::KOKKOS>( )
 
 
 // Test LAPACK
-#ifdef USE_LAPACK
+#ifdef TPLS_Tests_USE_LAPACK
 template<> bool test<TPL_Enum::LAPACK>( )
 {
 #if defined(USE_LAPACK_WRAPPERS)
@@ -115,7 +125,7 @@ template<> bool test<TPL_Enum::LAPACK>( )
 
 
 // Test LAPACK_WRAPPERS
-#ifdef USE_LAPACK_WRAPPERS
+#ifdef TPLS_Tests_USE_LAPACK_WRAPPERS
 template<> bool test<TPL_Enum::LAPACK_WRAPPERS>( )
 {
     int N_errors = 0;
@@ -127,7 +137,7 @@ template<> bool test<TPL_Enum::LAPACK_WRAPPERS>( )
 
 
 // Test LIBMESH
-#ifdef USE_LIBMESH
+#ifdef TPLS_Tests_USE_LIBMESH
 template<> bool test<TPL_Enum::LIBMESH>( )
 {
     std::cout << "   -- No tests defined for libmesh\n";
@@ -137,7 +147,7 @@ template<> bool test<TPL_Enum::LIBMESH>( )
 
 
 // Test NETCDF
-#ifdef USE_NETCDF
+#ifdef TPLS_Tests_USE_NETCDF
 template<> bool test<TPL_Enum::NETCDF>( )
 {
     std::cout << "   -- No tests defined for netcdf\n";
@@ -147,7 +157,7 @@ template<> bool test<TPL_Enum::NETCDF>( )
 
 
 // Test OGRE
-#ifdef USE_OGRE
+#ifdef TPLS_Tests_USE_OGRE
 template<> bool test<TPL_Enum::OGRE>( )
 {
     std::cout << "   -- No tests defined for ogre\n";
@@ -157,7 +167,7 @@ template<> bool test<TPL_Enum::OGRE>( )
 
 
 // Test PETSC
-#ifdef USE_PETSC
+#ifdef TPLS_Tests_USE_PETSC
 template<> bool test<TPL_Enum::PETSC>( )
 {
     bool pass = true;
@@ -173,7 +183,7 @@ template<> bool test<TPL_Enum::PETSC>( )
 
 
 // Test SAMRAI
-#ifdef USE_SAMRAI
+#ifdef TPLS_Tests_USE_SAMRAI
 template<> bool test<TPL_Enum::SAMRAI>( )
 {
     std::cout << "   -- No tests defined for samrai\n";
@@ -183,7 +193,7 @@ template<> bool test<TPL_Enum::SAMRAI>( )
 
 
 // Test SILO
-#ifdef USE_SILO
+#ifdef TPLS_Tests_USE_SILO
 template<> bool test<TPL_Enum::SILO>( )
 {
     std::cout << "   -- No tests defined for silo\n";
@@ -193,7 +203,7 @@ template<> bool test<TPL_Enum::SILO>( )
 
 
 // Test STACKTRACE
-#ifdef USE_STACKTRACE
+#ifdef TPLS_Tests_USE_STACKTRACE
 template<> bool test<TPL_Enum::STACKTRACE>( )
 {
     return !StackTrace::getCallStack().empty();
@@ -202,17 +212,17 @@ template<> bool test<TPL_Enum::STACKTRACE>( )
 
 
 // Test SUNDIALS
-#ifdef USE_SUNDIALS
+#ifdef TPLS_Tests_USE_SUNDIALS
 template<> bool test<TPL_Enum::SUNDIALS>( )
 {
-    std::cout << "   -- No tests defined for sundials\n";
+    std::cout << "   -- No tests defined for suTPL_Enumndials\n";
     return true;
 }
 #endif
 
 
 // Test TIMER
-#ifdef USE_TIMER
+#ifdef TPLS_Tests_USE_TIMER
 template<> bool test<TPL_Enum::TIMER>( )
 {
     std::cout << "   -- No tests defined for timer\n";
@@ -222,7 +232,7 @@ template<> bool test<TPL_Enum::TIMER>( )
 
 
 // Test TRILINOS
-#ifdef USE_TRILINOS
+#ifdef TPLS_Tests_USE_TRILINOS
 template<> bool test<TPL_Enum::TRILINOS>( )
 {
     std::cout << "   -- No tests defined for trilinos\n";
@@ -232,7 +242,7 @@ template<> bool test<TPL_Enum::TRILINOS>( )
 
 
 // Test ZLIB
-#ifdef USE_ZLIB
+#ifdef TPLS_Tests_USE_ZLIB
 template<> bool test<TPL_Enum::ZLIB>( )
 {
     std::cout << "   -- No tests defined for zlib\n";
@@ -241,10 +251,10 @@ template<> bool test<TPL_Enum::ZLIB>( )
 #endif
 
 
-// Default implimentation
+// Default implementation
 template<TPL_Enum TPL> bool test( )
 {
-    std::cerr << "   -- Implimentation of " << getName(TPL) << " not defined\n";
+    std::cerr << "   -- Implementation of " << getName(TPL) << " not defined\n";
     return false;
 }
 
@@ -272,7 +282,10 @@ int main()
         auto tpl = getName(tmp);
         std::cout << "Testing " << tpl << std::endl;
         bool pass = true;
-        if ( tpl == "BOOST" ) {
+        if ( tpl == "MPI" ) {
+            // Test MPI
+            pass = test<TPL_Enum::MPI>( );
+        } else if ( tpl == "BOOST" ) {
             // Test BOOST
             pass = test<TPL_Enum::BOOST>( );
         } else if ( tpl == "FFTW" ) {
