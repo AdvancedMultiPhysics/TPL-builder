@@ -1377,6 +1377,7 @@ MACRO( ADD_DISTCLEAN ${ARGN} )
         cmake
         cppclean
         compile_commands.json
+        TPLs.h
         ${ARGN}
     )
     ADD_CUSTOM_TARGET(distclean @echo cleaning for source distribution)
