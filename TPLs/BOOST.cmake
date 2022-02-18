@@ -60,23 +60,23 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDIF()\n" )
 # Configure boost
 IF ( CMAKE_BUILD_BOOST ) 
     SET( BUILD_OPTIONS )
-    SET( CONFIGURE_OPTIONS )
+    SET( BOOST_CONFIGURE_OPTIONS )
     IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
-        SET(CONFIGURE_OPTIONS debug )
+        SET(BOOST_CONFIGURE_OPTIONS debug )
     ELSEIF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" )
-        SET(CONFIGURE_OPTIONS release )
+        SET(BOOST_CONFIGURE_OPTIONS release )
     ELSE()
         MESSAGE( FATAL_ERROR "Unknown CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" )
     ENDIF()
     IF ( ENABLE_SHARED AND ENABLE_STATIC )
         MESSAGE(FATAL_ERROR "Compiling boost with both static and shared libraries is not yet supported")
     ELSEIF ( ENABLE_SHARED )
-        SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} link=shared )
+        SET( BOOST_CONFIGURE_OPTIONS ${BOOST_CONFIGURE_OPTIONS} link=shared )
     ELSEIF ( ENABLE_STATIC )
-        SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} link=static )
+        SET( BOOST_CONFIGURE_OPTIONS ${BOOST_CONFIGURE_OPTIONS} link=static )
     ENDIF()
 
-    SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --with-libraries= )
+    SET( BOOST_CONFIGURE_OPTIONS ${BOOST_CONFIGURE_OPTIONS} --with-libraries= )
 
     IF( USING_GCC )
         SET( TOOLSET gcc )
@@ -92,8 +92,8 @@ IF ( CMAKE_BUILD_BOOST )
 
     SET( BUILD_OPTIONS ${BUILD_OPTIONS} -sNO_BZIP2=1 --without-mpi --without-python ) 
     #SET( BUILD_OPTIONS ${BUILD_OPTIONS} -s"NO_BZIP2=1" ) 
-    #SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} -d0  )
-    #SET( CONFIGURE_OPTIONS ${CONFIGURE_OPTIONS} --without-mpi --without-python )
+    #SET( BOOST_CONFIGURE_OPTIONS ${BOOST_CONFIGURE_OPTIONS} -d0  )
+    #SET( BOOST_CONFIGURE_OPTIONS ${BOOST_CONFIGURE_OPTIONS} --without-mpi --without-python )
 ENDIF()
 
 
@@ -121,7 +121,7 @@ IF ( CMAKE_BUILD_BOOST )
             DOWNLOAD_DIR        "${BOOST_CMAKE_DOWNLOAD_DIR}"
             SOURCE_DIR          "${BOOST_CMAKE_SOURCE_DIR}"
             UPDATE_COMMAND      ""
-            CONFIGURE_COMMAND   ./bootstrap.sh --with-toolset=${TOOLSET} ${CONFIGURE_OPTIONS} --prefix=${BOOST_CMAKE_INSTALL_DIR}
+            CONFIGURE_COMMAND   ./bootstrap.sh --with-toolset=${TOOLSET} ${BOOST_CONFIGURE_OPTIONS} --prefix=${BOOST_CMAKE_INSTALL_DIR}
             BUILD_COMMAND       ./b2 install ${BUILD_OPTIONS} -j ${PROCS_INSTALL}
             BUILD_IN_SOURCE     1
             INSTALL_COMMAND     ""
