@@ -41,9 +41,14 @@ IF ( NOT DEFINED UMPIRE_USE_OPENMP )
 ENDIF()
 IF ( CMAKE_BUILD_UMPIRE )
     SET( UMPIRE_CONFIGURE_OPTIONS -DCMAKE_INSTALL_PREFIX=${UMPIRE_CMAKE_INSTALL_DIR} )
-        # Note that the dev version changes this to UMPIRE_ENABLE_C according to the documentation
-        # -DENABLE_C appears to be the correct option for Umpire 6.0.0
-        SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DENABLE_C=ON )
+    # Note that the dev version changes this to UMPIRE_ENABLE_C according to the documentation
+    # -DENABLE_C appears to be the correct option for Umpire 6.0.0
+    SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DENABLE_C=ON )
+    IF ( USE_MPI )
+        SET( UMPIRE_CONFIGURE_OPTS ${UMPIRE_CONFIGURE_OPTIONS} -DENABLE_MPI=ON )
+    ELSE()
+        SET( UMPIRE_CONFIGURE_OPTS ${UMPIRE_CONFIGURE_OPTIONS} -DENABLE_MPI=OFF )
+    ENDIF()
     IF ( UMPIRE_USE_OPENMP )
         MESSAGE( "Enabling OpenMP support for Umpire" )
         SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DENABLE_OPENMP=ON )
