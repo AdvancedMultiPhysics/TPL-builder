@@ -251,6 +251,16 @@ template<> bool test<TPL_Enum::ZLIB>( )
 #endif
 
 
+// Test XBRAID
+#ifdef TPLS_Tests_USE_XBRAID
+template<> bool test<TPL_Enum::XBRAID>( )
+{
+    std::cout << "   -- No tests defined for xbraid\n";
+    return true;
+}
+#endif
+
+
 // Default implementation
 template<TPL_Enum TPL> bool test( )
 {
@@ -339,6 +349,9 @@ int main()
         } else if ( tpl == "TRILINOS" ) {
             // Test TRILINOS
             pass = test<TPL_Enum::TRILINOS>( );
+        } else if ( tpl == "XBRAID" ) {
+            // Test XBRAID
+            pass = test<TPL_Enum::XBRAID>( );
         } else if ( tpl == "ZLIB" ) {
             // Test ZLIB
             pass = test<TPL_Enum::ZLIB>( );
