@@ -340,7 +340,13 @@ void testGlobalStack(
     }
 }
 
-
+static std::string print( const std::vector<std::thread::native_handle_type> &id )
+{
+    std::string msg;
+    for ( auto i : id )
+        msg += " " + std::to_string( i );
+    return msg + " ";
+}
 void testActivethreads( UnitTest &results )
 {
     // Test getting a list of all active threads
@@ -370,15 +376,20 @@ void testActivethreads( UnitTest &results )
     status[1] = 2;
     thread1.join();
     thread2.join();
-    int N = thread_ids_test.size();
-    if ( thread_ids == thread_ids_test )
-        results.passes( "StackTrace::activeThreads" );
-    else if ( N == 1 && thread_ids_test[0] == self )
-        results.expected( "StackTrace::activeThreads only is able to return self" );
-    else if ( N == 3 )
-        results.failure( "StackTrace::activeThreads ids do not match" );
-    else
-        results.failure( "StackTrace::activeThreads found " + std::to_string( N ) + " ids" );
+    // Check the id intersection
+    std::vector<std::thread::native_handle_type> ids;
+    std::set_intersection(thread_ids.begin(), thread_ids.end(),
+                          thread_ids_test.begin(), thread_ids_test.end(),
+                          std::back_inserter(ids));
+    if ( ids.size() == thread_ids.size() ) {
+        results.passes( "activeThreads" );
+    } else if ( ids.size() == 1 && thread_ids_test[0] == self ) {
+        results.expected( "activeThreads only is able to return self" );
+    } else {
+        std::string msg = "activeThreads did not find all threads: ";
+        msg += "[" + print( thread_ids ) + "] [" + print( thread_ids_test ) + "]\n";
+        results.failure( msg );
+    }
 }
 
 
