@@ -8,7 +8,7 @@
 
 
 // List of valid TPLs that we can test
-enum class TPL_Enum { MPI, BOOST, FFTW, HDF5, HYPRE, KOKKOS, LAPACK, LAPACK_WRAPPERS, 
+enum class TPL_Enum { MPI, BOOST, FFTW, HDF5, UMPIRE, RAJA, HYPRE, KOKKOS, CABANA, LAPACK, LAPACK_WRAPPERS, 
     OPENBLAS, LIBMESH, MATLAB, NETCDF, OGRE, PETSC, SAMRAI, SILO, STACKTRACE, 
     SUNDIALS, TIMER, TRILINOS, XBRAID, ZLIB, NULL_TPL, UNKNOWN };
 
@@ -28,10 +28,16 @@ inline std::string getName( TPL_Enum tpl )
         return "FFTW";
     if ( tpl == TPL_Enum::HDF5 )
         return "HDF5";
+    if ( tpl == TPL_Enum::UMPIRE )
+        return "UMPIRE";
+    if ( tpl == TPL_Enum::RAJA )
+        return "RAJA";
     if ( tpl == TPL_Enum::HYPRE )
         return "HYPRE";
     if ( tpl == TPL_Enum::KOKKOS )
         return "KOKKOS";
+    if ( tpl == TPL_Enum::CABANA )
+        return "CABANA";
     if ( tpl == TPL_Enum::LAPACK )
         return "LAPACK";
     if ( tpl == TPL_Enum::LAPACK_WRAPPERS )
@@ -81,10 +87,16 @@ inline TPL_Enum getTPL( const std::string &tpl )
         return TPL_Enum::FFTW;
     if ( tpl == "HDF5" )
         return TPL_Enum::HDF5;
+    if ( tpl == "UMPIRE" )
+        return TPL_Enum::UMPIRE;
+    if ( tpl == "RAJA" )
+        return TPL_Enum::RAJA;
     if ( tpl == "HYPRE" )
         return TPL_Enum::HYPRE;
     if ( tpl == "KOKKOS" )
         return TPL_Enum::KOKKOS;
+    if ( tpl == "CABANA" )
+        return TPL_Enum::CABANA;
     if ( tpl == "LAPACK" )
         return TPL_Enum::LAPACK;
     if ( tpl == "LAPACK_WRAPPERS" )
