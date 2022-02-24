@@ -99,12 +99,40 @@ template<> bool test<TPL_Enum::HYPRE>( )
 }
 #endif
 
+// Test UMPIRE
+#ifdef TPLS_Tests_USE_UMPIRE
+template<> bool test<TPL_Enum::UMPIRE>( )
+{
+    std::cout << "   -- No tests defined for Umpire\n";
+    return true;
+}
+#endif
+
+// Test RAJA
+#ifdef TPLS_Tests_USE_RAJA
+template<> bool test<TPL_Enum::RAJA>( )
+{
+    std::cout << "   -- No tests defined for Raja\n";
+    return true;
+}
+#endif
+
 
 // Test KOKKOS
 #ifdef TPLS_Tests_USE_KOKKOS
 template<> bool test<TPL_Enum::KOKKOS>( )
 {
     std::cout << "   -- No tests defined for kokkos\n";
+    return true;
+}
+#endif
+
+
+// Test CABANA
+#ifdef TPLS_Tests_USE_CABANA
+template<> bool test<TPL_Enum::CABANA>( )
+{
+    std::cout << "   -- No tests defined for Cabana\n";
     return true;
 }
 #endif
@@ -251,6 +279,16 @@ template<> bool test<TPL_Enum::ZLIB>( )
 #endif
 
 
+// Test XBRAID
+#ifdef TPLS_Tests_USE_XBRAID
+template<> bool test<TPL_Enum::XBRAID>( )
+{
+    std::cout << "   -- No tests defined for xbraid\n";
+    return true;
+}
+#endif
+
+
 // Default implementation
 template<TPL_Enum TPL> bool test( )
 {
@@ -304,9 +342,18 @@ int main()
         } else if ( tpl == "HYPRE" ) {
             // Test HYPRE
             pass = test<TPL_Enum::HYPRE>( );
+        } else if ( tpl == "UMPIRE" ) {
+            // Test UMPIRE
+            pass = test<TPL_Enum::UMPIRE>( );
+        } else if ( tpl == "RAJA" ) {
+            // Test RAJA
+            pass = test<TPL_Enum::RAJA>( );
         } else if ( tpl == "KOKKOS" ) {
             // Test KOKKOS
             pass = test<TPL_Enum::KOKKOS>( );
+        } else if ( tpl == "CABANA" ) {
+            // Test CABANA
+            pass = test<TPL_Enum::CABANA>( );
         } else if ( tpl == "LIBMESH" ) {
             // Test LIBMESH
             pass = test<TPL_Enum::LIBMESH>( );
@@ -339,6 +386,9 @@ int main()
         } else if ( tpl == "TRILINOS" ) {
             // Test TRILINOS
             pass = test<TPL_Enum::TRILINOS>( );
+        } else if ( tpl == "XBRAID" ) {
+            // Test XBRAID
+            pass = test<TPL_Enum::XBRAID>( );
         } else if ( tpl == "ZLIB" ) {
             // Test ZLIB
             pass = test<TPL_Enum::ZLIB>( );
