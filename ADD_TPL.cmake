@@ -45,6 +45,7 @@ MACRO( ADD_TPL_CLEAN TPL )
             ${TPL}-clean
             ${CMAKE_COMMAND}         -E remove_directory ../${TPL}-build
             COMMAND ${CMAKE_COMMAND} -E make_directory   ../${TPL}-build
+            COMMAND ${CMAKE_COMMAND} -E remove_directory ../${TPL}-src
             COMMAND ${CMAKE_COMMAND} -E remove ${RM_LIST}
             COMMAND ${CMAKE_COMMAND} -E remove_directory "${${TPL}_INSTALL_DIR}"
             COMMAND ${CMAKE_COMMAND} -E make_directory   "${${TPL}_INSTALL_DIR}"
