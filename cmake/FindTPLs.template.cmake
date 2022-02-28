@@ -164,6 +164,9 @@ IF ( NOT TPLs_FOUND )
     INCLUDE( "${TPL_MACRO_CMAKE}" )
     INCLUDE( "${TPL_WRITE_REPO}" )
 
+    # include the package below for some system dependent paths
+    INCLUDE( GNUInstallDirs )
+    
     # Get the compiler and set the compiler flags
     CHECK_ENABLE_FLAG( USE_STATIC 0 )
     SET_COMPILER_FLAGS()
