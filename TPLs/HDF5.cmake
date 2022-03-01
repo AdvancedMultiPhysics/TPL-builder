@@ -72,7 +72,7 @@ IF ( CMAKE_BUILD_HDF5 )
         # Newer HDF5 version
         IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
             SET(HDF5_CONFIGURE_OPTIONS ${HDF5_CONFIGURE_OPTIONS} --enable-build-mode=debug )
-        ELSEIF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" )
+        ELSEIF ( (${CMAKE_BUILD_TYPE} STREQUAL "Release") OR (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo") )
             SET(HDF5_CONFIGURE_OPTIONS ${HDF5_CONFIGURE_OPTIONS} --enable-build-mode=production )
         ELSE()
             MESSAGE ( FATAL_ERROR "Unknown CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" )
