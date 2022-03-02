@@ -28,11 +28,15 @@ locate using TPL_URL.
 The current TPL list and tested versions are:
     BLAS/LAPACK (any version, NOTE: only netlib versions <= 3.5.0 work with Trilinos 12.10.1)
     ZLIB
-    HDF5 (1.8.12)
-    HYPRE (2.19.0)
-    PETSc (3.14.0)
-    TRILINOS (12.10.1)
-    SAMRAI (3.15.0-modified)
+    HDF5 (1.12.0)
+    UMPIRE (6.0.0)
+    RAJA (0.8.0)
+    KOKKOS (3.5.00)
+    CABANA (0.4.0)
+    HYPRE (2.24.0)
+    PETSc (3.16.4)
+    TRILINOS (13.2.1)
+    SAMRAI (4.1.0-modified)
     LIBMESH (1.5.1)
     SUNDIALS (2.6.2)
     SCALAPACK (2.0.2)
@@ -70,8 +74,8 @@ An example folder layout is:
 root_dir
     | -- TPL_BUILDER
     | -- TPL_ROOT
-    |       | -- petsc-3.14.0.tar.gz
-    |       | -- SAMRAI_v3.15.0
+    |       | -- petsc-3.16.4.tar.gz
+    |       | -- SAMRAI_v4.1.0
     |       | -- AMP
     |       | ...
     | -- build
@@ -84,8 +88,8 @@ root_dir
 In this example layout if we are creating an opt installation where
 TPL_BUILDER=root_dir/TPL_BUILDER,
 TPL_SRC_DIR=root_dir/TPL_BUILDER, 
-PETSC_URL=root_dir/TPL_ROOT/petsc-3.14.0.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v3.15.0, 
+PETSC_URL=root_dir/TPL_ROOT/petsc-3.16.4.tar.gz,
+SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v4.1.0, 
 AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
 BUILD_DIR=root_dir/build/opt, 
 and INSTALL_DIR=root_dir/install/opt.  
@@ -109,11 +113,12 @@ A sample configure script for SAMRAI is:
         -D TPL_LIST:STRING="LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
         -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"      \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"            \
-        -D PETSC_URL="${TPL_ROOT}/petsc-3.14.0.tar.gz"   \
-        -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"    \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.19.0.tar.gz"  \
-        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v3.15.0"  \
-        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility" \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.16.4.tar.gz"  \
+        -D HDF5_URL="${TPL_ROOT}/hdf5-1.12.0.tar.gz"    \
+	-D HDF_VERSION="1.12.0"                         \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.24.0.tar.gz"  \
+        -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v4.1.0"   \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility"     \
         ${TPL_BUILDER}
 
 
@@ -139,17 +144,18 @@ A sample debug configure script for AMP is:
         -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS" \
         -D LAPACK_URL="http://www.netlib.org/lapack/lapack-3.5.0.tgz"  \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"                           \
-        -D PETSC_URL="${TPL_ROOT}/petsc-3.14.0.tar.gz"                  \
-        -D HDF5_URL="${TPL_ROOT}/hdf5-1.8.12.tar.gz"                   \
+        -D PETSC_URL="${TPL_ROOT}/petsc-3.16.4.tar.gz"                 \
+        -D HDF5_URL="${TPL_ROOT}/hdf5-1.12.0.tar.gz"                   \
+	-D HDF_VERSION="1.12.0"                                        \
         -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                    \
-        -D HYPRE_URL="${TPL_ROOT}/hypre-2.19.0.tar.gz"                 \
+        -D HYPRE_URL="${TPL_ROOT}/hypre-2.24.0.tar.gz"                 \
         -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                    \
-        -D TRILINOS_URL="${TPL_ROOT}/trilinos-12.10.1-Source.tar.gz"   \
+        -D TRILINOS_URL="${TPL_ROOT}/trilinos-13.2.0-Source.tar.gz"    \
         -D TRILINOS_PACKAGES="Epetra;EpetraExt;Thyra;Tpetra;ML;MueLu;Kokkos;Amesos;Ifpack;Ifpack2;Belos;NOX;Stratimikos" \
         -D SUNDIALS_URL="${TPL_ROOT}/sundials-2.6.2.tar.gz"            \
         -D AMP_SRC_DIR="/projects/AMP/AMP"                             \
         -D AMP_DATA:PATH=/projects/AMP/AMP-Data                        \
-        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility/src"                \
+        -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility"                    \
         ${TPL_BUILDER}
 
 
@@ -167,13 +173,15 @@ The important variables are:
     Fortran_COMPILER - The compiler to use for compiling Fortran code
     CFLAGS           - Any user-defined flags for C code
     CXXFLAGS         - Any user-defined flags for C++ code
-    CXX_STD          - Specify the C++ standard to use (98, 11, 14, NONE)
+    CXX_STD          - Specify the C++ standard to use (98, 11, 14, 17, NONE)
     FFLAGS           - Any user-defined flags for Fortran code
     LDFLAGS          - Any user-defined flags for linking
     ENABLE_STATIC    - Do we want to compile static libraries (default)
     ENABLE_SHARED    - Do we want to compile shared libraries
                        Note: we can only build one type of library (shared or static) at this time
     ENABLE_GXX_DEBUG - Do we want to enable GLIBCXX_DEBUG flags (disabled by default)
+    USE_OPENMP       - Turn on OpenMP
+    USE_CUDA         - Turn on CUDA
     CMAKE_SYSTEM_NAME - The system type: Linux, Generic, etc.
     CMAKE_SHARED_LINKER_FLAGS - Linker flags for shared libraries
     INSTALL_DIR      - The install path where we want to install the libraries
@@ -233,14 +241,24 @@ LAPACK:
 HDF5:
     HDF5_ENABLE_CXX - Enable cxx support in hdf5 (default is disabled)
     HDF5_ENABLE_UNSUPPORTED - Enable unsupported options in hdf5
+    HDF5_VERSION    - Specify HDF5 version being used (required)
+KOKKOS:
+    KOKKOS_ARCH_FLAGS - Specify CUDA architecture to use
+CABANA:
+    CABANA_VERSION - Specify Cabana version
+RAJA
+    RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use
 TRILINOS:
     TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
     TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
     TRILINOS_EXTRA_REPOSITORIES - List of extra repositories
     TRILINOS_EXTRA_FLAGS - List of extra flags (e.g. "-DBUILD_SHARED_LIBS=OFF;-DTPL_ENABLE_MPI=ON" )
+    TRILINOS_EXTRA_LAPACK_LIBRARIES - Semicolon separated list of extra libraries required for eg with Intel ifcore, ifport etc
 SAMRAI:
     SAMRAI_TEST - Enable samrai tests (may take a while to complete)
     SAMRAI_DOCS - Enable/disable building and installing the SAMRAI doxygen documentation (enabled by default)
+    SAMRAI_USE_UMPIRE - Enable use of Umpire with SAMRAI
+    SAMRAI_USE_RAJA   - Enable use of Raja with SAMRAI
 SAMRUTILS:
     DISABLE_THREAD_CHANGES - Disable all threading support
     TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
