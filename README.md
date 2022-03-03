@@ -244,6 +244,7 @@ HDF5:
     HDF5_VERSION    - Specify HDF5 version being used (required)
 KOKKOS:
     KOKKOS_ARCH_FLAGS - Specify CUDA architecture to use
+    KOKKOS_CXX_STD -- specify what C++ standard to use (11, 14,17) etc
 CABANA:
     CABANA_VERSION - Specify Cabana version
 RAJA
