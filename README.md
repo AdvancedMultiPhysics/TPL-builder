@@ -248,7 +248,7 @@ KOKKOS:
 CABANA:
     CABANA_VERSION - Specify Cabana version
 RAJA
-    RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use
+    RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use (sm_70, sm_80) etc
 TRILINOS:
     TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
     TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
@@ -260,6 +260,7 @@ SAMRAI:
     SAMRAI_DOCS - Enable/disable building and installing the SAMRAI doxygen documentation (enabled by default)
     SAMRAI_USE_UMPIRE - Enable use of Umpire with SAMRAI
     SAMRAI_USE_RAJA   - Enable use of Raja with SAMRAI
+    SAMRAI_CUDA_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
 SAMRUTILS:
     DISABLE_THREAD_CHANGES - Disable all threading support
     TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
