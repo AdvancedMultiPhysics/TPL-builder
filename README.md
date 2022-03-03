@@ -247,7 +247,12 @@ KOKKOS:
     KOKKOS_CXX_STD -- specify what C++ standard to use (11, 14,17) etc
 CABANA:
     CABANA_VERSION - Specify Cabana version
+UMPIRE
+    UMPIRE_USE_CUDA - Bool to enable CUDA
+    UMPIRE_USE_OPENMP - Bool to enable OpenMP
 RAJA
+    RAJA_USE_CUDA - Bool to enable CUDA
+    RAJA_USE_OPENMP - Bool to enable OpenMP
     RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use (sm_70, sm_80) etc
 TRILINOS:
     TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
@@ -258,6 +263,8 @@ TRILINOS:
 SAMRAI:
     SAMRAI_TEST - Enable samrai tests (may take a while to complete)
     SAMRAI_DOCS - Enable/disable building and installing the SAMRAI doxygen documentation (enabled by default)
+    SAMRAI_USE_CUDA - Bool to enable CUDA
+    SAMRAI_USE_OPENMP - Bool to enable OpenMP
     SAMRAI_USE_UMPIRE - Enable use of Umpire with SAMRAI
     SAMRAI_USE_RAJA   - Enable use of Raja with SAMRAI
     SAMRAI_CUDA_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
