@@ -254,6 +254,11 @@ RAJA
     RAJA_USE_CUDA - Bool to enable CUDA
     RAJA_USE_OPENMP - Bool to enable OpenMP
     RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use (sm_70, sm_80) etc
+HYPRE
+    HYPRE_USE_CUDA - Bool to enable CUDA
+    HYPRE_USE_OPENMP - Bool to enable OpenMP
+    HYPRE_USE_UMPIRE - bool whether Umpire should be used
+    HYPRE_CUDA_HOME - Root directory for CUDA install
 TRILINOS:
     TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
     TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
