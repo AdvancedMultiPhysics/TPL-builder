@@ -4,7 +4,7 @@
 #    location by specifying HYPRE_INSTALL_DIR
 
 
-# Intialize download/src/install vars
+# Initialize download/src/install vars
 SET( HYPRE_BUILD_DIR "${CMAKE_BINARY_DIR}/HYPRE-prefix/src/HYPRE-build" )
 IF ( HYPRE_URL ) 
     MESSAGE("   HYPRE_URL = ${HYPRE_URL}")
@@ -46,16 +46,16 @@ IF ( CMAKE_BUILD_HYPRE )
         IF ( HYPRE_CUDA_HOME )
           SET( HYPRE_CONFIGURE_OPTIONS --with-cuda --with-cuda-home=${HYPRE_CUDA_HOME} )
         ELSE()
-	  MESSAGE( FATAL_ERROR "HYPRE_CUDA_HOME needs to be defined " )
-	ENDIF()
+          SET( HYPRE_CONFIGURE_OPTIONS --with-cuda --with-cuda-home=${CUDA_HOME} )
+        ENDIF()
         SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --enable-unified-memory )        
         # Appears hypre only uses Umpire with CUDA so keep this if condition here
         IF ( HYPRE_USE_UMPIRE )
             SET( HYPRE_DEPENDS UMPIRE ${HYPRE_DEPENDS} )
             MESSAGE( "Building HYPRE with Umpire support" )
             SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --with-umpire --with-umpire-include=${UMPIRE_INSTALL_DIR}/include --with-umpire-lib-dirs=${UMPIRE_INSTALL_DIR}/lib --with-umpire-libs=umpire )
-	    SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --with-umpire-um )
-	ENDIF()
+        SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --with-umpire-um )
+        ENDIF()
     ENDIF()
     IF( HYPRE_USE_OPENMP )
         MESSAGE( "Enabling OpenMP support for HYPRE" )
