@@ -282,7 +282,7 @@ ENDMACRO()
 
 # Set ENV_VARS and CMAKE_ARGS
 MACRO( SET_CMAKE_ARGS )
-    FOREACH ( LANG C CXX Fortran )
+	FOREACH ( LANG C CXX Fortran CUDA )
         SET( ENV_${LANG}_FLAGS "${CMAKE_${LANG}_FLAGS} ${MPI_${LANG}_COMPILE_FLAGS}" )
         FOREACH ( tmp ${MPI_${LANG}_INCLUDE_PATH} )
             SET( ENV_${LANG}_FLAGS "${ENV_${LANG}_FLAGS} -I${tmp}" )
