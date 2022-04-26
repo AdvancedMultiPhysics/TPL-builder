@@ -193,6 +193,22 @@ IF ( USE_CUDA )
             SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -I${tmp}" )
         ENDFOREACH()
     ENDIF()
+    # Detect the number of GPUs available
+    IF ( NOT DEFINED NUMBER_OF_GPUS )
+        TRY_RUN( RUN_RESULT_VAR COMPILE_RESULT_VAR
+            ${CMAKE_BINARY_DIR} 
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCudaGPUs.cu
+            CMAKE_FLAGS 
+                -DINCLUDE_DIRECTORIES:STRING=${CUDA_TOOLKIT_INCLUDE}
+                -DLINK_LIBRARIES:STRING=${CUDA_CUDART_LIBRARY}
+            COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+            RUN_OUTPUT_VARIABLE NUMBER_OF_GPUS )
+        IF ( NOT NUMBER_OF_GPUS )
+            MESSAGE( FATAL_ERROR "NUMBER_OF_GPUS was not set and not CUDA capable GPUs were detected:\n${COMPILE_OUTPUT}" )
+        ENDIF()
+        MATH( EXPR NUMBER_OF_GPUS ${NUMBER_OF_GPUS} )
+        MESSAGE( "Number of GPUs detected: ${NUMBER_OF_GPUS}" )
+    ENDIF()
 ENDIF()
 
 
@@ -414,9 +430,38 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#endif\\n\")\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "EXECUTE_PROCESS( COMMAND $\{CMAKE_COMMAND} -E copy_if_different \"$\{TPLs_HEADER}\" \"$\{$\{PROJ}_INSTALL_DIR}/include/$\{$\{PROJ}_INC}/$\{PROJ}_TPLs.h\" )\n" )
 
+
 # Copy cmake files for cppcheck and cppclean
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCppcheck.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCppcheck.cmake" COPYONLY )
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run.cppclean.template.cmake "${CMAKE_INSTALL_PREFIX}/cmake/run.cppclean.template.cmake" COPYONLY )
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCppclean.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCppclean.cmake" COPYONLY )
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCoverage.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindCoverage.cmake" COPYONLY )
+
+
+# Create a default resource file
+SET( RESOURCE_FILE "${CMAKE_INSTALL_PREFIX}/resources.json" )
+FILE( WRITE  "${RESOURCE_FILE}" "{\n" )
+FILE( APPEND "${RESOURCE_FILE}" "  \"version\": {\n" )
+FILE( APPEND "${RESOURCE_FILE}" "  \"major\": 1,\n" )
+FILE( APPEND "${RESOURCE_FILE}" "  \"minor\": 0\n" )
+FILE( APPEND "${RESOURCE_FILE}" "  },\n" )
+FILE( APPEND "${RESOURCE_FILE}" "  \"local\": [\n" )
+FILE( APPEND "${RESOURCE_FILE}" "    {\n" )
+FILE( APPEND "${RESOURCE_FILE}" "      \"gpus\": [\n" )
+FILE( APPEND "${RESOURCE_FILE}" "        {\n" )
+FILE( APPEND "${RESOURCE_FILE}" "          \"id\": \"1\",\n" )
+FILE( APPEND "${RESOURCE_FILE}" "          \"slots\": 1\n" )
+FILE( APPEND "${RESOURCE_FILE}" "        }\n" )
+IF ( "${NUMBER_OF_GPUS}" GREATER 1 )
+    FOREACH( id RANGE 2 ${NUMBER_OF_GPUS} )
+        FILE( APPEND "${RESOURCE_FILE}" "        ,{\n" )
+        FILE( APPEND "${RESOURCE_FILE}" "          \"id\": \"${id}\",\n" )
+        FILE( APPEND "${RESOURCE_FILE}" "          \"slots\": 1\n" )
+        FILE( APPEND "${RESOURCE_FILE}" "        }\n" )
+    ENDFOREACH()
+ENDIF()
+FILE( APPEND "${RESOURCE_FILE}" "      ]\n" )
+FILE( APPEND "${RESOURCE_FILE}" "    }\n" )
+FILE( APPEND "${RESOURCE_FILE}" "  ]\n" )
+FILE( APPEND "${RESOURCE_FILE}" "}\n" )
 
