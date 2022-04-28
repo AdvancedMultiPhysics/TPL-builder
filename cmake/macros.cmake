@@ -937,6 +937,7 @@ ENDMACRO()
 #                   RESOURCES resources
 #                   GPU
 #                   TIMEOUT seconds
+#                   RUN_SERIAL
 #                   DEPENDS depends
 #                   ARGS arguments )
 FUNCTION( CALL_ADD_TEST EXEFILE )
@@ -949,7 +950,7 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
     ENDIF()
 
     # Parse the input arguments
-    SET( optionalArgs WEEKLY TESTBUILDER GPU )
+    SET( optionalArgs WEEKLY TESTBUILDER GPU RUN_SERIAL )
     SET( oneValueArgs TESTNAME PROCS THREADS TIMEOUT )
     SET( multiValueArgs RESOURCES DEPENDS ARGS )
     CMAKE_PARSE_ARGUMENTS( CALL_ADD_TEST "${optionalArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -1043,6 +1044,12 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
     # Add timeout
     IF ( TIMEOUT )
         SET_PROPERTY( TEST ${TESTNAME} PROPERTY TIMEOUT ${TIMEOUT} )
+    ENDIF()
+
+
+    # Run the test by itself
+    IF ( RUN_SERIAL )
+        SET_PROPERTY( TEST ${TESTNAME} PROPERTY RUN_SERIAL TRUE )
     ENDIF()
 
 
