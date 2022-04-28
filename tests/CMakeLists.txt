@@ -71,7 +71,7 @@ message( "   LINK_LIBRARIES: ${OUT_LIBRARIES}")
 message( "   LINK_FLAGS: ${OUT_FLAGS}")
 
 IF ( USE_MPI )
-    ADD_TPLS_Tests_TEST_PARALLEL( test_MPI 4 )
+    ADD_TPLS_Tests_TEST( test_MPI PROCS 4 )
 ENDIF()
 IF ( USE_STACKTRACE )
     FIND_PROGRAM( TestStack TestStack PATHS "${TPL_DIRECTORY}/StackTrace/bin" )
