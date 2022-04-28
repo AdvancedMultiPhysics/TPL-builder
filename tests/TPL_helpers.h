@@ -10,7 +10,7 @@
 // List of valid TPLs that we can test
 enum class TPL_Enum { MPI, BOOST, FFTW, HDF5, UMPIRE, RAJA, HYPRE, KOKKOS, CABANA, LAPACK, LAPACK_WRAPPERS, 
     OPENBLAS, LIBMESH, MATLAB, NETCDF, OGRE, PETSC, SAMRAI, SILO, STACKTRACE, 
-    SUNDIALS, TIMER, TRILINOS, XBRAID, ZLIB, NULL_TPL, UNKNOWN };
+		      SUNDIALS, TIMER, TRILINOS, XBRAID, ZLIB, CATCH2, NULL_TPL, UNKNOWN };
 
 
 // List of TPLs that are not used for compiling/linking (e.g. cppcheck)
@@ -70,6 +70,8 @@ inline std::string getName( TPL_Enum tpl )
         return "XBRAID";
     if ( tpl == TPL_Enum::ZLIB )
         return "ZLIB";
+    if ( tpl == TPL_Enum::CATCH2 )
+        return "CATCH2";
     if ( tpl == TPL_Enum::NULL_TPL )
         return "NULL_TPL";
     return "UNKNOWN";
@@ -129,6 +131,8 @@ inline TPL_Enum getTPL( const std::string &tpl )
         return TPL_Enum::XBRAID;
     if ( tpl == "ZLIB" )
         return TPL_Enum::ZLIB;
+    if ( tpl == "CATCH2" )
+        return TPL_Enum::CATCH2;
     for ( const auto& tmp : nullTPLs ) {
         if ( tpl == tmp )
             return TPL_Enum::NULL_TPL;

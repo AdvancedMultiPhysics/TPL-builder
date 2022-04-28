@@ -279,6 +279,16 @@ template<> bool test<TPL_Enum::ZLIB>( )
 #endif
 
 
+// Test CATCH2
+#ifdef TPLS_Tests_USE_CATCH2
+template<> bool test<TPL_Enum::CATCH2>( )
+{
+    std::cout << "   -- No tests defined for Catch2\n";
+    return true;
+}
+#endif
+
+
 // Test XBRAID
 #ifdef TPLS_Tests_USE_XBRAID
 template<> bool test<TPL_Enum::XBRAID>( )
@@ -392,6 +402,9 @@ int main()
         } else if ( tpl == "ZLIB" ) {
             // Test ZLIB
             pass = test<TPL_Enum::ZLIB>( );
+        } else if ( tpl == "CATCH2" ) {
+            // Test Catch2
+            pass = test<TPL_Enum::CATCH2>( );
         } else {
             // TPL not found
             std::cerr << tpl << " not programmed\n";
