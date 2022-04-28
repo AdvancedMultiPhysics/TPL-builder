@@ -936,6 +936,7 @@ ENDMACRO()
 #                   TESTBUILDER
 #                   RESOURCES resources
 #                   GPU
+#                   TIMEOUT seconds
 #                   DEPENDS depends
 #                   ARGS arguments )
 FUNCTION( CALL_ADD_TEST EXEFILE )
@@ -949,7 +950,7 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
 
     # Parse the input arguments
     SET( optionalArgs WEEKLY TESTBUILDER GPU )
-    SET( oneValueArgs TESTNAME PROCS THREADS )
+    SET( oneValueArgs TESTNAME PROCS THREADS TIMEOUT )
     SET( multiValueArgs RESOURCES DEPENDS ARGS )
     CMAKE_PARSE_ARGUMENTS( CALL_ADD_TEST "${optionalArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
     SET( TESTNAME ${CALL_ADD_TEST_TESTNAME} )
@@ -1038,6 +1039,12 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
         STRING( REGEX REPLACE "^," "" GPU_RESOURCE ${GPU_RESOURCE} )
         SET_PROPERTY( TEST ${TESTNAME} PROPERTY RESOURCE_GROUPS ${GPU_RESOURCE} )
     ENDIF()
+
+    # Add timeout
+    IF ( TIMEOUT )
+        SET_PROPERTY( TEST ${TESTNAME} PROPERTY TIMEOUT ${TIMEOUT} )
+    ENDIF()
+
 
     # Add dependencies
     IF ( TESTDEPENDS )
