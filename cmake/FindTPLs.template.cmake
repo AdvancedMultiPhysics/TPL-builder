@@ -26,6 +26,7 @@
 
 # Set some cmake policies
 CMAKE_POLICY( SET CMP0074 NEW )
+CMAKE_POLICY( SET CMP0110 NEW )
 
 
 # Check that PROJ and ${PROJ}_INSTALL_DIR have been set
