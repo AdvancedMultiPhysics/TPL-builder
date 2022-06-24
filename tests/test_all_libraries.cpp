@@ -70,6 +70,16 @@ template<> bool test<TPL_Enum::BOOST>( )
 #endif
 
 
+// Test THRUST
+#ifdef TPLS_Tests_USE_THRUST
+template<> bool test<TPL_Enum::THRUST>( )
+{
+    std::cout << "   -- No tests defined for thrust\n";
+    return true;
+}
+#endif
+
+
 // Test FFTW
 #ifdef TPLS_Tests_USE_FFTW
 template<> bool test<TPL_Enum::FFTW>( )

@@ -91,6 +91,8 @@ inline TPL_Enum getTPL( const std::string &tpl )
         return TPL_Enum::MPI;
     if ( tpl == "BOOST" )
         return TPL_Enum::BOOST;
+    if ( tpl == "THRUST" )
+        return TPL_Enum::THRUST;
     if ( tpl == "FFTW" )
         return TPL_Enum::FFTW;
     if ( tpl == "HDF5" )
