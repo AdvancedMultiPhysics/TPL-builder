@@ -346,6 +346,9 @@ int main()
         } else if ( tpl == "BOOST" ) {
             // Test BOOST
             pass = test<TPL_Enum::BOOST>( );
+        } else if ( tpl == "THRUST" ) {
+            // Test THRUST
+            pass = test<TPL_Enum::THRUST>( );
         } else if ( tpl == "FFTW" ) {
             // Test FFTW
         } else if ( tpl == "OPENBLAS" ) {
