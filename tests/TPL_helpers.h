@@ -8,7 +8,7 @@
 
 
 // List of valid TPLs that we can test
-enum class TPL_Enum { MPI, BOOST, FFTW, HDF5, UMPIRE, RAJA, HYPRE, KOKKOS, CABANA, LAPACK, LAPACK_WRAPPERS, 
+enum class TPL_Enum { MPI, BOOST, THRUST, FFTW, HDF5, UMPIRE, RAJA, HYPRE, KOKKOS, CABANA, LAPACK, LAPACK_WRAPPERS, 
     OPENBLAS, LIBMESH, MATLAB, NETCDF, OGRE, PETSC, SAMRAI, SILO, STACKTRACE, 
 		      SUNDIALS, TIMER, TRILINOS, XBRAID, ZLIB, CATCH2, AMP, SAMRUTILS, SAMRSOLVERS, NULL_TPL, UNKNOWN };
 
@@ -24,6 +24,8 @@ inline std::string getName( TPL_Enum tpl )
         return "MPI";
     if ( tpl == TPL_Enum::BOOST )
         return "BOOST";
+    if ( tpl == TPL_Enum::THRUST )
+        return "THRUST";
     if ( tpl == TPL_Enum::FFTW )
         return "FFTW";
     if ( tpl == TPL_Enum::HDF5 )
