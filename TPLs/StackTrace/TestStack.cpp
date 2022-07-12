@@ -152,6 +152,7 @@ std::vector<StackTrace::stack_info> get_call_stack( const std::vector<int> &null
 //   so we need to perform the sleep in a loop
 void sleep_ms( int N )
 {
+    StackTrace::registerThread();
     auto t1 = std::chrono::high_resolution_clock::now();
     auto t2 = std::chrono::high_resolution_clock::now();
     while ( to_ms( t2 - t1 ) < N ) {
@@ -162,6 +163,7 @@ void sleep_ms( int N )
 }
 void sleep_s( int N )
 {
+    StackTrace::registerThread();
     auto t1 = std::chrono::high_resolution_clock::now();
     auto t2 = std::chrono::high_resolution_clock::now();
     while ( to_ms( t2 - t1 ) < 1000 * N ) {
@@ -340,19 +342,15 @@ void testGlobalStack(
     }
 }
 
-static std::string print( const std::vector<std::thread::native_handle_type> &id )
-{
-    std::string msg;
-    for ( auto i : id )
-        msg += " " + std::to_string( i );
-    return msg + " ";
-}
+
+// Test finding the active threads
 void testActivethreads( UnitTest &results )
 {
     // Test getting a list of all active threads
     int status[2] = { 0, 0 };
     // Start the threads
     auto run = [&status]( int id ) {
+        StackTrace::registerThread();
         status[id] = 1;
         while ( status[id] != 2 )
             sleep_ms( 100 );
@@ -363,33 +361,29 @@ void testActivethreads( UnitTest &results )
     while ( status[0] == 0 || status[1] == 0 )
         sleep_ms( 100 );
     // Get the active thread ids
-    auto thread_ids_test = StackTrace::activeThreads();
+    auto active = StackTrace::activeThreads();
     std::vector<std::thread::native_handle_type> thread_ids( 3 );
     auto self     = StackTrace::thisThread();
     thread_ids[0] = StackTrace::thisThread();
     thread_ids[1] = thread1.native_handle();
     thread_ids[2] = thread2.native_handle();
     std::sort( thread_ids.begin(), thread_ids.end() );
-    std::sort( thread_ids_test.begin(), thread_ids_test.end() );
+    std::sort( active.begin(), active.end() );
     // Close the threads
     status[0] = 2;
     status[1] = 2;
     thread1.join();
     thread2.join();
-    // Check the id intersection
-    std::vector<std::thread::native_handle_type> ids;
-    std::set_intersection(thread_ids.begin(), thread_ids.end(),
-                          thread_ids_test.begin(), thread_ids_test.end(),
-                          std::back_inserter(ids));
-    if ( ids.size() == thread_ids.size() ) {
-        results.passes( "activeThreads" );
-    } else if ( ids.size() == 1 && thread_ids_test[0] == self ) {
-        results.expected( "activeThreads only is able to return self" );
-    } else {
-        std::string msg = "activeThreads did not find all threads: ";
-        msg += "[" + print( thread_ids ) + "] [" + print( thread_ids_test ) + "]\n";
-        results.failure( msg );
-    }
+    bool found_all = true;
+    for ( auto id : thread_ids )
+        found_all = found_all && std::count( active.begin(), active.end(), id );
+    int N = active.size();
+    if ( found_all )
+        results.passes( "StackTrace::activeThreads" );
+    else if ( active.size() == 1 && active[0] == self )
+        results.expected( "StackTrace::activeThreads only is able to return self" );
+    else
+        results.failure( "StackTrace::activeThreads does not find all active threads" );
 }
 
 
@@ -432,7 +426,7 @@ void test_exec( UnitTest &results )
         int exit_code   = 0;
         bool pass_local = true;
         for ( int i = 0; i < N; i++ ) {
-            auto out   = StackTrace::exec( cmd, exit_code );
+            auto out   = StackTrace::Utilities::exec( cmd, exit_code );
             pass_local = pass_local && out == "test\n";
         }
         pass = pass && pass_local;
@@ -458,7 +452,7 @@ void test_throw( UnitTest & )
     if ( getRank() == 0 ) {
         std::cout << "Testing abort:" << std::endl;
         try {
-            StackTrace::Utilities::abort( "Test", __FILE__, __LINE__ );
+            StackTrace::Utilities::abort( "Test", SOURCE_LOCATION_CURRENT() );
         } catch ( StackTrace::abort_error &e ) {
             std::cout << e.what() << std::endl;
         }
@@ -480,7 +474,7 @@ void test_throw( UnitTest & )
         auto t2 = std::chrono::high_resolution_clock::now();
         for ( int i = 0; i < N; i++ ) {
             try {
-                StackTrace::Utilities::abort( "Test", __FILE__, __LINE__ );
+                StackTrace::Utilities::abort( "Test", SOURCE_LOCATION_CURRENT() );
             } catch ( std::exception &e ) {
             }
         }
