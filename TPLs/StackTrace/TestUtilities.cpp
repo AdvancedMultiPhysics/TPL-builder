@@ -139,6 +139,28 @@ void fill( void *x, uint8_t value, size_t bytes )
 }
 
 
+// Test source_location::current
+void test_source_location(
+    UnitTest &ut, const source_location &source = source_location::current() )
+{
+    std::cout << "Testing StackTrace::source_location::current:\n";
+    auto source2 = SOURCE_LOCATION_CURRENT();
+    std::cout << "   file: " << source.file_name() << "(" << source.line() << ":" << source.column()
+              << ")  " << source.function_name() << '\n';
+    std::cout << "   file: " << source2.file_name() << "(" << source2.line() << ":"
+              << source2.column() << ")  " << source2.function_name() << '\n';
+    bool test1 = std::string( source.function_name() ).find( "main" ) != std::string::npos;
+    bool test2 =
+        std::string( source2.function_name() ).find( "test_source_location" ) != std::string::npos;
+    if ( test1 && test2 )
+        ut.passes( "source_location::current()" );
+    else if ( test2 && source.empty() )
+        ut.expected( "source_location::current()" );
+    else
+        ut.failure( "source_location::current()" );
+}
+
+
 /****************************************************************
  * Run some basic utility tests                                  *
  ****************************************************************/
@@ -153,14 +175,17 @@ int main( int argc, char *argv[] )
 
         // Check the OS
         constexpr auto OS = Utilities::getOS();
-        if constexpr ( OS == Utilities::OS::Linux )
+        if ( OS == Utilities::OS::Linux )
             ut.passes( "OS: Linux" );
-        else if constexpr ( OS == Utilities::OS::Windows )
+        else if ( OS == Utilities::OS::Windows )
             ut.passes( "OS: Windows" );
-        else if constexpr ( OS == Utilities::OS::macOS )
+        else if ( OS == Utilities::OS::macOS )
             ut.passes( "OS: macOS" );
         else
             ut.failure( "Known OS" );
+
+        // Test source_location
+        test_source_location( ut );
 
         // Test getSystemMemory
         size_t system_bytes = Utilities::getSystemMemory();
