@@ -14,7 +14,6 @@ MACRO( LOAD_LIST VAR )
 ENDMACRO()
 
 
-
 # Set platform specific variables
 SITE_NAME( HOSTNAME )
 STRING(REGEX REPLACE "-ext."   "" HOSTNAME "${HOSTNAME}")
@@ -39,6 +38,7 @@ LOAD_VAR( CTEST_CMAKE_GENERATOR )
 LOAD_VAR( N_PARALLEL_BUILD )
 LOAD_VAR( LANGUAGES )
 LOAD_VAR( CTEST_SITE )
+LOAD_VAR( CTEST_URL )
 IF ( NOT CXX_STD )
     SET( CXX_STD 11 )
 ENDIF()
@@ -241,8 +241,23 @@ MESSAGE("Configure options:")
 MESSAGE("   ${CTEST_OPTIONS}")
 
 
+# Configure the drop site
+IF ( CTEST_URL )
+    STRING( REPLACE "PROJECT" "CTest-Builder" CTEST_URL "${CTEST_URL}" )
+    SET( CTEST_SUBMIT_URL "${CTEST_URL}" )
+ELSE()
+    IF ( NOT CTEST_SITE )
+        SET( CTEST_SITE ${HOSTNAME} )
+    ENDIF()
+    SET( CTEST_DROP_METHOD "http" )
+    SET( CTEST_DROP_LOCATION "/CDash/submit.php?project=CTest-Builder" )
+    SET( CTEST_DROP_SITE_CDASH TRUE )
+    SET( DROP_SITE_CDASH TRUE )
+    SET( CTEST_DROP_SITE ${CTEST_SITE} )
+ENDIF()
+
+
 # Configure and run the tests
-SET( CTEST_SITE ${HOSTNAME} )
 CTEST_START("${CTEST_DASHBOARD}")
 CTEST_UPDATE()
 CTEST_CONFIGURE(
@@ -254,15 +269,6 @@ CTEST_CONFIGURE(
 # Run the configure/build 
 CTEST_BUILD()
 CTEST_TEST()
-
-
-
-# Submit the results to oblivion
-SET( CTEST_DROP_METHOD "http" )
-SET( CTEST_DROP_SITE ${CTEST_SITE} )
-SET( CTEST_DROP_LOCATION "/CDash/submit.php?project=CTest-Builder" )
-SET( CTEST_DROP_SITE_CDASH TRUE )
-SET( DROP_SITE_CDASH TRUE )
 CTEST_SUBMIT()
 
 
