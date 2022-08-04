@@ -64,7 +64,7 @@ ADD_TPL(
 
     UPDATE_COMMAND      ""
     CONFIGURE_COMMAND   ${MOAB_SRC_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}/moab ${MOAB_CONFIGURE_OPTIONS} ${ENV_VARS}
-    BUILD_COMMAND       make install -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_COMMAND       $(MAKE) install VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     ""
     DEPENDS             QT

@@ -13,7 +13,6 @@ cmake                                               \
     -D LDFLAGS=""                               \
     -D ENABLE_STATIC:BOOL=ON                        \
     -D ENABLE_SHARED:BOOL=OFF                       \
-    -D PROCS_INSTALL=16                                             \
     -D TPL_LIST:STRING="BOOST;TIMER;LAPACK;PETSC;ZLIB;HDF5;HYPRE;SAMRAI" \
     -D BLAS_INSTALL_DIR="/opt/cray/libsci/12.1.01/GNU/48/sandybridge/lib"            \
     -D BLAS_LIB="libsci_gnu.a"                                                                                                        \

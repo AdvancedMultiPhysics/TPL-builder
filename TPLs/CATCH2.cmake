@@ -50,7 +50,7 @@ IF ( CMAKE_BUILD_CATCH2 )
         SOURCE_DIR          "${CATCH2_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
         CMAKE_ARGS          ${CATCH2_CONFIGURE_OPTIONS}
-        BUILD_COMMAND       cmake --build ${CATCH2_BUILD_DIR} --target install -j ${PROCS_INSTALL}
+        BUILD_COMMAND       cmake --build ${CATCH2_BUILD_DIR} --target install -j 8
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ""
         DEPENDS

@@ -66,8 +66,6 @@ ENDIF()
 INCLUDE(ExternalProject)
 INCLUDE(macros.cmake)
 INCLUDE(GNUInstallDirs)
-
-SET_N_PROCS()
 NULL_USE( USE_MATLAB MATLAB_DIRECTORY BOOST_SRC_DIR BLAS_LIB LAPACK_LIB )
 
 
@@ -352,7 +350,7 @@ IF ( ENABLE_TESTS )
             BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
             INSTALL_COMMAND     make install
             TEST_AFTER_INSTALL  ${CMAKE_COMMAND} -E echo "Installing"
-            TEST_COMMAND        ctest -j ${PROCS_INSTALL} --output-on-failure
+            TEST_COMMAND        $(MAKE)
             DEPENDS             ${TPL_LIST}
             LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
         )
