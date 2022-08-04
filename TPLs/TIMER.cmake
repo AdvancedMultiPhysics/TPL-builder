@@ -87,7 +87,7 @@ ADD_TPL(
     SOURCE_DIR          "${TIMER_CMAKE_SOURCE_DIR}"
     UPDATE_COMMAND      ""
     CMAKE_ARGS          "${TIMER_CONFIGURE_OPTIONS}"
-    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_COMMAND       $(MAKE) VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     make install
     DEPENDS             

@@ -109,13 +109,12 @@ A sample configure script for SAMRAI is:
         -D ENABLE_STATIC:BOOL=ON                        \
         -D ENABLE_SHARED:BOOL=OFF                       \
         -D INSTALL_DIR:PATH=${INSTALL_DIR}              \
-        -D PROCS_INSTALL=4                              \
         -D TPL_LIST:STRING="LAPACK;ZLIB;PETSC;HDF5;HYPRE;TIMER;SAMRAI" \
         -D LAPACK_INSTALL_DIR="${TPL_ROOT}/lapack"      \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"            \
         -D PETSC_URL="${TPL_ROOT}/petsc-3.16.4.tar.gz"  \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.12.0.tar.gz"    \
-	-D HDF_VERSION="1.12.0"                         \
+    	-D HDF_VERSION="1.12.0"                         \
         -D HYPRE_URL="${TPL_ROOT}/hypre-2.24.0.tar.gz"  \
         -D SAMRAI_SRC_DIR="${TPL_ROOT}/SAMRAI-v4.1.0"   \
         -D TIMER_SRC_DIR="${TPL_ROOT}/timerutility"     \
@@ -140,13 +139,12 @@ A sample debug configure script for AMP is:
         -D ENABLE_STATIC:BOOL=ON                                       \
         -D ENABLE_SHARED:BOOL=OFF                                      \
         -D INSTALL_DIR:PATH=${INSTALL_DIR}                             \
-        -D PROCS_INSTALL=4                                             \
         -D TPL_LIST:STRING="TIMER;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS" \
         -D LAPACK_URL="http://www.netlib.org/lapack/lapack-3.5.0.tgz"  \
         -D ZLIB_INSTALL_DIR="/usr/local/lib"                           \
         -D PETSC_URL="${TPL_ROOT}/petsc-3.16.4.tar.gz"                 \
         -D HDF5_URL="${TPL_ROOT}/hdf5-1.12.0.tar.gz"                   \
-	-D HDF_VERSION="1.12.0"                                        \
+	    -D HDF_VERSION="1.12.0"                                        \
         -D SILO_URL="${TPL_ROOT}/silo-4.9.1.tar.gz"                    \
         -D HYPRE_URL="${TPL_ROOT}/hypre-2.24.0.tar.gz"                 \
         -D LIBMESH_URL="${TPL_ROOT}/libmesh.tar.gz"                    \
@@ -163,7 +161,7 @@ More sample script may be found in the scripts subdirectory.
 
 
 There are a number of variables that can be passed to the configure process.
-Unless otherwise noted, all variables are optional.  
+Unless otherwise noted, all variables are optional.
 The important variables are:
     CMAKE_BUILD_TYPE - The type of build we are performing (Debug,Release,...) (Required)
                        Note that we will automatically set default flags based on 
@@ -185,12 +183,6 @@ The important variables are:
     CMAKE_SYSTEM_NAME - The system type: Linux, Generic, etc.
     CMAKE_SHARED_LINKER_FLAGS - Linker flags for shared libraries
     INSTALL_DIR      - The install path where we want to install the libraries
-    PROCS_INSTALL    - The number of processors to use to compile each TPL.
-                       Note: we specify the number of processors to use for parallel build
-                       through this flag which will be passed to the subsequent build systems.
-                       specifying "make -j N" at the top level will build N TPLs in parallel,
-                       each with ${PROCS_INSTALL} procs.  
-                       If this is not specified the builds will default to serial builds.  
     TPL_LIST         - The list of TPLs to build.  By default all required TPLs will be built. 
                        Note: if provided the TPL_LIST must be in order of the required dependencies.
                        Failure to do so will result in a cmake error at configure time:
@@ -198,12 +190,12 @@ The important variables are:
                            get_property could not find TARGET LAPACK.  Perhaps it has not yet been created.
                        The order of the subsequent TPL_VARIABLES does not matter.
 
-The final argument must always point to the TPL_BUILDER directory.  
+The final argument must always point to the TPL_BUILDER directory.
 
 
 For each TPL, there are additional arguments that may be provided.  These arguments control
-how that that TPL is built.  
-    TPL_URL          - URL specifying the location to download the TPL.  
+how that that TPL is built.
+    TPL_URL          - URL specifying the location to download the TPL.
                        This URL may be a URL of the form 
                           http://zlib.net/zlib-1.2.8.tar.gz
                        or may point to a local .tar.gz file or directory where the files have been 
@@ -285,7 +277,7 @@ To build:
     cd to the build directory
     run the configure script
     run "make"
-Note that "make" will build all TPLs.  
+Note that "make" will build all TPLs.
 To build a specific TPL the command "make TPL" can be used.  This will build the specified 
     TPL and any required dependencies. 
 "make clean" will clean all TPLs

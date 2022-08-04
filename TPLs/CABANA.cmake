@@ -115,14 +115,14 @@ SET( CABANA_DOC_COMMAND )
 IF ( CABANA_TEST )
     SET( CABANA_CMAKE_TEST
         TEST_AFTER_INSTALL  1
-        TEST_COMMAND        make check
-        BUILD_TEST          make checkcompile -j ${PROCS_INSTALL}
+        TEST_COMMAND        $(MAKE) check
+        BUILD_TEST          $(MAKE) checkcompile
         CHECK_TEST          ! grep "FAILED" CABANA-test-out.log > /dev/null
     )
 ENDIF()
 #IF ( CABANA_DOCS )
 #    SET( CABANA_DOC_COMMAND
-#        DOC_COMMAND         make docs -j ${PROCS_INSTALL} VERBOSE=1
+#        DOC_COMMAND         $(MAKE) docs VERBOSE=1
 #        COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/cabana-dox/html "${CABANA_INSTALL_DIR}/doxygen"
 #    )
 #ENDIF()
@@ -133,10 +133,10 @@ ADD_TPL(
     SOURCE_DIR          "${CABANA_CMAKE_SOURCE_DIR}"
     UPDATE_COMMAND      ""
     CMAKE_ARGS          ${CABANA_CONFIGURE_OPTS}
-    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_COMMAND       $(MAKE) VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
-    CLEAN_COMMAND       make clean -j ${PROCS_INSTALL}
+    CLEAN_COMMAND       $(MAKE) clean
     ${CABANA_DOC_COMMAND}
     ${CABANA_CMAKE_TEST}
     DEPENDS             ${CABANA_DEPENDS}

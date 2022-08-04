@@ -14,7 +14,6 @@ cmake                                                       \
     -D ENABLE_STATIC:BOOL=ON                                \
     -D ENABLE_SHARED:BOOL=OFF                               \
     -D INSTALL_DIR:PATH=${INSTALL_DIR}                      \
-    -D PROCS_INSTALL=4                                      \
     -D TPL_LIST:STRING="BOOST;LAPACK;ZLIB;PETSC;HDF5;SILO;HYPRE;LIBMESH;TRILINOS;SUNDIALS;TIMER;SAMRAI" \
         -D BOOST_URL="${TPL_ROOT}/boost-1.55.0-headers.tar.gz" \
             -D BOOST_ONLY_COPY_HEADERS:BOOL=true            \

@@ -71,7 +71,7 @@ IF ( CMAKE_BUILD_THRUST )
         SOURCE_DIR          "${THRUST_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
         CMAKE_ARGS          ${THRUST_CONFIGURE_OPTIONS}
-        BUILD_COMMAND       cmake --build ${THRUST_BUILD_DIR} --target install -j ${PROCS_INSTALL}
+        BUILD_COMMAND       cmake --build ${THRUST_BUILD_DIR} --target install -j 8
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ""
         DEPENDS

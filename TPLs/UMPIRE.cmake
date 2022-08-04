@@ -90,7 +90,7 @@ IF ( CMAKE_BUILD_UMPIRE )
         SOURCE_DIR          "${UMPIRE_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
         CMAKE_ARGS          ${UMPIRE_CONFIGURE_OPTIONS}
-        BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM} -j ${PROCS_INSTALL} VERBOSE=1
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install; 
         DEPENDS             

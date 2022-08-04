@@ -111,7 +111,7 @@ IF ( CMAKE_BUILD_MUMPS )
         SOURCE_DIR          "${MUMPS_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
         CONFIGURE_COMMAND   cp ${MUMPS_Makefile} ${MUMPS_BUILD_DIR}/Makefile.inc
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ""
         DEPENDS             ${MUMPS_DEPENDENCIES}

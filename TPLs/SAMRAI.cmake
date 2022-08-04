@@ -169,14 +169,14 @@ SET( SAMRAI_DOC_COMMAND )
 IF ( SAMRAI_TEST )
     SET( SAMRAI_CMAKE_TEST
         TEST_AFTER_INSTALL  1
-        TEST_COMMAND        make check
-        BUILD_TEST          make checkcompile -j ${PROCS_INSTALL}
+        TEST_COMMAND        $(MAKE) check
+        BUILD_TEST          $(MAKE) checkcompile
         CHECK_TEST          ! grep "FAILED" SAMRAI-test-out.log > /dev/null
     )
 ENDIF()
 IF ( SAMRAI_DOCS )
     SET( SAMRAI_DOC_COMMAND
-        DOC_COMMAND         make docs -j ${PROCS_INSTALL} VERBOSE=1
+        DOC_COMMAND         $(MAKE) docsVERBOSE=1
         COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/samrai-dox/html "${SAMRAI_INSTALL_DIR}/doxygen"
     )
 ENDIF()
@@ -187,13 +187,13 @@ ADD_TPL(
     SOURCE_DIR          "${SAMRAI_CMAKE_SOURCE_DIR}"
     UPDATE_COMMAND      ""
     CMAKE_ARGS          ${SAMRAI_CONFIGURE_OPTIONS}
-    BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+    BUILD_COMMAND       $(MAKE) VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
     ${SAMRAI_DOC_COMMAND}
     ${SAMRAI_CMAKE_TEST}
     DEPENDS             ${SAMRAI_DEPENDS}
-    CLEAN_COMMAND       make clean -j ${PROCS_INSTALL}
+    CLEAN_COMMAND       $(MAKE) clean
     LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
 )
 

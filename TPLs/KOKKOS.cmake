@@ -97,7 +97,7 @@ IF ( CMAKE_BUILD_KOKKOS )
         SOURCE_DIR          "${KOKKOS_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
         CMAKE_ARGS          ${KOKKOS_CONFIGURE_OPTIONS}
-        BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM} -j ${PROCS_INSTALL} VERBOSE=1
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install; 
         DEPENDS             

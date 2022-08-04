@@ -102,7 +102,7 @@ IF ( CMAKE_BUILD_HYPRE )
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${HYPRE_CMAKE_SOURCE_DIR}"
         CONFIGURE_COMMAND   "./configure" --prefix=${HYPRE_INSTALL_DIR} ${HYPRE_CONFIGURE_OPTIONS} ${ENV_VARS}
-        BUILD_COMMAND       make -j ${PROCS_INSTALL} VERBOSE=1
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     1
         INSTALL_COMMAND     make install
         DEPENDS             ${HYPRE_DEPENDS}
