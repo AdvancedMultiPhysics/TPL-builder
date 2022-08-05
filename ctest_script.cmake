@@ -1,5 +1,5 @@
 # ctest script for building, running, and submitting the test results 
-# Usage:  ctest -s script,build
+# Usage:  ctest -S script,build
 #   build = debug / optimized / weekly / valgrind / valgrind-matlab
 # Note: this test will use use the number of processors defined in the variable N_PROCS,
 #   the enviornmental variable N_PROCS, or the number of processors availible (if not specified)
@@ -238,23 +238,23 @@ MESSAGE("   ${CTEST_OPTIONS}")
 
 
 # Configure the drop site
-IF ( CTEST_URL )
-    STRING( REPLACE "PROJECT" "CTest-Builder" CTEST_URL "${CTEST_URL}" )
-    SET( CTEST_SUBMIT_URL "${CTEST_URL}" )
-ELSE()
-    IF ( NOT CTEST_SITE )
-        SET( CTEST_SITE ${HOSTNAME} )
-    ENDIF()
+IF ( NOT CTEST_SITE )
+    SET( CTEST_SITE ${HOSTNAME} )
+ENDIF()
+IF ( NOT CTEST_URL )
     SET( CTEST_DROP_METHOD "http" )
     SET( CTEST_DROP_LOCATION "/CDash/submit.php?project=CTest-Builder" )
     SET( CTEST_DROP_SITE_CDASH TRUE )
     SET( DROP_SITE_CDASH TRUE )
     SET( CTEST_DROP_SITE ${CTEST_SITE} )
+ELSE()
+    STRING( REPLACE "PROJECT" "CTest-Builder" CTEST_URL "${CTEST_URL}" )
+    SET( CTEST_SUBMIT_URL "${CTEST_URL}" )
 ENDIF()
 
 
 # Configure and run the tests
-CTEST_START("${CTEST_DASHBOARD}")
+CTEST_START( "${CTEST_DASHBOARD}" )
 CTEST_UPDATE()
 CTEST_CONFIGURE(
     BUILD   ${CTEST_BINARY_DIRECTORY}
@@ -262,7 +262,8 @@ CTEST_CONFIGURE(
     OPTIONS "${CTEST_OPTIONS}"
 )
 
-# Run the configure/build 
+
+# Run the configure/build/test
 CTEST_BUILD()
 CTEST_TEST()
 CTEST_SUBMIT()
