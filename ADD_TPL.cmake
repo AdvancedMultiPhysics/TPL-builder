@@ -125,7 +125,7 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
     EXTERNALPROJECT_ADD_STEP(
         ${TPL}
         post-install
-        COMMAND             make log-${TPL}
+        COMMAND             $(MAKE) log-${TPL}
         COMMENT             ""
         DEPENDEES           stop-stamp
         ALWAYS              0
@@ -161,9 +161,9 @@ FUNCTION( ADD_TPL TPL )
             TEST_AFTER_INSTALL LOG_DOWNLOAD LOG_UPDATE LOG_CONFIGURE LOG_BUILD LOG_TEST LOG_INSTALL )
         SET(external_add_multiple TARGETS UPDATE_COMMAND PATCH_COMMAND CONFIGURE_COMMAND CMAKE_ARGS BUILD_COMMAND DEPENDS INSTALL_COMMAND TEST_COMMAND )
         # Parse the input options
-        SET(options OPTIONAL )
-        SET(oneValueArgs ${external_add_one} )
-        SET(multiValueArgs ${external_add_multiple} CLEAN_COMMAND DOC_COMMAND BUILD_TEST CHECK_TEST )
+        SET( options OPTIONAL CONFIGURE_ALWAYS )
+        SET( oneValueArgs ${external_add_one} )
+        SET( multiValueArgs ${external_add_multiple} CLEAN_COMMAND DOC_COMMAND BUILD_TEST CHECK_TEST )
         cmake_parse_arguments( ADD_TPL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
         # Add the options for EXTERNALPROJECT_ADD
         SET( TPL_OPTIONS )
@@ -182,12 +182,21 @@ FUNCTION( ADD_TPL TPL )
             MESSAGE( "EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )" )
         ENDIF()
         LIST( FIND TPL_LIST ${TPL} TPL_index )
-        FOREACH ( tpl2 ${ADD_TPL_DEPENDS} )
-            LIST( FIND TPL_LIST ${tpl2} tpl2_index)
-            IF ( ( ${tpl2_index} GREATER ${TPL_index} ) OR ( ${tpl2_index} EQUAL "-1" ) )
-                MESSAGE(FATAL_ERROR "${TPL} depends on ${tpl2}, ${tpl2} must be specified before ${TPL} in TPL_LIST" )
-            ENDIF()
-        ENDFOREACH()
+        IF ( ${TPL_index} EQUAL "-1" )
+            FOREACH ( tpl2 ${ADD_TPL_DEPENDS} )
+                LIST( FIND TPL_LIST ${tpl2} tpl2_index)
+                IF ( ${tpl2_index} EQUAL "-1" )
+                    MESSAGE(FATAL_ERROR "${TPL} depends on ${tpl2}, ${tpl2} must be specified in TPL_LIST" )
+                ENDIF()
+            ENDFOREACH()
+        ELSE()
+            FOREACH ( tpl2 ${ADD_TPL_DEPENDS} )
+                LIST( FIND TPL_LIST ${tpl2} tpl2_index)
+                IF ( ( ${tpl2_index} GREATER ${TPL_index} ) OR ( ${tpl2_index} EQUAL "-1" ) )
+                    MESSAGE(FATAL_ERROR "${TPL} depends on ${tpl2}, ${tpl2} must be specified before ${TPL} in TPL_LIST (${TPL_index},${tpl2_index})" )
+                ENDIF()
+            ENDFOREACH()
+        ENDIF()
         EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )
         # Add the logs and TPL-clean
         ADD_TPL_SAVE_LOGS( ${TPL} )
@@ -230,7 +239,7 @@ FUNCTION( ADD_TPL TPL )
                 ${TPL}
                 check-test
                 COMMENT             "Checking test results"
-                COMMAND             ${ADD_TPL_BUILD_TEST}
+                COMMAND             ${ADD_TPL_CHECK_TEST}
                 DEPENDEES           ${CHECK_TEST_DEPENDEES}
                 WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
                 LOG                 0
@@ -245,6 +254,16 @@ FUNCTION( ADD_TPL TPL )
                 DEPENDEES           ${CLEAN_DEPENDEES}
                 WORKING_DIRECTORY   "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-build"
                 LOG                 1
+            )
+        ENDIF()
+        IF ( ADD_TPL_CONFIGURE_ALWAYS )
+            ExternalProject_Add_Step(
+                ${TPL}
+                force_reconfigure
+                COMMAND ${CMAKE_COMMAND} -E echo "Force configure of ${TPL}"
+                DEPENDEES update
+                DEPENDERS configure
+                ALWAYS 1
             )
         ENDIF()
     ELSE()

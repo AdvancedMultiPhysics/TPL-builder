@@ -333,52 +333,27 @@ CHECK_ENABLE_FLAG( ENABLE_TESTS TRUE )
 IF ( ENABLE_TESTS )
     SET( TPLS_Test_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/tests" )
     CHECK_ENABLE_FLAG( DISABLE_TESTS_AFTER_INSTALL FALSE )
-    IF ( DISABLE_TESTS_AFTER_INSTALL )
-        EXTERNALPROJECT_ADD(
-            TPLS_Test
-            SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
-            BUILD_IN_SOURCE     0
-            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DTPL_TEST_DIR=${CMAKE_BINARY_DIR};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
-            BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
-            INSTALL_COMMAND     make install
-            DEPENDS             ${TPL_LIST}
-            LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_INSTALL 1
-        )
-    ELSE()
-        EXTERNALPROJECT_ADD(
-            TPLS_Test
-            SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
-            BUILD_IN_SOURCE     0
-            CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DTPL_TEST_DIR=${CMAKE_BINARY_DIR};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
-            BUILD_COMMAND       ${CMAKE_MAKE_PROGRAM}
-            INSTALL_COMMAND     make install
-            TEST_AFTER_INSTALL  ${CMAKE_COMMAND} -E echo "Installing"
-            TEST_COMMAND        $(MAKE)
-            DEPENDS             ${TPL_LIST}
-            LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-        )
-        EXTERNALPROJECT_ADD_STEP(
-            TPLS_Test
-            post-test
-            COMMAND             make log-TPLS_Test
-            COMMENT             ""
-            DEPENDEES           test
-            ALWAYS              0
-            LOG                 0
-        )
-    ENDIF()
-    ExternalProject_Add_Step(
-        TPLS_Test
-        force_reconfigure
-        COMMAND ${CMAKE_COMMAND} -E echo "Force configure of libhello"
-        DEPENDEES update
-        DEPENDERS configure
-        ALWAYS 1
-    )
-    ADD_TPL_SAVE_LOGS( TPLS_Test )
-    ADD_TPL_CLEAN( TPLS_Test )
-    ADD_BUILD_TEST( TPLS_Test )
 ENDIF()
+
+
+# Configure TPL-builder tests
+SET( TEST_ARGS )
+IF ( NOT DISABLE_TESTS_AFTER_INSTALL )
+SET( TEST_ARGS TEST_COMMAND ${CMAKE_CTEST_COMMAND} )
+ENDIF()
+ADD_TPL(
+    TPLS_Test
+    SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+    UPDATE_COMMAND      ""
+    BUILD_IN_SOURCE     0
+    CONFIGURE_ALWAYS
+    CMAKE_ARGS          "-DTPL_DIRECTORY=${CMAKE_INSTALL_PREFIX};-DTPL_TEST_DIR=${CMAKE_BINARY_DIR};-DINSTALL_DIR=${TPLS_Test_INSTALL_DIR}"
+    BUILD_COMMAND       $(MAKE) install
+    INSTALL_DIR         "${TPLS_Test_INSTALL_DIR}"
+    ${TEST_ARGS}
+    DEPENDS             ${TPL_LIST}
+    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+)
 
 
 ### Add final lines to FindTPLs.cmake

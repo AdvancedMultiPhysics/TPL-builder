@@ -51,8 +51,7 @@ int runAll( bool print_all )
     int N_errors = 0;
 
     // Run the basic tests
-    if ( print_all )
-        printf( "\nRunning double precision basic tests\n" );
+    if ( print_all ) printf( "\nRunning double precision basic tests\n" );
     int err0 = Lapack<double>::run_all_test();
     if ( err0 == 0 && print_all ) {
         printf( "  passed dp tests\n" );
@@ -60,8 +59,7 @@ int runAll( bool print_all )
         printf( "  failed %d dp tests\n", err0 );
         N_errors += err0;
     }
-    if ( print_all )
-        printf( "\nRunning single precision basic tests\n" );
+    if ( print_all ) printf( "\nRunning single precision basic tests\n" );
     err0 = Lapack<float>::run_all_test();
     if ( err0 == 0 && print_all ) {
         printf( "  passed sp tests\n" );
@@ -72,8 +70,7 @@ int runAll( bool print_all )
 
     // Get the times for the tests (double)
     {
-        if ( print_all )
-            printf( "\nGetting double precision test times\n" );
+        if ( print_all ) printf( "\nGetting double precision test times\n" );
         auto tests = Lapack<double>::list_all_tests();
         std::vector<double> error( tests.size() );
         std::vector<int> time( tests.size() );
@@ -93,8 +90,7 @@ int runAll( bool print_all )
 
     // Get the times for the tests (single)
     {
-        if ( print_all )
-            printf( "\nGetting single precision test times\n" );
+        if ( print_all ) printf( "\nGetting single precision test times\n" );
         auto tests = Lapack<float>::list_all_tests();
         std::vector<float> error( tests.size() );
         std::vector<int> time( tests.size() );
@@ -114,8 +110,7 @@ int runAll( bool print_all )
 
     // Run the tests in parallel to check for parallel bugs
     {
-        if ( print_all )
-            printf( "\nRunning parallel tests\n" );
+        if ( print_all ) printf( "\nRunning parallel tests\n" );
         int N_threads = 8;
         auto tests    = Lapack<double>::list_all_tests();
         for ( auto &test : tests ) {
@@ -163,8 +158,7 @@ int main( int argc, char *argv[] )
     Lapack<double>::set_num_threads( 1 );
 
     // Print the lapack version
-    if ( print )
-        std::cout << Lapack<double>::info();
+    if ( print ) std::cout << Lapack<double>::info();
 
     // Run the tests
     int N_errors = 0;

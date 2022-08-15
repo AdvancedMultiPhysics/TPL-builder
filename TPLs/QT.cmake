@@ -1,107 +1,53 @@
-# This will configure and build qt
-# User can configure the source path by specifying QT_SRC_DIR,
-#    the download path by specifying QT_URL, or the installed 
-#    location by specifying QT_INSTALL_DIR
+# This will configure and build QT
+# Currently this only supports finding QT automatically (need to update)
 
 
-# Intialize download/src/install vars
-SET( QT_BUILD_DIR "${CMAKE_BINARY_DIR}/QT-prefix/src/QT-build" )
-IF ( QT_URL ) 
-    MESSAGE("   QT_URL = ${QT_URL}")
-    SET( QT_CMAKE_URL            "${QT_URL}"     )
-    SET( QT_CMAKE_DOWNLOAD_DIR   "${QT_BUILD_DIR}" )
-    SET( QT_CMAKE_SOURCE_DIR     "${QT_BUILD_DIR}" )
-    SET( QT_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/qt" )
-    SET( CMAKE_BUILD_QT TRUE )
-ELSEIF ( QT_SRC_DIR )
-    VERIFY_PATH("${QT_SRC_DIR}")
-    MESSAGE("   QT_SRC_DIR = ${QT_SRC_DIR}")
-    SET( QT_CMAKE_URL            "${QT_SRC_DIR}"   )
-    SET( QT_CMAKE_DOWNLOAD_DIR   "${QT_BUILD_DIR}" )
-    SET( QT_CMAKE_SOURCE_DIR     "${QT_BUILD_DIR}" )
-    SET( QT_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/qt" )
-    SET( CMAKE_BUILD_QT TRUE )
-ELSEIF ( QT_INSTALL_DIR ) 
-    SET( QT_CMAKE_INSTALL_DIR "${QT_INSTALL_DIR}" )
-    SET( CMAKE_BUILD_QT FALSE )
+# Find QT
+IF ( NOT DEFINED QT_VERSION )
+    SET( QT_VERSION "4" )
+ENDIF()
+IF ( ${QT_VERSION} EQUAL "4" )
+    # Using Qt4
+    SET( QT "QT4" )
+    SET( Qt "Qt4" )
+    SET( QT_COMPONENTS  QtCore QtGui QtOpenGL QtSvg QtSql )
+ELSEIF ( ${QT_VERSION} EQUAL "5" )
+    # Using Qt5
+    SET( QT "QT5" )
+    SET( Qt "Qt5" )
+    SET( QT_COMPONENTS  Core Gui OpenGL Svg Sql )
 ELSE()
-    MESSAGE(FATAL_ERROR "Please specify QT_SRC_DIR, QT_URL, or QT_INSTALL_DIR")
+    MESSAGE( FATAL_ERROR "Unknown Qt version")
 ENDIF()
-SET( QT_INSTALL_DIR "${QT_CMAKE_INSTALL_DIR}" )
-MESSAGE( "   QT_INSTALL_DIR = ${QT_INSTALL_DIR}" )
-
-
-# Configure qt
-IF ( CMAKE_BUILD_QT )
-    SET( QT_CONFIGURE_OPTIONS )
-    SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} --prefix=${QT_CMAKE_INSTALL_DIR} )
-    SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} -opensource -confirm-license )
-    SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} -no-webkit -no-multimedia )
-    IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
-        SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} -debug )
-    ELSEIF ( ${CMAKE_BUILD_TYPE} STREQUAL "Release" )
-        SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} -release )
-    ELSE()
-        MESSAGE ( FATAL_ERROR "Unknown CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" )
-    ENDIF()
-    IF ( ENABLE_SHARED AND ENABLE_STATIC )
-        MESSAGE(FATAL_ERROR "Compiling qt with both static and shared libraries is not yet supported")
-    ELSEIF ( ENABLE_SHARED )
-        SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} --shared )
-        SET( SUFFIX so )
-    ELSEIF ( ENABLE_STATIC )
-        SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} --static )
-        SET( SUFFIX a)
-    ENDIF()
-
-    IF( USING_GCC )
-        SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} -platform linux-g++ )
-    ELSEIF( (${CMAKE_C_COMPILER_ID} MATCHES "Intel") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel") ) 
-        SET( QT_CONFIGURE_OPTIONS ${QT_CONFIGURE_OPTIONS} -platform linux-icc )
-    ELSE()
-        MESSAGE(WARNING "QT platform not set")
-    ENDIF()
-
-    SET( QT_ENV_VARS CC=${CMAKE_C_COMPILER} )
-    #SET( QT_ENV_VARS ${QT_ENV_VARS} CFLAGS=${CMAKE_C_FLAGS} )
-    SET( QT_ENV_VARS ${QT_ENV_VARS} CXX=${CMAKE_CXX_COMPILER} )
-    #SET( QT_ENV_VARS ${QT_ENV_VARS} CXXFLAGS=${CMAKE_CXX_FLAGS} )
-    SET( QT_ENV_VARS ${QT_ENV_VARS} FC=${CMAKE_Fortran_COMPILER} )
-    #SET( QT_ENV_VARS ${QT_ENV_VARS} FCFLAGS=${CMAKE_Fortran_FLAGS} )
-    #SET( QT_ENV_VARS ${QT_ENV_VARS} LDFLAGS=${ENV_LDFLAGS} )
+FIND_PACKAGE( ${Qt} COMPONENTS ${QT_COMPONENTS} REQUIRED )
+SET( QT_FOUND ${Qt}_FOUND )
+IF ( NOT ${Qt}_FOUND )
+    RETURN()
 ENDIF()
-
-
-# Build qt
-ADD_TPL( 
-    QT
-    URL                 "${QT_CMAKE_URL}"
-    DOWNLOAD_DIR        "${QT_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${QT_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    BUILD_IN_SOURCE     1
-    CONFIGURE_COMMAND   ./configure ${QT_CONFIGURE_OPTIONS} 
-    BUILD_COMMAND       $(MAKE) ${QT_ENV_VARS} VERBOSE=1
-    INSTALL_COMMAND     $(MAKE) install
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-IF ( CMAKE_BUILD_QT )
-    EXTERNALPROJECT_ADD_STEP(
-        QT
-        link
-        COMMAND             ln -sf libQtCore.prl libQtCore_debug.prl 
-        COMMAND             ln -sf libQtTest.prl libQtTest_debug.prl
-        COMMAND             ln -sf libQtXml.prl  libQtXml_debug.prl 
-        COMMAND             ln -sf libQtSql.prl  libQtSql_debug.prl
-        COMMAND             ln -sf libQtCore.${SUFFIX} libQtCore_debug.${SUFFIX}
-        COMMAND             ln -sf libQtTest.${SUFFIX} libQtTest_debug.${SUFFIX}
-        COMMAND             ln -sf libQtXml.${SUFFIX} libQtXml_debug.${SUFFIX}
-        COMMAND             ln -sf libQtSql.${SUFFIX} libQtSql_debug.${SUFFIX}
-        COMMENT             ""
-        DEPENDEES           install
-        WORKING_DIRECTORY   "${QT_CMAKE_INSTALL_DIR}/lib"
-        LOG                 0
-    )
+IF ( ${QT_VERSION} EQUAL "5" )
+    GET_TARGET_PROPERTY( QT_QMAKE_EXECUTABLE ${Qt}::qmake IMPORTED_LOCATION )
 ENDIF()
+ADD_CUSTOM_TARGET( QT )
+
+
+
+# Add the appropriate fields to FindTPLs.cmake
+FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find QT\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "IF ( TPLs_FIND_QT AND NOT TPL_FOUND_QT )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( QT_VERSION ${QT_VERSION} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( QT ${QT} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( Qt ${Qt} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( QT_COMPONENTS ${QT_COMPONENTS} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    FIND_PACKAGE( ${Qt} COMPONENTS ${QT_COMPONENTS} REQUIRED )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( TPL_INCLUDE_DIRS $\{QWT_INCLUDE_DIRS} $\{TPL_INCLUDE_DIRS} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( TPL_LIBRARIES $\{TPL_LIBRARIES} )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( TPL_FOUND_QT $\{Qt}_FOUND )\n" )
+IF ( ${QT_VERSION} EQUAL "5" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "    GET_TARGET_PROPERTY( QT_QMAKE_EXECUTABLE $\{Qt}::qmake IMPORTED_LOCATION )\n" )
+ENDIF()
+FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDIF()\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "\n" )
+
+
 
 
