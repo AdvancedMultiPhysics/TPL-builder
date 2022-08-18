@@ -61,6 +61,21 @@ IF ( NOT DEFINED CPPCHECK_SOURCE )
 ENDIF()
 
 
+# Set the global ignore files/directories
+SET( CPPCHECK_IGNORE_FILES )
+SET( CPPCHECK_IGNORE_DIRECTORIES )
+FOREACH ( tmp ${CPPCHECK_IGNORE} )
+    IF ( NOT EXISTS "${tmp}" )
+        SET( tmp "${CPPCHECK_SOURCE}/${tmp}" )
+    ENDIF()
+    IF ( IS_DIRECTORY "${tmp}" )
+        SET( CPPCHECK_IGNORE_DIRECTORIES ${CPPCHECK_IGNORE_DIRECTORIES} "${tmp}" )
+    ELSEIF ( EXISTS "${tmp}" )
+        SET( CPPCHECK_IGNORE_FILES ${CPPCHECK_IGNORE_FILES} "${tmp}" )
+    ENDIF()
+ENDFOREACH()
+
+
 # Function to add a cppcheck tests
 FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
     # Check if SRCDIR has been processed by CMake
@@ -106,6 +121,7 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
             SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} -UWIN32 -UWIN64 -U_WIN32 -U_WIN64 -U__APPLE__ -D__linux -D__unix -D__posix )
         ENDIF()
     ENDIF()
+
     # Add the include paths
     IF( NOT DEFINED CPPCHECK_INCLUDE )
         SET( CPPCHECK_INCLUDE )
@@ -115,10 +131,16 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
             GET_PROPERTY( dirs DIRECTORY "${PROJECT_SOURCE_DIR}" PROPERTY INCLUDE_DIRECTORIES )
         ENDIF()
         LIST( REMOVE_DUPLICATES dirs )
-        FOREACH(dir ${dirs})
-            SET( CPPCHECK_INCLUDE ${CPPCHECK_INCLUDE} "-I${dir}" )
-        ENDFOREACH()
+        SET( CPPCHECK_INCLUDE ${dirs} )
     ENDIF()
+    FOREACH ( dir ${CPPCHECK_INCLUDE} )
+        SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} "-I${dir}" )
+    ENDFOREACH()
+
+    # Add the exclusions
+    FOREACH ( tmp ${CPPCHECK_IGNORE_FILES} ${CPPCHECK_IGNORE_DIRECTORIES} )
+        SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} "-i${tmp}" )
+    ENDFOREACH()
 
     # Set the timeout
     IF ( NOT DEFINED CPPCHECK_TIMEOUT )
@@ -126,18 +148,18 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
     ENDIF()
 
     # Add the test
-    ADD_TEST( ${TESTNAME} ${CPPCHECK} ${CPPCHECK_OPTIONS} --error-exitcode=1  ${CPPCHECK_INCLUDE} ${CPPCHECK_IGNORE} ${ARGN} )
+    ADD_TEST( ${TESTNAME} ${CPPCHECK} ${CPPCHECK_OPTIONS} ${ARGN} )
     SET_TESTS_PROPERTIES( ${TESTNAME} PROPERTIES PROCESSORS 1 TIMEOUT ${CPPCHECK_TIMEOUT} COST ${CPPCHECK_TIMEOUT} )
-
 ENDFUNCTION()
 
 
 # Add the cppcheck test splitting directories with too many files
 FUNCTION( ADD_CPPCHECK_TEST_RECURSIVE TESTNAME SRCDIR )
+
     LIST( LENGTH SRCDIR src_len )
     IF ( src_len GREATER 1 )
         # Multiple src directories
-        FOREACH(src ${SRCDIR})
+        FOREACH ( src ${SRCDIR} )
             FILE( GLOB child RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${src}" )
             ADD_CPPCHECK_TEST_RECURSIVE( ${TESTNAME}-${child} "${src}" )
         ENDFOREACH()
@@ -148,8 +170,16 @@ FUNCTION( ADD_CPPCHECK_TEST_RECURSIVE TESTNAME SRCDIR )
         # Get a list of all CMake subdirectories
         GET_PROPERTY( subdirs DIRECTORY "${SRCDIR}" PROPERTY SUBDIRECTORIES )
         # Get a list of all srcs
-        FILE(GLOB_RECURSE SRCS "${SRCDIR}/*.cpp" "${SRCDIR}/*.cc" "${SRCDIR}/*.c" )
-        LIST(LENGTH SRCS len)
+        FILE( GLOB_RECURSE SRCS "${SRCDIR}/*.cpp" "${SRCDIR}/*.cc" "${SRCDIR}/*.c" )
+        # Remove excluded directories/files
+        SET( EXCLUDED_FILES ${CPPCHECK_IGNORE_FILES} )
+        FOREACH ( tmp ${CPPCHECK_IGNORE_DIRECTORIES} )
+            FILE( GLOB_RECURSE tmp2 "${tmp}/*.cpp" "${tmp}/*.cc" "${tmp}/*.c" )
+            SET( EXCLUDED_FILES ${CPPCHECK_IGNORE_FILES} ${tmp2} )
+        ENDFOREACH()
+        LIST( REMOVE_ITEM SRCS ${EXCLUDED_FILES} )
+        # Check the number of srcs
+        LIST( LENGTH SRCS len )
         IF ( len EQUAL 0 )
             # Nothing to process
         ELSEIF ( len LESS 20 )
