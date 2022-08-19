@@ -1415,6 +1415,7 @@ FUNCTION( ADD_DISTCLEAN ${ARGN} )
         cmake.check_cache
         *.cmake
         compile.log
+        cppcheck-build
         Doxyfile
         Makefile
         core core.*
