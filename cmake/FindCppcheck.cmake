@@ -4,10 +4,7 @@
 # Find cppcheck
 #
 # Use this module by invoking find_package with the form:
-#
-#   find_package( Cppcheck
-#     [REQUIRED]             # Fail with error if the cppcheck is not found
-#   )
+#   find_package( Cppcheck )
 #
 # This module finds cppcheck and configures a test using the provided options
 #
@@ -15,7 +12,10 @@
 #   CPPCHECK_SOURCE       - Source path to check
 #   CPPCHECK_INCLUDE      - List of include folders (will overwrite defaults)
 #   CPPCHECK_IGNORE       - List of files/folders to exclude
+#   CPPCHECK_USE_JSON     - Use JSON file instead of search for files (recommended, disabled by default)
+#   CPPCHECK_INCONCLUSIVE - Do we want to include the inclusive flag (disabled by default)
 #   CPPCHECK_TIMEOUT      - Timeout for each cppcheck test (default is 5 minutes)
+#   CPPCHECK_PROCS        - Number of processors to use (only used with CPPCHECK_USE_JSON)
 #   CPPCHECK_OPTIONS      - List of cppcheck options (expert use: will overwrite default options)
 #
 # The following variables are set by find_package( Cppcheck )
@@ -86,7 +86,10 @@ FUNCTION( ADD_CPPCHECK_TEST TESTNAME SRCDIR )
 
     # Set the options for cppcheck
     IF ( NOT DEFINED CPPCHECK_OPTIONS )
-        SET( CPPCHECK_OPTIONS -q --enable=all )
+        SET( CPPCHECK_OPTIONS -q --enable=warning,performance,portability,information )
+        IF ( CPPCHECK_INCONCLUSIVE )
+            SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} --inconclusive )
+        ENDIF()
         IF ( CPPCHECK_SUPPRESSION_FILE )
             SET( CPPCHECK_OPTIONS ${CPPCHECK_OPTIONS} "--suppressions-list=${CPPCHECK_SUPPRESSION_FILE}" )
         ELSEIF ( EXISTS "${CPPCHECK_SOURCE}/cppcheckSuppressionFile" )
@@ -184,9 +187,6 @@ FUNCTION( ADD_CPPCHECK_TEST_RECURSIVE TESTNAME SRCDIR )
             FILE( GLOB child RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${src}" )
             ADD_CPPCHECK_TEST_RECURSIVE( ${TESTNAME}-${child} "${src}" )
         ENDFOREACH()
-    ELSEIF( CPPCHECK_SERIALIZE )
-        # Force a single cppcheck command
-        ADD_CPPCHECK_TEST( ${TESTNAME} "${SRCDIR}" "${SRCDIR}" )
     ELSE()
         # Get a list of all CMake subdirectories
         GET_PROPERTY( subdirs DIRECTORY "${SRCDIR}" PROPERTY SUBDIRECTORIES )
@@ -253,11 +253,18 @@ ENDFUNCTION()
 
 # Add the test(s)
 IF ( CPPCHECK_USE_JSON AND CMAKE_EXPORT_COMPILE_COMMANDS )
-    SET( CPPCHECK_PROCS 8 )
-    IF (  "${TEST_MAX_PROCS}" LESS "${CPPCHECK_PROCS}" )
+    IF ( NOT CPPCHECK_PROCS )
+        SET( CPPCHECK_PROCS 8 )
+    ENDIF()
+    IF ( "${TEST_MAX_PROCS}" LESS "${CPPCHECK_PROCS}" )
         SET( CPPCHECK_PROCS ${TEST_MAX_PROCS} )
     ENDIF()
-    ADD_CPPCHECK_TEST( cppcheck "${SRCDIR}" "--project=${CMAKE_BINARY_DIR}/compile_commands.json" -j ${CPPCHECK_PROCS} )
+    IF ( "${CPPCHECK_PROCS}" GREATER "1" )
+        ADD_CPPCHECK_TEST( cppcheck "${SRCDIR}" "--project=${CMAKE_BINARY_DIR}/compile_commands.json" -j ${CPPCHECK_PROCS} )
+    ELSE()
+        SET( CPPCHECK_PROCS 1 )
+        ADD_CPPCHECK_TEST( cppcheck "${SRCDIR}" "--project=${CMAKE_BINARY_DIR}/compile_commands.json" )
+    ENDIF()
 ELSE()
     SET( CPPCHECK_PROCS 1 )
     ADD_CPPCHECK_TEST_RECURSIVE( cppcheck "${CPPCHECK_SOURCE}" )
