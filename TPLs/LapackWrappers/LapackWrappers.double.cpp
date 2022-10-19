@@ -86,9 +86,9 @@ void Lapack<double>::copy( int N, const double *DX, int INCX, double *DY, int IN
     cblas_dcopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
-    FORTRAN_WRAPPER(::dcopy )( &Nl, (double *) DX, &INCXl, DY, &INCYl );
+    FORTRAN_WRAPPER( ::dcopy )( &Nl, (double *) DX, &INCXl, DY, &INCYl );
 #else
-    FORTRAN_WRAPPER(::dcopy )( &N, (double *) DX, &INCX, DY, &INCY );
+    FORTRAN_WRAPPER( ::dcopy )( &N, (double *) DX, &INCX, DY, &INCY );
 #endif
 }
 // Define the member functions
@@ -104,9 +104,9 @@ void Lapack<double>::swap( int N, double *DX, int INCX, double *DY, int INCY )
     cblas_dswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
-    FORTRAN_WRAPPER(::dswap )( &Nl, DX, &INCXl, DY, &INCYl );
+    FORTRAN_WRAPPER( ::dswap )( &Nl, DX, &INCXl, DY, &INCYl );
 #else
-    FORTRAN_WRAPPER(::dswap )( &N, DX, &INCX, DY, &INCY );
+    FORTRAN_WRAPPER( ::dswap )( &N, DX, &INCX, DY, &INCY );
 #endif
 }
 #undef dscal
@@ -121,9 +121,9 @@ void Lapack<double>::scal( int N, double DA, double *DX, int INCX )
     cblas_dscal( N, DA, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    FORTRAN_WRAPPER(::dscal )( &Np, &DA, DX, &INCXp );
+    FORTRAN_WRAPPER( ::dscal )( &Np, &DA, DX, &INCXp );
 #else
-    FORTRAN_WRAPPER(::dscal )( &N, &DA, DX, &INCX );
+    FORTRAN_WRAPPER( ::dscal )( &N, &DA, DX, &INCX );
 #endif
 }
 #undef dnrm2
@@ -138,9 +138,9 @@ double Lapack<double>::nrm2( int N, const double *DX, int INCX )
     return cblas_dnrm2( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    return FORTRAN_WRAPPER(::dnrm2 )( &Np, (double *) DX, &INCXp );
+    return FORTRAN_WRAPPER( ::dnrm2 )( &Np, (double *) DX, &INCXp );
 #else
-    return FORTRAN_WRAPPER(::dnrm2 )( &N, (double *) DX, &INCX );
+    return FORTRAN_WRAPPER( ::dnrm2 )( &N, (double *) DX, &INCX );
 #endif
 }
 #undef idamax
@@ -155,9 +155,9 @@ int Lapack<double>::iamax( int N, const double *DX, int INCX )
     return cblas_idamax( N, DX, INCX ) - 1;
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    return FORTRAN_WRAPPER(::idamax )( &Np, (double *) DX, &INCXp ) - 1;
+    return FORTRAN_WRAPPER( ::idamax )( &Np, (double *) DX, &INCXp ) - 1;
 #else
-    return FORTRAN_WRAPPER(::idamax )( &N, (double *) DX, &INCX ) - 1;
+    return FORTRAN_WRAPPER( ::idamax )( &N, (double *) DX, &INCX ) - 1;
 #endif
 }
 #undef daxpy
@@ -172,9 +172,9 @@ void Lapack<double>::axpy( int N, double DA, const double *DX, int INCX, double 
     cblas_daxpy( N, DA, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
-    FORTRAN_WRAPPER(::daxpy )( &Np, &DA, (double *) DX, &INCXp, DY, &INCYp );
+    FORTRAN_WRAPPER( ::daxpy )( &Np, &DA, (double *) DX, &INCXp, DY, &INCYp );
 #else
-    FORTRAN_WRAPPER(::daxpy )( &N, &DA, (double *) DX, &INCX, DY, &INCY );
+    FORTRAN_WRAPPER( ::daxpy )( &N, &DA, (double *) DX, &INCX, DY, &INCY );
 #endif
 }
 #undef dgemv
@@ -194,10 +194,10 @@ void Lapack<double>::gemv( char TRANS, int M, int N, double ALPHA, const double 
     cblas_dgemv( CblasColMajor, TRANS2( TRANS ), M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, INCXp = INCX, INCYp = INCY;
-    FORTRAN_WRAPPER(::dgemv )
+    FORTRAN_WRAPPER( ::dgemv )
     ( &TRANS, &Mp, &Np, &ALPHA, (double *) A, &LDAp, (double *) DX, &INCXp, &BETA, DY, &INCYp );
 #else
-    FORTRAN_WRAPPER(::dgemv )
+    FORTRAN_WRAPPER( ::dgemv )
     ( &TRANS, &M, &N, &ALPHA, (double *) A, &LDA, (double *) DX, &INCX, &BETA, DY, &INCY );
 #endif
 }
@@ -210,7 +210,7 @@ void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K, double
     cblas_dgemm( CblasColMajor, (CBLAS_TRANSPOSE) TRANSA, (CBLAS_TRANSPOSE) TRANSB, M, N, K, ALPHA,
         A, LDA, B, LDB, BETA, C, LDC );
 #elif defined( USE_ACML )
-    FORTRAN_WRAPPER(::dgemm )
+    FORTRAN_WRAPPER( ::dgemm )
     ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (double *) A, &LDA, (double *) B, &LDB, &BETA, C, &LDC,
         1, 1 );
 //::dgemm(TRANSA,TRANSA,M,N,K,ALPHA,(double*)A,LDA,(double*)B,LDB,BETA,C,LDC);
@@ -222,11 +222,11 @@ void Lapack<double>::gemm( char TRANSA, char TRANSB, int M, int N, int K, double
         BETA, C, LDC );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, Kp = K, LDAp = LDA, LDBp = LDB, LDCp = LDC;
-    FORTRAN_WRAPPER(::dgemm )
+    FORTRAN_WRAPPER( ::dgemm )
     ( &TRANSA, &TRANSB, &Mp, &Np, &Kp, &ALPHA, (double *) A, &LDAp, (double *) B, &LDBp, &BETA, C,
         &LDCp );
 #else
-    FORTRAN_WRAPPER(::dgemm )
+    FORTRAN_WRAPPER( ::dgemm )
     ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, (double *) A, &LDA, (double *) B, &LDB, &BETA, C,
         &LDC );
 #endif
@@ -245,9 +245,9 @@ double Lapack<double>::asum( int N, const double *DX, int INCX )
     return cblas_dasum( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    return FORTRAN_WRAPPER(::dasum )( &Np, (double *) DX, &INCXp );
+    return FORTRAN_WRAPPER( ::dasum )( &Np, (double *) DX, &INCXp );
 #else
-    return FORTRAN_WRAPPER(::dasum )( &N, (double *) DX, &INCX );
+    return FORTRAN_WRAPPER( ::dasum )( &N, (double *) DX, &INCX );
 #endif
 }
 #undef ddot
@@ -262,9 +262,9 @@ double Lapack<double>::dot( int N, const double *DX, int INCX, const double *DY,
     return cblas_ddot( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
-    return FORTRAN_WRAPPER(::ddot )( &Np, (double *) DX, &INCXp, (double *) DY, &INCYp );
+    return FORTRAN_WRAPPER( ::ddot )( &Np, (double *) DX, &INCXp, (double *) DY, &INCYp );
 #else
-    return FORTRAN_WRAPPER(::ddot )( &N, (double *) DX, &INCX, (double *) DY, &INCY );
+    return FORTRAN_WRAPPER( ::ddot )( &N, (double *) DX, &INCX, (double *) DY, &INCY );
 #endif
 }
 #undef dger
@@ -280,10 +280,10 @@ void Lapack<double>::ger( int N, int M, double alpha, const double *x, int INCX,
     cblas_dger( CblasColMajor, N, M, alpha, x, INCX, y, INCY, A, LDA );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, INCXp = INCX, INCYp = INCY, LDAp = LDA;
-    FORTRAN_WRAPPER(::dger )
+    FORTRAN_WRAPPER( ::dger )
     ( &Np, &Mp, &alpha, (double *) x, &INCXp, (double *) y, &INCYp, A, &LDAp );
 #else
-    FORTRAN_WRAPPER(::dger )( &N, &M, &alpha, (double *) x, &INCX, (double *) y, &INCY, A, &LDA );
+    FORTRAN_WRAPPER( ::dger )( &N, &M, &alpha, (double *) x, &INCX, (double *) y, &INCY, A, &LDA );
 #endif
 }
 #undef dgesv
@@ -300,13 +300,13 @@ void Lapack<double>::gesv(
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER(::dgesv )( &Np, &NRHSp, A, &LDAp, IPIVp, B, &LDBp, &INFOp );
+    FORTRAN_WRAPPER( ::dgesv )( &Np, &NRHSp, A, &LDAp, IPIVp, B, &LDBp, &INFOp );
     for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
-    FORTRAN_WRAPPER(::dgesv )( &N, &NRHS, (double *) A, &LDA, IPIV, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgesv )( &N, &NRHS, (double *) A, &LDA, IPIV, B, &LDB, &INFO );
 #endif
 }
 #undef dgtsv
@@ -317,15 +317,15 @@ void Lapack<double>::gtsv(
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgtsv" );
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t N2 = N, NRHS2 = NRHS, LDB2 = LDB, INFOp;
-    FORTRAN_WRAPPER(::dgtsv )( &N2, &NRHS2, DL, D, DU, B, &LDB2, &INFOp );
+    FORTRAN_WRAPPER( ::dgtsv )( &N2, &NRHS2, DL, D, DU, B, &LDB2, &INFOp );
     INFO = static_cast<int>( INFOp );
 #else
-    FORTRAN_WRAPPER(::dgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgtsv )( &N, &NRHS, DL, D, DU, B, &LDB, &INFO );
 #endif
 }
 #undef dgbsv
@@ -337,24 +337,24 @@ void Lapack<double>::gbsv( int N, int KL, int KU, int NRHS, double *AB, int LDAB
     throw std::logic_error( "ATLAS does not support dgbsv" );
 #elif defined( USE_ACML )
     d_mutex.lock();
-    FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
     d_mutex.unlock();
 #elif defined( USE_VECLIB )
     d_mutex.lock();
-    FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
     d_mutex.unlock();
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER(::dgbsv )( &Np, &KLp, &KUp, &NRHSp, AB, &LDABp, IPIVp, B, &LDBp, &INFOp );
+    FORTRAN_WRAPPER( ::dgbsv )( &Np, &KLp, &KUp, &NRHSp, AB, &LDABp, IPIVp, B, &LDBp, &INFOp );
     for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
-    FORTRAN_WRAPPER(::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
+    FORTRAN_WRAPPER( ::dgbsv )( &N, &KL, &KU, &NRHS, AB, &LDAB, IPIV, B, &LDB, &INFO );
 #endif
 }
 #undef dgetrf
@@ -365,22 +365,22 @@ void Lapack<double>::getrf( int M, int N, double *A, int LDA, int *IPIV, int &IN
     INFO = clapack_dgetrf( CblasColMajor, M, N, A, LDA, IPIV );
 #elif defined( USE_ACML )
     d_mutex.lock();
-    FORTRAN_WRAPPER(::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
     d_mutex.unlock();
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, LDAp = LDA, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER(::dgetrf )( &Mp, &Np, A, &LDAp, IPIVp, &INFOp );
+    FORTRAN_WRAPPER( ::dgetrf )( &Mp, &Np, A, &LDAp, IPIVp, &INFOp );
     for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
     delete[] IPIVp;
     INFO = static_cast<int>( INFOp );
 #else
-    FORTRAN_WRAPPER(::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgetrf )( &M, &N, A, &LDA, IPIV, &INFO );
 #endif
 }
 #undef dgttrf
@@ -391,19 +391,19 @@ void Lapack<double>::gttrf(
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgttrf" );
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np     = N, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER(::dgttrf )( &Np, DL, D, DU, DU2, IPIVp, &INFOp );
+    FORTRAN_WRAPPER( ::dgttrf )( &Np, DL, D, DU, DU2, IPIVp, &INFOp );
     for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
-    FORTRAN_WRAPPER(::dgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgttrf )( &N, DL, D, DU, DU2, IPIV, &INFO );
 #endif
 }
 #undef dgbtrf
@@ -414,23 +414,23 @@ void Lapack<double>::gbtrf(
 #ifdef USE_ATLAS
     throw std::logic_error( "ATLAS does not support dgbtrf" );
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, KLp = KL, KUp = KU, LDABp = LDAB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER(::dgbtrf )( &Mp, &Np, &KLp, &KUp, AB, &LDABp, IPIVp, &INFOp );
+    FORTRAN_WRAPPER( ::dgbtrf )( &Mp, &Np, &KLp, &KUp, AB, &LDABp, IPIVp, &INFOp );
     for ( int i = 0; i < N; i++ )
         IPIV[i] = static_cast<int>( IPIVp[i] );
     delete[] IPIVp;
     INFO = static_cast<int>( INFOp );
 #elif defined( USE_ACML )
     d_mutex.lock();
-    FORTRAN_WRAPPER(::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
     d_mutex.unlock();
 #else
-    FORTRAN_WRAPPER(::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
+    FORTRAN_WRAPPER( ::dgbtrf )( &M, &N, &KL, &KU, AB, &LDAB, IPIV, &INFO );
 #endif
 }
 #undef dgetrs
@@ -443,21 +443,22 @@ void Lapack<double>::getrs( char TRANS, int N, int NRHS, const double *A, int LD
 #elif defined( USE_ACML )
     ::dgetrs( TRANS, N, NRHS, (double *) A, LDA, (int *) IPIV, B, LDB, &INFO );
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgetrs )
+    FORTRAN_WRAPPER( ::dgetrs )
     ( &TRANS, &N, &NRHS, (double *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgetrs )
+    FORTRAN_WRAPPER( ::dgetrs )
     ( &TRANS, &N, &NRHS, (double *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
-    FORTRAN_WRAPPER(::dgetrs )( &TRANS, &Np, &NRHSp, (double *) A, &LDAp, IPIVp, B, &LDBp, &INFOp );
+    FORTRAN_WRAPPER( ::dgetrs )
+    ( &TRANS, &Np, &NRHSp, (double *) A, &LDAp, IPIVp, B, &LDBp, &INFOp );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
-    FORTRAN_WRAPPER(::dgetrs )
+    FORTRAN_WRAPPER( ::dgetrs )
     ( &TRANS, &N, &NRHS, (double *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
 #endif
 }
@@ -472,11 +473,11 @@ void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const
     ::dgttrs( TRANS, N, NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2,
         (int *) IPIV, B, LDB, &INFO );
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgttrs )
+    FORTRAN_WRAPPER( ::dgttrs )
     ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV,
         B, &LDB, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgttrs )
+    FORTRAN_WRAPPER( ::dgttrs )
     ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV,
         B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
@@ -484,13 +485,13 @@ void Lapack<double>::gttrs( char TRANS, int N, int NRHS, const double *DL, const
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
-    FORTRAN_WRAPPER(::dgttrs )
+    FORTRAN_WRAPPER( ::dgttrs )
     ( &TRANS, &Np, &NRHSp, (double *) DL, (double *) D, (double *) DU, (double *) DU2, IPIVp, B,
         &LDBp, &INFOp );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
-    FORTRAN_WRAPPER(::dgttrs )
+    FORTRAN_WRAPPER( ::dgttrs )
     ( &TRANS, &N, &NRHS, (double *) DL, (double *) D, (double *) DU, (double *) DU2, (int *) IPIV,
         B, &LDB, &INFO );
 #endif
@@ -505,10 +506,10 @@ void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const d
 #elif defined( USE_ACML )
     ::dgbtrs( TRANS, N, KL, KU, NRHS, (double *) AB, LDAB, (int *) IPIV, B, LDB, &INFO );
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgbtrs )
+    FORTRAN_WRAPPER( ::dgbtrs )
     ( &TRANS, &N, &KL, &KU, &NRHS, (double *) AB, &LDAB, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgbtrs )
+    FORTRAN_WRAPPER( ::dgbtrs )
     ( &TRANS, &N, &KL, &KU, &NRHS, (double *) AB, &LDAB, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
@@ -516,13 +517,13 @@ void Lapack<double>::gbtrs( char TRANS, int N, int KL, int KU, int NRHS, const d
     for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
     d_mutex.lock();
-    FORTRAN_WRAPPER(::dgbtrs )
+    FORTRAN_WRAPPER( ::dgbtrs )
     ( &TRANS, &Np, &KLp, &KUp, &NRHSp, (double *) AB, &LDABp, IPIVp, B, &LDBp, &INFOp );
     d_mutex.unlock();
     INFO = static_cast<int>( INFOp );
     delete[] IPIVp;
 #else
-    FORTRAN_WRAPPER(::dgbtrs )
+    FORTRAN_WRAPPER( ::dgbtrs )
     ( &TRANS, &N, &KL, &KU, &NRHS, (double *) AB, &LDAB, (int *) IPIV, B, &LDB, &INFO );
 #endif
 }
@@ -536,19 +537,19 @@ void Lapack<double>::getri(
 #elif defined( USE_ACML )
     ::dgetri_( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
 #elif defined( USE_VECLIB )
-    FORTRAN_WRAPPER(::dgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
+    FORTRAN_WRAPPER( ::dgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
 #elif defined( USE_OPENBLAS )
-    FORTRAN_WRAPPER(::dgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
+    FORTRAN_WRAPPER( ::dgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, LDAp = LDA, LWORKp = LWORK, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     for ( int i = 0; i < N; i++ )
         IPIVp[i] = IPIV[i];
-    FORTRAN_WRAPPER(::dgetri )( &Np, A, &LDAp, IPIVp, WORK, &LWORKp, &INFOp );
+    FORTRAN_WRAPPER( ::dgetri )( &Np, A, &LDAp, IPIVp, WORK, &LWORKp, &INFOp );
     INFO = static_cast<int>( INFOp );
     delete[] IPIVp;
 #else
-    FORTRAN_WRAPPER(::dgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
+    FORTRAN_WRAPPER( ::dgetri )( &N, A, &LDA, (int *) IPIV, WORK, &LWORK, &INFO );
 #endif
 }
 #undef dtrsm
@@ -571,10 +572,10 @@ void Lapack<double>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, i
         ALPHA, (double *) A, LDA, B, LDB );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, LDBp = LDB;
-    FORTRAN_WRAPPER(::dtrsm )
+    FORTRAN_WRAPPER( ::dtrsm )
     ( &SIDE, &UPLO, &TRANS, &DIAG, &Mp, &Np, &ALPHA, (double *) A, &LDAp, B, &LDBp );
 #else
-    FORTRAN_WRAPPER(::dtrsm )
+    FORTRAN_WRAPPER( ::dtrsm )
     ( &SIDE, &UPLO, &TRANS, &DIAG, &M, &N, &ALPHA, (double *) A, &LDA, B, &LDB );
 #endif
 }

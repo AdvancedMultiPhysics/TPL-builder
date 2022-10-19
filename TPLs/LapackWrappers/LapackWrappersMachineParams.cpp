@@ -30,11 +30,11 @@ float Lapack<float>::lamch( char cmach )
 #elif defined( USE_ACML )
     return ::dlamch( cmach );
 #elif defined( USE_VECLIB )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
+    return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #elif defined( USE_OPENBLAS )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
+    return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #else
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
+    return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #endif
 }
 template<>
@@ -45,11 +45,11 @@ double Lapack<double>::lamch( char cmach )
 #elif defined( USE_ACML )
     return ::dlamch( cmach );
 #elif defined( USE_VECLIB )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
+    return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #elif defined( USE_OPENBLAS )
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
+    return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #else
-    return FORTRAN_WRAPPER(::dlamch )( &cmach );
+    return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #endif
 }
 

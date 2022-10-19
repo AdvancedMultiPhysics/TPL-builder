@@ -68,7 +68,7 @@ public:
      * @param[in]  x        The input vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static TYPE nrm2( int N, const TYPE *x, int INCX );
+    static double nrm2( int N, const TYPE *x, int INCX );
 
     /*!
      * \brief   iamax
@@ -102,8 +102,8 @@ public:
      *                      TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
      *                      TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.
      *                      TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.
-     * @param[in] N         The number of rows of the matrix A.  M >= 0
-     * @param[in] M         The number of columns of the matrix A.  N >= 0
+     * @param[in] M         The number of rows of the matrix A.  M >= 0
+     * @param[in] N         The number of columns of the matrix A.  N >= 0
      * @param[in] alpha     The scale factor alpha
      * @param[in] A         The leading m by n part of the array A must contain the matrix of
      * coefficients.
@@ -188,7 +188,7 @@ public:
      * @param[in]  x        The source vector
      * @param[in]  INCX     The spacing between points in x
      */
-    static TYPE asum( int N, const TYPE *x, int INCX );
+    static double asum( int N, const TYPE *x, int INCX );
 
     /*!
      * \brief   dot
@@ -643,7 +643,7 @@ public:
      * @param[out] error    The largest error detected
      * @return              The number of failures detected
      */
-    static int run_test( const std::string &routine, int N, TYPE &error );
+    static int run_test( const std::string &routine, int N, double &error );
 
     //! List all of the availible tests to run
     static std::vector<std::string> list_all_tests();

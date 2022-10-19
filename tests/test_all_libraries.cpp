@@ -218,6 +218,17 @@ bool test<TPL_Enum::OGRE>()
 #endif
 
 
+// Test OpenBLAS
+#ifdef TPLS_Tests_USE_OPENBLAS
+template<>
+bool test<TPL_Enum::OPENBLAS>()
+{
+    std::cout << "   -- OpenBLAS tested through test_LapackWrappers\n";
+    return true;
+}
+#endif
+
+
 // Test PETSC
 #ifdef TPLS_Tests_USE_PETSC
 template<>

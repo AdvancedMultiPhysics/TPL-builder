@@ -1,5 +1,6 @@
 #include "LapackWrappers.h"
 
+#include <complex>
 #include <math.h>
 #include <stdexcept>
 
@@ -11,6 +12,25 @@
             temp++;                          \
         }                                    \
     } while ( 0 )
+#define ASSERT( EXP )                                            \
+    do {                                                         \
+        if ( !( EXP ) ) {                                        \
+            throw std::logic_error( "Failed assertion: " #EXP ); \
+        }                                                        \
+    } while ( 0 )
+
+
+// Helper functions
+static inline bool getTrans( char TRANS )
+{
+    if ( TRANS == 'N' || TRANS == 'n' ) {
+        return false;
+    } else if ( TRANS == 'T' || TRANS == 'T' || TRANS == 'C' || TRANS == 'C' ) {
+        return true;
+    } else {
+        throw std::logic_error( "invalid value for TRANS" );
+    }
+}
 
 
 // Define the member functions
@@ -39,12 +59,12 @@ void Lapack<TYPE>::scal( int N, TYPE DA, TYPE *DX, int INCX )
         *X *= DA;
 }
 template<class TYPE>
-TYPE Lapack<TYPE>::nrm2( int N, const TYPE *DX, int INCX )
+double Lapack<TYPE>::nrm2( int N, const TYPE *DX, int INCX )
 {
     double s = 0;
     auto X   = DX;
     for ( int i = 0; i < N; i++, X += INCX )
-        s += ( *X ) * ( *X );
+        s += std::norm( *X );
     return sqrt( s );
 }
 template<class TYPE>
@@ -73,7 +93,7 @@ void Lapack<TYPE>::axpy( int N, TYPE DA, const TYPE *DX, int INCX, TYPE *DY, int
         *Y += DA * ( *X );
 }
 template<class TYPE>
-TYPE Lapack<TYPE>::asum( int N, const TYPE *DX, int INCX )
+double Lapack<TYPE>::asum( int N, const TYPE *DX, int INCX )
 {
     if ( N <= 1 )
         return N;
@@ -94,40 +114,104 @@ TYPE Lapack<TYPE>::dot( int N, const TYPE *DX, int INCX, const TYPE *DY, int INC
     return s;
 }
 template<class TYPE>
-void Lapack<TYPE>::gemv( char TRANS, int M, int N, TYPE ALPHA, const TYPE *A, int LDA,
-    const TYPE *DX, int INCX, TYPE BETA, TYPE *DY, int INCY )
+void Lapack<TYPE>::gemv( char TRANS, int M, int N, TYPE alpha, const TYPE *A, int LDA,
+    const TYPE *DX, int INCX, TYPE beta, TYPE *DY, int INCY )
 {
-    NULL_USE( TRANS );
-    NULL_USE( M );
-    NULL_USE( N );
-    NULL_USE( ALPHA );
-    NULL_USE( A );
-    NULL_USE( LDA );
-    NULL_USE( DX );
-    NULL_USE( INCX );
-    NULL_USE( BETA );
-    NULL_USE( DY );
-    NULL_USE( INCY );
-    throw std::logic_error( "gemv is not currently supported without blas/lapack" );
+    ASSERT( M >= 0 );
+    ASSERT( N >= 0 );
+    ASSERT( LDA >= 0 );
+    ASSERT( INCX >= 1 );
+    ASSERT( INCY >= 1 );
+    bool trans = getTrans( TRANS );
+    int Nx     = trans ? M : N;
+    int Ny     = trans ? N : M;
+    for ( int i = 0, iy = 0; i < Ny; i++, iy += INCY )
+        DY[iy] = beta * DY[iy];
+    constexpr TYPE zero( 0 );
+    if ( alpha == zero )
+        return;
+    if ( TRANS == 'N' || TRANS == 'n' ) {
+        for ( int i = 0, iy = 0; i < Ny; i++, iy += INCY ) {
+            TYPE Ax = zero;
+            for ( int j = 0, jx = 0; j < Nx; j++, jx += INCX )
+                Ax += A[i + j * LDA] * DX[jx];
+            DY[iy] += alpha * Ax;
+        }
+    } else {
+        for ( int i = 0, iy = 0; i < Ny; i++, iy += INCY ) {
+            TYPE Ax = zero;
+            for ( int j = 0, jx = 0; j < Nx; j++, jx += INCX )
+                Ax += A[j + i * LDA] * DX[jx];
+            DY[iy] += alpha * Ax;
+        }
+    }
 }
 template<class TYPE>
-void Lapack<TYPE>::gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE ALPHA, const TYPE *A,
-    int LDA, const TYPE *B, int LDB, TYPE BETA, TYPE *C, int LDC )
+void Lapack<TYPE>::gemm( char TRANSA, char TRANSB, int M, int N, int K, TYPE alpha, const TYPE *A,
+    int LDA, const TYPE *B, int LDB, TYPE beta, TYPE *C, int LDC )
 {
-    NULL_USE( TRANSA );
-    NULL_USE( TRANSB );
-    NULL_USE( M );
-    NULL_USE( N );
-    NULL_USE( K );
-    NULL_USE( ALPHA );
-    NULL_USE( A );
-    NULL_USE( LDA );
-    NULL_USE( B );
-    NULL_USE( LDB );
-    NULL_USE( BETA );
-    NULL_USE( C );
-    NULL_USE( LDC );
-    throw std::logic_error( "gemm is not currently supported without blas/lapack" );
+    bool transa = getTrans( TRANSA );
+    bool transb = getTrans( TRANSB );
+    int nrowa   = transa ? K : M;
+    int nrowb   = transb ? N : K;
+    ASSERT( M >= 0 );
+    ASSERT( N >= 0 );
+    ASSERT( K >= 0 );
+    ASSERT( LDA >= std::max( 1, nrowa ) );
+    ASSERT( LDB >= std::max( 1, nrowb ) );
+    ASSERT( LDC >= std::max( 1, M ) );
+    for ( int i = 0; i < N * M; i++ )
+        C[i] = beta * C[i];
+    constexpr TYPE zero( 0 );
+    if ( alpha == zero )
+        return;
+    if ( !transb ) {
+        if ( !transa ) {
+            // C := alpha*A*B + beta*C.
+            for ( int j = 0; j < N; j++ ) {
+                for ( int l = 0; l < K; l++ ) {
+                    TYPE temp = alpha * B[l + j * LDB];
+                    for ( int i = 0; i < M; i++ ) {
+                        C[i + j * LDC] += temp * A[i + l * LDA];
+                    }
+                }
+            }
+        } else {
+            // C := alpha*A**T*B + beta*C
+            for ( int j = 0; j < N; j++ ) {
+                for ( int i = 0; i < M; i++ ) {
+                    TYPE temp = zero;
+                    for ( int l = 0; l < K; l++ ) {
+                        temp = temp + A[l + i * LDA] * B[l + j * LDB];
+                    }
+                    C[i + j * LDC] += alpha * temp;
+                }
+            }
+        }
+    } else {
+        if ( !transa ) {
+            // C := alpha*A*B**T + beta*C
+            for ( int j = 0; j < N; j++ ) {
+                for ( int l = 0; l < K; l++ ) {
+                    TYPE temp = alpha * B[j + l * LDB];
+                    for ( int i = 0; i < M; i++ ) {
+                        C[i + j * LDC] += temp * A[i + l * LDA];
+                    }
+                }
+            }
+        } else {
+            // C := alpha*A**T*B**T + beta*C
+            for ( int j = 0; j < N; j++ ) {
+                for ( int i = 0; i < M; i++ ) {
+                    TYPE temp = zero;
+                    for ( int l = 0; l < K; l++ ) {
+                        temp = temp + A[l + i * LDA] * B[j + l * LDB];
+                    }
+                    C[i + j * LDC] += alpha * temp;
+                }
+            }
+        }
+    }
 }
 template<class TYPE>
 void Lapack<TYPE>::ger(
@@ -308,14 +392,14 @@ void Lapack<TYPE>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int
     template void Lapack<TYPE>::copy( int, const TYPE *, int, TYPE *, int );                      \
     template void Lapack<TYPE>::swap( int, TYPE *, int, TYPE *, int );                            \
     template void Lapack<TYPE>::scal( int, TYPE, TYPE *, int );                                   \
-    template TYPE Lapack<TYPE>::nrm2( int, const TYPE *, int );                                   \
+    template double Lapack<TYPE>::nrm2( int, const TYPE *, int );                                 \
     template int Lapack<TYPE>::iamax( int, const TYPE *, int );                                   \
     template void Lapack<TYPE>::axpy( int, TYPE, const TYPE *, int, TYPE *, int );                \
     template void Lapack<TYPE>::gemv(                                                             \
         char, int, int, TYPE, const TYPE *, int, const TYPE *, int, TYPE, TYPE *, int );          \
     template void Lapack<TYPE>::gemm( char, char, int, int, int K, TYPE ALPHA, const TYPE *, int, \
         const TYPE *, int, TYPE, TYPE *, int );                                                   \
-    template TYPE Lapack<TYPE>::asum( int, const TYPE *, int );                                   \
+    template double Lapack<TYPE>::asum( int, const TYPE *, int );                                 \
     template TYPE Lapack<TYPE>::dot( int, const TYPE *, int, const TYPE *, int );                 \
     template void Lapack<TYPE>::ger(                                                              \
         int, int, TYPE, const TYPE *, int, const TYPE *, int, TYPE *, int );                      \
@@ -334,7 +418,8 @@ void Lapack<TYPE>::trsm( char SIDE, char UPLO, char TRANS, char DIAG, int M, int
         char, int, int, int, int, const TYPE *, int, const int *, TYPE *, int, int & );           \
     template void Lapack<TYPE>::getri( int, TYPE *, int, const int *, TYPE *, int, int & );       \
     template void Lapack<TYPE>::trsm(                                                             \
-        char, char, char, char, int, int, TYPE, const TYPE *, int, TYPE *, int );
+        char, char, char, char, int, int, TYPE, const TYPE *, int, TYPE *, int )
 
-INSTANTIATE( float )
-INSTANTIATE( double )
+INSTANTIATE( float );
+INSTANTIATE( double );
+INSTANTIATE( std::complex<double> );
