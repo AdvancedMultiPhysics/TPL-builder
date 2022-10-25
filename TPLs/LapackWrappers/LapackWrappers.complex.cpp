@@ -337,7 +337,7 @@ void Lapack<std::complex<double>>::ger( int N, int M, std::complex<double> ALPHA
     ( &Np, &Mp, &ALPHA, x, &INCXp, y, &INCYp, const_cast<Complex *>( A ), &LDAp );
 #else
     FORTRAN_WRAPPER( ::zgerc )
-    ( &N, &M, &ALPHA, x, &INCX, const_cast<Complex *>( y ), &INCY, const_cast<Complex *>( A ),
+    ( &N, &M, &ALPHA, const_cast<Complex *>( x ), &INCX, const_cast<Complex *>( y ), &INCY, const_cast<Complex *>( A ),
         &LDA );
 #endif
 }
@@ -576,7 +576,7 @@ void Lapack<std::complex<double>>::gttrs( char TRANS, int N, int NRHS,
     INFO         = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER( ::zgttrs )
-    ( &TRANS, &N, &NRHS, DL, D, DU, DU2, (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, const_cast<Complex *>( DL ), const_cast<Complex *>( D ), const_cast<Complex *>( DU ), const_cast<Complex *>( DU2 ), (int *) IPIV, B, &LDB, &INFO );
 #endif
 }
 #undef sgbtrs
