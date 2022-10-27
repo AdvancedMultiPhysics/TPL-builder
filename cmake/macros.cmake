@@ -127,10 +127,21 @@ FUNCTION( ASSERT test comment )
 ENDFUNCTION()
 
 
+# Function to get the number of physical processors
+# Note: CMake uses OMP_NUM_THREADS which we don't want to use
+FUNCTION ( GetPhysicalProcs VAR )
+    INCLUDE( ProcessorCount )
+    SET( OMP_NUM_THREADS $ENV{OMP_NUM_THREADS}  )
+    SET( ENV{OMP_NUM_THREADS} )
+    ProcessorCount( PROCS )
+    SET( ${VAR} ${PROCS} PARENT_SCOPE )
+    SET( ENV{OMP_NUM_THREADS} ${OMP_NUM_THREADS} )
+ENDFUNCTION()
+
+
 # Set the maximum number of processors
 IF ( NOT TEST_MAX_PROCS )
-    INCLUDE(ProcessorCount)
-    ProcessorCount( TEST_MAX_PROCS )
+    GetPhysicalProcs( TEST_MAX_PROCS )
     IF ( ${TEST_MAX_PROCS} EQUAL 0 )
         SET( TEST_MAX_PROCS 16 )
     ENDIF()
