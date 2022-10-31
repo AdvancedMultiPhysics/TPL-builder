@@ -82,6 +82,17 @@ inline CBLAS_TRANSPOSE TRANS2( char TRANS )
 static std::mutex d_mutex;
 
 
+// Helper functions
+#if defined( USE_MATLAB_LAPACK )
+template<class T1, class T2>
+void convert( int N, const T1 *x, T2 *y )
+{
+    for ( int i = 0; i < N; i++ )
+        y[i] = x[i];
+}
+#endif
+
+
 // Define the member functions
 #undef scopy
 template<>
@@ -98,7 +109,7 @@ void Lapack<std::complex<double>>::copy(
     cblas_zcopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
-    FORTRAN_WRAPPER( ::zcopy )( &Nl, const_cast<Complex *>( DX ), &INCXl, DY, &INCYl );
+    FORTRAN_WRAPPER( ::zcopy )( &Nl, (double *) DX, &INCXl, (double *) DY, &INCYl );
 #else
     FORTRAN_WRAPPER( ::zcopy )( &N, const_cast<Complex *>( DX ), &INCX, DY, &INCY );
 #endif
@@ -119,7 +130,7 @@ void Lapack<std::complex<double>>::swap(
     cblas_zswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
-    FORTRAN_WRAPPER( ::zswap )( &Nl, const_cast<Complex *>( DX ), &INCXl, DY, &INCYl );
+    FORTRAN_WRAPPER( ::zswap )( &Nl, (double *) DX, &INCXl, (double *) DY, &INCYl );
 #else
     FORTRAN_WRAPPER( ::zswap )( &N, const_cast<Complex *>( DX ), &INCX, DY, &INCY );
 #endif
@@ -139,7 +150,7 @@ void Lapack<std::complex<double>>::scal(
     cblas_zscal( N, DA, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    FORTRAN_WRAPPER( ::zscal )( &Np, DA, DX, &INCXp );
+    FORTRAN_WRAPPER( ::zscal )( &Np, (double *) DA, (double *) DX, &INCXp );
 #else
     FORTRAN_WRAPPER( ::zscal )( &N, DA, DX, &INCX );
 #endif
@@ -157,7 +168,7 @@ double Lapack<std::complex<double>>::nrm2( int N, const std::complex<double> *DX
     return cblas_dznrm2( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    return FORTRAN_WRAPPER( ::dznrm2 )( &Np, const_cast<Complex *>( DX ), &INCXp );
+    return FORTRAN_WRAPPER( ::dznrm2 )( &Np, (double *) DX, &INCXp );
 #else
     return FORTRAN_WRAPPER( ::dznrm2 )( &N, const_cast<Complex *>( DX ), &INCX );
 #endif
@@ -175,7 +186,7 @@ int Lapack<std::complex<double>>::iamax( int N, const std::complex<double> *DX_,
     return cblas_izamax( N, DX, INCX ) - 1;
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    return FORTRAN_WRAPPER( ::izamax )( &Np, const_cast<Complex *>( DX ), &INCXp ) - 1;
+    return FORTRAN_WRAPPER( ::izamax )( &Np, (double *) DX, &INCXp ) - 1;
 #else
     return FORTRAN_WRAPPER( ::izamax )( &N, const_cast<Complex *>( DX ), &INCX ) - 1;
 #endif
@@ -196,7 +207,7 @@ void Lapack<std::complex<double>>::axpy( int N, std::complex<double> DA_,
     cblas_zaxpy( N, &DA, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
-    FORTRAN_WRAPPER( ::zaxpy )( &Np, &DA, const_cast<Complex *>( DX ), &INCXp, DY, &INCYp );
+    FORTRAN_WRAPPER( ::zaxpy )( &Np, (double *) &DA, (double *) DX, &INCXp, (double *) DY, &INCYp );
 #else
     FORTRAN_WRAPPER( ::zaxpy )( &N, &DA, const_cast<Complex *>( DX ), &INCX, DY, &INCY );
 #endif
@@ -225,8 +236,8 @@ void Lapack<std::complex<double>>::gemv( char TRANS, int M, int N, std::complex<
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, INCXp = INCX, INCYp = INCY;
     FORTRAN_WRAPPER( ::zgemv )
-    ( &TRANS, &Mp, &Np, &ALPHA, const_cast<Complex *>( A ), &LDAp, const_cast<Complex *>( DX ),
-        &INCXp, &BETA, DY, &INCYp );
+    ( &TRANS, &Mp, &Np, (double *) &ALPHA, (double *) A, &LDAp, (double *) DX, &INCXp,
+        (double *) &BETA, (double *) DY, &INCYp );
 #else
     FORTRAN_WRAPPER( ::zgemv )
     ( &TRANS, &M, &N, &ALPHA, const_cast<Complex *>( A ), &LDA, const_cast<Complex *>( DX ), &INCX,
@@ -262,8 +273,8 @@ void Lapack<std::complex<double>>::gemm( char TRANSA, char TRANSB, int M, int N,
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, Kp = K, LDAp = LDA, LDBp = LDB, LDCp = LDC;
     FORTRAN_WRAPPER( ::zgemm )
-    ( &TRANSA, &TRANSB, &Mp, &Np, &Kp, &ALPHA, const_cast<Complex *>( A ), &LDAp,
-        const_cast<Complex *>( B ), &LDBp, &BETA, C, &LDCp );
+    ( &TRANSA, &TRANSB, &Mp, &Np, &Kp, (double *) &ALPHA, (double *) A, &LDAp, (double *) B, &LDBp,
+        (double *) &BETA, (double *) C, &LDCp );
 #else
     FORTRAN_WRAPPER( ::zgemm )
     ( &TRANSA, &TRANSB, &M, &N, &K, &ALPHA, const_cast<Complex *>( A ), &LDA,
@@ -283,7 +294,7 @@ double Lapack<std::complex<double>>::asum( int N, const std::complex<double> *DX
     return cblas_dzasum( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
-    return FORTRAN_WRAPPER( ::dzasum )( &Np, const_cast<Complex *>( DX ), &INCXp );
+    return FORTRAN_WRAPPER( ::dzasum )( &Np, (double *) DX, &INCXp );
 #else
     return FORTRAN_WRAPPER( ::dzasum )( &N, const_cast<Complex *>( DX ), &INCX );
 #endif
@@ -303,7 +314,8 @@ std::complex<double> Lapack<std::complex<double>>::dot(
     return cblas_zdotc( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
-    return FORTRAN_WRAPPER( ::zdotc )( &Np, const_cast<Complex *>( DX ), &INCXp, DY, &INCYp );
+    auto rtn = FORTRAN_WRAPPER( ::zdotc )( &Np, (double *) DX, &INCXp, (double *) DY, &INCYp );
+    return std::complex<double>( rtn.r, rtn.i );
 #elif defined( USE_MKL )
     std::complex<double> rtn;
     FORTRAN_WRAPPER( ::zdotc )
@@ -334,11 +346,12 @@ void Lapack<std::complex<double>>::ger( int N, int M, std::complex<double> ALPHA
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, INCXp = INCX, INCYp = INCY, LDAp = LDA;
     FORTRAN_WRAPPER( ::zgerc )
-    ( &Np, &Mp, &ALPHA, x, &INCXp, y, &INCYp, const_cast<Complex *>( A ), &LDAp );
+    ( &Np, &Mp, (double *) &ALPHA, (double *) x, &INCXp, (double *) y, &INCYp, (double *) A,
+        &LDAp );
 #else
     FORTRAN_WRAPPER( ::zgerc )
-    ( &N, &M, &ALPHA, const_cast<Complex *>( x ), &INCX, const_cast<Complex *>( y ), &INCY, const_cast<Complex *>( A ),
-        &LDA );
+    ( &N, &M, &ALPHA, const_cast<Complex *>( x ), &INCX, const_cast<Complex *>( y ), &INCY,
+        const_cast<Complex *>( A ), &LDA );
 #endif
 }
 #undef sgesv
@@ -358,11 +371,8 @@ void Lapack<std::complex<double>>::gesv( int N, int NRHS, std::complex<double> *
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     FORTRAN_WRAPPER( ::zgesv )
-    ( &Np, &NRHSp, const_cast<Complex *>( A ), &LDAp, IPIVp, const_cast<Complex *>( B ), &LDBp,
-        &INFOp );
-    for ( int i = 0; i < N; i++ ) {
-        IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
+    ( &Np, &NRHSp, (double *) A, &LDAp, IPIVp, (double *) B, &LDBp, &INFOp );
+    convert( N, IPIVp, IPIV );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
@@ -389,7 +399,7 @@ void Lapack<std::complex<double>>::gtsv( int N, int NRHS, std::complex<double> *
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t N2 = N, NRHS2 = NRHS, LDB2 = LDB, INFOp;
     FORTRAN_WRAPPER( ::zgtsv )
-    ( &N2, &NRHS2, DL, D, DU, const_cast<Complex *>( B ), &LDB2, &INFOp );
+    ( &N2, &NRHS2, (double *) DL, (double *) D, (double *) DU, (double *) B, &LDB2, &INFOp );
     INFO         = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER( ::zgtsv )
@@ -413,11 +423,8 @@ void Lapack<std::complex<double>>::gbsv( int N, int KL, int KU, int NRHS, std::c
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
     FORTRAN_WRAPPER( ::zgbsv )
-    ( &Np, &KLp, &KUp, &NRHSp, const_cast<Complex *>( A ) B, &LDABp, IPIVp,
-        const_cast<Complex *>( B ), &LDBp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
-        IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
+    ( &Np, &KLp, &KUp, &NRHSp, (double *) AB, &LDABp, IPIVp, (double *) B, &LDBp, &INFOp );
+    convert( N, IPIVp, IPIV );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
@@ -441,10 +448,8 @@ void Lapack<std::complex<double>>::getrf(
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, LDAp = LDA, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER( ::zgetrf )( &Mp, &Np, A, &LDAp, IPIVp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
-        IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
+    FORTRAN_WRAPPER( ::zgetrf )( &Mp, &Np, (double *) A, &LDAp, IPIVp, &INFOp );
+    convert( N, IPIVp, IPIV );
     delete[] IPIVp;
     INFO             = static_cast<int>( INFOp );
 #else
@@ -470,10 +475,9 @@ void Lapack<std::complex<double>>::gttrf( int N, std::complex<double> *DL_,
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np     = N, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER( ::zgttrf )( &Np, DL, D, DU, DU2, IPIVp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
-        IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
+    FORTRAN_WRAPPER( ::zgttrf )
+    ( &Np, (double *) DL, (double *) D, (double *) DU, (double *) DU2, IPIVp, &INFOp );
+    convert( N, IPIVp, IPIV );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
@@ -495,10 +499,8 @@ void Lapack<std::complex<double>>::gbtrf(
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, KLp = KL, KUp = KU, LDABp = LDAB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    FORTRAN_WRAPPER( ::zgbtrf )( &Mp, &Np, &KLp, &KUp, AB, &LDABp, IPIVp, &INFOp );
-    for ( int i = 0; i < N; i++ ) {
-        IPIV[i] = static_cast<int>( IPIVp[i] );
-    }
+    FORTRAN_WRAPPER( ::zgbtrf )( &Mp, &Np, &KLp, &KUp, (double *) AB, &LDABp, IPIVp, &INFOp );
+    convert( N, IPIVp, IPIV );
     delete[] IPIVp;
     INFO = static_cast<int>( INFOp );
 #elif defined( USE_ACML )
@@ -530,11 +532,9 @@ void Lapack<std::complex<double>>::getrs( char TRANS, int N, int NRHS,
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
-        IPIVp[i] = IPIV[i];
-    }
+    convert( N, IPIV, IPIVp );
     FORTRAN_WRAPPER( ::zgetrs )
-    ( &TRANS, &Np, &NRHSp, const_cast<Complex *>( A ), &LDAp, IPIVp, B, &LDBp, &INFOp );
+    ( &TRANS, &Np, &NRHSp, (double *) A, &LDAp, IPIVp, (double *) B, &LDBp, &INFOp );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
@@ -567,16 +567,16 @@ void Lapack<std::complex<double>>::gttrs( char TRANS, int N, int NRHS,
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
-        IPIVp[i] = IPIV[i];
-    }
+    convert( N, IPIV, IPIVp );
     FORTRAN_WRAPPER( ::zgttrs )
-    ( &TRANS, &Np, &NRHSp, DL, D, DU, DU2, IPIVp, B, &LDBp, &INFOp );
+    ( &TRANS, &Np, &NRHSp, (double *) DL, (double *) D, (double *) DU, (double *) DU2, IPIVp,
+        (double *) B, &LDBp, &INFOp );
     delete[] IPIVp;
     INFO         = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER( ::zgttrs )
-    ( &TRANS, &N, &NRHS, const_cast<Complex *>( DL ), const_cast<Complex *>( D ), const_cast<Complex *>( DU ), const_cast<Complex *>( DU2 ), (int *) IPIV, B, &LDB, &INFO );
+    ( &TRANS, &N, &NRHS, const_cast<Complex *>( DL ), const_cast<Complex *>( D ),
+        const_cast<Complex *>( DU ), const_cast<Complex *>( DU2 ), (int *) IPIV, B, &LDB, &INFO );
 #endif
 }
 #undef sgbtrs
@@ -603,12 +603,9 @@ void Lapack<std::complex<double>>::gbtrs( char TRANS, int N, int KL, int KU, int
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, KLp = KL, KUp = KU, NRHSp = NRHS, LDABp = LDAB, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
-        IPIVp[i] = IPIV[i];
-    }
+    convert( N, IPIV, IPIVp );
     FORTRAN_WRAPPER( ::zgbtrs )
-    ( &TRANS, &Np, &KLp, &KUp, &NRHSp, const_cast<Complex *>( AB ), &LDABp, IPIVp, B, &LDBp,
-        &INFOp );
+    ( &TRANS, &Np, &KLp, &KUp, &NRHSp, (double *) AB, &LDABp, IPIVp, (double *) B, &LDBp, &INFOp );
     INFO = static_cast<int>( INFOp );
     delete[] IPIVp;
 #else
@@ -635,10 +632,9 @@ void Lapack<std::complex<double>>::getri( int N, std::complex<double> *A_, int L
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, LDAp = LDA, LWORKp = LWORK, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
-    for ( int i = 0; i < N; i++ ) {
-        IPIVp[i] = IPIV[i];
-    }
-    FORTRAN_WRAPPER( ::zgetri )( &Np, A, &LDAp, IPIVp, WORK, &LWORKp, &INFOp );
+    convert( N, IPIV, IPIVp );
+    FORTRAN_WRAPPER( ::zgetri )
+    ( &Np, (double *) A, &LDAp, IPIVp, (double *) WORK, &LWORKp, &INFOp );
     INFO = static_cast<int>( INFOp );
     delete[] IPIVp;
 #else
@@ -670,7 +666,8 @@ void Lapack<std::complex<double>>::trsm( char SIDE, char UPLO, char TRANS, char 
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, LDBp = LDB;
     FORTRAN_WRAPPER( ::ztrsm )
-    ( &SIDE, &UPLO, &TRANS, &DIAG, &Mp, &Np, &ALPHA, const_cast<Complex *>( A ), &LDAp, B, &LDBp );
+    ( &SIDE, &UPLO, &TRANS, &DIAG, &Mp, &Np, (double *) &ALPHA, (double *) A, &LDAp, (double *) B,
+        &LDBp );
 #else
     FORTRAN_WRAPPER( ::ztrsm )
     ( &SIDE, &UPLO, &TRANS, &DIAG, &M, &N, &ALPHA, const_cast<Complex *>( A ), &LDA, B, &LDB );

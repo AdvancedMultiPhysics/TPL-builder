@@ -196,6 +196,17 @@ bool test<TPL_Enum::LIBMESH>()
 #endif
 
 
+// Test MATLAB
+#ifdef TPLS_Tests_USE_MATLAB
+template<>
+bool test<TPL_Enum::MATLAB>()
+{
+    std::cout << "   -- No tests defined for MATLAB\n";
+    return true;
+}
+#endif
+
+
 // Test NETCDF
 #ifdef TPLS_Tests_USE_NETCDF
 template<>
