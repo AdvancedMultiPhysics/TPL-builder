@@ -1,0 +1,25 @@
+diff -Naur umpire-6.0.0.old/src/umpire/tpl/camp/include/camp/camp.hpp umpire-6.0.0/src/umpire/tpl/camp/include/camp/camp.hpp
+--- umpire-6.0.0.old/src/umpire/tpl/camp/include/camp/camp.hpp	2021-08-16 15:59:18.000000000 -0600
++++ umpire-6.0.0/src/umpire/tpl/camp/include/camp/camp.hpp	2023-04-26 16:34:19.144644141 -0600
+@@ -13,6 +13,7 @@
+ 
+ #include <array>
+ #include <type_traits>
++#include <stdexcept>
+ 
+ #include "camp/defines.hpp"
+ #include "camp/helpers.hpp"
+diff -Naur umpire-6.0.0.old/umpire-config.cmake.in umpire-6.0.0/umpire-config.cmake.in
+--- umpire-6.0.0.old/umpire-config.cmake.in	2021-08-19 10:48:29.000000000 -0600
++++ umpire-6.0.0/umpire-config.cmake.in	2023-04-27 13:51:02.494565790 -0600
+@@ -7,6 +7,10 @@
+ get_filename_component(UMPIRE_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+ set(UMPIRE_INCLUDE_DIRS "@CMAKE_INSTALL_PREFIX@/include")
+ 
++if (@ENABLE_CUDA@)
++  find_package(Threads)
++endif()
++
+ if (NOT TARGET camp)
+   if (NOT DEFINED camp_DIR)
+     set(camp_DIR @umpire_camp_DIR@)

@@ -1,12 +1,12 @@
 # This will configure and build umpire
 # User can configure the source path by specifying UMPIRE_SRC_DIR,
-#    the download path by specifying UMPIRE_URL, or the installed 
+#    the download path by specifying UMPIRE_URL, or the installed
 #    location by specifying UMPIRE_INSTALL_DIR
 
 
 # Intialize download/src/install vars
 SET( UMPIRE_BUILD_DIR "${CMAKE_BINARY_DIR}/UMPIRE-prefix/src/UMPIRE-build" )
-IF ( UMPIRE_URL ) 
+IF ( UMPIRE_URL )
     MESSAGE("   UMPIRE_URL = ${UMPIRE_URL}")
     SET( UMPIRE_SRC_DIR "${CMAKE_BINARY_DIR}/UMPIRE-prefix/src/UMPIRE-src" )
     SET( UMPIRE_CMAKE_URL            "${UMPIRE_URL}"       )
@@ -22,7 +22,7 @@ ELSEIF ( UMPIRE_SRC_DIR )
     SET( UMPIRE_CMAKE_SOURCE_DIR     "${UMPIRE_SRC_DIR}" )
     SET( UMPIRE_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/umpire" )
     SET( CMAKE_BUILD_UMPIRE TRUE )
-ELSEIF ( UMPIRE_INSTALL_DIR ) 
+ELSEIF ( UMPIRE_INSTALL_DIR )
     SET( UMPIRE_CMAKE_INSTALL_DIR "${UMPIRE_INSTALL_DIR}" )
     SET( CMAKE_BUILD_UMPIRE FALSE )
 ELSE()
@@ -43,8 +43,7 @@ IF ( CMAKE_BUILD_UMPIRE )
     # Include the configure file
     SET( UMPIRE_CONFIGURE_OPTIONS
         ${CMAKE_ARGS}
-        -DCMAKE_INSTALL_PREFIX=${UMPIRE_CMAKE_INSTALL_DIR}
-    )
+        -DCMAKE_INSTALL_PREFIX=${UMPIRE_CMAKE_INSTALL_DIR} )
     # Note that the dev version changes this to UMPIRE_ENABLE_C according to the documentation
     # -DENABLE_C appears to be the correct option for Umpire 6.0.0
     SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DENABLE_C=ON )
@@ -61,12 +60,12 @@ IF ( CMAKE_BUILD_UMPIRE )
     ENDIF()
     IF ( UMPIRE_USE_CUDA )
         MESSAGE( "Enabling CUDA support for Umpire" )
-        SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DENABLE_CUDA=ON )
+        SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DENABLE_CUDA=ON)
         # Set more options
         SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} )
         MESSAGE("   UMPIRE configured with cuda:")
     ELSE()
-        SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DENABLE_CUDA=OFF )
+      SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DENABLE_CUDA=OFF)
         SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} )
         MESSAGE("   UMPIRE configured without cuda")
     ENDIF()
@@ -83,17 +82,18 @@ ENDIF()
 
 # Build umpire
 IF ( CMAKE_BUILD_UMPIRE )
-    ADD_TPL( 
+    ADD_TPL(
         UMPIRE
         URL                 "${UMPIRE_CMAKE_URL}"
         DOWNLOAD_DIR        "${UMPIRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${UMPIRE_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
+        PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/umpire.cuda.patch
         CMAKE_ARGS          ${UMPIRE_CONFIGURE_OPTIONS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install; 
-        DEPENDS             
+        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install;
+        DEPENDS
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 ELSE()
@@ -118,4 +118,3 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( UMPIRE_FOUND TRUE )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( TPL_FOUND_UMPIRE TRUE )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDIF()\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n" )
-
