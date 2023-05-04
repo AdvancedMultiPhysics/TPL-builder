@@ -31,7 +31,7 @@ MACRO( ADD_DISTCLEAN )
 ENDMACRO()
 
 
-# Macro to create a TPL-clean target
+# Create a TPL-clean target
 MACRO( ADD_TPL_CLEAN TPL )
     SET( tpl_cmds ${TPL}-build ${TPL}-pre-configure ${TPL}-configure ${TPL}-done 
         ${TPL}-download ${TPL}-download-impl ${TPL}-mkdir ${TPL}-patch ${TPL}-install 
@@ -69,6 +69,26 @@ MACRO( ADD_TPL_CLEAN TPL )
 ENDMACRO()
 
 
+# Create reconfigure target
+FUNCTION( ADD_TPL_RECONFIGURE TPL )
+    ADD_CUSTOM_TARGET( 
+        ${TPL}-reconfigure
+        COMMAND ${CMAKE_COMMAND} -E remove ${TPL}-configure ${TPL}-build ${TPL}-install
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" 
+    )
+ENDFUNCTION()
+FUNCTION( ADD_RECONFIGURE )
+    SET( RECONFIGURE_CMDS )
+    FOREACH( TPL ${TPL_LIST} )
+        SET( RECONFIGURE_CMDS ${RECONFIGURE_CMDS} ${TPL}-reconfigure )
+    ENDFOREACH()
+    ADD_CUSTOM_TARGET( 
+        reconfigure
+        COMMAND $(MAKE) ${RECONFIGURE_CMDS}
+    )
+ENDFUNCTION()
+
+
 # Macro to create an empty TPL target
 MACRO( ADD_TPL_EMPTY TPL )
     FILE( MAKE_DIRECTORY "${${TPL}_INSTALL_DIR}" )
@@ -84,6 +104,10 @@ MACRO( ADD_TPL_EMPTY TPL )
     )
     ADD_CUSTOM_TARGET(
         ${TPL}-clean
+        ${CMAKE_COMMAND}         -E echo "Skipping preinstalled ${TPL}"
+    )
+    ADD_CUSTOM_TARGET(
+        ${TPL}-reconfigure
         ${CMAKE_COMMAND}         -E echo "Skipping preinstalled ${TPL}"
     )
 ENDMACRO()
@@ -199,6 +223,7 @@ FUNCTION( ADD_TPL TPL )
         ENDIF()
         EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )
         # Add the logs and TPL-clean
+        ADD_TPL_RECONFIGURE( ${TPL} )
         ADD_TPL_SAVE_LOGS( ${TPL} )
         ADD_TPL_CLEAN( ${TPL} )
         SET( CLEAN_DEPENDEES install )

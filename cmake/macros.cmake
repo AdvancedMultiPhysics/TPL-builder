@@ -93,7 +93,24 @@ ENDIF()
 IF ( NOT TARGET copy-${PROJ}-include )
     ADD_CUSTOM_TARGET( copy-${PROJ}-include ALL )
 ENDIF()
-
+IF ( NOT TARGET clean-makefile )
+    ADD_CUSTOM_TARGET( clean-makefile ALL )
+    ADD_DEPENDENCIES( copy-${PROJ}-Data clean-makefile )
+    ADD_DEPENDENCIES( copy-${PROJ}-include clean-makefile )
+    ADD_CUSTOM_COMMAND( TARGET clean-makefile
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rm -f "${CMAKE_CURRENT_BINARY_DIR}/time.log"
+    )
+ENDIF()
+IF ( NOT TARGET build-test )
+    ADD_CUSTOM_TARGET( build-test )
+ENDIF()
+IF ( NOT TARGET build-examples )
+    ADD_CUSTOM_TARGET( build-examples )
+ENDIF()
+IF ( NOT TARGET check )
+    ADD_CUSTOM_TARGET( check )
+ENDIF()
 
 # Dummy use to prevent unused cmake variable warning
 FUNCTION( NULL_USE VAR )
@@ -540,8 +557,8 @@ MACRO( SET_WARNINGS )
         # Add gcc specific compiler options
         # Note: adding -Wlogical-op causes a wierd linking error on Titan using the nvcc wrapper:
         #    /usr/bin/ld: cannot find gical-op: No such file or directory
-        SET(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra") 
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Woverloaded-virtual -Wsign-compare -Wformat-security")
+        SET(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat-security -Wformat-overflow=2 -Wformat-nonliteral") 
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat-security -Wformat-overflow=2 -Wformat-nonliteral -Woverloaded-virtual -Wsign-compare -pedantic")
     ELSEIF ( USING_MSVC )
         # Add Microsoft specifc compiler options
         SET(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _ITERATOR_DEBUG_LEVEL=0 /wd4267" )
@@ -813,10 +830,6 @@ MACRO( ADD_PROJ_EXE_DEP EXE )
         TARGET_LINK_LIBRARIES( ${EXE} ${PACKAGE_TEST_LIB} )
     ENDIF()
     # Add the executable to the dependencies of check and build-test
-    IF ( NOT TARGET check )
-        ADD_CUSTOM_TARGET( check )
-        ADD_CUSTOM_TARGET( build-test )
-    ENDIF()
     ADD_DEPENDENCIES( check ${EXE} )
     ADD_DEPENDENCIES( build-test ${EXE} )
     # Add the file copy targets to the dependency list
