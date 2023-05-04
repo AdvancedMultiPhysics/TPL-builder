@@ -777,7 +777,7 @@ static void getFileAndLineObject( staticVector<StackTrace::stack_info*,blockSize
                 info[i]->line = atoi( &buf[j + 1] );
             }
         }
-    #elif defined( USE_MAC ) 
+    #elif defined( USE_MAC )
         // Create the call command
         void* load_address = loadAddress( hashString( info[0]->object.data() ) );
         if ( load_address == nullptr )
@@ -1488,6 +1488,7 @@ std::vector<int> StackTrace::defaultSignalsToCatch()
     erase( signals, SIGWINCH ); // Don't catch window changed by default
     erase( signals, SIGCONT );  // Don't catch continue by default
     erase( signals, SIGCHLD );  // Don't catch child exited by default
+    erase( signals, SIGPROF );
     return signals;
 }
 
