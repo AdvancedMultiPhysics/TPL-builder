@@ -146,21 +146,13 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
         WORKING_DIRECTORY   "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp"
         LOG                 0
     )
-    EXTERNALPROJECT_ADD_STEP(
-        ${TPL}
-        post-install
-        COMMAND             $(MAKE) log-${TPL}
-        COMMENT             ""
-        DEPENDEES           stop-stamp
-        ALWAYS              0
-        LOG                 0
-    )
     ADD_CUSTOM_TARGET( log-${TPL}
         COMMAND             ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp" .
         COMMAND             ${CMAKE_COMMAND} -E remove ${RM_LIST}  ${TPL}-urlinfo.txt
         COMMAND             ${CMAKE_COMMAND} -E remove_directory ${TPL}-prefix
         WORKING_DIRECTORY   "${CMAKE_INSTALL_PREFIX}/logs/${TPL}"
     )
+    ADD_DEPENDENCIES( log-${TPL} ${TPL} )
     ADD_DEPENDENCIES( logs log-${TPL} )
 ENDMACRO()
 
