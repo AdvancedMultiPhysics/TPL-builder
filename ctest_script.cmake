@@ -2,14 +2,13 @@
 # Usage:  ctest -S script,build
 #   build = debug / optimized / weekly / valgrind / valgrind-matlab
 # Note: this test will use use the number of processors defined in the variable N_PROCS,
-#   the enviornmental variable N_PROCS, or the number of processors availible (if not specified)
+#   the environmental variable N_PROCS, or the number of processors available (if not specified)
 
 
 # Macros to load environmental variables
 MACRO( LOAD_VAR VAR ${ARGN} )
-    IF ( DEFINED ENV{<${VAR}>} )
-        SET( ${VAR} $ENV{${VAR}} )
-    ELSEIF ( DEFINED DEFAULT )
+    SET( ${VAR} $ENV{${VAR}} )
+    IF ( NOT DEFINED ${VAR} AND DEFINED DEFAULT )
         SET( DEFAULT ${ARGN} )
     ENDIF()
 ENDMACRO()
