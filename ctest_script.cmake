@@ -6,10 +6,11 @@
 
 
 # Macros to load environmental variables
-MACRO( LOAD_VAR VAR DEFAULT )
+MACRO( LOAD_VAR VAR ${ARGN} )
     SET( ${VAR} $ENV{${VAR}} )
-    IF ( NOT ${VAR} AND ${DEFAULT} )
-        SET( ${VAR} ${${DEFAULT}} )
+    SET( DEFAULT ${ARGN} )
+    IF ( NOT ${VAR} AND DEFAULT )
+        SET( ${VAR} ${DEFAULT} )
     ENDIF()
 ENDMACRO()
 MACRO( LOAD_LIST VAR )
