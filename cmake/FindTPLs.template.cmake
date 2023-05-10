@@ -128,7 +128,7 @@ IF ( NOT TPLs_FOUND )
         ADD_DEFINITIONS( -DUSE_CUDA )
         # Enable CUDA toolkit
         FIND_PACKAGE( CUDAToolkit )
-        SET( TPL_LIBRARIES ${TPL_LIBRARIES} CUDA::cusparse CUDA::curand CUDA::cudart CUDA::cuda_driver )
+        SET( TPL_LIBRARIES ${TPL_LIBRARIES} CUDA::cusparse CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
     ENDIF()
     SET( NUMBER_OF_GPUS @NUMBER_OF_GPUS@ CACHE STRING "Number of GPUs for testing" )
     IF ( USE_OPENMP )
