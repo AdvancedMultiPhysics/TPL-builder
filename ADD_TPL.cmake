@@ -1,3 +1,27 @@
+# Include the TPLs folder for the search path
+SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/TPLs" )
+MESSAGE( "CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}" )
+
+
+# Configure a TPL
+MACRO( CONFIGURE_TPL TPL )
+    IF ( NOT ${TPL}_CONFIGURED )
+        MESSAGE("Configuring ${TPL}")
+        SET( ${TPL}_CONFIGURED TRUE )
+        INCLUDE( ${TPL} )
+    ENDIF()
+ENDMACRO()
+
+
+# Configure an optional TPL
+MACRO( CONFIGURE_OPTIONAL_TPL TPL )
+    LIST(FIND TPL_LIST "${TPL}" index)
+    IF ( ${index} GREATER -1 )
+        CONFIGURE_TPL( ${TPL} )
+    ENDIF()
+ENDMACRO()
+
+
 # Macro to create a distclean target
 MACRO( ADD_DISTCLEAN )
     SET( DISTCLEAN_CMDS )
@@ -91,6 +115,7 @@ ENDFUNCTION()
 
 # Macro to create an empty TPL target
 MACRO( ADD_TPL_EMPTY TPL )
+    MESSAGE("   Adding empty TPL: ${TPL}" )
     FILE( MAKE_DIRECTORY "${${TPL}_INSTALL_DIR}" )
     FILE( MAKE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/logs/${TPL}" )
     STRING(TOLOWER ${TPL} TPL2)
@@ -198,21 +223,11 @@ FUNCTION( ADD_TPL TPL )
             MESSAGE( "EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )" )
         ENDIF()
         LIST( FIND TPL_LIST ${TPL} TPL_index )
-        IF ( ${TPL_index} EQUAL "-1" )
-            FOREACH ( tpl2 ${ADD_TPL_DEPENDS} )
-                LIST( FIND TPL_LIST ${tpl2} tpl2_index)
-                IF ( ${tpl2_index} EQUAL "-1" )
-                    MESSAGE(FATAL_ERROR "${TPL} depends on ${tpl2}, ${tpl2} must be specified in TPL_LIST" )
-                ENDIF()
-            ENDFOREACH()
-        ELSE()
-            FOREACH ( tpl2 ${ADD_TPL_DEPENDS} )
-                LIST( FIND TPL_LIST ${tpl2} tpl2_index)
-                IF ( ( ${tpl2_index} GREATER ${TPL_index} ) OR ( ${tpl2_index} EQUAL "-1" ) )
-                    MESSAGE(FATAL_ERROR "${TPL} depends on ${tpl2}, ${tpl2} must be specified before ${TPL} in TPL_LIST (${TPL_index},${tpl2_index})" )
-                ENDIF()
-            ENDFOREACH()
-        ENDIF()
+        FOREACH ( tpl2 ${ADD_TPL_DEPENDS} )
+            IF ( NOT ${tpl2}_CONFIGURED )
+                MESSAGE(FATAL_ERROR "${TPL} depends on ${tpl2}, ${tpl2} must be configured first" )
+            ENDIF()
+        ENDFOREACH()
         EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )
         # Add the logs and TPL-clean
         ADD_TPL_RECONFIGURE( ${TPL} )
