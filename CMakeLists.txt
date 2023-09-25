@@ -358,7 +358,6 @@ IF ( NOT DISABLE_TPL_TESTS AND NOT DISABLE_ALL_TESTS )
     )
 ENDIF()
 
-### Add final lines to FindTPLs.cmake
 
 # Add the timer if it is not installed
 IF ( NOT TIMER_INSTALL_DIR )
@@ -368,47 +367,10 @@ IF ( NOT TIMER_INSTALL_DIR )
     FILE( APPEND "${FIND_TPLS_CMAKE}" "CONFIGURE_TIMER( FALSE \"$\{$\{PROJ}_INSTALL_DIR}/include\" TRUE )\n\n" )
 ENDIF()
 
-# Add a check to the FindTPLs.cmake to ensure all TPLs were found
-FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Check that all desired TPLs were found\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH ( tmp $\{TPL_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( NOT TPL_FOUND_$\{tmp} AND TPLs_FIND_$\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        IF ( TPLs_FIND_REQUIRED_$\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "            MESSAGE( ERROR \"$\{tmp} not found\" )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        ELSE()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "            MESSAGE( \"  $\{tmp} not found\" )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 
-# Get the list of found TPLs
-FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPL_LIST_FOUND )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH( tmp $\{TPL_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( TPL_FOUND_$\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        SET( TPL_LIST_FOUND $\{TPL_LIST_FOUND} $\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
-
-# Write the TPLs.h file for the TPLs we included 
-FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Write the TPLs.h\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPLs_HEADER \"$\{CMAKE_CURRENT_BINARY_DIR}/tmp/TPLs.h\" )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( WRITE \"$\{TPLs_HEADER}\" \"// This file sets the TPL list for C/C++ codes\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#ifndef TPL_LIST\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#define TPL_LIST \\\"$\{TPL_LIST}\\\"\\n\")\n")
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#endif\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#ifndef $\{PROJ}_TPL_LIST\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#define $\{PROJ}_TPL_LIST \\\"$\{TPL_LIST_FOUND}\\\"\\n\")\n")
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH( TPL $\{TPL_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( TPL_FOUND_$\{TPL} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        SET( USE_$\{TPL} TRUE )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        FILE( APPEND \"$\{TPLs_HEADER}\" \"#define $\{PROJ}_USE_$\{TPL}\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        FOREACH( tmp $\{$\{TPL}_PACKAGE_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "             STRING(TOUPPER $\{tmp} tmp)\n")
-FILE( APPEND "${FIND_TPLS_CMAKE}" "             FILE( APPEND \"$\{TPLs_HEADER}\" \"#define $\{PROJ}_USE_$\{TPL}_$\{tmp}\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        ENDFOREACH()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#endif\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "EXECUTE_PROCESS( COMMAND $\{CMAKE_COMMAND} -E copy_if_different \"$\{TPLs_HEADER}\" \"$\{$\{PROJ}_INSTALL_DIR}/include/$\{$\{PROJ}_INC}/$\{PROJ}_TPLs.h\" )\n" )
+# Add final lines to FindTPLs.cmake
+FILE( READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTPLs.footer.cmake" TPL_FOOTER )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "${TPL_FOOTER}" )
 
 
 # Copy cmake files for cppcheck and cppclean
