@@ -1047,6 +1047,20 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
     # Parse the input arguments
     PARSE_TEST_ARGUMENTS( ${ARGN} )
 
+    # Add example to list
+    IF ( TEST_EXAMPLE )
+        SET( VALUE 0 )
+        FOREACH (_variableName ${EXAMPLE_LIST})
+            IF ( "${_variableName}" STREQUAL "${EXEFILE}" )
+                SET( VALUE 1 )
+            ENDIF()
+        ENDFOREACH()
+        IF ( NOT ${VALUE} )
+            FILE(APPEND ${EXAMPLE_INSTALL_DIR}/examples.h "* \\ref ${EXEFILE} \"${EXEFILE}\"\n" )
+            SET( EXAMPLE_LIST ${EXAMPLE_LIST} ${EXEFILE} CACHE INTERNAL "example_list" FORCE )
+        ENDIF()
+    ENDIF()
+
     # Check if we are dealing with a TestBuilder test
     IF ( TEST_TESTBUILDER )
         # Add the test to the TestBuilder sources
@@ -1054,6 +1068,14 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
     ELSE()
         # Add the provisional test
         ADD_PROJ_PROVISIONAL_TEST( ${EXEFILE} )
+    ENDIF()
+
+    # Copy example
+    IF ( TEST_EXAMPLE )
+        ADD_DEPENDENCIES( build-examples ${EXEFILE} )
+        ADD_CUSTOM_COMMAND( TARGET ${EXEFILE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LAST_TEST}> "${EXAMPLE_INSTALL_DIR}/${EXEFILE}"
+        )
     ENDIF()
 
     # Create the tests for ctest
@@ -1094,7 +1116,7 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
         SET_PROPERTY( TEST ${TESTNAME} PROPERTY RESOURCE_LOCK ${TEST_RESOURCES} )
     ENDIF()
     
-    # Add resource locks
+    # Add resource locks for GPUs
     IF ( USE_CUDA AND TEST_GPU )
         SET( GPU_RESOURCE )
         FOREACH ( tmp RANGE 1 ${TEST_PROCS} )
@@ -1109,12 +1131,10 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
         SET_PROPERTY( TEST ${TESTNAME} PROPERTY TIMEOUT ${TEST_TIMEOUT} )
     ENDIF()
 
-
     # Run the test by itself
     IF ( TEST_RUN_SERIAL )
         SET_PROPERTY( TEST ${TESTNAME} PROPERTY RUN_SERIAL TRUE )
     ENDIF()
-
 
     # Add dependencies
     IF ( TEST_DEPENDS )
@@ -1255,49 +1275,9 @@ ENDMACRO()
 
 
 # Add a executable as an example
-FUNCTION( ADD_${PROJ}_EXAMPLE EXEFILE )
-    # Parse input arguments
-    PARSE_TEST_ARGUMENTS( ${ARGN} )
-    # Add the file to the example doxygen file
-    SET( VALUE 0 )
-    FOREACH (_variableName ${EXAMPLE_LIST})
-        IF ( "${_variableName}" STREQUAL "${EXEFILE}" )
-            SET( VALUE 1 )
-        ENDIF()
-    ENDFOREACH()
-    IF ( NOT ${VALUE} )
-        FILE(APPEND ${EXAMPLE_INSTALL_DIR}/examples.h "* \\ref ${EXEFILE} \"${EXEFILE}\"\n" )
-        SET( EXAMPLE_LIST ${EXAMPLE_LIST} ${EXEFILE} CACHE INTERNAL "example_list" FORCE )
-    ENDIF()
-    # Check if we actually want to add the test
-    IF ( ONLY_BUILD_DOCS )
-        RETURN()
-    ENDIF()
-    # Add the provisional test
-    ADD_PROJ_PROVISIONAL_TEST( ${EXEFILE} )
-    IF ( ${TEST_PROCS} STREQUAL "0" )
-        RETURN()
-    ENDIF()
-    # Add the test command to ctest
-    ADD_DEPENDENCIES( build-examples ${EXEFILE} )
-    ADD_CUSTOM_COMMAND( TARGET ${EXEFILE} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LAST_TEST}> "${EXAMPLE_INSTALL_DIR}/${EXEFILE}"
-    )
-    CREATE_TEST_NAME( ${EXEFILE} EXAMPLE ${ARGN} )
-    IF ( ${TEST_PROCS} STREQUAL "1" AND (NOT USE_MPI_FOR_SERIAL_TESTS) )
-        ADD_TEST( NAME ${TESTNAME} COMMAND $<TARGET_FILE:${LAST_TEST}> ${TEST_ARGS} )
-    ELSEIF ( USE_EXT_MPI AND NOT (${TOT_PROCS} GREATER ${TEST_MAX_PROCS}) )
-        ADD_TEST( NAME ${TESTNAME} COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} ${TEST_PROCS} $<TARGET_FILE:${LAST_TEST}> ${TEST_ARGS} )
-        SET_PROPERTY( TEST ${TESTNAME} APPEND PROPERTY ENVIRONMENT "OMPI_MCA_hwloc_base_binding_policy=none" )
-    ENDIF()
-    SET( LAST_TESTNAME ${TESTNAME} PARENT_SCOPE )
-    SET_TESTS_PROPERTIES( ${TESTNAME} PROPERTIES FAIL_REGULAR_EXPRESSION "${TEST_FAIL_REGULAR_EXPRESSION}" PROCESSORS ${TOT_PROCS} )
-    SET_TESTS_PROPERTIES( ${TESTNAME} PROPERTIES ENVIRONMENT "OMP_NUM_THREADS=${TEST_THREADS};OMP_WAIT_POLICY=passive" )
-    IF ( NOT TEST_RESOURCES )
-        SET( TEST_RESOURCES ${EXEFILE} ${TEST_ARGS} )
-    ENDIF()
-    SET_PROPERTY( TEST ${TESTNAME} PROPERTY RESOURCE_LOCK ${TEST_RESOURCES} )
-ENDFUNCTION()
+MACRO( ADD_${PROJ}_EXAMPLE EXEFILE )
+    CALL_ADD_TEST( ${EXEFILE} EXAMPLE ${ARGN} )
+ENDMACRO()
 
 
 # Begin configure for the examples for a package
