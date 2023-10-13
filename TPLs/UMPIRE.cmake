@@ -78,11 +78,8 @@ IF ( CMAKE_BUILD_UMPIRE )
         SET( UMPIRE_CONFIGURE_OPTIONS ${UMPIRE_CONFIGURE_OPTIONS} )
     ENDIF()
     MESSAGE("   UMPIRE configure options: ${UMPIRE_CONFIGURE_OPTIONS}")
-ENDIF()
 
-
-# Build umpire
-IF ( CMAKE_BUILD_UMPIRE )
+    # Build umpire
     ADD_TPL(
         UMPIRE
         URL                 "${UMPIRE_CMAKE_URL}"

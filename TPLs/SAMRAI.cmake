@@ -163,44 +163,45 @@ IF ( CMAKE_BUILD_SAMRAI )
         SET( SAMRAI_CONFIGURE_OPTIONS ${SAMRAI_CONFIGURE_OPTIONS} -DENABLE_DOCS=OFF )
     ENDIF()
     MESSAGE("   SAMRAI configure options: ${SAMRAI_CONFIGURE_OPTIONS}")
-ENDIF()
 
 
-# Build samrai
-SET( SAMRAI_CMAKE_TEST )
-SET( SAMRAI_DOC_COMMAND )
-IF ( ( ENABLE_ALL_TESTS OR SAMRAI_ENABLE_TESTS ) AND NOT DISABLE_ALL_TESTS )
-    SET( SAMRAI_CMAKE_TEST
-        TEST_AFTER_INSTALL  1
-        TEST_COMMAND        $(MAKE) check
-        BUILD_TEST          $(MAKE) checkcompile
-        CHECK_TEST          ! grep "FAILED" SAMRAI-test-out.log > /dev/null
+    # Build samrai
+    SET( SAMRAI_CMAKE_TEST )
+    SET( SAMRAI_DOC_COMMAND )
+    IF ( ( ENABLE_ALL_TESTS OR SAMRAI_ENABLE_TESTS ) AND NOT DISABLE_ALL_TESTS )
+        SET( SAMRAI_CMAKE_TEST
+            TEST_AFTER_INSTALL  1
+            TEST_COMMAND        $(MAKE) check
+            BUILD_TEST          $(MAKE) checkcompile
+            CHECK_TEST          ! grep "FAILED" SAMRAI-test-out.log > /dev/null
+        )
+    ENDIF()
+    IF ( SAMRAI_DOCS )
+        SET( SAMRAI_DOC_COMMAND
+            DOC_COMMAND         $(MAKE) docsVERBOSE=1
+            COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/samrai-dox/html "${SAMRAI_INSTALL_DIR}/doxygen"
+        )
+    ENDIF()
+    ADD_TPL(
+        SAMRAI
+        URL                 "${SAMRAI_CMAKE_URL}"
+        DOWNLOAD_DIR        "${SAMRAI_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${SAMRAI_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CMAKE_ARGS          ${SAMRAI_CONFIGURE_OPTIONS}
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
+        ${SAMRAI_DOC_COMMAND}
+        ${SAMRAI_CMAKE_TEST}
+        DEPENDS             ${SAMRAI_DEPENDS}
+        CLEAN_COMMAND       $(MAKE) clean
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
-ENDIF()
-IF ( SAMRAI_DOCS )
-    SET( SAMRAI_DOC_COMMAND
-        DOC_COMMAND         $(MAKE) docsVERBOSE=1
-        COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/samrai-dox/html "${SAMRAI_INSTALL_DIR}/doxygen"
-    )
-ENDIF()
-ADD_TPL(
-    SAMRAI
-    URL                 "${SAMRAI_CMAKE_URL}"
-    DOWNLOAD_DIR        "${SAMRAI_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${SAMRAI_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CMAKE_ARGS          ${SAMRAI_CONFIGURE_OPTIONS}
-    BUILD_COMMAND       $(MAKE) VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
-    ${SAMRAI_DOC_COMMAND}
-    ${SAMRAI_CMAKE_TEST}
-    DEPENDS             ${SAMRAI_DEPENDS}
-    CLEAN_COMMAND       $(MAKE) clean
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
 
-
+ELSE()
+    ADD_TPL_EMPTY( SAMRAI )
+ENDIF()
 # Add the appropriate fields to FindTPLs.cmake
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find SAMRAI\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "IF ( TPLs_FIND_SAMRAI AND NOT TPL_FOUND_SAMRAI )\n" )

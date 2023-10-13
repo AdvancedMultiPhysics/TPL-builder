@@ -94,7 +94,6 @@ IF ( CMAKE_BUILD_HPL )
     FILE( APPEND "${HPL_MAKE}"  "ARCHIVER     = ar\n" )
     FILE( APPEND "${HPL_MAKE}"  "ARFLAGS      = r\n" )
     FILE( APPEND "${HPL_MAKE}"  "RANLIB       = echo\n" )
-ENDIF()
 
 
 # Build hpl
@@ -114,6 +113,9 @@ ADD_TPL(
     LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
 )
 
+ELSE()
+   ADD_TPL_EMPTY( HPL )
+ENDIF()
 
 # Add the appropriate fields to FindTPLs.cmake
 

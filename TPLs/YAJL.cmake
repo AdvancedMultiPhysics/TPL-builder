@@ -35,22 +35,24 @@ MESSAGE( "   YAJL_INSTALL_DIR = ${YAJL_INSTALL_DIR}" )
 # Configure yajl
 IF ( CMAKE_BUILD_YAJL )
     SET( YAJL_CONFIGURE_OPTIONS "${CMAKE_ARGS};-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yajl" )
+
+    # Build yajl
+    ADD_TPL(
+            YAJL
+        URL                 "${YAJL_CMAKE_URL}"
+        DOWNLOAD_DIR        "${YAJL_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${YAJL_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        BUILD_IN_SOURCE     0
+        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/yajl
+        CMAKE_ARGS          "${YAJL_CONFIGURE_OPTIONS}"
+        BUILD_COMMAND       $(MAKE) install VERBOSE=1
+        DEPENDS             
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( YAJL )
 ENDIF()
-
-
-# Build yajl
-ADD_TPL(
-        YAJL
-    URL                 "${YAJL_CMAKE_URL}"
-    DOWNLOAD_DIR        "${YAJL_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${YAJL_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    BUILD_IN_SOURCE     0
-    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/yajl
-    CMAKE_ARGS          "${YAJL_CONFIGURE_OPTIONS}"
-    BUILD_COMMAND       $(MAKE) install VERBOSE=1
-    DEPENDS             
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
 
 

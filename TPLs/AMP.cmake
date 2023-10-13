@@ -52,23 +52,24 @@ IF ( CMAKE_BUILD_AMP )
     IF ( AMP_DOCS )
         SET( AMP_DOC_COMMAND  DOC_COMMAND $(MAKE) doc )
     ENDIF()
+
+
+    # Build amp
+    ADD_TPL(
+        AMP
+        URL                 "${AMP_CMAKE_URL}"
+        DOWNLOAD_DIR        "${AMP_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${AMP_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        BUILD_IN_SOURCE     0
+        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/amp
+        CMAKE_ARGS          "${AMP_CONFIGURE_OPTIONS}"
+        BUILD_COMMAND       $(MAKE) install VERBOSE=1
+        ${AMP_DOC_COMMAND}
+        DEPENDS             ${AMP_DEPENDS}
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( AMP )
 ENDIF()
-
-
-# Build amp
-ADD_TPL(
-    AMP
-    URL                 "${AMP_CMAKE_URL}"
-    DOWNLOAD_DIR        "${AMP_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${AMP_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    BUILD_IN_SOURCE     0
-    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/amp
-    CMAKE_ARGS          "${AMP_CONFIGURE_OPTIONS}"
-    BUILD_COMMAND       $(MAKE) install VERBOSE=1
-    ${AMP_DOC_COMMAND}
-    DEPENDS             ${AMP_DEPENDS}
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
-

@@ -35,23 +35,25 @@ IF ( CMAKE_BUILD_SWIG )
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory "${SWIG_INSTALL_DIR}/include" )
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory "${SWIG_INSTALL_DIR}/lib" )
     SET( SWIG_CONFIGURE_OPTIONS --prefix=${SWIG_INSTALL_DIR} )
+
+    # Build swig
+    ADD_TPL(
+        SWIG
+        URL                 "${SWIG_CMAKE_URL}"
+        DOWNLOAD_DIR        "${SWIG_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${SWIG_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CONFIGURE_COMMAND   ${SWIG_CMAKE_SOURCE_DIR}/configure ${SWIG_CONFIGURE_OPTIONS} ${ENV_VARS}
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     make install
+        DEPENDS             ZLIB
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( SWIG )
 ENDIF()
-
-# Build swig
-ADD_TPL(
-    SWIG
-    URL                 "${SWIG_CMAKE_URL}"
-    DOWNLOAD_DIR        "${SWIG_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${SWIG_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CONFIGURE_COMMAND   ${SWIG_CMAKE_SOURCE_DIR}/configure ${SWIG_CONFIGURE_OPTIONS} ${ENV_VARS}
-    BUILD_COMMAND       $(MAKE) VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     make install
-    DEPENDS             ZLIB
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
 
 # Add the appropriate fields to FindTPLs.cmake
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find SWIG\n" )

@@ -31,24 +31,26 @@ ENDIF()
 SET( QWT_INSTALL_DIR "${QWT_CMAKE_INSTALL_DIR}" )
 MESSAGE( "   QWT_INSTALL_DIR = ${QWT_INSTALL_DIR}" )
 
-
-# Configure QWT
-ADD_TPL(
-    QWT
-    URL                 "${QWT_CMAKE_URL}"
-    TIMEOUT             300
-    DOWNLOAD_DIR        "${QWT_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${QWT_CMAKE_SOURCE_DIR}"
-    PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_LIST_DIR}/../patches/QWT.patch
-    UPDATE_COMMAND      ""
-    BUILD_IN_SOURCE     1
-    INSTALL_DIR         "${QWT_INSTALL_DIR}"
-    CONFIGURE_COMMAND   ${QT_QMAKE_EXECUTABLE} QWT_INSTALL_PREFIX=${QWT_INSTALL_DIR} qwt.pro
-    BUILD_COMMAND       $(MAKE) install
-    DEPENDS             QT
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
+IF ( CMAKE_BUILD_QWT )
+    # Configure QWT
+    ADD_TPL(
+        QWT
+        URL                 "${QWT_CMAKE_URL}"
+        TIMEOUT             300
+        DOWNLOAD_DIR        "${QWT_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${QWT_CMAKE_SOURCE_DIR}"
+        PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_LIST_DIR}/../patches/QWT.patch
+        UPDATE_COMMAND      ""
+        BUILD_IN_SOURCE     1
+        INSTALL_DIR         "${QWT_INSTALL_DIR}"
+        CONFIGURE_COMMAND   ${QT_QMAKE_EXECUTABLE} QWT_INSTALL_PREFIX=${QWT_INSTALL_DIR} qwt.pro
+        BUILD_COMMAND       $(MAKE) install
+        DEPENDS             QT
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+ELSE()
+    ADD_TPL_EMPTY( QWT )
+ENDIF()
 
 # Add the appropriate fields to FindTPLs.cmake
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find QWT\n" )

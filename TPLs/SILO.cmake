@@ -71,21 +71,27 @@ IF ( CMAKE_BUILD_SILO )
     ENDIF()
 ENDIF()
 
+IF ( CMAKE_BUILD_SILO )
 
-# Build silo
-ADD_TPL(
-    SILO
-    URL                 "${SILO_CMAKE_URL}"
-    DOWNLOAD_DIR        "${SILO_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${SILO_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CONFIGURE_COMMAND   "${SILO_CMAKE_SOURCE_DIR}/configure" ${SILO_CONFIGURE_OPTIONS} ${ENV_VARS}
-    BUILD_COMMAND       $(MAKE) install VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     ""
-    DEPENDS             ZLIB HDF5
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
+    # Build silo
+    ADD_TPL(
+        SILO
+        URL                 "${SILO_CMAKE_URL}"
+        DOWNLOAD_DIR        "${SILO_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${SILO_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CONFIGURE_COMMAND   "${SILO_CMAKE_SOURCE_DIR}/configure" ${SILO_CONFIGURE_OPTIONS} ${ENV_VARS}
+        BUILD_COMMAND       $(MAKE) install VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     ""
+        DEPENDS             ZLIB HDF5
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( SILO )
+ENDIF()
+
 
 
 # Add the appropriate fields to FindTPLs.cmake

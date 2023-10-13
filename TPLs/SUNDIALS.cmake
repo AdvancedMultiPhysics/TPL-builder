@@ -52,25 +52,27 @@ IF ( CMAKE_BUILD_SUNDIALS )
     FOREACH( flags ${SUNDIALS_EXTRA_FLAGS} )
         SET( SUNDIALS_CONFIGURE_OPTIONS "${SUNDIALS_CONFIGURE_OPTIONS};${flags}" )
     ENDFOREACH()
+
+
+    # Configure sundials
+    ADD_TPL(
+        SUNDIALS
+        URL                 "${SUNDIALS_CMAKE_URL}"
+        DOWNLOAD_DIR        "${SUNDIALS_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${SUNDIALS_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        BUILD_IN_SOURCE     0
+        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/sundials
+        CMAKE_ARGS          "${SUNDIALS_CONFIGURE_OPTIONS}"
+        BUILD_COMMAND       $(MAKE) install VERBOSE=1
+        CLEAN_COMMAND       $(MAKE) clean
+        DEPENDS             ${SUNDIALS_DEPENDS}
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( SUNDIALS )
 ENDIF()
-
-
-# Configure sundials
-ADD_TPL(
-    SUNDIALS
-    URL                 "${SUNDIALS_CMAKE_URL}"
-    DOWNLOAD_DIR        "${SUNDIALS_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${SUNDIALS_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    BUILD_IN_SOURCE     0
-    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/sundials
-    CMAKE_ARGS          "${SUNDIALS_CONFIGURE_OPTIONS}"
-    BUILD_COMMAND       $(MAKE) install VERBOSE=1
-    CLEAN_COMMAND       $(MAKE) clean
-    DEPENDS             ${SUNDIALS_DEPENDS}
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
 
 # Add the appropriate fields to FindTPLs.cmake
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindSundials.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindSundials.cmake" COPYONLY )

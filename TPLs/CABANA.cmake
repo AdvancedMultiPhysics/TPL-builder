@@ -126,23 +126,29 @@ ENDIF()
 #        COMMAND             ${CMAKE_COMMAND} -E copy_directory docs/cabana-dox/html "${CABANA_INSTALL_DIR}/doxygen"
 #    )
 #ENDIF()
-ADD_TPL(
-    CABANA
-    URL                 "${CABANA_CMAKE_URL}"
-    DOWNLOAD_DIR        "${CABANA_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${CABANA_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CMAKE_ARGS          ${CABANA_CONFIGURE_OPTS}
-    BUILD_COMMAND       $(MAKE) VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
-    CLEAN_COMMAND       $(MAKE) clean
-    ${CABANA_DOC_COMMAND}
-    ${CABANA_CMAKE_TEST}
-    DEPENDS             ${CABANA_DEPENDS}
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
+IF ( CMAKE_BUILD_CABANA )
 
+      ADD_TPL(
+        CABANA
+        URL                 "${CABANA_CMAKE_URL}"
+        DOWNLOAD_DIR        "${CABANA_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${CABANA_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CMAKE_ARGS          ${CABANA_CONFIGURE_OPTS}
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
+        CLEAN_COMMAND       $(MAKE) clean
+        ${CABANA_DOC_COMMAND}
+        ${CABANA_CMAKE_TEST}
+        DEPENDS             ${CABANA_DEPENDS}
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( CABANA )
+ENDIF()
+  
 IF ( EXISTS "${CABANA_INSTALL_DIR}/lib64" )
   SET( CABANA_CMAKE_CONFIG_DIR "${CABANA_INSTALL_DIR}/lib64/cmake/Cabana/" )
 ELSE()

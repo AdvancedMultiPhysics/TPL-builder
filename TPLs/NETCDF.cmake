@@ -51,26 +51,28 @@ IF ( CMAKE_BUILD_NETCDF )
     ELSE()
         SET( NETCDF_CONFIGURE_OPTIONS ${NETCDF_CONFIGURE_OPTIONS} --disable-static )
     ENDIF()
+
+
+    # Build netcdf
+    ADD_TPL(
+        NETCDF
+        URL                 "${NETCDF_CMAKE_URL}"
+        DOWNLOAD_DIR        "${NETCDF_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${NETCDF_CMAKE_SOURCE_DIR}"
+
+        UPDATE_COMMAND      ""
+        CONFIGURE_COMMAND   ${NETCDF_SRC_DIR}/configure ${NETCDF_CONFIGURE_OPTIONS} 
+                            CC=${CMAKE_C_COMPILER} CFLAGS=${NETCDF_CFLAGS} LDFLAGS=${NETCDF_LDFLAGS} LIBS=${NETCDF_LIBS}
+        BUILD_COMMAND       $(MAKE) install VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     ""
+        DEPENDS             HDF5
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( NETCDF )
 ENDIF()
-
-
-# Build netcdf
-ADD_TPL(
-    NETCDF
-    URL                 "${NETCDF_CMAKE_URL}"
-    DOWNLOAD_DIR        "${NETCDF_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${NETCDF_CMAKE_SOURCE_DIR}"
-
-    UPDATE_COMMAND      ""
-    CONFIGURE_COMMAND   ${NETCDF_SRC_DIR}/configure ${NETCDF_CONFIGURE_OPTIONS} 
-                        CC=${CMAKE_C_COMPILER} CFLAGS=${NETCDF_CFLAGS} LDFLAGS=${NETCDF_LDFLAGS} LIBS=${NETCDF_LIBS}
-    BUILD_COMMAND       $(MAKE) install VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     ""
-    DEPENDS             HDF5
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
 
 # Add the appropriate fields to FindTPLs.cmake
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find NETCDF\n" )

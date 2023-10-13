@@ -178,26 +178,28 @@ IF ( CMAKE_BUILD_TRILINOS )
     WRITE_TRILINOS_CONFIG_BOOL( Trilinos_DUMP_LINK_LIBS ON )
     FILE( APPEND "${TRILINOS_CMAKE_CONFIGURE}" "SET( Trilinos_EXTRA_LINK_FLAGS $\{TRILINOS_EXTRA_LIBS} CACHE STRING \"\" FORCE )\n" )
     FILE( APPEND "${TRILINOS_CMAKE_CONFIGURE}" "MESSAGE( \"Trilinos_EXTRA_LINK_FLAGS=$\{Trilinos_EXTRA_LINK_FLAGS}\")\n" )
+
+
+    # Configure trilinos
+    ADD_TPL(
+        TRILINOS
+        URL                 "${TRILINOS_CMAKE_URL}"
+        TIMEOUT             300
+        DOWNLOAD_DIR        "${TRILINOS_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${TRILINOS_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        BUILD_IN_SOURCE     0
+        INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/trilinos
+        CMAKE_ARGS          ${TRILINOS_CONFIGURE_OPTS}
+        BUILD_COMMAND       $(MAKE) install VERBOSE=1
+        DEPENDS             ${TRILINOS_DEPENDS}
+        CLEAN_COMMAND       $(MAKE) clean
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( TRILINOS )
 ENDIF()
-
-
-# Configure trilinos
-ADD_TPL(
-    TRILINOS
-    URL                 "${TRILINOS_CMAKE_URL}"
-    TIMEOUT             300
-    DOWNLOAD_DIR        "${TRILINOS_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${TRILINOS_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    BUILD_IN_SOURCE     0
-    INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/trilinos
-    CMAKE_ARGS          ${TRILINOS_CONFIGURE_OPTS}
-    BUILD_COMMAND       $(MAKE) install VERBOSE=1
-    DEPENDS             ${TRILINOS_DEPENDS}
-    CLEAN_COMMAND       $(MAKE) clean
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
 
 # Add the appropriate fields to FindTPLs.cmake
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find TRILINOS\n" )

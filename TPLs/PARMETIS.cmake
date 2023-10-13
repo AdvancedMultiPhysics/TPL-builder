@@ -47,26 +47,29 @@ IF ( CMAKE_BUILD_PARMETIS )
     SET( PARMETIS_VARS ${PARMETIS_VARS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${PARMETIS_CXXFLAGS} )
     SET( PARMETIS_VARS ${PARMETIS_VARS} FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${PARMETIS_FFLAGS} )
     SET( PARMETIS_VARS ${PARMETIS_VARS} LDFLAGS=${LDFLAGS} )
+
+
+    # Build parmetis
+    # Note: a bug in the parmetis cmake scripts results in parmetis not installing the metis headers and libs
+    # The current fix is to modify the Parmetis CMakeLists.txt to run the metis install also
+    # Currently this might not be portable due to the use of sed
+    ADD_TPL(
+        PARMETIS
+        URL                 "${PARMETIS_CMAKE_URL}"
+        DOWNLOAD_DIR        "${PARMETIS_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${PARMETIS_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        PATCH_COMMAND       sed -e "s|add_subdirectory\(\${METIS_PATH}\\/libmetis \${CMAKE_BINARY_DIR}\\/libmetis\)|add_subdirectory\(\${METIS_PATH}\)|" ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt > tmp
+                            COMMAND mv tmp ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt
+        CONFIGURE_COMMAND   make config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
+                            FC=${CMAKE_Fortran_COMPILER} prefix=${PARMETIS_INSTALL_DIR} VERBOSE=1
+        BUILD_COMMAND       make ${PARMETIS_VARS} -i
+        BUILD_IN_SOURCE     1
+        INSTALL_COMMAND     make install -i
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( PARMETIS )
 ENDIF()
-
-
-# Build parmetis
-# Note: a bug in the parmetis cmake scripts results in parmetis not installing the metis headers and libs
-# The current fix is to modify the Parmetis CMakeLists.txt to run the metis install also
-# Currently this might not be portable due to the use of sed
-ADD_TPL(
-    PARMETIS
-    URL                 "${PARMETIS_CMAKE_URL}"
-    DOWNLOAD_DIR        "${PARMETIS_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${PARMETIS_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    PATCH_COMMAND       sed -e "s|add_subdirectory\(\${METIS_PATH}\\/libmetis \${CMAKE_BINARY_DIR}\\/libmetis\)|add_subdirectory\(\${METIS_PATH}\)|" ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt > tmp
-                        COMMAND mv tmp ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt
-    CONFIGURE_COMMAND   make config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
-                        FC=${CMAKE_Fortran_COMPILER} prefix=${PARMETIS_INSTALL_DIR} VERBOSE=1
-    BUILD_COMMAND       make ${PARMETIS_VARS} -i
-    BUILD_IN_SOURCE     1
-    INSTALL_COMMAND     make install -i
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
 

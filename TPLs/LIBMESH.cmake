@@ -116,25 +116,27 @@ IF ( CMAKE_BUILD_LIBMESH )
     # for some strange reason this is required for linking when MPI is not turned on
     # even if pthreads is disabled   
     SET( LIBMESH_LD_FLAGS -pthread )
+
+
+    # Build libmesh
+    ADD_TPL( 
+        LIBMESH
+        URL                 "${LIBMESH_CMAKE_URL}"
+        DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${LIBMESH_CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     $(MAKE) install
+        CLEAN_COMMAND       $(MAKE) clean
+        DEPENDS             
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( LIBMESH ) 
 ENDIF()
-
-
-# Build libmesh
-ADD_TPL( 
-    LIBMESH
-    URL                 "${LIBMESH_CMAKE_URL}"
-    DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${LIBMESH_CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
-    BUILD_COMMAND       $(MAKE) VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     $(MAKE) install
-    CLEAN_COMMAND       $(MAKE) clean
-    DEPENDS             
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
 
 # Add the appropriate fields to FindTPLs.cmake
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindLibmesh.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindLibmesh.cmake" COPYONLY )

@@ -183,6 +183,7 @@ The important variables are:
     CMAKE_SYSTEM_NAME - The system type: Linux, Generic, etc.
     CMAKE_SHARED_LINKER_FLAGS - Linker flags for shared libraries
     INSTALL_DIR      - The install path where we want to install the libraries
+    DISABLE_ALL_TESTS - Disable building and running of tests for TPLs
     TPL_LIST         - The list of TPLs to build.  By default all required TPLs will be built. 
                        Note: if provided the TPL_LIST must be in order of the required dependencies.
                        Failure to do so will result in a cmake error at configure time:

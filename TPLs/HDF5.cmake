@@ -116,23 +116,27 @@ ELSE()
     ENDIF()
 ENDIF()
 
+IF ( CMAKE_BUILD_HDF5 )
 
-# Build hdf5
-ADD_TPL(
-    HDF5
-    URL                 "${HDF5_CMAKE_URL}"
-    DOWNLOAD_DIR        "${HDF5_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${HDF5_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CONFIGURE_COMMAND   ${HDF5_CMAKE_SOURCE_DIR}/configure ${HDF5_CONFIGURE_OPTIONS} ${ENV_VARS}
-    BUILD_COMMAND       $(MAKE) install VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     ""
-    CLEAN_COMMAND       $(MAKE) clean
-    DEPENDS             ZLIB
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
+    # Build hdf5
+    ADD_TPL(
+        HDF5
+        URL                 "${HDF5_CMAKE_URL}"
+        DOWNLOAD_DIR        "${HDF5_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${HDF5_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CONFIGURE_COMMAND   ${HDF5_CMAKE_SOURCE_DIR}/configure ${HDF5_CONFIGURE_OPTIONS} ${ENV_VARS}
+        BUILD_COMMAND       $(MAKE) install VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     ""
+        CLEAN_COMMAND       $(MAKE) clean
+        DEPENDS             ZLIB
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
 
+ELSE()
+    ADD_TPL_EMPTY( HDF5 )
+ENDIF()
 
 # Add the appropriate fields to FindTPLs.cmake
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find HDF5\n" )
