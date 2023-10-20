@@ -86,7 +86,9 @@ IF ( CMAKE_BUILD_UMPIRE )
         DOWNLOAD_DIR        "${UMPIRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${UMPIRE_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-        PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/umpire.cuda.patch
+        PATCH_COMMAND       ""
+# patch for umpire 6.0.0 -- see if it's necessary
+#        PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/umpire.cuda.patch
         CMAKE_ARGS          ${UMPIRE_CONFIGURE_OPTIONS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
