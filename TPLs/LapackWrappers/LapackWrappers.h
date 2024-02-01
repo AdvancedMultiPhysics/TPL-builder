@@ -1,6 +1,7 @@
 #ifndef USE_LAPACK_WRAPPER
 #define USE_LAPACK_WRAPPER
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
