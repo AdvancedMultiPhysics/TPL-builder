@@ -180,6 +180,7 @@ The important variables are:
     ENABLE_GXX_DEBUG - Do we want to enable GLIBCXX_DEBUG flags (disabled by default)
     USE_OPENMP       - Turn on OpenMP
     USE_CUDA         - Turn on CUDA
+    USE_HIP         - Turn on HIP
     CMAKE_SYSTEM_NAME - The system type: Linux, Generic, etc.
     CMAKE_SHARED_LINKER_FLAGS - Linker flags for shared libraries
     INSTALL_DIR      - The install path where we want to install the libraries
@@ -236,22 +237,27 @@ HDF5:
     HDF5_ENABLE_UNSUPPORTED - Enable unsupported options in hdf5
     HDF5_VERSION    - Specify HDF5 version being used (required)
 KOKKOS:
-    KOKKOS_ARCH_FLAGS - Specify CUDA architecture to use
+    KOKKOS_ARCH_FLAGS - Specify CUDA/HIP architecture to use
     KOKKOS_CXX_STD -- specify what C++ standard to use (11, 14,17) etc
 CABANA:
     CABANA_VERSION - Specify Cabana version
 UMPIRE
     UMPIRE_USE_CUDA - Bool to enable CUDA
+    UMPIRE_USE_HIP - Bool to enable HIP
     UMPIRE_USE_OPENMP - Bool to enable OpenMP
 RAJA
     RAJA_USE_CUDA - Bool to enable CUDA
+    RAJA_USE_HIP - Bool to enable HIP
     RAJA_USE_OPENMP - Bool to enable OpenMP
     RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use (sm_70, sm_80) etc
+    RAJA_HIP_ARCH_FLAGS - Specify HIP architecture to use (sm_70, sm_80) etc
 HYPRE
     HYPRE_USE_CUDA - Bool to enable CUDA
+    HYPRE_USE_HIP - Bool to enable HIP
     HYPRE_USE_OPENMP - Bool to enable OpenMP
     HYPRE_USE_UMPIRE - bool whether Umpire should be used
     HYPRE_CUDA_HOME - Root directory for CUDA install
+    HYPRE_HIP_HOME - Root directory for HIP install
 TRILINOS:
     TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
     TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
@@ -262,10 +268,12 @@ SAMRAI:
     SAMRAI_TEST - Enable samrai tests (may take a while to complete)
     SAMRAI_DOCS - Enable/disable building and installing the SAMRAI doxygen documentation (enabled by default)
     SAMRAI_USE_CUDA - Bool to enable CUDA
+    SAMRAI_USE_HIP - Bool to enable HIP
     SAMRAI_USE_OPENMP - Bool to enable OpenMP
     SAMRAI_USE_UMPIRE - Enable use of Umpire with SAMRAI
     SAMRAI_USE_RAJA   - Enable use of Raja with SAMRAI
     SAMRAI_CUDA_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
+    SAMRAI_HIP_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
 SAMRUTILS:
     DISABLE_THREAD_CHANGES - Disable all threading support
     TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
