@@ -941,6 +941,7 @@ FUNCTION( ADD_PROJ_PROVISIONAL_TEST EXEFILE ${ARGN} )
                     SET_SOURCE_FILES_PROPERTIES( ${tmp} PROPERTIES LANGUAGE CUDA )
                 ENDIF()
             ENDFOREACH()
+        ENDIF()
         # If we are using HIP and COMPILE_CXX_AS_HIP is set, change the language
         IF ( USE_HIP AND COMPILE_CXX_AS_HIP )
             SET( OVERRIDE_LINKER FALSE )
