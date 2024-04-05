@@ -155,7 +155,7 @@ ELSE()
     FILE( WRITE "${STACKTRACE_INCLUDE}/string_view.h" "namespace StackTrace {\nusing std::string_view;\n}\n" )
 ENDIF()
 FILE( WRITE "${STACKTRACE_INCLUDE}/std.h" "#define STACTRACE_CXX_STANDARD ${CMAKE_CXX_STANDARD}\n" )
-SET_WARNINGS()
+SET_COMPILER_FLAGS()
 
 
 # Check if we are using the timer (allows a more accurate memory usage)
@@ -183,6 +183,14 @@ FOREACH( tmp ${hfiles} )
     SET( DST_FILE "${STACKTRACE_INCLUDE}/${tmp}" )
     CONFIGURE_FILE( "${SRC_FILE}" "${DST_FILE}" @ONLY )
 ENDFOREACH()
+
+
+# Check for mallinfo2
+INCLUDE(CheckSymbolExists)
+CHECK_SYMBOL_EXISTS( mallinfo2 malloc.h HAVE_MALLINFO2 )
+IF ( HAVE_MALLINFO2 )
+    ADD_DEFINITIONS( -DHAVE_MALLINFO2 )
+ENDIF()
 
 
 # Add a static library

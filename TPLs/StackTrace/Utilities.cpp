@@ -15,11 +15,11 @@
 #include <typeinfo>
 
 #ifdef USE_TIMER
-#include "MemoryApp.h"
+    #include "MemoryApp.h"
 #endif
 
 #ifdef USE_GCOV
-extern "C" void __gcov_flush( void );
+extern "C" void __gcov_dump();
 #endif
 
 
@@ -69,19 +69,8 @@ extern "C" void __gcov_flush( void );
 
 
 #ifdef __GNUC__
-#define USE_ABI
-#include <cxxabi.h>
-#endif
-
-
-#ifndef NULL_USE
-#define NULL_USE( variable )                       \
-    do {                                           \
-        if ( 0 ) {                                 \
-            auto static temp = (char *) &variable; \
-            temp++;                                \
-        }                                          \
-    } while ( 0 )
+    #define USE_ABI
+    #include <cxxabi.h>
 #endif
 
 
@@ -138,7 +127,7 @@ static std::mutex terminate_mutex;
 [[noreturn]] static inline void callAbort()
 {
 #ifdef USE_GCOV
-    __gcov_flush();
+    __gcov_dump();
 #endif
     terminate_mutex.unlock();
     std::abort();
@@ -234,25 +223,30 @@ size_t Utilities::getMemoryUsage()
     #ifdef USE_TIMER
         size_t N_bytes = MemoryApp::getTotalMemoryUsage();
     #else
-        #if defined( USE_LINUX )
-            struct mallinfo meminfo = mallinfo();
-            size_t size_hblkhd      = static_cast<unsigned int>( meminfo.hblkhd );
-            size_t size_uordblks    = static_cast<unsigned int>( meminfo.uordblks );
-            size_t N_bytes          = size_hblkhd + size_uordblks;
-        #elif defined( USE_MAC )
-            struct task_basic_info t_info;
-            mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
-            if ( KERN_SUCCESS !=
-                 task_info( mach_task_self(), TASK_BASIC_INFO, (task_info_t) &t_info, &t_info_count ) ) {
-                return 0;
-            }
-            size_t N_bytes = t_info.virtual_size;
-        #elif defined( USE_WINDOWS )
+        #if defined( WIN32 ) || defined( _WIN32 ) || defined( WIN64 ) || defined( _WIN64 )
+            // Windows
             PROCESS_MEMORY_COUNTERS memCounter;
             GetProcessMemoryInfo( GetCurrentProcess(), &memCounter, sizeof( memCounter ) );
             size_t N_bytes = memCounter.WorkingSetSize;
+        #elif defined( __APPLE__ )
+            // MAC
+            struct task_basic_info t_info;
+            mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
+            kern_return_t rtn =
+                task_info( mach_task_self(), TASK_BASIC_INFO, (task_info_t) &t_info, &t_info_count );
+            if ( rtn != KERN_SUCCESS )
+                return 0;
+            size_t N_bytes = t_info.virtual_size;
+        #elif defined( HAVE_MALLINFO2 )
+            // Linux - mallinfo2
+            auto meminfo   = mallinfo2();
+            size_t N_bytes = meminfo.hblkhd + meminfo.uordblks;
         #else
-            #error Unknown OS
+            // Linux - Deprecated mallinfo
+            auto meminfo = mallinfo();
+            size_t size_hblkhd   = static_cast<unsigned int>( meminfo.hblkhd );
+            size_t size_uordblks = static_cast<unsigned int>( meminfo.uordblks );
+            size_t N_bytes       = size_hblkhd + size_uordblks;
         #endif
     #endif
     return N_bytes;
@@ -299,7 +293,7 @@ double Utilities::tick()
     return resolution;
 }
 #else
-#error Unknown OS
+    #error Unknown OS
 #endif
 
 
