@@ -22,7 +22,7 @@ public:
     inline string_view( const std::string& s ) : d_data( s.data() ), d_size( s.size() ) {}
 
     // Assignment
-    constexpr string_view& operator=( string_view&& other ) noexcept = default;
+    constexpr string_view& operator=( string_view&& other ) noexcept      = default;
     constexpr string_view& operator=( const string_view& other ) noexcept = default;
 
     // Iterators
