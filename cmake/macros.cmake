@@ -625,7 +625,7 @@ MACRO( SET_COMPILER_FLAGS )
         SET(CMAKE_C_FLAGS_RELEASE   "/O2 /EHsc /MD" )
         SET(CMAKE_CXX_FLAGS_RELEASE "/O2 /EHsc /MD" )
     ELSEIF ( USING_ICC )
-        SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fp-model precise -fp-model source")
+        SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fp-model precise")
     ELSE()
     ENDIF()
     # Set the behavior of GLIBCXX flags
