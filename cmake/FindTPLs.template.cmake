@@ -146,9 +146,10 @@ IF ( NOT TPLs_FOUND )
         SET( CMAKE_HIP_FLAGS  "@CMAKE_HIP_FLAGS@" CACHE STRING "HIP flags" )
         ENABLE_LANGUAGE( HIP )
         ADD_DEFINITIONS( -DUSE_HIP )
-        # Enable HIP toolkit
-        FIND_PACKAGE( HIPToolkit )
-        SET( TPL_LIBRARIES ${TPL_LIBRARIES} HIP::cusparse HIP::cublas HIP::curand HIP::cudart HIP::cuda_driver )
+        # Enable ROCm API Libraries
+        FIND_PACKAGE( rocprim REQUIRED)
+        FIND_PACKAGE( rocthrust REQUIRED )
+        SET( TPL_LIBRARIES ${TPL_LIBRARIES} roc::rocthrust)
     ENDIF()
     SET( NUMBER_OF_GPUS @NUMBER_OF_GPUS@ CACHE STRING "Number of GPUs for testing" )
     IF ( USE_OPENMP )
@@ -236,10 +237,6 @@ IF ( NOT TPLs_FOUND )
 
     IF ( USE_CUDA )
          SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -I${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}" )
-    ENDIF()
-
-    IF ( USE_HIP )
-         SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -I${CMAKE_HIP_TOOLKIT_INCLUDE_DIRECTORIES}" )
     ENDIF()
 
     # Print some flags
