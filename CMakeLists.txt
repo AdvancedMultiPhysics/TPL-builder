@@ -345,9 +345,9 @@ ENDIF()
 
 # Set TPL defaults
 SET_DEFAULT_TPL( ZLIB  URL http://zlib.net/zlib-1.2.11.tar.gz )
-SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.8.12.tar.gz  )
-SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hypre-2.18.2.tar.gz )
-SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/petsc-3.13.0.tar.gz )
+SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.12.0.tar.gz  )
+SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hypre-2.30.0.tar.gz )
+SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/petsc-3.20.0.tar.gz )
 
 
 # Copy cmake files to install dir
