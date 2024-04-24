@@ -20,33 +20,7 @@ typedef double _Complex Complex;
 #define FORTRAN_WRAPPER( x ) x##_
 #elif defined( _WIN32 ) || defined( __hpux ) || defined( USE_MKL )
 #define FORTRAN_WRAPPER( x ) x
-#elif defined( USE_VECLIB )
-#define FORTRAN_WRAPPER( x ) x##_
-inline cblas_zIDE SIDE2( char SIDE )
-{
-    return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight;
-}
-inline CBLAS_UPLO UPLO2( char UPLO )
-{
-    return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower;
-}
-inline CBLAS_DIAG DIAG2( char DIAG )
-{
-    return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit;
-}
-inline CBLAS_TRANSPOSE TRANS2( char TRANS )
-{
-    CBLAS_TRANSPOSE ans = CblasNoTrans;
-    if ( TRANS == 'N' || TRANS == 'n' ) {
-        ans = CblasNoTrans;
-    } else if ( TRANS == 'T' || TRANS == 't' ) {
-        ans = CblasTrans;
-    } else if ( TRANS == 'C' || TRANS == 'c' ) {
-        ans = CblasConjTrans;
-    }
-    return ans;
-}
-#elif defined( USE_OPENBLAS )
+#elif defined( USE_VECLIB ) || defined( USE_OPENBLAS ) || defined( USE_CBLAS )
 #define FORTRAN_WRAPPER( x ) x##_
 inline CBLAS_SIDE SIDE2( char SIDE )
 {
@@ -107,6 +81,8 @@ void Lapack<std::complex<double>>::copy(
     cblas_zcopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
     cblas_zcopy( N, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
+    cblas_zcopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
     FORTRAN_WRAPPER( ::zcopy )( &Nl, (double *) DX, &INCXl, (double *) DY, &INCYl );
@@ -128,6 +104,8 @@ void Lapack<std::complex<double>>::swap(
     cblas_zswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
     cblas_zswap( N, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
+    cblas_zswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
     FORTRAN_WRAPPER( ::zswap )( &Nl, (double *) DX, &INCXl, (double *) DY, &INCYl );
@@ -148,6 +126,8 @@ void Lapack<std::complex<double>>::scal(
     cblas_zscal( N, DA, DX, INCX );
 #elif defined( USE_OPENBLAS )
     cblas_zscal( N, DA, DX, INCX );
+#elif defined( USE_CBLAS )
+    cblas_zscal( N, DA, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     FORTRAN_WRAPPER( ::zscal )( &Np, (double *) DA, (double *) DX, &INCXp );
@@ -166,6 +146,8 @@ double Lapack<std::complex<double>>::nrm2( int N, const std::complex<double> *DX
     return cblas_dznrm2( N, DX, INCX );
 #elif defined( USE_OPENBLAS )
     return cblas_dznrm2( N, DX, INCX );
+#elif defined( USE_CBLAS )
+    return cblas_dznrm2( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER( ::dznrm2 )( &Np, (double *) DX, &INCXp );
@@ -183,6 +165,8 @@ int Lapack<std::complex<double>>::iamax( int N, const std::complex<double> *DX_,
 #elif defined( USE_VECLIB )
     return cblas_izamax( N, DX, INCX ) - 1;
 #elif defined( USE_OPENBLAS )
+    return cblas_izamax( N, DX, INCX ) - 1;
+#elif defined( USE_CBLAS )
     return cblas_izamax( N, DX, INCX ) - 1;
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
@@ -204,6 +188,8 @@ void Lapack<std::complex<double>>::axpy( int N, std::complex<double> DA_,
 #elif defined( USE_VECLIB )
     cblas_zaxpy( N, &DA, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
+    cblas_zaxpy( N, &DA, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
     cblas_zaxpy( N, &DA, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
@@ -232,6 +218,8 @@ void Lapack<std::complex<double>>::gemv( char TRANS, int M, int N, std::complex<
 #elif defined( USE_VECLIB )
     cblas_zgemv( CblasColMajor, TRANS2( TRANS ), M, N, &ALPHA, A, LDA, DX, INCX, &BETA, DY, INCY );
 #elif defined( USE_OPENBLAS )
+    cblas_zgemv( CblasColMajor, TRANS2( TRANS ), M, N, &ALPHA, A, LDA, DX, INCX, &BETA, DY, INCY );
+#elif defined( USE_CBLAS )
     cblas_zgemv( CblasColMajor, TRANS2( TRANS ), M, N, &ALPHA, A, LDA, DX, INCX, &BETA, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, INCXp = INCX, INCYp = INCY;
@@ -270,6 +258,9 @@ void Lapack<std::complex<double>>::gemm( char TRANSA, char TRANSB, int M, int N,
 #elif defined( USE_OPENBLAS )
     cblas_zgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, &ALPHA, A, LDA, B, LDB,
         &BETA, C, LDC );
+#elif defined( USE_CBLAS )
+    cblas_zgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, &ALPHA, A, LDA, B, LDB,
+        &BETA, C, LDC );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, Kp = K, LDAp = LDA, LDBp = LDB, LDCp = LDC;
     FORTRAN_WRAPPER( ::zgemm )
@@ -292,6 +283,8 @@ double Lapack<std::complex<double>>::asum( int N, const std::complex<double> *DX
     return cblas_dzasum( N, DX, INCX );
 #elif defined( USE_OPENBLAS )
     return cblas_dzasum( N, DX, INCX );
+#elif defined( USE_CBLAS )
+    return cblas_dzasum( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER( ::dzasum )( &Np, (double *) DX, &INCXp );
@@ -311,6 +304,8 @@ std::complex<double> Lapack<std::complex<double>>::dot(
 #elif defined( USE_VECLIB )
     return cblas_zdotc( N, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
+    return cblas_zdotc( N, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
     return cblas_zdotc( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
@@ -342,6 +337,8 @@ void Lapack<std::complex<double>>::ger( int N, int M, std::complex<double> ALPHA
 #elif defined( USE_VECLIB )
     cblas_zgerc( CblasColMajor, N, M, &ALPHA, x, INCX, y, INCY, A, LDA );
 #elif defined( USE_OPENBLAS )
+    cblas_zgerc( CblasColMajor, N, M, &ALPHA, x, INCX, y, INCY, A, LDA );
+#elif defined( USE_CBLAS )
     cblas_zgerc( CblasColMajor, N, M, &ALPHA, x, INCX, y, INCY, A, LDA );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, INCXp = INCX, INCYp = INCY, LDAp = LDA;

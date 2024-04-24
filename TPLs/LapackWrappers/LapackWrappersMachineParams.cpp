@@ -33,6 +33,8 @@ float Lapack<float>::lamch( char cmach )
     return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #elif defined( USE_OPENBLAS )
     return FORTRAN_WRAPPER( ::dlamch )( &cmach );
+#elif defined( USE_LAPACKE )
+    return ::LAPACKE_dlamch( cmach );
 #else
     return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #endif
@@ -48,6 +50,8 @@ double Lapack<double>::lamch( char cmach )
     return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #elif defined( USE_OPENBLAS )
     return FORTRAN_WRAPPER( ::dlamch )( &cmach );
+#elif defined( USE_LAPACKE )
+    return ::LAPACKE_dlamch( cmach );
 #else
     return FORTRAN_WRAPPER( ::dlamch )( &cmach );
 #endif

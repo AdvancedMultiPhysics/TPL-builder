@@ -11,33 +11,7 @@
 #define FORTRAN_WRAPPER( x ) x##_
 #elif defined( _WIN32 ) || defined( __hpux ) || defined( USE_MKL )
 #define FORTRAN_WRAPPER( x ) x
-#elif defined( USE_VECLIB )
-#define FORTRAN_WRAPPER( x ) x##_
-inline CBLAS_SIDE SIDE2( char SIDE )
-{
-    return ( SIDE = 'L' || SIDE == 'l' ) ? CblasLeft : CblasRight;
-}
-inline CBLAS_UPLO UPLO2( char UPLO )
-{
-    return ( UPLO = 'U' || UPLO == 'u' ) ? CblasUpper : CblasLower;
-}
-inline CBLAS_DIAG DIAG2( char DIAG )
-{
-    return ( DIAG = 'U' || DIAG == 'u' ) ? CblasUnit : CblasNonUnit;
-}
-inline CBLAS_TRANSPOSE TRANS2( char TRANS )
-{
-    CBLAS_TRANSPOSE ans = CblasNoTrans;
-    if ( TRANS == 'N' || TRANS == 'n' ) {
-        ans = CblasNoTrans;
-    } else if ( TRANS == 'T' || TRANS == 't' ) {
-        ans = CblasTrans;
-    } else if ( TRANS == 'C' || TRANS == 'c' ) {
-        ans = CblasConjTrans;
-    }
-    return ans;
-}
-#elif defined( USE_OPENBLAS )
+#elif defined( USE_VECLIB ) || defined( USE_OPENBLAS ) || defined( USE_CBLAS )
 #define FORTRAN_WRAPPER( x ) x##_
 inline CBLAS_SIDE SIDE2( char SIDE )
 {
@@ -84,6 +58,8 @@ void Lapack<float>::copy( int N, const float *DX, int INCX, float *DY, int INCY 
     cblas_scopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
     cblas_scopy( N, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
+    cblas_scopy( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
     FORTRAN_WRAPPER( ::scopy )( &Nl, (float *) DX, &INCXl, DY, &INCYl );
@@ -102,6 +78,8 @@ void Lapack<float>::swap( int N, float *DX, int INCX, float *DY, int INCY )
     cblas_sswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
     cblas_sswap( N, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
+    cblas_sswap( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Nl = N, INCXl = INCX, INCYl = INCY;
     FORTRAN_WRAPPER( ::sswap )( &Nl, DX, &INCXl, DY, &INCYl );
@@ -118,6 +96,8 @@ void Lapack<float>::scal( int N, float DA, float *DX, int INCX )
 #elif defined( USE_VECLIB )
     cblas_sscal( N, DA, DX, INCX );
 #elif defined( USE_OPENBLAS )
+    cblas_sscal( N, DA, DX, INCX );
+#elif defined( USE_CBLAS )
     cblas_sscal( N, DA, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
@@ -136,6 +116,8 @@ double Lapack<float>::nrm2( int N, const float *DX, int INCX )
     return cblas_snrm2( N, DX, INCX );
 #elif defined( USE_OPENBLAS )
     return cblas_snrm2( N, DX, INCX );
+#elif defined( USE_CBLAS )
+    return cblas_snrm2( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER( ::snrm2 )( &Np, (float *) DX, &INCXp );
@@ -153,6 +135,8 @@ int Lapack<float>::iamax( int N, const float *DX, int INCX )
     return cblas_isamax( N, DX, INCX ) - 1;
 #elif defined( USE_OPENBLAS )
     return cblas_isamax( N, DX, INCX ) - 1;
+#elif defined( USE_CBLAS )
+    return cblas_isamax( N, DX, INCX ) - 1;
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER( ::isamax )( &Np, (float *) DX, &INCXp ) - 1;
@@ -169,6 +153,8 @@ void Lapack<float>::axpy( int N, float DA, const float *DX, int INCX, float *DY,
 #elif defined( USE_VECLIB )
     cblas_saxpy( N, DA, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
+    cblas_saxpy( N, DA, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
     cblas_saxpy( N, DA, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
@@ -191,6 +177,8 @@ void Lapack<float>::gemv( char TRANS, int M, int N, float ALPHA, const float *A,
 #elif defined( USE_VECLIB )
     cblas_sgemv( CblasColMajor, TRANS2( TRANS ), M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
 #elif defined( USE_OPENBLAS )
+    cblas_sgemv( CblasColMajor, TRANS2( TRANS ), M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
+#elif defined( USE_CBLAS )
     cblas_sgemv( CblasColMajor, TRANS2( TRANS ), M, N, ALPHA, A, LDA, DX, INCX, BETA, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, LDAp = LDA, INCXp = INCX, INCYp = INCY;
@@ -220,6 +208,9 @@ void Lapack<float>::gemm( char TRANSA, char TRANSB, int M, int N, int K, float A
 #elif defined( USE_OPENBLAS )
     cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB,
         BETA, C, LDC );
+#elif defined( USE_CBLAS )
+    cblas_sgemm( CblasColMajor, TRANS2( TRANSA ), TRANS2( TRANSB ), M, N, K, ALPHA, A, LDA, B, LDB,
+        BETA, C, LDC );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Mp = M, Np = N, Kp = K, LDAp = LDA, LDBp = LDB, LDCp = LDC;
     FORTRAN_WRAPPER( ::sgemm )
@@ -240,6 +231,8 @@ double Lapack<float>::asum( int N, const float *DX, int INCX )
     return cblas_sasum( N, DX, INCX );
 #elif defined( USE_OPENBLAS )
     return cblas_sasum( N, DX, INCX );
+#elif defined( USE_CBLAS )
+    return cblas_sasum( N, DX, INCX );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX;
     return FORTRAN_WRAPPER( ::sasum )( &Np, (float *) DX, &INCXp );
@@ -256,6 +249,8 @@ float Lapack<float>::dot( int N, const float *DX, int INCX, const float *DY, int
 #elif defined( USE_VECLIB )
     return cblas_sdot( N, DX, INCX, DY, INCY );
 #elif defined( USE_OPENBLAS )
+    return cblas_sdot( N, DX, INCX, DY, INCY );
+#elif defined( USE_CBLAS )
     return cblas_sdot( N, DX, INCX, DY, INCY );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, INCXp = INCX, INCYp = INCY;
@@ -274,6 +269,8 @@ void Lapack<float>::ger( int N, int M, float alpha, const float *x, int INCX, co
 #elif defined( USE_VECLIB )
     cblas_sger( CblasColMajor, N, M, alpha, x, INCX, y, INCY, A, LDA );
 #elif defined( USE_OPENBLAS )
+    cblas_sger( CblasColMajor, N, M, alpha, x, INCX, y, INCY, A, LDA );
+#elif defined( USE_CBLAS )
     cblas_sger( CblasColMajor, N, M, alpha, x, INCX, y, INCY, A, LDA );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, Mp = M, INCXp = INCX, INCYp = INCY, LDAp = LDA;
@@ -438,6 +435,9 @@ void Lapack<float>::getrs( char TRANS, int N, int NRHS, const float *A, int LDA,
 #elif defined( USE_OPENBLAS )
     FORTRAN_WRAPPER( ::sgetrs )
     ( &TRANS, &N, &NRHS, (float *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
+#elif defined( USE_LAPACKE )
+    FORTRAN_WRAPPER( ::sgetrs )
+    ( &TRANS, &N, &NRHS, (float *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
 #elif defined( USE_MATLAB_LAPACK )
     ptrdiff_t Np = N, NRHSp = NRHS, LDAp = LDA, LDBp = LDB, INFOp;
     ptrdiff_t *IPIVp = new ptrdiff_t[N];
@@ -446,7 +446,7 @@ void Lapack<float>::getrs( char TRANS, int N, int NRHS, const float *A, int LDA,
     }
     FORTRAN_WRAPPER( ::sgetrs )( &TRANS, &Np, &NRHSp, (float *) A, &LDAp, IPIVp, B, &LDBp, &INFOp );
     delete[] IPIVp;
-    INFO         = static_cast<int>( INFOp );
+    INFO = static_cast<int>( INFOp );
 #else
     FORTRAN_WRAPPER( ::sgetrs )
     ( &TRANS, &N, &NRHS, (float *) A, &LDA, (int *) IPIV, B, &LDB, &INFO );
