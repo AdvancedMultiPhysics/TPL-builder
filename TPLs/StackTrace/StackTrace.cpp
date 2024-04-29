@@ -1579,11 +1579,11 @@ void StackTrace::setSignals( const std::vector<int> &signals, void ( *handler )(
     std::this_thread::yield();
 }
 void StackTrace::raiseSignal( int signal ) { std::raise( signal ); }
-void StackTrace::setErrorHandler( std::function<void( StackTrace::abort_error & )> abort )
+void StackTrace::setErrorHandler( std::function<void( StackTrace::abort_error & )> abort, const std::vector<int> &signals )
 {
     abort_fun = abort;
     std::set_terminate( term_func );
-    setSignals( defaultSignalsToCatch(), &terminateFunctionSignal );
+    setSignals( signals, &terminateFunctionSignal );
     std::set_unexpected( term_func );
 }
 void StackTrace::clearErrorHandler()
@@ -2241,7 +2241,7 @@ const char *StackTrace::abort_error::what() const noexcept
     if ( bytes > 0 ) {
         d_msg += "Bytes used = " + std::to_string( bytes ) + "\n";
     }
-    if ( !stack.empty() ) {
+    if ( !stack.empty() && stackType != printStackType::none ) {
         d_msg += "Stack Trace:\n";
         if ( stackType == printStackType::local ) {
             for ( const auto &item : getStackInfo( stack ) ) {
