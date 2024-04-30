@@ -82,9 +82,9 @@ FUNCTION( CREATE_RELEASE )
     FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_NAME}/.clang-format )\n" )
     FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_NAME}/.clang-format-ignore )\n" )
     FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_NAME}/.clang-tidy )\n" )
-    FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E copy version.cmake ${PROJ_NAME}/${PROJ}_Version.cmake)\n" )
-    FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E tar -cf ${PROJ_NAME}.tar ${PROJ_NAME})\n" )
-    FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${PROJ_NAME}.tar \"${${PROJ}_INSTALL_DIR}/${${PROJ_NAME}}\" )\n" )
+    FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E copy version.cmake ${PROJ_NAME}/${PROJ}_Version.cmake )\n" )
+    FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E tar -cfz ${PROJ_NAME}.tar.gz ${PROJ_NAME} )\n" )
+    FILE(APPEND "${TMP_DIR}/release.cmake" "execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${PROJ_NAME}.tar.gz \"${${PROJ}_INSTALL_DIR}/${${PROJ_NAME}}\" )\n" )
     ADD_CUSTOM_COMMAND( TARGET release PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -P "${TMP_DIR}/release.cmake"
         WORKING_DIRECTORY "${TMP_DIR}" 
