@@ -140,7 +140,7 @@ IF ( CMAKE_BUILD_CABANA )
         CMAKE_ARGS          ${CABANA_CONFIGURE_OPTS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
+        INSTALL_COMMAND     $(MAKE) install
         CLEAN_COMMAND       $(MAKE) clean
         ${CABANA_DOC_COMMAND}
         ${CABANA_CMAKE_TEST}

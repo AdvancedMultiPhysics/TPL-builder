@@ -215,7 +215,7 @@ IF ( CMAKE_BUILD_SAMRAI )
         CMAKE_ARGS          ${SAMRAI_CONFIGURE_OPTIONS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
+        INSTALL_COMMAND     $(MAKE) install
         ${SAMRAI_DOC_COMMAND}
         ${SAMRAI_CMAKE_TEST}
         DEPENDS             ${SAMRAI_DEPENDS}
