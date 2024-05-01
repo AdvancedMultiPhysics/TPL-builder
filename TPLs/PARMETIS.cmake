@@ -61,7 +61,7 @@ IF ( CMAKE_BUILD_PARMETIS )
         UPDATE_COMMAND      ""
         PATCH_COMMAND       sed -e "s|add_subdirectory\(\${METIS_PATH}\\/libmetis \${CMAKE_BINARY_DIR}\\/libmetis\)|add_subdirectory\(\${METIS_PATH}\)|" ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt > tmp
                             COMMAND mv tmp ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt
-        CONFIGURE_COMMAND   make config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
+        CONFIGURE_COMMAND   $(MAKE) config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
                             FC=${CMAKE_Fortran_COMPILER} prefix=${PARMETIS_INSTALL_DIR} VERBOSE=1
         BUILD_COMMAND       $(MAKE) ${PARMETIS_VARS} -i
         BUILD_IN_SOURCE     1

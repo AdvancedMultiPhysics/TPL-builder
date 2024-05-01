@@ -104,7 +104,7 @@ ADD_TPL(
     SOURCE_DIR          "${HPL_CMAKE_SOURCE_DIR}"
     UPDATE_COMMAND      ""
     CONFIGURE_COMMAND   ${CMAKE_COMMAND} -E copy ${HPL_MAKE} ${HPL_CMAKE_SOURCE_DIR}/Make.Linux
-    BUILD_COMMAND       make arch=Linux VERBOSE=1
+    BUILD_COMMAND       $(MAKE) arch=Linux VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     ${CMAKE_COMMAND} -E copy_directory ${HPL_CMAKE_SOURCE_DIR}/include ${HPL_INSTALL_DIR}/include
             COMMAND     ${CMAKE_COMMAND} -E copy_directory ${HPL_CMAKE_SOURCE_DIR}/lib ${HPL_INSTALL_DIR}/lib

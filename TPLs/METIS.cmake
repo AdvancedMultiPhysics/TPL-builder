@@ -57,11 +57,11 @@ IF ( CMAKE_BUILD_METIS )
         DOWNLOAD_DIR        "${METIS_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${METIS_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   make config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
+        CONFIGURE_COMMAND   $(MAKE) config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
                             FC=${CMAKE_Fortran_COMPILER} prefix=${METIS_INSTALL_DIR} VERBOSE=1
-        BUILD_COMMAND       make ${METIS_VARS} -i
+        BUILD_COMMAND       $(MAKE) ${METIS_VARS} -i
         BUILD_IN_SOURCE     1
-        INSTALL_COMMAND     make install -i
+        INSTALL_COMMAND     $(MAKE) install -i
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 ELSE()

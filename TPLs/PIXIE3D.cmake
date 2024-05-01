@@ -60,8 +60,8 @@ IF ( CMAKE_BUILD_PIXIE3D )
         DOWNLOAD_COMMAND    ""
         SOURCE_DIR          "${PIXIE3D_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   make ${PIXIE_ENV} setup VERBOSE=1
-        BUILD_COMMAND       make ${PIXIE_ENV} VERBOSE=1
+        CONFIGURE_COMMAND   $(MAKE) ${PIXIE_ENV} setup VERBOSE=1
+        BUILD_COMMAND       $(MAKE) ${PIXIE_ENV} VERBOSE=1
         BUILD_IN_SOURCE     1
         INSTALL_COMMAND     "" #make ${PIXIE_ENV} install
         DEPENDS             SAMRSOLVERS HDF5
@@ -87,11 +87,11 @@ IF ( CMAKE_BUILD_PIXIE3D )
         PIXIE3D
         make-libstell
         COMMENT             "Make LIBSTELL"
-        COMMAND             make clean_debug FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
-        COMMAND             make clean_release FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
-        COMMAND             make debug FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
-        COMMAND             make release FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
-        COMMAND             make static_release FC=${CMAKE_Fortran_COMPILER} FFLAGS=cpp
+        COMMAND             $(MAKE) clean_debug FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
+        COMMAND             $(MAKE) clean_release FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
+        COMMAND             $(MAKE) debug FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
+        COMMAND             $(MAKE) release FC=${CMAKE_Fortran_COMPILER} FFLAGS=-cpp
+        COMMAND             $(MAKE) static_release FC=${CMAKE_Fortran_COMPILER} FFLAGS=cpp
         COMMENT             ""
         DEPENDEES           configure
         DEPENDERS           build
