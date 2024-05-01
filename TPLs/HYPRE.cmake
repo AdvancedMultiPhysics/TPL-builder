@@ -136,7 +136,7 @@ IF ( CMAKE_BUILD_HYPRE )
         CONFIGURE_COMMAND   "./configure" --prefix=${HYPRE_INSTALL_DIR} ${HYPRE_CONFIGURE_OPTIONS} ${ENV_VARS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     1
-        INSTALL_COMMAND     make install
+        INSTALL_COMMAND     $(MAKE) install
         DEPENDS             ${HYPRE_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )

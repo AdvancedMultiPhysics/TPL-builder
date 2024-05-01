@@ -63,9 +63,9 @@ IF ( CMAKE_BUILD_PARMETIS )
                             COMMAND mv tmp ${PARMETIS_CMAKE_SOURCE_DIR}/CMakeLists.txt
         CONFIGURE_COMMAND   make config CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} 
                             FC=${CMAKE_Fortran_COMPILER} prefix=${PARMETIS_INSTALL_DIR} VERBOSE=1
-        BUILD_COMMAND       make ${PARMETIS_VARS} -i
+        BUILD_COMMAND       $(MAKE) ${PARMETIS_VARS} -i
         BUILD_IN_SOURCE     1
-        INSTALL_COMMAND     make install -i
+        INSTALL_COMMAND     $(MAKE) install -i
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 

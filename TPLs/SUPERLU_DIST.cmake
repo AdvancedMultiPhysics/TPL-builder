@@ -62,7 +62,7 @@ IF ( CMAKE_BUILD_SUPERLU_DIST )
         CMAKE_ARGS          "${SUPERLU_CONFIGURE_OPTIONS}"
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     make install
+        INSTALL_COMMAND     $(MAKE) install
         DEPENDS             PARMETIS
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )

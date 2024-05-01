@@ -116,7 +116,7 @@ IF ( CMAKE_BUILD_RAJA )
         CMAKE_ARGS          ${RAJA_CONFIGURE_OPTIONS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
-        INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install; 
+        INSTALL_COMMAND     $(MAKE) install; 
         DEPENDS             
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
