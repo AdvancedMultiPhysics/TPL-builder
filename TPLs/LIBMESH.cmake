@@ -65,6 +65,7 @@ IF ( CMAKE_BUILD_LIBMESH )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --enable-bzip2      )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --enable-second     )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --disable-boost     )
+    SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --with-boost=no     ) # --disable-boost doesn't seem to be enough
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --disable-cppunit   )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --disable-eigen     )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --enable-exodus=v522 )
@@ -113,6 +114,11 @@ IF ( CMAKE_BUILD_LIBMESH )
     ELSEIF ( ${CXX_STD} STREQUAL 17 )
         SET( LIBMESH_CXX_FLAGS -std=c++17 )
     ENDIF()
+    # Here, CPP_FLAGS are the C Pre-Processor flags
+    # libmesh uses strptime() which is a gnu extension, so we need to enable those or
+    # else clang won't find them
+    SET( LIBMESH_CPP_FLAGS -D_GNU_SOURCE)
+    
     # for some strange reason this is required for linking when MPI is not turned on
     # even if pthreads is disabled   
     SET( LIBMESH_LD_FLAGS -pthread )
@@ -125,7 +131,7 @@ IF ( CMAKE_BUILD_LIBMESH )
         DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${LIBMESH_CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
+        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${LIBMESH_CONFIGURE_OPTIONS} CPPFLAGS=${LIBMESH_CPP_FLAGS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     $(MAKE) install
