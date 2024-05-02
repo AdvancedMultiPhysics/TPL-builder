@@ -86,8 +86,7 @@ IF ( CMAKE_BUILD_RAJA )
              SET( RAJA_CONFIGURE_OPTIONS ${RAJA_CONFIGURE_OPTIONS} -DENABLE_HIP=ON -DHIP_ARCH=${HIP_ARCH_FLAGS} )
         ENDIF()
         # Set more options
-        # On Cray's Raja still seems to get confused about CUB (note we will probably fail with cuda < 11.0)
-        SET( RAJA_CONFIGURE_OPTIONS ${RAJA_CONFIGURE_OPTIONS} -DRAJA_ENABLE_EXTERNAL_CUB=ON )
+        # RAJA doesn't need an external cub or external rocprim with c++17
         SET( RAJA_CONFIGURE_OPTIONS ${RAJA_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} )
         MESSAGE("   RAJA configured with cuda:")
     ELSE()

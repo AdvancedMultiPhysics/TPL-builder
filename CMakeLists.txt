@@ -212,8 +212,6 @@ IF ( USE_CUDA )
         MATH( EXPR NUMBER_OF_GPUS ${NUMBER_OF_GPUS} )
         MESSAGE( "Number of GPUs detected: ${NUMBER_OF_GPUS}" )
     ENDIF()
-ELSE()
-  SET( NUMBER_OF_GPUS 0 )
 ENDIF()
 
 # Configure HIP
@@ -271,21 +269,24 @@ IF ( USE_HIP )
     IF ( NOT DEFINED NUMBER_OF_GPUS )
         TRY_RUN( RUN_RESULT_VAR COMPILE_RESULT_VAR
             ${CMAKE_BINARY_DIR} 
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCudaGPUs.cu
-            CMAKE_FLAGS 
-                -DINCLUDE_DIRECTORIES:STRING=${HIP_TOOLKIT_INCLUDE}
-                -DLINK_LIBRARIES:STRING=${HIP_HIPRT_LIBRARY}
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHIPGPUs.hip
+            # CMAKE_FLAGS 
+            #     -DINCLUDE_DIRECTORIES:STRING=${HIP_TOOLKIT_INCLUDE}
+            #     -DLINK_LIBRARIES:STRING=${HIP_HIPRT_LIBRARY}
             COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
             RUN_OUTPUT_VARIABLE NUMBER_OF_GPUS )
         IF ( NOT NUMBER_OF_GPUS )
-            MESSAGE( FATAL_ERROR "NUMBER_OF_GPUS was not set and not HIP capable GPUs were detected:\n${COMPILE_OUTPUT}" )
+            MESSAGE( FATAL_ERROR "NUMBER_OF_GPUS was not set and no HIP capable GPUs were detected:\n${COMPILE_OUTPUT}" )
         ENDIF()
         MATH( EXPR NUMBER_OF_GPUS ${NUMBER_OF_GPUS} )
         MESSAGE( "Number of GPUs detected: ${NUMBER_OF_GPUS}" )
     ENDIF()
-ELSE()
-  SET( NUMBER_OF_GPUS 0 )
 ENDIF()
+
+IF (NOT USE_CUDA AND NOT USE_HIP)
+    SET( NUMBER_OF_GPUS 0 )
+ENDIF()
+
 
 
 # Configure OpenMP
