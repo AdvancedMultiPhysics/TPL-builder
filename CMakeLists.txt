@@ -311,36 +311,6 @@ ENDIF()
 STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 
 
-# Add the StackTrace
-IF ( NOT DISABLE_STACKTRACE OR "${CXX_STD}" LESS "17" )
-    IF ( ";${TPL_LIST};" MATCHES ";TIMER;" )
-        STRING( REPLACE ";TIMER;" ";TIMER;STACKTRACE;" TPL_LIST "?;${TPL_LIST};?" )
-        STRING( REPLACE "?;" "" TPL_LIST "${TPL_LIST}" )
-        STRING( REPLACE ";?" "" TPL_LIST "${TPL_LIST}" )
-    ELSE()
-        SET( TPL_LIST "STACKTRACE;${TPL_LIST}" )
-    ENDIF()
-ENDIF()
-MESSAGE("TPL_LIST=${TPL_LIST}")
-
-
-# Add the lapack wrappers
-IF ( NOT DISABLE_LAPACK_WRAPPERS )
-    IF ( ";${TPL_LIST};" MATCHES ";LAPACK;" )
-        STRING( REPLACE ";LAPACK;" ";LAPACK;LAPACK_WRAPPERS;" TPL_LIST "?;${TPL_LIST};?" )
-        STRING( REPLACE "?;" "" TPL_LIST "${TPL_LIST}" )
-        STRING( REPLACE ";?" "" TPL_LIST "${TPL_LIST}" )
-    ELSEIF ( ";${TPL_LIST};" MATCHES ";OPENBLAS;" )
-        STRING( REPLACE ";OPENBLAS;" ";OPENBLAS;LAPACK;LAPACK_WRAPPERS;" TPL_LIST "?;${TPL_LIST};?" )
-        STRING( REPLACE "?;" "" TPL_LIST "${TPL_LIST}" )
-        STRING( REPLACE ";?" "" TPL_LIST "${TPL_LIST}" )
-    ELSE()
-        SET( TPL_LIST "LAPACK_WRAPPERS;${TPL_LIST}" )
-    ENDIF()
-ENDIF()
-MESSAGE( "TPL_LIST = ${TPL_LIST}" )
-
-
 # Disable LTO for certain configurations
 IF ( ";${TPL_LIST};" MATCHES ";MATLAB;" )
     SET( DISABLE_LTO TRUE )
