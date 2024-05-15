@@ -30,6 +30,11 @@ FILE( MAKE_DIRECTORY "${HYPRE_CMAKE_INSTALL_DIR}" )
 SET( HYPRE_INSTALL_DIR "${HYPRE_CMAKE_INSTALL_DIR}" )
 MESSAGE( "   HYPRE_INSTALL_DIR = ${HYPRE_INSTALL_DIR}" )
 
+
+# Configure optional/required TPLs
+CONFIGURE_DEPENDENCIES( HYPRE REQUIRED LAPACK OPTIONAL UMPIRE )
+
+
 # Configure HYPRE
 IF ( NOT DEFINED HYPRE_USE_CUDA )
     SET( HYPRE_USE_CUDA ${USE_CUDA} )
@@ -41,9 +46,9 @@ IF ( NOT DEFINED HYPRE_USE_OPENMP )
     SET( HYPRE_USE_OPENMP ${USE_OPENMP} )
 ENDIF()
 
+
 # Configure hypre
 IF ( CMAKE_BUILD_HYPRE )
-    SET( HYPRE_DEPENDS LAPACK )
     IF( HYPRE_USE_CUDA )
         MESSAGE( "Enabling CUDA support for HYPRE" )
         IF ( HYPRE_CUDA_HOME )
@@ -59,7 +64,6 @@ IF ( CMAKE_BUILD_HYPRE )
         SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --enable-unified-memory )        
         # Appears hypre only uses Umpire with CUDA so keep this if condition here
         IF ( HYPRE_USE_UMPIRE )
-            SET( HYPRE_DEPENDS UMPIRE ${HYPRE_DEPENDS} )
             MESSAGE( "Building HYPRE with Umpire support" )
             SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --with-umpire --with-umpire-include=${UMPIRE_INSTALL_DIR}/include --with-umpire-lib-dirs=${UMPIRE_INSTALL_DIR}/lib --with-umpire-libs=umpire )
         SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --with-umpire-um )
@@ -80,7 +84,6 @@ IF ( CMAKE_BUILD_HYPRE )
 	SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --enable-unified-memory --with-extra-CUFLAGS=${CMAKE_HIP_FLAGS} )        
         # Appears hypre only uses Umpire with HIP so keep this if condition here
         IF ( HYPRE_USE_UMPIRE )
-            SET( HYPRE_DEPENDS UMPIRE ${HYPRE_DEPENDS} )
             MESSAGE( "Building HYPRE with Umpire support" )
             SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --with-umpire --with-umpire-include=${UMPIRE_INSTALL_DIR}/include --with-umpire-lib-dirs=${UMPIRE_INSTALL_DIR}/lib --with-umpire-libs=umpire )
         SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --with-umpire-um )
@@ -137,7 +140,6 @@ IF ( CMAKE_BUILD_HYPRE )
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     1
         INSTALL_COMMAND     $(MAKE) install
-        DEPENDS             ${HYPRE_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
     EXTERNALPROJECT_ADD_STEP(

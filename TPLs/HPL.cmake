@@ -39,6 +39,10 @@ SET( HPL_INSTALL_DIR "${HPL_CMAKE_INSTALL_DIR}" )
 MESSAGE( "   HPL_INSTALL_DIR = ${HPL_INSTALL_DIR}" )
 
 
+# Configure optional/required TPLs
+CONFIGURE_DEPENDENCIES( HPL REQUIRED LAPACK )
+
+
 # Configure hpl
 IF ( CMAKE_BUILD_HPL )
    
@@ -109,7 +113,6 @@ ADD_TPL(
     INSTALL_COMMAND     ${CMAKE_COMMAND} -E copy_directory ${HPL_CMAKE_SOURCE_DIR}/include ${HPL_INSTALL_DIR}/include
             COMMAND     ${CMAKE_COMMAND} -E copy_directory ${HPL_CMAKE_SOURCE_DIR}/lib ${HPL_INSTALL_DIR}/lib
             COMMAND     ${CMAKE_COMMAND} -E copy_directory ${HPL_CMAKE_SOURCE_DIR}/bin ${HPL_INSTALL_DIR}/bin
-    DEPENDS             LAPACK
     LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
 )
 
