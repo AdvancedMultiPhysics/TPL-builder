@@ -10,6 +10,10 @@ LIST(FIND TPL_LIST "TRILINOS" index)
 IF ( ${index} GREATER -1 )
     SET( TRILINOS_KOKKOS TRUE )
 ENDIF()
+IF ( ( KOKKOS_URL OR KOKKOS_SRC_DIR ) AND TRILINOS_KOKKOS )
+    MESSAGE( FATAL_ERROR "Cannot build Trilinos and external Kokkos."
+             "   Please remove Trilinos or KOKKOS_URL/KOKKOS_SRC_DIR" )
+ENDIF()
 
 
 # Intialize download/src/install vars
@@ -231,7 +235,7 @@ IF ( CMAKE_BUILD_KOKKOS )
             CMAKE_ARGS          ${KOKKOS_CONFIGURE_OPTIONS} ${KOKKOS_OPTIONS}
             BUILD_COMMAND       $(MAKE) VERBOSE=1
             BUILD_IN_SOURCE     0
-            INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} install
+            INSTALL_COMMAND     $(MAKE) install; 
             DEPENDS             
             LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
         )
