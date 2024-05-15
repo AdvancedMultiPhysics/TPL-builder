@@ -13,12 +13,24 @@ MACRO( CONFIGURE_TPL TPL )
 ENDMACRO()
 
 
-# Configure an optional TPL
-MACRO( CONFIGURE_OPTIONAL_TPL TPL )
-    LIST(FIND TPL_LIST "${TPL}" index)
-    IF ( ${index} GREATER -1 )
-        CONFIGURE_TPL( ${TPL} )
-    ENDIF()
+# Configure dependencies
+MACRO( CONFIGURE_DEPENDENCIES TPL )
+    SET( optionalArgs )
+    SET( oneValueArgs )
+    SET( multiValueArgs REQUIRED OPTIONAL )
+    CMAKE_PARSE_ARGUMENTS( CONFIGURE_DEPENDENCIES "${optionalArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    SET( ${TPL}_DEPENDS )
+    FOREACH ( tmp ${CONFIGURE_DEPENDENCIES_REQUIRED} )
+        CONFIGURE_TPL( ${tmp} )
+        SET( ${TPL}_DEPENDS ${${TPL}_DEPENDS} ${tmp} )
+    ENDFOREACH()
+    FOREACH ( tmp ${CONFIGURE_DEPENDENCIES_OPTIONAL} )
+        LIST(FIND TPL_LIST "${tmp}" index)
+        IF ( ${index} GREATER -1 )
+            CONFIGURE_TPL( ${tmp} )
+            SET( ${TPL}_DEPENDS ${${TPL}_DEPENDS} ${tmp} )
+        ENDIF()
+    ENDFOREACH()
 ENDMACRO()
 
 
