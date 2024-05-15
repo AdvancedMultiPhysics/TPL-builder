@@ -76,24 +76,25 @@ IF ( CMAKE_BUILD_TIMER )
             MESSAGE(FATAL_ERROR "Please specify QT_VERSION and QWT_URL")
         ENDIF()
     ENDIF()
+
+    # Build Timer
+    ADD_TPL(
+        TIMER
+        URL                 "${TIMER_CMAKE_URL}"
+        DOWNLOAD_DIR        "${TIMER_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${TIMER_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CMAKE_ARGS          "${TIMER_CONFIGURE_OPTIONS}"
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     $(MAKE) install VERBOSE=1
+        DEPENDS             
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( TIMER )
 ENDIF()
-
-
-# Build Timer
-ADD_TPL(
-    TIMER
-    URL                 "${TIMER_CMAKE_URL}"
-    DOWNLOAD_DIR        "${TIMER_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${TIMER_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CMAKE_ARGS          "${TIMER_CONFIGURE_OPTIONS}"
-    BUILD_COMMAND       $(MAKE) VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     make install
-    DEPENDS             
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
 
 # Add the appropriate fields to FindTPLs.cmake
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTimer.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake" COPYONLY )

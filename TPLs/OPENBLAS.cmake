@@ -73,7 +73,7 @@ ADD_TPL(
     CMAKE_ARGS          ${OPENBLAS_CONFIGURE_OPTIONS}
     BUILD_COMMAND       $(MAKE) ${OPENBLAS_ENV_VARS} VERBOSE=1
     BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     ${CMAKE_MAKE_PROGRAM} PREFIX=${OPENBLAS_CMAKE_INSTALL_DIR} install
+    INSTALL_COMMAND     $(MAKE) PREFIX=${OPENBLAS_CMAKE_INSTALL_DIR} install
     LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
 )
 ADD_LIBRARY(LAPACK INTERFACE)
@@ -109,8 +109,8 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "\n" )
 # Create blas_lapack.h
 SET( BLAS_LAPACK_HEADER "${CMAKE_INSTALL_PREFIX}/blas_lapack.h" )
 FILE( WRITE "${BLAS_LAPACK_HEADER}" "// Auto-generated file to include BLAS/LAPACK headers\n" )
-FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${OPENBLAS_INSTALL_DIR}/include/openblas/cblas.h\"\n" )
-FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${OPENBLAS_INSTALL_DIR}/include/openblas/lapacke.h\"\n" )
+FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${OPENBLAS_INSTALL_DIR}/include/cblas.h\"\n" )
+FILE( APPEND "${BLAS_LAPACK_HEADER}" "#include \"${OPENBLAS_INSTALL_DIR}/include/lapacke.h\"\n" )
 FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_BLAS\n #define USE_BLAS\n #endif\n" )
 FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_LAPACK\n #define USE_LAPACK\n #endif\n" )
 FILE( APPEND "${BLAS_LAPACK_HEADER}" "#ifndef USE_OPENBLAS\n #define USE_OPENBLAS\n #endif\n" )

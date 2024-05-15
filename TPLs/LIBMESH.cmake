@@ -65,6 +65,7 @@ IF ( CMAKE_BUILD_LIBMESH )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --enable-bzip2      )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --enable-second     )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --disable-boost     )
+    SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --with-boost=no     ) # --disable-boost doesn't seem to be enough
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --disable-cppunit   )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --disable-eigen     )
     SET( LIBMESH_CONFIGURE_OPTIONS ${LIBMESH_CONFIGURE_OPTIONS} --enable-exodus=v522 )
@@ -113,28 +114,35 @@ IF ( CMAKE_BUILD_LIBMESH )
     ELSEIF ( ${CXX_STD} STREQUAL 17 )
         SET( LIBMESH_CXX_FLAGS -std=c++17 )
     ENDIF()
+    # Here, CPP_FLAGS are the C Pre-Processor flags
+    # libmesh uses strptime() which is a gnu extension, so we need to enable those or
+    # else clang won't find them
+    SET( LIBMESH_CPP_FLAGS -D_GNU_SOURCE)
+    
     # for some strange reason this is required for linking when MPI is not turned on
     # even if pthreads is disabled   
     SET( LIBMESH_LD_FLAGS -pthread )
+
+
+    # Build libmesh
+    ADD_TPL( 
+        LIBMESH
+        URL                 "${LIBMESH_CMAKE_URL}"
+        DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
+        SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
+        UPDATE_COMMAND      ""
+        CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${LIBMESH_CONFIGURE_OPTIONS} CPPFLAGS=${LIBMESH_CPP_FLAGS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
+        BUILD_COMMAND       $(MAKE) VERBOSE=1
+        BUILD_IN_SOURCE     0
+        INSTALL_COMMAND     $(MAKE) install
+        CLEAN_COMMAND       $(MAKE) clean
+        DEPENDS             
+        LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
+    )
+
+ELSE()
+    ADD_TPL_EMPTY( LIBMESH ) 
 ENDIF()
-
-
-# Build libmesh
-ADD_TPL( 
-    LIBMESH
-    URL                 "${LIBMESH_CMAKE_URL}"
-    DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
-    SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
-    UPDATE_COMMAND      ""
-    CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${LIBMESH_CONFIGURE_OPTIONS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}
-    BUILD_COMMAND       $(MAKE) VERBOSE=1
-    BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     $(MAKE) install
-    CLEAN_COMMAND       $(MAKE) clean
-    DEPENDS             
-    LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
-)
-
 
 # Add the appropriate fields to FindTPLs.cmake
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindLibmesh.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindLibmesh.cmake" COPYONLY )
@@ -144,6 +152,8 @@ FILE( APPEND "${FIND_TPLS_CMAKE}" "    INCLUDE( \"${CMAKE_INSTALL_PREFIX}/cmake/
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( LIBMESH_DIR \"${LIBMESH_INSTALL_DIR}\" )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( LIBMESH_DIRECTORY \"${LIBMESH_INSTALL_DIR}\" )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( LIBMESH_INCLUDE \"${LIBMESH_INSTALL_DIR}/include\" )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( CMAKE_INSTALL_RPATH $\{CMAKE_INSTALL_RPATH} \"$\{LIBMESH_DIR}/lib\" )\n" )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "    SET( CMAKE_INSTALL_RPATH $\{CMAKE_INSTALL_RPATH} \"$\{LIBMESH_DIR}/lib64\" )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    FIND_PACKAGE( OpenMP )\n" )  # Libmesh disable-openmp does not actually disable OpenMP
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    LIBMESH_SET_INCLUDES( $\{LIBMESH_DIRECTORY} )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    LIBMESH_SET_LIBRARIES( $\{LIBMESH_DIRECTORY} )\n" )

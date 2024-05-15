@@ -136,8 +136,6 @@ IF ( CMAKE_BUILD_LMDB )
     FILE( APPEND "${LMDB_Makefile}" "	$(CC) $(CFLAGS) -fPIC $(CPPFLAGS) -O0 $(COV_FLAGS) -c midl.c -o $@\n" )
 
     FILE( APPEND "${LMDB_Makefile}" "\n" )
-ENDIF()
-
 
 # Build LMDB
 ADD_TPL( 
@@ -147,11 +145,14 @@ ADD_TPL(
     SOURCE_DIR          "${LMDB_CMAKE_SOURCE_DIR}"
     UPDATE_COMMAND      ""
     CONFIGURE_COMMAND   cp ${LMDB_Makefile} ${LMDB_BUILD_DIR}/Makefile
-    BUILD_COMMAND       make VERBOSE=1
+    BUILD_COMMAND       $(MAKE) VERBOSE=1
     BUILD_IN_SOURCE     0
-    INSTALL_COMMAND     make install
+    INSTALL_COMMAND     $(MAKE) install
     DEPENDS             ${LMDB_DEPENDENCIES}
     LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
 )
 
+ELSE()
+    ADD_TPL_EMPTY( LMDB )
+ENDIF()
 

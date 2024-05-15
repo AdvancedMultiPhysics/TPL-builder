@@ -165,6 +165,7 @@ MACRO( ADD_TPL_SAVE_LOGS TPL )
         start-stamp
         COMMAND             ${CMAKE_COMMAND} -Dfilename=time -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/write_stamp.cmake"
         COMMENT             ""
+        INDEPENDENT         TRUE
         DEPENDEES           
         DEPENDERS           download configure stop-stamp
         ALWAYS              0

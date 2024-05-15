@@ -1,5 +1,5 @@
 # Set some CMake properties
-CMAKE_MINIMUM_REQUIRED( VERSION 3.9 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.21 )
 IF ( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
 CMAKE_POLICY( SET CMP0135 OLD )
 ENDIF()
@@ -214,9 +214,81 @@ IF ( USE_CUDA )
         MATH( EXPR NUMBER_OF_GPUS ${NUMBER_OF_GPUS} )
         MESSAGE( "Number of GPUs detected: ${NUMBER_OF_GPUS}" )
     ENDIF()
-ELSE()
-  SET( NUMBER_OF_GPUS 0 )
 ENDIF()
+
+# Configure HIP
+CHECK_ENABLE_FLAG( USE_HIP FALSE )
+# Set HIP standard (always required in case down-stream packages enable HIP)
+IF ( NOT DEFINED CMAKE_HIP_STANDARD )
+    IF ( (${CXX_STD} STREQUAL "98") OR (${CXX_STD} STREQUAL "03") )
+        SET( CMAKE_HIP_STANDARD 03 )
+    ELSEIF ( ${CXX_STD} STREQUAL "11" )
+        SET( CMAKE_HIP_STANDARD 11 )
+    ELSEIF ( ${CXX_STD} STREQUAL "14" )
+        SET( CMAKE_HIP_STANDARD 14 )
+    ELSEIF ( ( ${CXX_STD} STREQUAL "17" ) OR ( ${CXX_STD} STREQUAL "20" ) OR ( ${CXX_STD} STREQUAL "23" ) )
+        SET( CMAKE_HIP_STANDARD 17 )
+    ELSE()
+        MESSAGE( FATAL_ERROR "Unknown C++ standard" )
+    ENDIF()
+ENDIF()
+# Find and configure HIP
+IF ( USE_HIP )
+    ADD_DEFINITIONS( -DUSE_HIP )
+    IF ( ${CMAKE_VERSION} VERSION_LESS "3.21" )
+        MESSAGE( FATAL_ERROR "We require CMake 3.21 or newer when compiling with HIP" )
+    ENDIF()
+    ENABLE_LANGUAGE( HIP )
+    IF ( NOT DEFINED HIP_HOME )
+        GET_FILENAME_COMPONENT( HIP_HOME "${CMAKE_HIP_COMPILER}" DIRECTORY )
+        GET_FILENAME_COMPONENT( HIP_HOME "${HIP_HOME}/.." REALPATH )
+        MESSAGE( "HIP_HOME = ${HIP_HOME}")
+    ENDIF()
+    IF ( NOT DEFINED HIP_ARCH_FLAGS )
+        FOREACH ( arch ${CMAKE_HIP_ARCHITECTURES} )
+            SET( HIP_ARCH_FLAGS ${HIP_ARCH_FLAGS} sm_${arch} )
+        ENDFOREACH()
+        SET( HIP_ARCH_FLAGS "${HIP_ARCH_FLAGS}" )
+    ENDIF()
+    SET( CMAKE_HIP_STANDARD_REQUIRED ON )
+    SET( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} ${HIP_FLAGS_EXTRA}" )
+    IF ( USE_OPENMP )
+       SET( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -Xcompiler -fopenmp" )
+    ENDIF()
+    IF ( USE_MPI )
+        SET( MPI_HIP_INCLUDE_DIRS ${MPI_CXX_INCLUDE_DIRS} )
+        IF ( NOT MPI_HIP_INCLUDE_DIRS )
+            EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -show OUTPUT_VARIABLE MPI_SHOW ERROR_VARIABLE MPI_SHOW )
+            STRING( REGEX MATCHALL "\-I[^ ]*" MPI_HIP_INCLUDE_DIRS ${MPI_SHOW} )
+            STRING( REPLACE "-I" "" MPI_HIP_INCLUDE_DIRS "${MPI_HIP_INCLUDE_DIRS}" )
+        ENDIF()
+        MESSAGE( "MPI_HIP_INCLUDE_DIRS=${MPI_HIP_INCLUDE_DIRS}" )
+        FOREACH( tmp ${MPI_HIP_INCLUDE_DIRS} )
+            SET( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -I${tmp}" )
+        ENDFOREACH()
+    ENDIF()
+    # Detect the number of GPUs available
+    IF ( NOT DEFINED NUMBER_OF_GPUS )
+        TRY_RUN( RUN_RESULT_VAR COMPILE_RESULT_VAR
+            ${CMAKE_BINARY_DIR} 
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHIPGPUs.hip
+            # CMAKE_FLAGS 
+            #     -DINCLUDE_DIRECTORIES:STRING=${HIP_TOOLKIT_INCLUDE}
+            #     -DLINK_LIBRARIES:STRING=${HIP_HIPRT_LIBRARY}
+            COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+            RUN_OUTPUT_VARIABLE NUMBER_OF_GPUS )
+        IF ( NOT NUMBER_OF_GPUS )
+            MESSAGE( FATAL_ERROR "NUMBER_OF_GPUS was not set and no HIP capable GPUs were detected:\n${COMPILE_OUTPUT}" )
+        ENDIF()
+        MATH( EXPR NUMBER_OF_GPUS ${NUMBER_OF_GPUS} )
+        MESSAGE( "Number of GPUs detected: ${NUMBER_OF_GPUS}" )
+    ENDIF()
+ENDIF()
+
+IF (NOT USE_CUDA AND NOT USE_HIP)
+    SET( NUMBER_OF_GPUS 0 )
+ENDIF()
+
 
 
 # Configure OpenMP
@@ -284,9 +356,9 @@ ENDIF()
 
 # Set TPL defaults
 SET_DEFAULT_TPL( ZLIB  URL http://zlib.net/zlib-1.2.11.tar.gz )
-SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.8.12.tar.gz  )
-SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hypre-2.18.2.tar.gz )
-SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/petsc-3.13.0.tar.gz )
+SET_DEFAULT_TPL( HDF5  URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hdf5-1.12.0.tar.gz  )
+SET_DEFAULT_TPL( HYPRE URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/hypre-2.30.0.tar.gz )
+SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/petsc-3.20.0.tar.gz )
 
 
 # Copy cmake files to install dir
@@ -366,7 +438,6 @@ IF ( NOT DISABLE_TPL_TESTS AND NOT DISABLE_ALL_TESTS )
     )
 ENDIF()
 
-### Add final lines to FindTPLs.cmake
 
 # Add the timer if it is not installed
 IF ( NOT TIMER_INSTALL_DIR )
@@ -376,47 +447,10 @@ IF ( NOT TIMER_INSTALL_DIR )
     FILE( APPEND "${FIND_TPLS_CMAKE}" "CONFIGURE_TIMER( FALSE \"$\{$\{PROJ}_INSTALL_DIR}/include\" TRUE )\n\n" )
 ENDIF()
 
-# Add a check to the FindTPLs.cmake to ensure all TPLs were found
-FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Check that all desired TPLs were found\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH ( tmp $\{TPL_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( NOT TPL_FOUND_$\{tmp} AND TPLs_FIND_$\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        IF ( TPLs_FIND_REQUIRED_$\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "            MESSAGE( ERROR \"$\{tmp} not found\" )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        ELSE()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "            MESSAGE( \"  $\{tmp} not found\" )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
 
-# Get the list of found TPLs
-FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPL_LIST_FOUND )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH( tmp $\{TPL_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( TPL_FOUND_$\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        SET( TPL_LIST_FOUND $\{TPL_LIST_FOUND} $\{tmp} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
-
-# Write the TPLs.h file for the TPLs we included 
-FILE( APPEND "${FIND_TPLS_CMAKE}" "\n\n# Write the TPLs.h\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPLs_HEADER \"$\{CMAKE_CURRENT_BINARY_DIR}/tmp/TPLs.h\" )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( WRITE \"$\{TPLs_HEADER}\" \"// This file sets the TPL list for C/C++ codes\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#ifndef TPL_LIST\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#define TPL_LIST \\\"$\{TPL_LIST}\\\"\\n\")\n")
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#endif\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#ifndef $\{PROJ}_TPL_LIST\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#define $\{PROJ}_TPL_LIST \\\"$\{TPL_LIST_FOUND}\\\"\\n\")\n")
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FOREACH( TPL $\{TPL_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    IF ( TPL_FOUND_$\{TPL} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        SET( USE_$\{TPL} TRUE )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        FILE( APPEND \"$\{TPLs_HEADER}\" \"#define $\{PROJ}_USE_$\{TPL}\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        FOREACH( tmp $\{$\{TPL}_PACKAGE_LIST} )\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "             STRING(TOUPPER $\{tmp} tmp)\n")
-FILE( APPEND "${FIND_TPLS_CMAKE}" "             FILE( APPEND \"$\{TPLs_HEADER}\" \"#define $\{PROJ}_USE_$\{TPL}_$\{tmp}\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "        ENDFOREACH()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "    ENDIF()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "ENDFOREACH()\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "FILE( APPEND \"$\{TPLs_HEADER}\" \"#endif\\n\")\n" )
-FILE( APPEND "${FIND_TPLS_CMAKE}" "EXECUTE_PROCESS( COMMAND $\{CMAKE_COMMAND} -E copy_if_different \"$\{TPLs_HEADER}\" \"$\{$\{PROJ}_INSTALL_DIR}/include/$\{$\{PROJ}_INC}/$\{PROJ}_TPLs.h\" )\n" )
+# Add final lines to FindTPLs.cmake
+FILE( READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTPLs.footer.cmake" TPL_FOOTER )
+FILE( APPEND "${FIND_TPLS_CMAKE}" "${TPL_FOOTER}" )
 
 
 # Copy cmake files for cppcheck and cppclean
