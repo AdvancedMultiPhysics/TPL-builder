@@ -219,6 +219,12 @@ FUNCTION( ADD_TPL TPL )
         SET( oneValueArgs ${external_add_one} )
         SET( multiValueArgs ${external_add_multiple} CLEAN_COMMAND DOC_COMMAND BUILD_TEST CHECK_TEST )
         cmake_parse_arguments( ADD_TPL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+        # Set the dependencies
+        IF ( ADD_TPL_DEPENDS )
+            MESSAGE( WARNING "Use CONFIGURE_DEPENDENCIES over manually setting dependencies" )
+        ELSE()
+            SET( ADD_TPL_DEPENDS ${${TPL}_DEPENDS} )
+        ENDIF()
         # Add the options for EXTERNALPROJECT_ADD
         SET( TPL_OPTIONS )
         FOREACH ( arg ${external_add_one} )

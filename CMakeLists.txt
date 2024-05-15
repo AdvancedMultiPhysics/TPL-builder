@@ -388,6 +388,7 @@ ADD_TPL_CLEAN( environment )
 # Configure TPL-builder tests
 IF ( NOT DISABLE_TPL_TESTS AND NOT DISABLE_ALL_TESTS )
     SET( TPLS_Test_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/tests" )
+    SET( TPLS_Test_DEPENDS ${TPL_LIST} )
     ADD_TPL(
         TPLS_Test
         SOURCE_DIR          "${CMAKE_CURRENT_SOURCE_DIR}/tests"
@@ -398,7 +399,6 @@ IF ( NOT DISABLE_TPL_TESTS AND NOT DISABLE_ALL_TESTS )
         BUILD_COMMAND       $(MAKE) install
         INSTALL_DIR         "${TPLS_Test_INSTALL_DIR}"
         TEST_COMMAND        ${CMAKE_CTEST_COMMAND}
-        DEPENDS             ${TPL_LIST}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 ENDIF()

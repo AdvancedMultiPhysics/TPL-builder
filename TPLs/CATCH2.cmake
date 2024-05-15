@@ -54,7 +54,6 @@ IF ( CMAKE_BUILD_CATCH2 )
         BUILD_COMMAND       cmake --build ${CATCH2_BUILD_DIR} --target install -j 8
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ""
-        DEPENDS
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 ELSE()

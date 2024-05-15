@@ -136,7 +136,6 @@ IF ( CMAKE_BUILD_LIBMESH )
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     $(MAKE) install
         CLEAN_COMMAND       $(MAKE) clean
-        DEPENDS             
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 

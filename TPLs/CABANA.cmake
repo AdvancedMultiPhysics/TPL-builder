@@ -33,7 +33,7 @@ MESSAGE( "   CABANA_INSTALL_DIR = ${CABANA_INSTALL_DIR}" )
 
 
 # Configure optional/required TPLs
-CONFIGURE_DEPENDENCIES( CABANA REQUIRED KOKKOS )
+CONFIGURE_DEPENDENCIES( CABANA OPTIONAL KOKKOS TRILINOS )
 
 
 # Configure cabana
@@ -55,9 +55,7 @@ IF ( CMAKE_BUILD_CABANA )
     # Set third party library includes
     IF ( KOKKOS_INSTALL_DIR )
         MESSAGE( "Using standalone build of Kokkos")
-        SET( CABANA_DEPENDS KOKKOS )
     ELSEIF ( TRILINOS_INSTALL_DIR )
-        SET( CABANA_DEPENDS TRILINOS )
         SET( KOKKOS_INSTALL_DIR ${TRILINOS_INSTALL_DIR} )
         MESSAGE( "Using Trilinos build of Kokkos")
         MESSAGE( "Setting KOKKOS_INSTALL_DIR to ${KOKKOS_INSTALL_DIR}" )
@@ -148,7 +146,6 @@ IF ( CMAKE_BUILD_CABANA )
         CLEAN_COMMAND       $(MAKE) clean
         ${CABANA_DOC_COMMAND}
         ${CABANA_CMAKE_TEST}
-        DEPENDS             ${CABANA_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 

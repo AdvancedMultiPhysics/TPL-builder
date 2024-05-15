@@ -88,7 +88,6 @@ IF ( CMAKE_BUILD_SILO )
         BUILD_COMMAND       $(MAKE) install VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ""
-        DEPENDS             ${SILO_DEPENDS}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 

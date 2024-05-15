@@ -31,14 +31,16 @@ SET( MUMPS_INSTALL_DIR "${MUMPS_CMAKE_INSTALL_DIR}" )
 MESSAGE( "   MUMPS_INSTALL_DIR = ${MUMPS_INSTALL_DIR}" )
 
 
+# Configure optional/required TPLs
+CONFIGURE_DEPENDENCIES( MUMPS REQUIRED LAPACK OPTIONAL SCALAPACK )
+
+
 # Configure mumps
 IF ( CMAKE_BUILD_MUMPS )
     # Set variables based on TPLs
     SET( MUMPS_PARALLEL "${MUMPS_PARALLEL}" )
-    SET( MUMPS_DEPENDENCIES LAPACK )
     IF ( MUMPS_PARALLEL )
         MESSAGE("Enabling parallel mumps")
-        SET( MUMPS_DEPENDENCIES ${MUMPS_DEPENDENCIES} SCALAPACK )
     ENDIF()
     LIST(FIND TPL_LIST "METIS" index)
     IF (${index} GREATER -1)
@@ -96,14 +98,6 @@ ENDIF()
 
 # Build MUMPS
 IF ( CMAKE_BUILD_MUMPS )
-    # commenting out the lines below for now. LAPACK is a dependency but the TPL_LIST may contain OPENBLAS in place of LAPACK and the calls below fail
-    # just need to add the special case
-	#    FOREACH( TPL ${MUMPS_DEPENDENCIES} )
-	#        LIST(FIND TPL_LIST "${TPL}" index)
-	#        IF (${index} EQUAL -1)
-	#            MESSAGE(FATAL_ERROR "MUMPS depends on ${TPL}, but it is not configured")
-	#        ENDIF()
-	#    ENDFOREACH()
     ADD_TPL( 
         MUMPS
         URL                 "${MUMPS_CMAKE_URL}"
@@ -114,7 +108,6 @@ IF ( CMAKE_BUILD_MUMPS )
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     ""
-        DEPENDS             ${MUMPS_DEPENDENCIES}
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
     EXTERNALPROJECT_ADD_STEP(

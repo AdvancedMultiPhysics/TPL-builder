@@ -31,6 +31,10 @@ SET( LMDB_INSTALL_DIR "${LMDB_CMAKE_INSTALL_DIR}" )
 MESSAGE( "   LMDB_INSTALL_DIR = ${LMDB_INSTALL_DIR}" )
 
 
+# Configure optional/required TPLs
+CONFIGURE_DEPENDENCIES( LMDB )
+
+
 # Configure lmdb
 IF ( CMAKE_BUILD_LMDB )
     # Set variables based on TPLs
@@ -148,7 +152,6 @@ ADD_TPL(
     BUILD_COMMAND       $(MAKE) VERBOSE=1
     BUILD_IN_SOURCE     0
     INSTALL_COMMAND     $(MAKE) install
-    DEPENDS             ${LMDB_DEPENDENCIES}
     LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
 )
 

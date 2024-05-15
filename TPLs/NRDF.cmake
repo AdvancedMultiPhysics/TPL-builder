@@ -35,6 +35,10 @@ SET( NRDF_INSTALL_DIR "${NRDF_CMAKE_INSTALL_DIR}" )
 MESSAGE( "   NRDF_INSTALL_DIR = ${NRDF_INSTALL_DIR}" )
 
 
+# Configure optional/required TPLs
+CONFIGURE_DEPENDENCIES( NRDF OPTIONAL SAMRSOLVERS )
+
+
 # Configure NRDF
 IF ( CMAKE_BUILD_NRDF )
     SET( NRDF_FFLAGS "-x f95-cpp-input -ffixed-line-length-none" )
@@ -54,7 +58,6 @@ IF ( CMAKE_BUILD_NRDF )
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     $(MAKE) install
-        DEPENDS             SAMRSOLVERS
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 
