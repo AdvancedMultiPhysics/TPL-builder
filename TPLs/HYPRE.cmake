@@ -77,7 +77,7 @@ IF ( CMAKE_BUILD_HYPRE )
         ELSE()
           MESSAGE( FATAL_ERROR "The HYPRE_HIP_ARCH must be set" )
         ENDIF()
-        SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --enable-unified-memory )        
+	SET( HYPRE_CONFIGURE_OPTIONS ${HYPRE_CONFIGURE_OPTIONS} --enable-unified-memory --with-extra-CUFLAGS=${CMAKE_HIP_FLAGS} )        
         # Appears hypre only uses Umpire with HIP so keep this if condition here
         IF ( HYPRE_USE_UMPIRE )
             SET( HYPRE_DEPENDS UMPIRE ${HYPRE_DEPENDS} )
