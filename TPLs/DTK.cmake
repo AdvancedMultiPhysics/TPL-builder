@@ -24,7 +24,6 @@ ENDIF()
 
 ADD_TPL(
     DTK
-    DEPENDS             
     GIT_REPOSITORY      https://github.com/ORNL-CEES/DataTransferKit.git
     GIT_TAG             master
     DOWNLOAD_DIR        ${DTK_SRC_DIR}

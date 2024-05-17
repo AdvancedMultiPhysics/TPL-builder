@@ -47,7 +47,6 @@ IF ( CMAKE_BUILD_YAJL )
         INSTALL_DIR         ${CMAKE_INSTALL_PREFIX}/yajl
         CMAKE_ARGS          "${YAJL_CONFIGURE_OPTIONS}"
         BUILD_COMMAND       $(MAKE) install VERBOSE=1
-        DEPENDS             
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
     )
 

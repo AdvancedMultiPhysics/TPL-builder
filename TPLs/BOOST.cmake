@@ -31,6 +31,10 @@ SET( BOOST_INSTALL_DIR "${BOOST_CMAKE_INSTALL_DIR}" )
 MESSAGE( "   BOOST_INSTALL_DIR = ${BOOST_INSTALL_DIR}" )
 
 
+# Configure optional/required TPLs
+CONFIGURE_DEPENDENCIES( BOOST OPTIONAL ZLIB )
+
+
 # Add the search/include of boost to FindTPLs.cmake
 IF ( BOOST_ONLY_COPY_HEADERS )
     SET( BOOST_COMPONENTS )
@@ -131,7 +135,6 @@ IF ( CMAKE_BUILD_BOOST )
             BUILD_COMMAND       ./b2 install ${BUILD_OPTIONS} -j 8
             BUILD_IN_SOURCE     1
             INSTALL_COMMAND     ""
-            #DEPENDS ZLIB
             LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
         )
     ENDIF()
