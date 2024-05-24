@@ -16,12 +16,17 @@
 #
 #   TPLs_FOUND            - True if headers and requested libraries were found
 #   TPL_LIST              - List of TPLs that are availible
-#   TPL_FOUND_${TPL}      - Was the specified TPL found
+#   TPL_${TPL}_FOUND      - Was the specified TPL found
 #   TPL_LIBRARIES         - TPL Libraries
 #   TPL_INCLUDE_DIRS      - TPL Include paths
 #   TPL_MACRO_CMAKE       - File to macros.cmake provided by the TPL install
 #   TPL_CPPCHECK_CMAKE    - File to cppcheck.cmake provided by the TPL install
 #   TPL_CPPCLEAN_CMAKE    - File to cppclean.cmake provided by the TPL install
+
+
+SET( TPLs_VERSION @TPLs_VERSION@ )
+
+@PACKAGE_INIT@
 
 
 # Set some cmake policies
@@ -45,10 +50,10 @@ ENDIF()
 
 
 # Set some basic information (should only be called once regardless of the number of calls to find_package(FindTPLs)
-IF ( NOT TPLs_FOUND )
+IF ( NOT TPLs_COMPILERS_INITIALIZED )
 
     # Set that we were able to find the TPLs (this file)
-    SET( TPLs_FOUND TRUE)
+    SET( TPLs_COMPILERS_INITIALIZED TRUE )
 
     # Set the TPL list
     SET( TPL_LIST @TPL_LIST@ )
@@ -314,7 +319,7 @@ ENDFUNCTION()
 
 # Configure MPI
 SET( USE_MPI @USE_MPI@ )
-IF ( USE_MPI AND NOT TPL_FOUND_MPI )
+IF ( USE_MPI AND NOT TPLs_MPI_FOUND )
     MESSAGE( "Configuring MPI" )
     SET( TPL_LIST MPI ${TPL_LIST} )
     SET( MPI_LANG C CXX Fortran )
@@ -346,7 +351,7 @@ IF ( USE_MPI AND NOT TPL_FOUND_MPI )
     SET( MPIEXEC_PREFLAGS           @MPIEXEC_PREFLAGS@           )
     SET( MPIEXEC_POSTFLAGS          @MPIEXEC_POSTFLAGS@          )
     SET( USE_EXT_MPI true )
-    SET( TPL_FOUND_MPI true )
+    SET( TPLs_MPI_FOUND true )
     SET( MPI_LINK_FLAGS )
     ADD_DEFINITIONS( -DUSE_MPI )
     ADD_DEFINITIONS( -DUSE_EXT_MPI )

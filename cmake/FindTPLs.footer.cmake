@@ -1,6 +1,6 @@
 # Check that all desired TPLs were found
 FOREACH ( TPL ${TPL_LIST} )
-    IF ( NOT TPL_FOUND_${TPL} AND TPLs_FIND_${TPL} )
+    IF ( NOT TPLs_${TPL}_FOUND AND TPLs_FIND_${TPL} )
         IF ( TPLs_FIND_REQUIRED_${TPL} )
             MESSAGE( ERROR "${TPL} not found" )
         ELSE()
@@ -11,7 +11,8 @@ ENDFOREACH()
 SET( TPL_LIST_FOUND )       # List of all TPLs found/linked
 SET( TPL_LIST_INCLUDED )    # List of TPLs found and not disabled
 FOREACH( TPL ${TPL_LIST} )
-    IF ( TPL_FOUND_${TPL} ) 
+    IF ( TPLs_${TPL}_FOUND ) 
+        SET( ${TPL}_FOUND true )
         SET( TPL_LIST_FOUND ${TPL_LIST_FOUND} ${TPL} )
         IF ( NOT DISABLE_${TPL} )
             SET( TPL_LIST_INCLUDED ${TPL_LIST_INCLUDED} ${TPL} )
@@ -29,7 +30,7 @@ FILE( APPEND "${TPLs_HEADER}" "#endif\n")
 FILE( APPEND "${TPLs_HEADER}" "#ifndef ${PROJ}_TPL_LIST\n")
 FILE( APPEND "${TPLs_HEADER}" "#define ${PROJ}_TPL_LIST \"${TPL_LIST_INCLUDED}\"\n")
 FOREACH( TPL ${TPL_LIST} )
-    IF ( TPL_FOUND_${TPL} AND NOT DISABLE_${TPL} )
+    IF ( TPLs_${TPL}_FOUND AND NOT DISABLE_${TPL} )
         SET( USE_${TPL} TRUE )
         FILE( APPEND "${TPLs_HEADER}" "#define ${PROJ}_USE_${TPL}\n")
         FOREACH( tmp ${${TPL}_PACKAGE_LIST} )
@@ -42,3 +43,5 @@ FILE( APPEND "${TPLs_HEADER}" "#endif\n")
 EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TPLs_HEADER}" "${${PROJ}_INSTALL_DIR}/include/${${PROJ}_INC}/${PROJ}_TPLs.h" )
 
 
+# Check that all components were found (not finished)
+#CHECK_REQUIRED_COMPONENTS( TPLs )

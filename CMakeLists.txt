@@ -331,10 +331,15 @@ CONFIGURE_FILE( cmake/macros.cmake "${CMAKE_INSTALL_PREFIX}/cmake/macros.cmake" 
 CONFIGURE_FILE( cmake/WriteRepoVersion.cmake "${CMAKE_INSTALL_PREFIX}/cmake/WriteRepoVersion.cmake" COPYONLY )
 
 
+# Set the version information
+SET( TPLs_VERSION 3.0.0 )
+
+
 # Create a FindTPLs.cmake file for subsequent projects that sets the compilers,
 #    TPLs, links commands, and provides a macros file with additional cmake functions
-SET( FIND_TPLS_CMAKE "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" )
-CONFIGURE_FILE( cmake/FindTPLs.template.cmake "${FIND_TPLS_CMAKE}" @ONLY )
+SET( FIND_TPLS_CMAKE "${CMAKE_CURRENT_BINARY_DIR}/TPLs.cmake.in" )
+SET( PACKAGE_INIT "@PACKAGE_INIT@" )
+CONFIGURE_FILE( cmake/FindTPLs.header.cmake "${FIND_TPLS_CMAKE}" @ONLY )
 IF ( USE_MATLAB )
     MESSAGE( FATAL_ERROR "USE_MATLAB is obsolete, please specify MATLAB as a TPL" )
 ENDIF()
@@ -409,13 +414,26 @@ IF ( NOT TIMER_INSTALL_DIR )
     CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTimer.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake" COPYONLY )
     FILE( APPEND "${FIND_TPLS_CMAKE}" "# Configure timer\n" )
     FILE( APPEND "${FIND_TPLS_CMAKE}" "INCLUDE( \"${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake\" )\n" )
-    FILE( APPEND "${FIND_TPLS_CMAKE}" "CONFIGURE_TIMER( FALSE \"$\{$\{PROJ}_INSTALL_DIR}/include\" TRUE )\n\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "CONFIGURE_TIMER( FALSE \"$\{TPL_INSTALL_DIR}/include\" TRUE )\n\n" )
 ENDIF()
 
 
-# Add final lines to FindTPLs.cmake
+# Add final lines to TPLs.cmake.in
 FILE( READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTPLs.footer.cmake" TPL_FOOTER )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "${TPL_FOOTER}" )
+
+
+# Generate a Package Configuration File
+INCLUDE( CMakePackageConfigHelpers )
+SET( SYSCONFIG_INSTALL_DIR ${TPL_INSTALL_DIR} CACHE PATH "Location of configuration files" )
+CONFIGURE_PACKAGE_CONFIG_FILE( "${FIND_TPLS_CMAKE}"
+    ${TPL_INSTALL_DIR}/TPLsConfig.cmake
+    INSTALL_DESTINATION "${TPL_INSTALL_DIR}"
+    PATH_VARS SYSCONFIG_INSTALL_DIR )
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    ${TPL_INSTALL_DIR}/TPLsVersion.cmake
+    VERSION ${TPLs_VERSION}
+    COMPATIBILITY SameMajorVersion )
 
 
 # Copy cmake files for cppcheck and cppclean
