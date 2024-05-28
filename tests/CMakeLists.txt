@@ -42,8 +42,8 @@ ENDIF()
 FIND_PACKAGE( TPLs REQUIRED PATHS "${TPL_DIRECTORY}" )
 MESSAGE("TPLs Found")
 MESSAGE("  TPLs List: ${TPL_LIST}")
-MESSAGE("  Include Paths: ${TPL_INCLUDE_DIRS}")
-MESSAGE("  Libraries: ${TPL_LIBRARIES}")
+MESSAGE("  Include Paths: ${TPLs_INCLUDE_DIRS}")
+MESSAGE("  Libraries: ${TPLs_LIBRARIES}")
 
 
 # Enable tests
@@ -52,10 +52,10 @@ INCLUDE( CTest )
 
 
 # Include the TPL inclde paths and libraries
-INCLUDE_DIRECTORIES( ${TPL_INCLUDE_DIRS} )
-MESSAGE("  Include Paths: ${TPL_INCLUDE_DIRS}")
-MESSAGE("  Libraries: ${TPL_LIBRARIES}")
-SET( TPL_LIBS ${TPL_LIBRARIES} )
+INCLUDE_DIRECTORIES( ${TPLs_INCLUDE_DIRS} )
+MESSAGE("  Include Paths: ${TPLs_INCLUDE_DIRS}")
+MESSAGE("  Libraries: ${TPLs_LIBRARIES}")
+SET( TPL_LIBS ${TPLs_LIBRARIES} )
 
 
 # Add the tests

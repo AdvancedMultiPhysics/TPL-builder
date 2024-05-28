@@ -14,14 +14,14 @@
 # This module finds headers and requested component libraries for the TPLs that
 # were installed by the builder.
 #
-#   TPLs_FOUND            - True if headers and requested libraries were found
-#   TPL_LIST              - List of TPLs that are availible
-#   TPL_${TPL}_FOUND      - Was the specified TPL found
-#   TPL_LIBRARIES         - TPL Libraries
-#   TPL_INCLUDE_DIRS      - TPL Include paths
-#   TPL_MACRO_CMAKE       - File to macros.cmake provided by the TPL install
-#   TPL_CPPCHECK_CMAKE    - File to cppcheck.cmake provided by the TPL install
-#   TPL_CPPCLEAN_CMAKE    - File to cppclean.cmake provided by the TPL install
+#   TPLs_FOUND          - True if headers and requested libraries were found
+#   TPLs_LIST           - List of TPLs that are availible
+#   TPLs_${TPL}_FOUND   - Was the specified TPL found
+#   TPLs_LIBRARIES      - TPL Libraries
+#   TPLs_INCLUDE_DIRS   - TPL Include paths
+#   TPLs_MACRO_CMAKE    - File to macros.cmake provided by the TPL install
+#   TPLs_CPPCHECK_CMAKE - File to cppcheck.cmake provided by the TPL install
+#   TPLs_CPPCLEAN_CMAKE - File to cppclean.cmake provided by the TPL install
 
 
 SET( TPLs_VERSION @TPLs_VERSION@ )
@@ -56,7 +56,7 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
     SET( TPLs_COMPILERS_INITIALIZED TRUE )
 
     # Set the TPL list
-    SET( TPL_LIST @TPL_LIST@ )
+    SET( TPLs_LIST @TPL_LIST@ )
 
     # Include project install directory
     INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_LIST_DIR}" )
@@ -65,8 +65,8 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
     INCLUDE_DIRECTORIES( "${${PROJ}_INSTALL_DIR}/include" )
 
     # Initialize the include paths / libraries
-    SET( TPL_INCLUDE_DIRS )
-    SET( TPL_LIBRARIES )
+    SET( TPLs_INCLUDE_DIRS )
+    SET( TPLs_LIBRARIES )
 
     # Set CMAKE_MODULE_PATH
     SET( CMAKE_MODULE_PATH "@CMAKE_INSTALL_PREFIX@/cmake" ${CMAKE_MODULE_PATH} )
@@ -141,7 +141,7 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         ADD_DEFINITIONS( -DUSE_CUDA )
         # Enable CUDA toolkit
         FIND_PACKAGE( CUDAToolkit )
-        SET( TPL_LIBRARIES ${TPL_LIBRARIES} CUDA::cusparse CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
+        SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
     ENDIF()
     IF ( USE_HIP )
         # Check the CMake version
@@ -162,7 +162,7 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         FIND_PACKAGE( hipblas REQUIRED )
         FIND_PACKAGE( hiprand REQUIRED )
         FIND_PACKAGE( hipcub REQUIRED )
-        SET( TPL_LIBRARIES ${TPL_LIBRARIES} roc::rocthrust roc::hipblas hip::hiprand hip::hipcub)
+        SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} roc::rocthrust roc::hipblas hip::hiprand hip::hipcub)
     ENDIF()
     SET( NUMBER_OF_GPUS @NUMBER_OF_GPUS@ CACHE STRING "Number of GPUs for testing" )
     IF ( USE_OPENMP )
@@ -185,10 +185,10 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
     ENDIF()
 
     # Include additional cmake files
-    SET( TPL_MACRO_CMAKE "@CMAKE_INSTALL_PREFIX@/cmake/macros.cmake" )
-    SET( TPL_WRITE_REPO "@CMAKE_INSTALL_PREFIX@/cmake/WriteRepoVersion.cmake" )
-    INCLUDE( "${TPL_MACRO_CMAKE}" )
-    INCLUDE( "${TPL_WRITE_REPO}" )
+    SET( TPLs_MACRO_CMAKE "@CMAKE_INSTALL_PREFIX@/cmake/macros.cmake" )
+    SET( TPLs_WRITE_REPO "@CMAKE_INSTALL_PREFIX@/cmake/WriteRepoVersion.cmake" )
+    INCLUDE( "${TPLs_MACRO_CMAKE}" )
+    INCLUDE( "${TPLs_WRITE_REPO}" )
 
     # include the package below for some system dependent paths
     INCLUDE( GNUInstallDirs )
@@ -272,8 +272,8 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
     ENDFOREACH()
 
     # Add user include paths / libraries
-    SET( TPL_INCLUDE_DIRS ${TPL_INCLUDE_DIRS} ${USER_INCLUDE_DIRS} )
-    SET( TPL_LIBRARIES ${TPL_LIBRARIES} ${USER_LIBRARIES} )
+    SET( TPLs_INCLUDE_DIRS ${TPLs_INCLUDE_DIRS} ${USER_INCLUDE_DIRS} )
+    SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} ${USER_LIBRARIES} )
 
     # Set the default resource file
     IF ( NOT DEFINED CTEST_RESOURCE_SPEC_FILE )
@@ -284,9 +284,9 @@ ENDIF()
 
 # Check which TPLs we want to include and if they are required
 IF ( NOT TPLs_FIND_COMPONENTS )
-    SET( TPLs_FIND_COMPONENTS ${TPL_LIST} )
+    SET( TPLs_FIND_COMPONENTS ${TPLs_LIST} )
 ENDIF()
-FOREACH( tmp ${TPL_LIST} )
+FOREACH( tmp ${TPLs_LIST} )
     SET( TPLs_FIND_${tmp} FALSE )
 ENDFOREACH()
 FOREACH( tmp ${TPLs_FIND_COMPONENTS} )
@@ -317,11 +317,29 @@ FUNCTION( CONFIGURE_LINE_COVERAGE )
 ENDFUNCTION()
 
 
+# Function to create a wrapper library
+MACRO( ADD_TPL_LIBRARY TPL )
+    IF ( NOT TARGET TPLs::${TPL} )
+        ADD_LIBRARY( TPLs::${TPL} INTERFACE IMPORTED )
+        TARGET_LINK_LIBRARIES( TPLs::${TPL} INTERFACE ${ARGN} )
+    ENDIF()
+    SET( TPLs_LIBRARIES TPLs::${TPL} ${TPLs_LIBRARIES} )
+    LIST( REMOVE_DUPLICATES  TPLs::${TPL} )
+    SET( TPLs_${TPL}_FOUND TRUE )
+    IF ( ${TPL}_INCLUDE_DIRECTORY )
+        SET( TPLs_INCLUDE_DIRS ${${TPL}_INCLUDE_DIRECTORY} ${TPLs_INCLUDE_DIRS} )
+    ENDIF()
+    IF ( DEFINED ${TPL}_INCLUDE_DIRECTORY OR DEFINED ${TPL}_INCLUDE_DIRS OR DEFINED ${TPL}_INCLUDE_DIR OR DEFINED ${TPL}_INCLUDE )
+        SET( TPLs_INCLUDE_DIRS ${${TPL}_INCLUDE_DIRECTORY} ${${TPL}_INCLUDE_DIRS} ${${TPL}_INCLUDE_DIR} ${${TPL}_INCLUDE} ${TPLs_INCLUDE_DIRS} )
+    ENDIF()
+ENDMACRO()
+
+
 # Configure MPI
 SET( USE_MPI @USE_MPI@ )
 IF ( USE_MPI AND NOT TPLs_MPI_FOUND )
     MESSAGE( "Configuring MPI" )
-    SET( TPL_LIST MPI ${TPL_LIST} )
+    SET( TPLs_LIST MPI ${TPLs_LIST} )
     SET( MPI_LANG C CXX Fortran )
     # Set user flags that control the behavior of FindMPI.cmake (or are used by subsequent projects)
     SET( USE_MPI_FOR_SERIAL_TESTS   @USE_MPI_FOR_SERIAL_TESTS@   )
@@ -357,8 +375,8 @@ IF ( USE_MPI AND NOT TPLs_MPI_FOUND )
     ADD_DEFINITIONS( -DUSE_EXT_MPI )
     FOREACH( lang ${MPI_LANG} )
         SET( CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${MPI_${lang}_COMPILE_FLAGS}" )
-        SET( TPL_INCLUDE_DIRS ${TPL_INCLUDE_DIRS} ${MPI_${lang}_INCLUDE_PATH} )
-        SET( TPL_LIBRARIES ${MPI_${lang}_LIBRARIES} ${TPL_LIBRARIES} )
+        SET( TPLs_INCLUDE_DIRS ${TPLs_INCLUDE_DIRS} ${MPI_${lang}_INCLUDE_PATH} )
+        SET( TPLs_LIBRARIES ${MPI_${lang}_LIBRARIES} ${TPLs_LIBRARIES} )
         SET( MPI_LINK_FLAGS "${MPI_${lang}_LINK_FLAGS} ${MPI_LINK_FLAGS}" )
     ENDFOREACH()
 ENDIF()

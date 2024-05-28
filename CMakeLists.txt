@@ -313,6 +313,17 @@ ENDIF()
 STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 
 
+# Add KOKKOS if needed
+LIST( FIND TPL_LIST "TRILINOS" index_trilinos )
+LIST( FIND TPL_LIST "KOKKOS" index_kokkos )
+IF ( ${index_trilinos} GREATER -1 )
+    SET( TRILINOS_KOKKOS TRUE )
+ENDIF()
+IF ( ${index_trilinos} GREATER -1 AND ${index_kokkos} EQUAL -1 )
+    STRING( REPLACE "TRILINOS" "KOKKOS;TRILINOS" TPL_LIST "${TPL_LIST}" )
+ENDIF()
+
+
 # Disable LTO for certain configurations
 IF ( ";${TPL_LIST};" MATCHES ";MATLAB;" )
     SET( DISABLE_LTO TRUE )
@@ -327,8 +338,9 @@ SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builde
 
 
 # Copy cmake files to install dir
-CONFIGURE_FILE( cmake/macros.cmake "${CMAKE_INSTALL_PREFIX}/cmake/macros.cmake" COPYONLY )
-CONFIGURE_FILE( cmake/WriteRepoVersion.cmake "${CMAKE_INSTALL_PREFIX}/cmake/WriteRepoVersion.cmake" COPYONLY )
+FILE( COPY cmake/macros.cmake           DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake" )
+FILE( COPY cmake/WriteRepoVersion.cmake DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake" )
+FILE( COPY cmake/dummyTimer             DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake" )
 
 
 # Set the version information
@@ -411,10 +423,10 @@ ENDIF()
 
 # Add the timer if it is not installed
 IF ( NOT TIMER_INSTALL_DIR )
-    CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTimer.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake" COPYONLY )
-    FILE( APPEND "${FIND_TPLS_CMAKE}" "# Configure timer\n" )
-    FILE( APPEND "${FIND_TPLS_CMAKE}" "INCLUDE( \"${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake\" )\n" )
-    FILE( APPEND "${FIND_TPLS_CMAKE}" "CONFIGURE_TIMER( FALSE \"$\{TPL_INSTALL_DIR}/include\" TRUE )\n\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find TIMER\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "FIND_PACKAGE( Timer REQUIRED PATHS \"${CMAKE_INSTALL_PREFIX}/cmake/dummyTimer\" )\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPLs_TIMER_FOUND FALSE )\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TIMER_FOUND TRUE )\n\n\n" )
 ENDIF()
 
 

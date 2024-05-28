@@ -1,5 +1,5 @@
 # Check that all desired TPLs were found
-FOREACH ( TPL ${TPL_LIST} )
+FOREACH ( TPL ${TPLs_LIST} )
     IF ( NOT TPLs_${TPL}_FOUND AND TPLs_FIND_${TPL} )
         IF ( TPLs_FIND_REQUIRED_${TPL} )
             MESSAGE( ERROR "${TPL} not found" )
@@ -8,14 +8,14 @@ FOREACH ( TPL ${TPL_LIST} )
         ENDIF()
     ENDIF()
 ENDFOREACH()
-SET( TPL_LIST_FOUND )       # List of all TPLs found/linked
-SET( TPL_LIST_INCLUDED )    # List of TPLs found and not disabled
-FOREACH( TPL ${TPL_LIST} )
+SET( TPLs_LIST_FOUND )       # List of all TPLs found/linked
+SET( TPLs_LIST_INCLUDED )    # List of TPLs found and not disabled
+FOREACH( TPL ${TPLs_LIST} )
     IF ( TPLs_${TPL}_FOUND ) 
         SET( ${TPL}_FOUND true )
-        SET( TPL_LIST_FOUND ${TPL_LIST_FOUND} ${TPL} )
+        SET( TPLs_LIST_FOUND ${TPLs_LIST_FOUND} ${TPL} )
         IF ( NOT DISABLE_${TPL} )
-            SET( TPL_LIST_INCLUDED ${TPL_LIST_INCLUDED} ${TPL} )
+            SET( TPLs_LIST_INCLUDED ${TPLs_LIST_INCLUDED} ${TPL} )
         ENDIF()
     ENDIF()
 ENDFOREACH()
@@ -25,11 +25,11 @@ ENDFOREACH()
 SET( TPLs_HEADER "${CMAKE_CURRENT_BINARY_DIR}/tmp/TPLs.h" )
 FILE( WRITE "${TPLs_HEADER}" "// This file sets the TPL list for C/C++ codes\n")
 FILE( APPEND "${TPLs_HEADER}" "#ifndef TPL_LIST\n")
-FILE( APPEND "${TPLs_HEADER}" "#define TPL_LIST \"${TPL_LIST}\"\n")
+FILE( APPEND "${TPLs_HEADER}" "#define TPL_LIST \"${TPLs_LIST}\"\n")
 FILE( APPEND "${TPLs_HEADER}" "#endif\n")
 FILE( APPEND "${TPLs_HEADER}" "#ifndef ${PROJ}_TPL_LIST\n")
-FILE( APPEND "${TPLs_HEADER}" "#define ${PROJ}_TPL_LIST \"${TPL_LIST_INCLUDED}\"\n")
-FOREACH( TPL ${TPL_LIST} )
+FILE( APPEND "${TPLs_HEADER}" "#define ${PROJ}_TPL_LIST \"${TPLs_LIST_INCLUDED}\"\n")
+FOREACH( TPL ${TPLs_LIST} )
     IF ( TPLs_${TPL}_FOUND AND NOT DISABLE_${TPL} )
         SET( USE_${TPL} TRUE )
         FILE( APPEND "${TPLs_HEADER}" "#define ${PROJ}_USE_${TPL}\n")
@@ -44,4 +44,6 @@ EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TPLs_HEADER}" 
 
 
 # Check that all components were found (not finished)
-#CHECK_REQUIRED_COMPONENTS( TPLs )
+CHECK_REQUIRED_COMPONENTS( TPLs )
+
+
