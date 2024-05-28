@@ -27,6 +27,9 @@
 #ifdef TPLS_Tests_USE_STACKTRACE
 #include "StackTrace/StackTrace.h"
 #endif
+#ifdef TPLS_Tests_USE_KOKKOS
+#include <Kokkos_Core.hpp>
+#endif
 
 
 // Split the TPL list
@@ -140,7 +143,9 @@ bool test<TPL_Enum::RAJA>()
 template<>
 bool test<TPL_Enum::KOKKOS>()
 {
-    std::cout << "   -- No tests defined for kokkos\n";
+    auto settings = Kokkos::InitializationSettings();
+    Kokkos::initialize( settings );
+    Kokkos::finalize();
     return true;
 }
 #endif
