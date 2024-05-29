@@ -283,6 +283,7 @@ bool test<TPL_Enum::QWT>()
 }
 #endif
 
+
 // Test SAMRAI
 #ifdef TPLS_Tests_USE_SAMRAI
 template<>
