@@ -45,10 +45,14 @@ MACRO( ADD_DISTCLEAN )
     ADD_CUSTOM_TARGET(
         distclean
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/logs"
+        COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/lapackwrappers"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/cmake"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLs.h"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/macros.cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/resources.json"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLsConfig.cmake"
+        COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/TPLsVersion.cmake"
         COMMAND ${CMAKE_COMMAND} -E remove           "${CMAKE_INSTALL_PREFIX}/blas_lapack.h"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/LapackWrappers"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/StackTrace"
@@ -59,8 +63,9 @@ MACRO( ADD_DISTCLEAN )
         COMMAND ${CMAKE_COMMAND} -E remove_directory environment-prefix
         COMMAND ${CMAKE_COMMAND} -E remove_directory LAPACK_WRAPPERS-prefix
         COMMAND ${CMAKE_COMMAND} -E remove_directory TPLS_Test-prefix
-        COMMAND ${CMAKE_COMMAND} -E remove_directory Matlab
-        COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake CTestTestfile.cmake DartConfiguration.tcl Makefile
+        COMMAND ${CMAKE_COMMAND} -E remove_directory NVCC-build
+                COMMAND ${CMAKE_COMMAND} -E remove_directory Matlab
+        COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake CTestTestfile.cmake DartConfiguration.tcl Makefile TPLs.cmake.in
         ${DISTCLEAN_CMDS}
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" 
     )

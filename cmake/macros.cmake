@@ -377,7 +377,7 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
         FOREACH ( HFILE ${HFILES} )
             SET( SRC_FILE "${${PROJ}_SOURCE_DIR}/${HFILE}" )
             SET( DST_FILE "${${PROJ}_INSTALL_DIR}/include/${${PROJ}_INC}/${HFILE}" )
-            # Only copy the headers if the exist in the project source directory
+            # Only copy the headers if they exist in the project source directory
             IF ( EXISTS "${SRC_FILE}" )
                 ADD_CUSTOM_COMMAND(TARGET ${COPY_TARGET} 
                     PRE_BUILD 
@@ -453,7 +453,12 @@ MACRO( INSTALL_PROJ_LIB )
     ADD_LIBRARY( ${${PROJ}_LIB} ${LIB_TYPE} ${tmp_link_list} )
     TARGET_LINK_LIBRARIES( ${${PROJ}_LIB} LINK_PUBLIC ${COVERAGE_LIBS} )
     TARGET_LINK_EXTERNAL_LIBRARIES( ${${PROJ}_LIB} LINK_PUBLIC )
-    INSTALL( TARGETS ${${PROJ}_LIB} DESTINATION ${${PROJ}_INSTALL_DIR}/lib )
+    INSTALL( TARGETS ${${PROJ}_LIB} EXPORT ${PROJ}Targets DESTINATION ${${PROJ}_INSTALL_DIR}/lib )
+    INSTALL( EXPORT ${PROJ}Targets
+             FILE ${PROJ}Targets.cmake
+             NAMESPACE ${PROJ}::
+             DESTINATION ${${PROJ}_INSTALL_DIR}/lib/cmake
+    )
 ENDMACRO()
 
 
@@ -680,6 +685,9 @@ FUNCTION( COPY_DATA_FILE SRC_FILE DST_FILE )
     IF ( NOT TARGET ${COPY_TARGET} )
         ADD_CUSTOM_TARGET( ${COPY_TARGET} ALL )
         ADD_DEPENDENCIES( copy-${PROJ}-Data ${COPY_TARGET} )
+    ENDIF()
+    IF ( NOT SRC_FILE OR NOT DST_FILE )
+        MESSAGE( FATAL_ERROR "COPY_DATA_FILE( ${SRC_FILE} ${DST_FILE} )" )
     ENDIF()
     ADD_CUSTOM_COMMAND( TARGET ${COPY_TARGET}
         PRE_BUILD

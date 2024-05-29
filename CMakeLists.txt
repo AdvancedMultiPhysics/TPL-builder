@@ -48,6 +48,9 @@ ELSEIF( TPL_INSTALL_DIR )
 ELSE()
     SET( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR} )
 ENDIF()
+IF ( NOT TPL_INSTALL_DIR )
+    SET( TPL_INSTALL_DIR ${CMAKE_INSTALL_PREFIX} )
+ENDIF()
 INCLUDE_DIRECTORIES( "${CMAKE_INSTALL_PREFIX}" )
 MESSAGE("Installing TPLs in: ${CMAKE_INSTALL_PREFIX}")
 
@@ -313,6 +316,17 @@ ENDIF()
 STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 
 
+# Add KOKKOS if needed
+LIST( FIND TPL_LIST "TRILINOS" index_trilinos )
+LIST( FIND TPL_LIST "KOKKOS" index_kokkos )
+IF ( ${index_trilinos} GREATER -1 )
+    SET( TRILINOS_KOKKOS TRUE )
+ENDIF()
+IF ( ${index_trilinos} GREATER -1 AND ${index_kokkos} EQUAL -1 )
+    STRING( REPLACE "TRILINOS" "KOKKOS;TRILINOS" TPL_LIST "${TPL_LIST}" )
+ENDIF()
+
+
 # Disable LTO for certain configurations
 IF ( ";${TPL_LIST};" MATCHES ";MATLAB;" )
     SET( DISABLE_LTO TRUE )
@@ -327,14 +341,20 @@ SET_DEFAULT_TPL( PETSC URL https://bitbucket.org/AdvancedMultiPhysics/tpl-builde
 
 
 # Copy cmake files to install dir
-CONFIGURE_FILE( cmake/macros.cmake "${CMAKE_INSTALL_PREFIX}/cmake/macros.cmake" COPYONLY )
-CONFIGURE_FILE( cmake/WriteRepoVersion.cmake "${CMAKE_INSTALL_PREFIX}/cmake/WriteRepoVersion.cmake" COPYONLY )
+FILE( COPY cmake/macros.cmake           DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake" )
+FILE( COPY cmake/WriteRepoVersion.cmake DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake" )
+FILE( COPY cmake/dummyTimer             DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake" )
+
+
+# Set the version information
+SET( TPLs_VERSION 3.0.0 )
 
 
 # Create a FindTPLs.cmake file for subsequent projects that sets the compilers,
 #    TPLs, links commands, and provides a macros file with additional cmake functions
-SET( FIND_TPLS_CMAKE "${CMAKE_INSTALL_PREFIX}/FindTPLs.cmake" )
-CONFIGURE_FILE( cmake/FindTPLs.template.cmake "${FIND_TPLS_CMAKE}" @ONLY )
+SET( FIND_TPLS_CMAKE "${CMAKE_CURRENT_BINARY_DIR}/TPLs.cmake.in" )
+SET( PACKAGE_INIT "@PACKAGE_INIT@" )
+CONFIGURE_FILE( cmake/FindTPLs.header.cmake "${FIND_TPLS_CMAKE}" @ONLY )
 IF ( USE_MATLAB )
     MESSAGE( FATAL_ERROR "USE_MATLAB is obsolete, please specify MATLAB as a TPL" )
 ENDIF()
@@ -406,16 +426,29 @@ ENDIF()
 
 # Add the timer if it is not installed
 IF ( NOT TIMER_INSTALL_DIR )
-    CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTimer.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake" COPYONLY )
-    FILE( APPEND "${FIND_TPLS_CMAKE}" "# Configure timer\n" )
-    FILE( APPEND "${FIND_TPLS_CMAKE}" "INCLUDE( \"${CMAKE_INSTALL_PREFIX}/cmake/FindTimer.cmake\" )\n" )
-    FILE( APPEND "${FIND_TPLS_CMAKE}" "CONFIGURE_TIMER( FALSE \"$\{$\{PROJ}_INSTALL_DIR}/include\" TRUE )\n\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find TIMER\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "FIND_PACKAGE( Timer REQUIRED PATHS \"${CMAKE_INSTALL_PREFIX}/cmake/dummyTimer\" )\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TPLs_TIMER_FOUND FALSE )\n" )
+    FILE( APPEND "${FIND_TPLS_CMAKE}" "SET( TIMER_FOUND TRUE )\n\n\n" )
 ENDIF()
 
 
-# Add final lines to FindTPLs.cmake
+# Add final lines to TPLs.cmake.in
 FILE( READ "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindTPLs.footer.cmake" TPL_FOOTER )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "${TPL_FOOTER}" )
+
+
+# Generate a Package Configuration File
+INCLUDE( CMakePackageConfigHelpers )
+SET( SYSCONFIG_INSTALL_DIR ${TPL_INSTALL_DIR} CACHE PATH "Location of configuration files" )
+CONFIGURE_PACKAGE_CONFIG_FILE( "${FIND_TPLS_CMAKE}"
+    ${TPL_INSTALL_DIR}/TPLsConfig.cmake
+    INSTALL_DESTINATION "${TPL_INSTALL_DIR}"
+    PATH_VARS SYSCONFIG_INSTALL_DIR )
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+    ${TPL_INSTALL_DIR}/TPLsVersion.cmake
+    VERSION ${TPLs_VERSION}
+    COMPATIBILITY SameMajorVersion )
 
 
 # Copy cmake files for cppcheck and cppclean
