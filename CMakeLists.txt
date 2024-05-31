@@ -301,6 +301,8 @@ IF ( USE_OPENMP )
     FIND_PACKAGE( OpenMP )
     SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
+# The next line should be uncommented if the correct openmp flags are not added    
+#    SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wno-unused-parameter -fopenmp" )
     SET( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}" )
 ENDIF()
 
