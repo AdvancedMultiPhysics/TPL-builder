@@ -161,6 +161,7 @@ ENDIF()
 
 
 # Add the appropriate fields to FindTPLs.cmake
+CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHypre.cmake "${CMAKE_INSTALL_PREFIX}/cmake/FindHypre.cmake" COPYONLY )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "\n# Find HYPRE\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "IF ( TPLs_FIND_HYPRE AND NOT TPLs_HYPRE_FOUND )\n" )
 FILE( APPEND "${FIND_TPLS_CMAKE}" "    INCLUDE( \"${CMAKE_INSTALL_PREFIX}/cmake/FindHypre.cmake\" )\n" )
