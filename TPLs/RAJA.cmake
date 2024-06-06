@@ -88,11 +88,11 @@ IF ( CMAKE_BUILD_RAJA )
         # Set more options
         # RAJA doesn't need an external cub or external rocprim with c++17
         SET( RAJA_CONFIGURE_OPTIONS ${RAJA_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} )
-        MESSAGE("   RAJA configured with cuda:")
+        MESSAGE("   RAJA configured with hip:")
     ELSE()
         SET( RAJA_CONFIGURE_OPTIONS ${RAJA_CONFIGURE_OPTIONS} -DENABLE_HIP=OFF )
         SET( RAJA_CONFIGURE_OPTIONS ${RAJA_CONFIGURE_OPTIONS} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} )
-        MESSAGE("   RAJA configured without cuda")
+        MESSAGE("   RAJA configured without hip")
     ENDIF()
     IF ( ENABLE_SHARED AND ENABLE_STATIC )
         MESSAGE(FATAL_ERROR "Compiling RAJA with both static and shared libraries is not yet supported")
