@@ -73,7 +73,9 @@ IF ( CMAKE_BUILD_CABANA )
     ENDIF()
     IF ( KOKKOS_INSTALL_DIR )
        MESSAGE( "Kokkos installed at ${KOKKOS_INSTALL_DIR}")
-       FIND_PACKAGE( Kokkos REQUIRED PATHS ${KOKKOS_INSTALL_DIR} )
+       # CABANA at present (0.6.x ) requires -DCMAKE_PREFIX_PATH=${KOKKOS_INSTALL_DIR}
+       # Appending to CMAKE_PREFIX_PATH or using find_package for Kokkos don't work
+       SET( CABANA_CONFIGURE_OPTS ${CABANA_CONFIGURE_OPTS} -DCMAKE_PREFIX_PATH=${KOKKOS_INSTALL_DIR} )
     ELSE()
        MESSAGE( "Kokkos dependency not installed!!" )
     ENDIF()
