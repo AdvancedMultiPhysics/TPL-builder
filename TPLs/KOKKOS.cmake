@@ -241,16 +241,7 @@ IF ( CMAKE_BUILD_KOKKOS )
         INSTALL_NVCC( KOKKOS )
     ENDIF()
 ELSE()
-    MESSAGE( "   Using Kokkos version in Trilinos" )
-    EXTERNALPROJECT_ADD(
-        KOKKOS
-        DOWNLOAD_COMMAND    cmake -E true
-        SOURCE_DIR          "${KOKKOS_INSTALL_DIR}"
-        CONFIGURE_COMMAND   cmake -E true
-        BUILD_COMMAND       cmake -E true
-        INSTALL_COMMAND     cmake -E true
-    )
-    ADD_TPL_CLEAN( KOKKOS )
+    ADD_TPL_EMPTY( KOKKOS )
 ENDIF()
 
 # Add the appropriate fields to FindTPLs.cmake
