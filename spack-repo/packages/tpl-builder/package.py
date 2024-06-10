@@ -18,17 +18,18 @@ class TplBuilder(CMakePackage):
     variant("cuda", default=False)
     variant("rocm", default=False)
     
-    #TODO make condition that these are mutually exclusive
-
 
     depends_on("cmake@3.26.0:", type="build")
     depends_on("mpi", when="+mpi")
     depends_on("stacktrace@master", when="+stacktrace")
-    
-    #im sure i can do all this with if statements
-    depends_on("hypre@2.31.0+cuda", when="+hypre+cuda")
+   
+
+
+    #TODO im sure i can do all this with if statements
+    #TODO make cuda_arch an option and able to use different platforms
+    depends_on("hypre@2.31.0+cuda cuda_arch=70", when="+hypre+cuda")
     depends_on("hypre@2.31.0~cuda", when="+hypre~cuda")
-    depends_on("hypre@2.31.0+rocm", when="+hypre+rocm")
+    depends_on("hypre@2.31.0+rocm amdgpu_target=gfx90a", when="+hypre+rocm")
     depends_on("hypre@2.31.0~rocm", when="+hypre~rocm")
 
     conflicts("+rocm +cuda")
