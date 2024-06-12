@@ -82,7 +82,6 @@ IF ( CMAKE_BUILD_HYPRE )
 	    SET(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -std=c++${CMAKE_HIP_STANDARD}")
         ADD_HYPRE_OPTION( "\"--with-extra-CUFLAGS=${CMAKE_HIP_FLAGS}\"" )
     ENDIF()
-    ADD_HYPRE_OPTION( "\"--with-extra-CFLAGS= -I${HYPRE_INSTALL_DIR}/include\"" )
       
     # Appears hypre only uses Umpire with CUDA/HIP
     IF ( ( HYPRE_USE_CUDA OR HYPRE_USE_HIP ) AND HYPRE_USE_UMPIRE )
