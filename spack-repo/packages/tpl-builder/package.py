@@ -7,8 +7,6 @@ class TplBuilder(CMakePackage):
     git = "ssh://git@re-git.lanl.gov:10022/xcap/oss/solvers/tpl-builder.git"
 
     version("master", branch="master")
-    version("cmake-update", branch="cmake-update")
-    version("2.0.0", tag="2.0.0")
     
     variant("mpi", default=True, description="build with mpi")
     variant("stacktrace", default=False)
@@ -34,7 +32,6 @@ class TplBuilder(CMakePackage):
 
 
     #TODO im sure i can do all this with if statements
-    #TODO make cuda_arch an option and able to use different platforms
     depends_on("hypre@2.31.0~cuda", when="+hypre~cuda")
     depends_on("hypre@2.31.0+rocm amdgpu_target=gfx90a", when="+hypre+rocm")
     depends_on("hypre@2.31.0~rocm", when="+hypre~rocm")
@@ -50,8 +47,6 @@ class TplBuilder(CMakePackage):
             "-DDISABLE_ALL_TESTS=ON"
         ]
 
-        #TODO include all TPLs in cmake args using the path to their spack installed binaries I think this can be done with "<TPL>_INSTALL_DIR"?
-        archive_dir="/usr/projects/xcap/oss/projects/solvers/archives/"
         all_tpls = ["hypre","stacktrace"] #we can probably use the spec string to get this, or to get the variants that are turned on - maybe "self.spec" or str(spec)?
         install_dirs = []
         tpl_list = []
@@ -66,7 +61,7 @@ class TplBuilder(CMakePackage):
             args.append("-DCMAKE_CXX_COMPILER=mpicxx")
         return args
 
-        if self.spec.satidfies("+cuda"):
+        if self.spec.satisfies("+cuda"):
             args.append("-D USE_CUDA = True")
             args.append("-D CMAKE_CUDA_COMPILER=" + self.spec["cuda"].prefix + "bin/nvcc")
             args.append("-D CMAKE_CUDA_ARCHITECTURES=" + self.spec.variants["cuda_arch"].value)
