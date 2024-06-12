@@ -59,11 +59,11 @@ class TplBuilder(CMakePackage):
         args.append("-DTPL_LIST:STRING=" + ';'.join(tpl_list))
         if self.spec.satisfies("+mpi"):
             args.append("-DCMAKE_CXX_COMPILER=mpicxx")
-        return args
 
         if self.spec.satisfies("+cuda"):
-            args.append("-D USE_CUDA = True")
-            args.append("-D CMAKE_CUDA_COMPILER=" + self.spec["cuda"].prefix + "bin/nvcc")
-            args.append("-D CMAKE_CUDA_ARCHITECTURES=" + self.spec.variants["cuda_arch"].value)
+            args.append("-DUSE_CUDA=TRUE")
+            args.append("-DCMAKE_CUDA_COMPILER=" + self.spec["cuda"].prefix + "/bin/nvcc")
+            args.append("-DCMAKE_CUDA_ARCHITECTURES=" + self.spec.variants["cuda_arch"].value)
 
+        return args
 
