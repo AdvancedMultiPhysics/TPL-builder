@@ -63,6 +63,7 @@ class TplBuilder(CMakePackage):
         if self.spec.satisfies("+cuda"):
             args.append("-DUSE_CUDA=TRUE")
             args.append("-DCMAKE_CUDA_COMPILER=" + self.spec["cuda"].prefix + "/bin/nvcc")
+            args.append("-DCMAKE_CUDA_STANDARD=17")
             args.append("-DCMAKE_CUDA_ARCHITECTURES=" + self.spec.variants["cuda_arch"].value)
 
         return args
