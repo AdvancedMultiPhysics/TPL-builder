@@ -60,6 +60,17 @@ bool test<TPL_Enum::MPI>()
 #endif
 
 
+// Test AMP
+#ifdef TPLS_Tests_USE_AMP
+template<>
+bool test<TPL_Enum::AMP>()
+{
+    std::cout << "   -- No tests defined for AMP\n";
+    return true;
+}
+#endif
+
+
 // Test BOOST
 #ifdef TPLS_Tests_USE_BOOST
 template<>
@@ -295,6 +306,28 @@ bool test<TPL_Enum::SAMRAI>()
 #endif
 
 
+// Test SAMRSOLVERS
+#ifdef TPLS_Tests_USE_SAMRSOLVERS
+template<>
+bool test<TPL_Enum::SAMRSOLVERS>()
+{
+    std::cout << "   -- No tests defined for SAMRSolvers\n";
+    return true;
+}
+#endif
+
+
+// Test SAMRUTILS
+#ifdef TPLS_Tests_USE_SAMRUTILS
+template<>
+bool test<TPL_Enum::SAMRUTILS>()
+{
+    std::cout << "   -- No tests defined for SAMRUtils\n";
+    return true;
+}
+#endif
+
+
 // Test SILO
 #ifdef TPLS_Tests_USE_SILO
 template<>
@@ -321,7 +354,7 @@ bool test<TPL_Enum::STACKTRACE>()
 template<>
 bool test<TPL_Enum::SUNDIALS>()
 {
-    std::cout << "   -- No tests defined for suTPL_Enumndials\n";
+    std::cout << "   -- No tests defined for SUNDIALS\n";
     return true;
 }
 #endif
