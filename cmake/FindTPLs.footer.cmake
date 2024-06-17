@@ -21,6 +21,11 @@ FOREACH( TPL ${TPLs_LIST} )
 ENDFOREACH()
 
 
+# Clean up some lists
+LIST( REMOVE_DUPLICATES TPLs_INCLUDE_DIRS )
+LIST( REMOVE_DUPLICATES CMAKE_INSTALL_RPATH )
+
+
 # Write the TPLs.h
 SET( TPLs_HEADER "${CMAKE_CURRENT_BINARY_DIR}/tmp/TPLs.h" )
 FILE( WRITE "${TPLs_HEADER}" "// This file sets the TPL list for C/C++ codes\n")
