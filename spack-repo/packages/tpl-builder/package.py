@@ -18,9 +18,11 @@ class TplBuilder(CMakePackage):
             values = ("none", "gfx1010", "gfx1011", "gfx1012", "gfx1013", "gfx1030", "gfx1031", "gfx1032", "gfx1033", "gfx1034", "gfx1035", "gfx1036", "gfx1100", "gfx1101", "gfx1102", "gfx1103", "gfx701", "gfx801", "gfx802", "gfx803", "gfx900", "gfx900:xnack-", "gfx902", "gfx904", "gfx906", "gfx906:xnack-", "gfx908", "gfx908:xnack-", "gfx909", "gfx90a", "gfx90a:xnack+", "gfx90a:xnack-", "gfx90c", "gfx940", "gfx941", "gfx942" ),
             multi=False)    
 
+
     depends_on("cmake@3.26.0:", type="build")
     depends_on("mpi", when="+mpi")
     depends_on("stacktrace@master", when="+stacktrace")
+    depends_on("cuda", when="+cuda")
 
     for sm_ in CudaPackage.cuda_arch_values:
         depends_on(
