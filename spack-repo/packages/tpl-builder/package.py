@@ -10,7 +10,6 @@ class TplBuilder(CMakePackage):
     
     variant("mpi", default=True, description="build with mpi")
     variant("stacktrace", default=False)
-    variant("timerutility", default=False)
     variant("hypre", default=False)
     variant("cuda", default=False)
     variant("cuda_arch", default="none", values = ("none", "10", "11", "12", "13", "20", "21", "30", "32", "35", "37", "50", "52", "53", "60", "61", "62", "70", "72", "75", "80", "86", "87", "89", "90"), multi=False)
@@ -23,7 +22,6 @@ class TplBuilder(CMakePackage):
     depends_on("cmake@3.26.0:", type="build")
     depends_on("mpi", when="+mpi")
     depends_on("stacktrace@master", when="+stacktrace")
-    depends_on("timerutility", when="+timerutility")
     depends_on("cuda", when="+cuda")
 
     for sm_ in CudaPackage.cuda_arch_values:
