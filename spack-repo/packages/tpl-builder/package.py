@@ -114,6 +114,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
             self.define("CXX_STD", "17"),
             self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
             self.define_from_variant("ENABLE_SHARED", "shared"),
+            self.define("ENABLE_STATIC", not spec.variants["shared"].value),
             self.define_from_variant("USE_MPI", "mpi"),
         ]
 
