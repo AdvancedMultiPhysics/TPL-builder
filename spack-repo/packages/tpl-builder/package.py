@@ -1,74 +1,186 @@
+# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Spack Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
 from spack.package import *
 
 
-class TplBuilder(CMakePackage):
+class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
 
     homepage = "https://re-git.lanl.gov/xcap/oss/solvers/tpl-builder"
     git = "ssh://git@re-git.lanl.gov:10022/xcap/oss/solvers/tpl-builder.git"
 
     version("master", branch="master")
-    
-    variant("mpi", default=True, description="build with mpi")
-    variant("stacktrace", default=False)
-    variant("hypre", default=False)
-    variant("cuda", default=False)
-    variant("cuda_arch", default="none", values = ("none", "10", "11", "12", "13", "20", "21", "30", "32", "35", "37", "50", "52", "53", "60", "61", "62", "70", "72", "75", "80", "86", "87", "89", "90"), multi=False)
-    variant("rocm", default=False)
-    variant("amdgpu_target", default="none",
-            values = ("none", "gfx1010", "gfx1011", "gfx1012", "gfx1013", "gfx1030", "gfx1031", "gfx1032", "gfx1033", "gfx1034", "gfx1035", "gfx1036", "gfx1100", "gfx1101", "gfx1102", "gfx1103", "gfx701", "gfx801", "gfx802", "gfx803", "gfx900", "gfx900:xnack-", "gfx902", "gfx904", "gfx906", "gfx906:xnack-", "gfx908", "gfx908:xnack-", "gfx909", "gfx90a", "gfx90a:xnack+", "gfx90a:xnack-", "gfx90c", "gfx940", "gfx941", "gfx942" ),
-            multi=False)    
+
+    variant("stacktrace", default=False, description="Build with support for Stacktrace")
+    variant("lapackwrappers", default=False, description="Build with support for lapackwrappers")
+    variant("boost", default=False, description="Build with support for Boost")
+    variant("hdf5", default=False, description="Build with support for HDF5")
+    variant("hypre", default=False, description="Build with support for hypre")
+    variant("kokkos", default=False, description="Build with support for Kokkos")
+    variant("libmesh", default=False, description="Build with libmesh support")
+    variant("mpi", default=False, description="Build with MPI support")
+    variant("netcdf", default=False, description="Build with NetCDF support")
+    variant("petsc", default=False, description="Build with Petsc support")
+    variant("shared", default=False, description="Build shared libraries")
+    variant("silo", default=False, description="Build with support for Silo")
+    variant("sundials", default=False, description="Build with support for Sundials")
+    variant("trilinos", default=False, description="Build with support for Trilinos")
+    variant("umpire", default=False, description="Build with support for UMPIRE")
+    variant("zlib", default=False, description="Build with support for zlib")
 
 
-    depends_on("cmake@3.26.0:", type="build")
+    depends_on("git", type="build")
+
+    depends_on("stacktrace", when="+stacktrace")
+    depends_on("stacktrace+mpi", when="+stacktrace+mpi")
+    depends_on("lapackwrappers", when="+lapackwrappers")
+
+    depends_on("boost", when="+boost")
+    depends_on("hdf5", when="+hdf5")
+    depends_on("hypre", when="+hypre")
+    depends_on("kokkos", when="+kokkos")
+    depends_on("libmesh+exodusii+netcdf", when="+libmesh")
+    depends_on("netcdf-c", when="+netcdf")
+    depends_on("petsc~hypre", when="+petsc", patches=[patch("petsc.snes.patch.v3.19.0", when="@3.19.0:")])
+    depends_on("silo", when="+silo")
+    depends_on("sundials@2.6.2", when="+sundials")
+    depends_on(
+        "trilinos@13.4.1: +epetra+epetraext+thyra+tpetra+ml+amesos+ifpack+ifpack2+belos+nox+stratimikos cxxstd=17 gotype=int",
+        when="+trilinos",
+    )
+    depends_on("umpire", when="+umpire")
+    depends_on("zlib", when="+zlib")
+
+    depends_on("trilinos +kokkos", when="+trilinos+kokkos")
+    depends_on("trilinos +mpi", when="+trilinos+mpi")
+
+    depends_on("kokkos+cuda+cuda_constexpr", when="+kokkos+cuda")
+    depends_on("hypre+cuda+unified-memory", when="+hypre+cuda")
+    depends_on("umpire+cuda", when="+umpire+cuda")
+
+    depends_on("libmesh~shared", when="~shared+libmesh")
+    depends_on("libmesh+shared", when="+shared+libmesh")
+    depends_on("hypre~shared", when="~shared+hypre")
+    depends_on("hypre+shared", when="+shared+hypre")
+    depends_on("petsc~shared", when="~shared+petsc")
+    depends_on("petsc+shared", when="+shared+petsc")
+    depends_on("lapackwrappers~shared", when="~shared+lapackwrappers")
+    depends_on("lapackwrappers+shared", when="+shared+lapackwrappers")
+
+    for _flag in list(CudaPackage.cuda_arch_values):
+        depends_on("hypre cuda_arch=" + _flag, when="+hypre+cuda cuda_arch=" + _flag)
+        depends_on("umpire cuda_arch=" + _flag, when="+umpire+cuda cuda_arch=" + _flag)
+        depends_on("kokkos cuda_arch=" + _flag, when="+kokkos+cuda cuda_arch=" + _flag)
+
+    # MPI related dependencies
     depends_on("mpi", when="+mpi")
-    depends_on("stacktrace@master", when="+stacktrace")
-    depends_on("cuda", when="+cuda")
 
-    for sm_ in CudaPackage.cuda_arch_values:
-        depends_on(
-            "hypre+cuda cuda_arch={0}".format(sm_),
-            when="+hypre+cuda cuda_arch={0}".format(sm_),
-        )
+    def setup_build_environment(self, env):
+        if "^kokkos-nvcc-wrapper" in self.spec:
+            # undo nvcc wrapper changes
+            env.set("MPICH_CXX", spack_cxx)
+            env.set("OMPI_CXX", spack_cxx)
+            env.set("MPICXX_CXX", spack_cxx)
 
-    for gfx in ROCmPackage.amdgpu_targets:
-        depends_on(
-            "hypre+rocm amdgpu_target={0}".format(gfx),
-            when="+hypre+rocm amdgpu_target={0}".format(gfx),
-        )
+    #def patch(self):
+    #    build_ver = 1
+    #    short_hash = ""
+    #    long_hash = ""
+    #    if self.spec.satisfies("@develop"):
+    #        major_ver = "0"
+    #        minor_ver = "0"
+    #    else:
+    #        major_ver = self.spec.version[0]
+    #        minor_ver = self.spec.version[1]
+    #    
+    #    version_file = join_path(self.stage.source_path, "src", "AMP_Version.cmake")
+    #    with open(version_file, "w") as f:
+    #        print(f"# generated by Spack package", file=f)
+    #        print(f"set(AMP_MAJOR_VERSION {major_ver})", file=f)
+    #        print(f"set(AMP_MINOR_VERSION {minor_ver})", file=f)
+    #        print(f"set(AMP_BUILD_VERSION {build_ver})", file=f)
+    #        print(f"set(AMP_SHORT_HASH_VERSION \"{short_hash}\")", file=f)
+    #        print(f"set(AMP_LONG_HASH_VERSION  \"{long_hash}\")", file=f)
 
+    phases = ["cmake", "build"]
 
-    depends_on("hypre~cuda", when="+hypre~cuda")
-    depends_on("hypre~rocm", when="+hypre~rocm")
-
-    conflicts("+rocm +cuda")
-
-    phases=["cmake", "build"]
     def cmake_args(self):
+        spec = self.spec
 
-        args = [
-            "-DINSTALL_DIR:PATH="+self.spec.prefix,
-            "-DCXX_STD=17",
-            "-DDISABLE_ALL_TESTS=ON"
+        options = [
+            self.define("INSTALL_DIR", self.spec.prefix),
+            self.define("DISABLE_ALL_TESTS", True),
+            self.define("CXX_STD", "17"),
+            self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
+            self.define_from_variant("ENABLE_SHARED", "shared"),
+            self.define_from_variant("USE_MPI", "mpi"),
         ]
 
-        all_tpls = ["hypre","stacktrace"] #we can probably use the spec string to get this, or to get the variants that are turned on - maybe "self.spec" or str(spec)?
-        install_dirs = []
+        if "+cuda" in spec:
+            cuda_arch = self.spec.variants["cuda_arch"].value
+            if cuda_arch[0] != "none":
+                options.extend(
+                    [
+                        self.define("USE_CUDA", True),
+                        self.define(
+                            "CMAKE_CUDA_COMPILER", join_path(spec["cuda"].prefix.bin, "nvcc")
+                        ),
+                        self.define("CMAKE_CUDA_ARCHITECTURES", cuda_arch),
+                        self.define(
+                            "CMAKE_CUDA_FLAGS", "-extended-lambda --expt-relaxed-constexpr"
+                        ),
+                    ]
+                )
+
+        if "+mpi" in spec:
+            options.extend(
+                [
+                    self.define("CMAKE_C_COMPILER", spec["mpi"].mpicc),
+                    self.define("CMAKE_CXX_COMPILER", spec["mpi"].mpicxx),
+                    self.define("CMAKE_Fortran_COMPILER", spec["mpi"].mpifc),
+                    self.define("MPIEXEC", spec["mpi"].prefix.bin),
+                ]
+            )
+        else:
+            options.extend(
+                [
+                    self.define("CMAKE_C_COMPILER", self.compiler.cc),
+                    self.define("CMAKE_CXX_COMPILER", self.compiler.cxx),
+                    self.define("CMAKE_Fortran_COMPILER", self.compiler.fc),
+                ]
+            )
+
         tpl_list = []
-        for tpl in all_tpls:
-            if self.spec.satisfies("+"+tpl):
-                tpl_list.append(tpl.upper())
-                args.append("-D" + tpl.upper() + "_INSTALL_DIR=" + self.spec[tpl].prefix)
 
-        #TODO add to this list instead of overwriding it
-        args.append("-DTPL_LIST:STRING=" + ';'.join(tpl_list))
-        if self.spec.satisfies("+mpi"):
-            args.append("-DCMAKE_CXX_COMPILER=mpicxx")
+        if "+zlib" in spec:
+            tpl_list.append("ZLIB")
+            options.append(self.define("ZLIB_INSTALL_DIR", spec["zlib"].prefix))
 
-        if self.spec.satisfies("+cuda"):
-            args.append("-DUSE_CUDA=TRUE")
-            args.append("-DCMAKE_CUDA_COMPILER=" + self.spec["cuda"].prefix + "/bin/nvcc")
-            args.append("-DCMAKE_CUDA_STANDARD=17")
-            args.append("-DCMAKE_CUDA_ARCHITECTURES=" + self.spec.variants["cuda_arch"].value)
+        if "+lapackwrappers" in spec:
+            tpl_list.append("LAPACK_WRAPPERS")
+            options.append(self.define("LAPACK_WRAPPERS_INSTALL_DIR", spec["lapackwrappers"].prefix))
 
-        return args
+        for vname in (
+            "stacktrace",
+            "boost",
+            "hdf5",
+            "hypre",
+            "kokkos",
+            "libmesh",
+            "petsc",
+            "silo",
+            "sundials",
+            "trilinos",
+            "umpire",
+        ):
+            if "+" + vname in spec:
+                tpl_list.append(vname.upper())
+                options.append(self.define(f"{vname.upper()}_INSTALL_DIR", spec[vname].prefix))
 
+        if "+netcdf" in spec:
+            tpl_list.append("NETCDF")
+            options.append(self.define("NETCDF_INSTALL_DIR", spec["netcdf-c"].prefix))
+
+        options.append(self.define("TPL_LIST", ";".join(tpl_list)))
+        return options
