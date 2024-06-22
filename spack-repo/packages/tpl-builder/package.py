@@ -14,6 +14,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
 
     variant("stacktrace", default=False, description="Build with support for Stacktrace")
     variant("lapackwrappers", default=False, description="Build with support for lapackwrappers")
+    variant("lapack", default=False, description="Build with support for lapack")
     variant("boost", default=False, description="Build with support for Boost")
     variant("hdf5", default=False, description="Build with support for HDF5")
     variant("hypre", default=False, description="Build with support for hypre")
@@ -70,6 +71,10 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("petsc+shared", when="+shared+petsc")
     depends_on("lapackwrappers~shared", when="~shared+lapackwrappers")
     depends_on("lapackwrappers+shared", when="+shared+lapackwrappers")
+    depends_on("blas", when="+lapack")
+    depends_on("lapack", when="+lapack")
+
+    requires("+lapack", when="+petsc")
 
     for _flag in list(CudaPackage.cuda_arch_values):
         depends_on("hypre cuda_arch=" + _flag, when="+hypre+cuda cuda_arch=" + _flag)
@@ -149,6 +154,25 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
         if "+lapackwrappers" in spec:
             tpl_list.append("LAPACK_WRAPPERS")
             options.append(self.define("LAPACK_WRAPPERS_INSTALL_DIR", spec["lapackwrappers"].prefix))
+
+        if "+lapack" in spec:
+            tpl_list.append("LAPACK")
+            if "^intel-mkl" in self.spec:
+                options.append(self.define("LAPACK_INSTALL_DIR", self.spec["lapack"].prefix.mkl))
+            elif "^intel-oneapi-mkl" in self.spec:
+                options.append(self.define("LAPACK_INSTALL_DIR", self.spec["intel-oneapi-mkl"].package.component_prefix))
+            else:
+                options.append(self.define("LAPACK_INSTALL_DIR", self.spec["lapack"].prefix))
+
+            blas, lapack = self.spec["blas"].libs, self.spec["lapack"].libs
+            options.extend(
+                [
+                    self.define("BLAS_LIBRARY_NAMES", ";".join(blas.names)),
+                    self.define("BLAS_LIBRARY_DIRS", ";".join(blas.directories)),
+                    self.define("LAPACK_LIBRARY_NAMES", ";".join(lapack.names)),
+                    self.define("LAPACK_LIBRARY_DIRS", ";".join(lapack.directories)),
+                ]
+            )
 
         for vname in (
             "stacktrace",
