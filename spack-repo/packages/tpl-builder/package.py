@@ -56,8 +56,11 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("trilinos +mpi", when="+trilinos+mpi")
 
     depends_on("kokkos+cuda+cuda_constexpr", when="+kokkos+cuda")
+    depends_on("kokkos+rocm", when="+kokkos+rocm")
     depends_on("hypre+cuda+unified-memory", when="+hypre+cuda")
+    depends_on("hypre+rocm", when="+hypre+rocm")
     depends_on("umpire+cuda", when="+umpire+cuda")
+    depends_on("umpire+rocm", when="+umpire+rocm")
 
     depends_on("libmesh~shared", when="~shared+libmesh")
     depends_on("libmesh+shared", when="+shared+libmesh")
@@ -72,6 +75,11 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
         depends_on("hypre cuda_arch=" + _flag, when="+hypre+cuda cuda_arch=" + _flag)
         depends_on("umpire cuda_arch=" + _flag, when="+umpire+cuda cuda_arch=" + _flag)
         depends_on("kokkos cuda_arch=" + _flag, when="+kokkos+cuda cuda_arch=" + _flag)
+
+    for _flag in ROCmPackage.amdgpu_targets:
+        depends_on("hypre amdgpu_target=" + _flag, when="+hypre+rocm amdgpu_target=" + _flag)
+        depends_on("umpire amdgpu_target=" + _flag, when="+umpire+rocm amdgpu_target=" + _flag)
+        depends_on("kokkos amdgpu_target=" + _flag, when="+kokkos+rocm amdgpu_target=" + _flag)
 
     # MPI related dependencies
     depends_on("mpi", when="+mpi")
@@ -112,6 +120,22 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
                         self.define("CMAKE_CUDA_ARCHITECTURES", cuda_arch),
                         self.define(
                             "CMAKE_CUDA_FLAGS", "-extended-lambda --expt-relaxed-constexpr"
+                        ),
+                    ]
+                )
+
+        if "+rocm" in spec:
+            amdgpu_target = self.spec.variants["amdgpu_target"].value
+            if amdgpu_target[0] != "none":
+                options.extend(
+                    [
+                        self.define("USE_HIP", True),
+                        self.define(
+                            "CMAKE_HIP_COMPILER", join_path(spec["llvm-amdgpu"].prefix.bin, "amdclang++")
+                        ),
+                        self.define("CMAKE_HIP_ARCHITECTURES", amdgpu_target),
+                        self.define(
+                            "CMAKE_HIP_FLAGS", ""
                         ),
                     ]
                 )
