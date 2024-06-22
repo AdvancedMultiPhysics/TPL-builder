@@ -37,7 +37,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("lapackwrappers", when="+lapackwrappers")
 
     depends_on("boost", when="+boost")
-    depends_on("hdf5", when="+hdf5")
+    depends_on("hdf5+cxx+fortran", when="+hdf5")
     depends_on("hypre", when="+hypre")
     depends_on("kokkos", when="+kokkos")
     depends_on("libmesh+exodusii+netcdf", when="+libmesh")
@@ -116,6 +116,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
             self.define_from_variant("ENABLE_SHARED", "shared"),
             self.define("ENABLE_STATIC", not spec.variants["shared"].value),
             self.define_from_variant("USE_MPI", "mpi"),
+            self.define("MPI_SKIP_SEARCH", False),
         ]
 
         if "+cuda" in spec:
@@ -133,24 +134,6 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
                         ),
                     ]
                 )
-
-        if "+mpi" in spec:
-            options.extend(
-                [
-                    self.define("CMAKE_C_COMPILER", spec["mpi"].mpicc),
-                    self.define("CMAKE_CXX_COMPILER", spec["mpi"].mpicxx),
-                    self.define("CMAKE_Fortran_COMPILER", spec["mpi"].mpifc),
-                    self.define("MPIEXEC", spec["mpi"].prefix.bin),
-                ]
-            )
-        else:
-            options.extend(
-                [
-                    self.define("CMAKE_C_COMPILER", self.compiler.cc),
-                    self.define("CMAKE_CXX_COMPILER", self.compiler.cxx),
-                    self.define("CMAKE_Fortran_COMPILER", self.compiler.fc),
-                ]
-            )
 
         tpl_list = []
 
