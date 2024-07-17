@@ -166,7 +166,17 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         FIND_PACKAGE( rocsparse REQUIRED )
         SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} roc::rocthrust roc::hipblas hip::hiprand hip::hipcub roc::rocrand roc::rocsparse)
     ENDIF()
+
+    IF ( USE_CUDA OR USE_HIP )
+        ADD_DEFINITIONS( -DUSE_DEVICE )
+        SET( USE_DEVICE TRUE )
+    ELSE()
+        SET( USE_DEVICE FALSE )
+    ENDIF()
+        
+
     SET( NUMBER_OF_GPUS @NUMBER_OF_GPUS@ CACHE STRING "Number of GPUs for testing" )
+
     IF ( USE_OPENMP )
         ADD_DEFINITIONS( -DUSE_OPENMP )
         FIND_PACKAGE( OpenMP )
