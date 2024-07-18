@@ -139,6 +139,7 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         SET( CMAKE_CUDA_FLAGS  "@CMAKE_CUDA_FLAGS@" CACHE STRING "Cuda flags" )
         ENABLE_LANGUAGE( CUDA )
         ADD_DEFINITIONS( -DUSE_CUDA )
+        SET( CMAKE_CUDA_SEPARABLE_COMPILATION TRUE )
         # Enable CUDA toolkit
         FIND_PACKAGE( CUDAToolkit )
         SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
