@@ -457,7 +457,7 @@ MACRO( INSTALL_PROJ_LIB )
     INSTALL( EXPORT ${PROJ}Targets
              FILE ${PROJ}Targets.cmake
              NAMESPACE ${PROJ}::
-             DESTINATION ${${PROJ}_INSTALL_DIR}/lib/cmake
+             DESTINATION ${${PROJ}_INSTALL_DIR}/lib/cmake/${PROJ}
     )
 ENDMACRO()
 
