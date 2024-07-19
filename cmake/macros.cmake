@@ -453,12 +453,14 @@ MACRO( INSTALL_PROJ_LIB )
     ADD_LIBRARY( ${${PROJ}_LIB} ${LIB_TYPE} ${tmp_link_list} )
     TARGET_LINK_LIBRARIES( ${${PROJ}_LIB} LINK_PUBLIC ${COVERAGE_LIBS} )
     TARGET_LINK_EXTERNAL_LIBRARIES( ${${PROJ}_LIB} LINK_PUBLIC )
-    INSTALL( TARGETS ${${PROJ}_LIB} EXPORT ${PROJ}Targets DESTINATION ${${PROJ}_INSTALL_DIR}/lib )
-    INSTALL( EXPORT ${PROJ}Targets
-             FILE ${PROJ}Targets.cmake
-             NAMESPACE ${PROJ}::
-             DESTINATION ${${PROJ}_INSTALL_DIR}/lib/cmake/${PROJ}
-    )
+    IF ( NOT DISABLE_TARGETS_EXPORT )
+        INSTALL( TARGETS ${${PROJ}_LIB} EXPORT ${PROJ}Targets DESTINATION ${${PROJ}_INSTALL_DIR}/lib )
+        INSTALL( EXPORT ${PROJ}Targets
+                FILE ${PROJ}Targets.cmake
+                NAMESPACE ${PROJ}::
+                DESTINATION ${${PROJ}_INSTALL_DIR}/lib/cmake/${PROJ}
+              )
+    ENDIF()
 ENDMACRO()
 
 
