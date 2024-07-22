@@ -220,12 +220,12 @@ IF ( NOT CTEST_SITE )
 ENDIF()
 IF ( NOT CTEST_URL )
     SET( CTEST_DROP_METHOD "http" )
-    SET( CTEST_DROP_LOCATION "/CDash/submit.php?project=CTest-Builder" )
+    SET( CTEST_DROP_LOCATION "/CDash/submit.php?project=CTest-Tester" )
     SET( CTEST_DROP_SITE_CDASH TRUE )
     SET( DROP_SITE_CDASH TRUE )
     SET( CTEST_DROP_SITE ${CTEST_SITE} )
 ELSE()
-    STRING( REPLACE "PROJECT" "CTest-Builder" CTEST_URL "${CTEST_URL}" )
+    STRING( REPLACE "PROJECT" "CTest-Tester" CTEST_URL "${CTEST_URL}" )
     SET( CTEST_SUBMIT_URL "${CTEST_URL}" )
 ENDIF()
 
@@ -246,7 +246,7 @@ CTEST_TEST()
 CTEST_SUBMIT()
 
 
-# Write a message to test for success in the ctest-builder
+# Write a message to test for success
 MESSAGE( "ctest_script ran to completion" )
 
 
