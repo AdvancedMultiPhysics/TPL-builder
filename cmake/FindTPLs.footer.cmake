@@ -21,6 +21,11 @@ FOREACH( TPL ${TPLs_LIST} )
 ENDFOREACH()
 
 
+# Clean up some lists
+LIST( REMOVE_DUPLICATES TPLs_INCLUDE_DIRS )
+LIST( REMOVE_DUPLICATES CMAKE_INSTALL_RPATH )
+
+
 # Write the TPLs.h
 SET( TPLs_HEADER "${CMAKE_CURRENT_BINARY_DIR}/tmp/TPLs.h" )
 FILE( WRITE "${TPLs_HEADER}" "// This file sets the TPL list for C/C++ codes\n")
@@ -43,7 +48,15 @@ FILE( APPEND "${TPLs_HEADER}" "#endif\n")
 EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${TPLs_HEADER}" "${${PROJ}_INSTALL_DIR}/include/${${PROJ}_INC}/${PROJ}_TPLs.h" )
 
 
-# Check that all components were found (not finished)
-CHECK_REQUIRED_COMPONENTS( TPLs )
+# Check that all components were found (replaces default check_required_components)
+SET( TPLs_FOUND TRUE )
+FOREACH( comp ${TPLs_FIND_COMPONENTS} )
+    IF ( NOT TPLs_${comp}_FOUND AND NOT DISABLE_${COMP} )
+        IF ( TPLs_FIND_REQUIRED_${comp} )
+            MESSAGE( "Failed to find TPLs::${comp}" )
+            SET( TPLs_FOUND FALSE )
+        ENDIF()
+    ENDIF()
+ENDFOREACH()
 
 
