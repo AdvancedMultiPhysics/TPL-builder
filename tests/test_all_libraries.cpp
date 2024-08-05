@@ -245,6 +245,17 @@ bool test<TPL_Enum::METIS>()
 #endif
 
 
+// Test PARMETIS
+#ifdef TPLS_Tests_USE_PARMETIS
+template<>
+bool test<TPL_Enum::PARMETIS>()
+{
+    std::cout << "   -- No tests defined for PARMETIS\n";
+    return true;
+}
+#endif
+
+
 // Test NETCDF
 #ifdef TPLS_Tests_USE_NETCDF
 template<>
@@ -468,6 +479,7 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::NETCDF: return test<TPL_Enum::NETCDF>();
     case TPL_Enum::OGRE: return test<TPL_Enum::OGRE>();
     case TPL_Enum::OPENBLAS: return test<TPL_Enum::OPENBLAS>();
+    case TPL_Enum::PARMETIS: return test<TPL_Enum::PARMETIS>();
     case TPL_Enum::PETSC: return test<TPL_Enum::PETSC>();
     case TPL_Enum::QT: return test<TPL_Enum::QT>();
     case TPL_Enum::QWT: return test<TPL_Enum::QWT>();

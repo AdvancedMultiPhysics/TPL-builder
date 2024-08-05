@@ -27,6 +27,7 @@ enum class TPL_Enum {
     NETCDF,
     OGRE,
     OPENBLAS,
+    PARMETIS,
     PETSC,
     QT,
     QWT,
@@ -74,6 +75,7 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::NETCDF: return "NETCDF";
     case TPL_Enum::OGRE: return "OGRE";
     case TPL_Enum::OPENBLAS: return "OPENBLAS";
+    case TPL_Enum::PARMETIS: return "PARMETIS";
     case TPL_Enum::PETSC: return "PETSC";
     case TPL_Enum::QT: return "QT";
     case TPL_Enum::QWT: return "QWT";
@@ -116,6 +118,7 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "MPI" ) { return TPL_Enum::MPI; }
     if ( tpl == "NETCDF" ) { return TPL_Enum::NETCDF; }
     if ( tpl == "OGRE" ) { return TPL_Enum::OGRE; }
+    if ( tpl == "PARMETIS" ) { return TPL_Enum::PARMETIS; }
     if ( tpl == "PETSC" ) { return TPL_Enum::PETSC; }
     if ( tpl == "QT" ) { return TPL_Enum::QT; }
     if ( tpl == "QWT" ) { return TPL_Enum::QWT; }
