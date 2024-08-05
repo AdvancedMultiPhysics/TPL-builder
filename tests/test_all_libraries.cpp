@@ -223,6 +223,28 @@ bool test<TPL_Enum::MATLAB>()
 #endif
 
 
+// Test GKLIB
+#ifdef TPLS_Tests_USE_GKLIB
+template<>
+bool test<TPL_Enum::GKLIB>()
+{
+    std::cout << "   -- No tests defined for GKLIB\n";
+    return true;
+}
+#endif
+
+
+// Test METIS
+#ifdef TPLS_Tests_USE_METIS
+template<>
+bool test<TPL_Enum::METIS>()
+{
+    std::cout << "   -- No tests defined for METIS\n";
+    return true;
+}
+#endif
+
+
 // Test NETCDF
 #ifdef TPLS_Tests_USE_NETCDF
 template<>
@@ -433,6 +455,7 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::CABANA: return test<TPL_Enum::CABANA>();
     case TPL_Enum::CATCH2: return test<TPL_Enum::CATCH2>();
     case TPL_Enum::FFTW: return test<TPL_Enum::FFTW>();
+    case TPL_Enum::GKLIB: return test<TPL_Enum::GKLIB>();
     case TPL_Enum::HDF5: return test<TPL_Enum::HDF5>();
     case TPL_Enum::HYPRE: return test<TPL_Enum::HYPRE>();
     case TPL_Enum::KOKKOS: return test<TPL_Enum::KOKKOS>();
@@ -440,6 +463,7 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::LAPACK_WRAPPERS: return test<TPL_Enum::LAPACK_WRAPPERS>();
     case TPL_Enum::LIBMESH: return test<TPL_Enum::LIBMESH>();
     case TPL_Enum::MATLAB: return test<TPL_Enum::MATLAB>();
+    case TPL_Enum::METIS: return test<TPL_Enum::METIS>();
     case TPL_Enum::MPI: return test<TPL_Enum::MPI>();
     case TPL_Enum::NETCDF: return test<TPL_Enum::NETCDF>();
     case TPL_Enum::OGRE: return test<TPL_Enum::OGRE>();
