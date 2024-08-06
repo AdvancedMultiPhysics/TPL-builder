@@ -15,17 +15,23 @@ ENDMACRO()
 
 # Configure dependencies
 MACRO( CONFIGURE_DEPENDENCIES TPL )
+    # Parse input arguments
     SET( optionalArgs )
     SET( oneValueArgs )
     SET( multiValueArgs REQUIRED OPTIONAL )
     CMAKE_PARSE_ARGUMENTS( CONFIGURE_DEPENDENCIES "${optionalArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+    # Guard resquired/optional arguments to ensure they are not overridden be nested calls to CONFIGURE_TPL
+    SET( CONFIGURE_DEPENDENCIES_${TPL}_REQUIRED ${CONFIGURE_DEPENDENCIES_REQUIRED} )
+    SET( CONFIGURE_DEPENDENCIES_${TPL}_OPTIONAL ${CONFIGURE_DEPENDENCIES_OPTIONAL} )
+    # Add required and optional dependencies
     SET( ${TPL}_DEPENDS )
-    FOREACH ( tmp ${CONFIGURE_DEPENDENCIES_REQUIRED} )
+    FOREACH ( tmp ${CONFIGURE_DEPENDENCIES_${TPL}_REQUIRED} )
         CONFIGURE_TPL( ${tmp} )
         SET( ${TPL}_DEPENDS ${${TPL}_DEPENDS} ${tmp} )
     ENDFOREACH()
-    FOREACH ( tmp ${CONFIGURE_DEPENDENCIES_OPTIONAL} )
+    FOREACH ( tmp ${CONFIGURE_DEPENDENCIES_${TPL}_OPTIONAL} )
         LIST(FIND TPL_LIST "${tmp}" index)
+        MESSAGE("${TPL}-${tmp} = ${index}")
         IF ( ${index} GREATER -1 )
             CONFIGURE_TPL( ${tmp} )
             SET( ${TPL}_DEPENDS ${${TPL}_DEPENDS} ${tmp} )

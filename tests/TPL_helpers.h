@@ -14,6 +14,7 @@ enum class TPL_Enum {
     CABANA,
     CATCH2,
     FFTW,
+    GKLIB,
     HDF5,
     HYPRE,
     KOKKOS,
@@ -21,10 +22,12 @@ enum class TPL_Enum {
     LAPACK_WRAPPERS,
     LIBMESH,
     MATLAB,
+    METIS,
     MPI,
     NETCDF,
     OGRE,
     OPENBLAS,
+    PARMETIS,
     PETSC,
     QT,
     QWT,
@@ -59,6 +62,7 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::CABANA: return "CABANA";
     case TPL_Enum::CATCH2: return "CATCH2";
     case TPL_Enum::FFTW: return "FFTW";
+    case TPL_Enum::GKLIB: return "GKLIB";
     case TPL_Enum::HDF5: return "HDF5";
     case TPL_Enum::HYPRE: return "HYPRE";
     case TPL_Enum::KOKKOS: return "KOKKOS";
@@ -66,10 +70,12 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::LAPACK_WRAPPERS: return "LAPACK_WRAPPERS";
     case TPL_Enum::LIBMESH: return "LIBMESH";
     case TPL_Enum::MATLAB: return "MATLAB";
+    case TPL_Enum::METIS: return "METIS";
     case TPL_Enum::MPI: return "MPI";
     case TPL_Enum::NETCDF: return "NETCDF";
     case TPL_Enum::OGRE: return "OGRE";
     case TPL_Enum::OPENBLAS: return "OPENBLAS";
+    case TPL_Enum::PARMETIS: return "PARMETIS";
     case TPL_Enum::PETSC: return "PETSC";
     case TPL_Enum::QT: return "QT";
     case TPL_Enum::QWT: return "QWT";
@@ -100,6 +106,7 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "CABANA" ) { return TPL_Enum::CABANA; }
     if ( tpl == "CATCH2" ) { return TPL_Enum::CATCH2; }
     if ( tpl == "FFTW" ) { return TPL_Enum::FFTW; }
+    if ( tpl == "GKLIB" ) { return TPL_Enum::GKLIB; }
     if ( tpl == "HDF5" ) { return TPL_Enum::HDF5; }
     if ( tpl == "HYPRE" ) { return TPL_Enum::HYPRE; }
     if ( tpl == "KOKKOS" ) { return TPL_Enum::KOKKOS; }
@@ -107,9 +114,11 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "LAPACK_WRAPPERS" ) { return TPL_Enum::LAPACK_WRAPPERS; }
     if ( tpl == "LIBMESH" ) { return TPL_Enum::LIBMESH; }
     if ( tpl == "MATLAB" ) { return TPL_Enum::MATLAB; }
+    if ( tpl == "METIS" ) { return TPL_Enum::METIS; }
     if ( tpl == "MPI" ) { return TPL_Enum::MPI; }
     if ( tpl == "NETCDF" ) { return TPL_Enum::NETCDF; }
     if ( tpl == "OGRE" ) { return TPL_Enum::OGRE; }
+    if ( tpl == "PARMETIS" ) { return TPL_Enum::PARMETIS; }
     if ( tpl == "PETSC" ) { return TPL_Enum::PETSC; }
     if ( tpl == "QT" ) { return TPL_Enum::QT; }
     if ( tpl == "QWT" ) { return TPL_Enum::QWT; }
