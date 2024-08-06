@@ -408,7 +408,7 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
             SET_SOURCE_FILES_PROPERTIES( ${CXXSOURCES} PROPERTIES LANGUAGE CUDA )
         ENDIF()
         # If we are using HIP and COMPILE_CXX_AS_HIP is set, change the language
-        IF ( USE_CUDA AND COMPILE_CXX_AS_HIP )
+        IF ( USE_HIP AND COMPILE_CXX_AS_HIP )
             SET_SOURCE_FILES_PROPERTIES( ${CXXSOURCES} PROPERTIES LANGUAGE HIP )
         ENDIF()
         # Create the library
