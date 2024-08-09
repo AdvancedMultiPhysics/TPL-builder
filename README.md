@@ -25,26 +25,34 @@ Note:  The automatic download of TPLs from bitbucket is still being developed.
 Users should pre-download all TPLs into a common folder and then specify their
 locate using TPL_URL.  
 
-The current TPL list and tested versions are:
-    BLAS/LAPACK (any version, NOTE: only netlib versions <= 3.5.0 work with Trilinos 12.10.1)
-    ZLIB
-    HDF5 (1.12.0)
-    UMPIRE (6.0.0)
-    RAJA (0.8.0)
-    KOKKOS (3.5.00)
-    CABANA (0.4.0)
-    HYPRE (2.24.0)
-    PETSc (3.16.4)
-    TRILINOS (13.2.1)
-    SAMRAI (4.1.0-modified)
-    LIBMESH (1.5.1)
-    SUNDIALS (2.6.2)
-    SCALAPACK (2.0.2)
+The current TPL list and last tested versions are:
+    BLAS/LAPACK:
+        MKL
+        OpenBLAS (0.2.18) - https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.2.18/OpenBLAS-0.2.18.tar.gz
+        Netlib (3.10.0) - https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.10.0.tar.gz
+        ScaLAPACK (2.0.2) - http://www.netlib.org/scalapack/scalapack-2.0.2.tgz
+    CABANA (0.6.1) - https://github.com/ECP-copa/Cabana/archive/refs/tags/0.6.1.tar.gz
+    Cppcheck (2.10) - https://github.com/danmar/cppcheck/archive/refs/tags/2.10.tar.gz
+    GKlib 
+    FFTW (3.3.8) - https://www.fftw.org/fftw-3.3.8.tar.gz
+    HDF5 (1.12.0) - https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/src/hdf5-1.12.0.tar.bz2
+    HYPRE (2.30.0) - https://github.com/hypre-space/hypre/archive/refs/tags/v2.31.0.tar.gz
+    KOKKOS (4.1.00) - https://github.com/kokkos/kokkos/archive/refs/tags/4.1.00.tar.gz
+    LIBMESH (1.7.1) - https://github.com/libMesh/libmesh/releases/download/v1.7.1/libmesh-1.7.1.tar.gz
+    LMDB - https://www.openldap.org
     MUMPS (5.0.1)
     METIS (5.1.0)
+https://github.com/OGRECave/ogre/archive/refs/tags/ogre-1.11.0.zip
+    NETCDF (4.6.1) - https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.6.1.tar.gz
     PARMETIS (4.0.3)
+    PETSc (3.20.0) - https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.0.tar.gz
+    RAJA (2023.06.1) - https://github.com/LLNL/RAJA/releases/download/v2023.06.1/RAJA-v2023.06.1.tar.gz
+    SAMRAI (4.2.1-modified)
+    SUNDIALS (2.6.2) - https://computing.llnl.gov/sites/default/files/inline-files/sundials-2.6.2.tar.gz
+    TRILINOS (14-4-0) - https://github.com/trilinos/Trilinos/archive/refs/tags/trilinos-release-14-4-0.tar.gz
+    UMPIRE (2024.02.1) - https://github.com/LLNL/CHAI/archive/refs/tags/v2024.02.1.tar.gz
     SUPERLU_DIST (5.0.0)
-    LMDB
+    ZLIB (1.2.12) - https://zlib.net/fossils/zlib-1.2.12.tar.gz
 
 Note:  For the purposes of the TPL builder BLAS/LAPACK are configured as one TPL (LAPACK).
 A user may still provided their own libraries to use for blas/lapack which may
