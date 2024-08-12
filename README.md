@@ -48,10 +48,13 @@ The current TPL list and last tested versions are:
 - PETSc (3.20.0) https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.0.tar.gz
 - RAJA (2023.06.1) https://github.com/LLNL/RAJA/releases/download/v2023.06.1/RAJA-v2023.06.1.tar.gz
 - SAMRAI(patched) https://github.com/AdvancedMultiPhysics/SAMRAI/tree/patches5
+- SILO (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/Silo-4.10.3RC.modified.tar.gz
 - SUNDIALS (2.6.2) https://computing.llnl.gov/sites/default/files/inline-files/sundials-2.6.2.tar.gz
+- Thrust (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/thrust.tar.gz
 - TRILINOS (14-4-0) https://github.com/trilinos/Trilinos/archive/refs/tags/trilinos-release-14-4-0.tar.gz
 - UMPIRE (2024.02.1) https://github.com/LLNL/CHAI/archive/refs/tags/v2024.02.1.tar.gz
 - SUPERLU_DIST (5.0.0)
+- XBraid (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/xbraid.tar.gz
 - ZLIB (1.2.12) https://zlib.net/fossils/zlib-1.2.12.tar.gz
 
 Note:  For the purposes of the TPL builder BLAS/LAPACK are configured as one TPL (LAPACK).
