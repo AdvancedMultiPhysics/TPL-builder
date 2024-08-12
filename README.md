@@ -79,19 +79,19 @@ To begin the configure/build process there are 4 paths that we will refer to in 
                  to the current build tree.
 
 An example folder layout is:
-root_dir
-    | -- TPL_BUILDER
-    | -- TPL_ROOT
-    |       | -- petsc-3.16.4.tar.gz
-    |       | -- SAMRAI_v4.1.0
-    |       | -- AMP
-    |       | ...
-    | -- build
-    |       | -- debug
-    |       | -- opt
-    | -- install
-            | -- debug
-            | -- opt
+root_dir                                \
+    | -- TPL_BUILDER                    \
+    | -- TPL_ROOT                       \
+    |       | -- petsc-3.16.4.tar.gz    \
+    |       | -- SAMRAI_v4.1.0          \
+    |       | -- AMP                    \
+    |       | ...                       \
+    | -- build                          \
+    |       | -- debug                  \
+    |       | -- opt                    \
+    | -- install                        \
+            | -- debug                  \
+            | -- opt                    \
 
 In this example layout if we are creating an opt installation where
 - TPL_BUILDER=root_dir/TPL_BUILDER,
