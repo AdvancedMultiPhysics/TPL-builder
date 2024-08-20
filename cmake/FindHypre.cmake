@@ -1,3 +1,14 @@
+# Verify that a path has been set
+FUNCTION( VERIFY_PATH PATH_NAME )
+    IF ("${PATH_NAME}" STREQUAL "")
+        MESSAGE( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
+    ENDIF()
+    IF ( NOT EXISTS "${PATH_NAME}" )
+        MESSAGE( FATAL_ERROR "Path does not exist: ${PATH_NAME}" )
+    ENDIF()
+ENDFUNCTION()
+
+
 FUNCTION ( HYPRE_SET_INCLUDES  HYPRE_DIRECTORY )
     VERIFY_PATH( ${HYPRE_DIRECTORY} )
     VERIFY_PATH( ${HYPRE_DIRECTORY}/include )

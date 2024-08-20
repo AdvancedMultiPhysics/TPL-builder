@@ -34,15 +34,6 @@ CMAKE_POLICY( SET CMP0074 NEW )
 CMAKE_POLICY( SET CMP0110 NEW )
 
 
-# Check that PROJ and ${PROJ}_INSTALL_DIR have been set
-IF ( NOT PROJ )
-    MESSAGE( FATAL_ERROR "PROJ must be set before calling FindTPLs")
-ENDIF()
-IF ( NOT ${PROJ}_INSTALL_DIR )
-    MESSAGE( FATAL_ERROR "${PROJ}_INSTALL_DIR must be set before calling FindTPLs")
-ENDIF()
-
-
 # Print a message to indicate we started looking for TPLs
 IF ( NOT TPLs_FIND_QUIETLY )
     MESSAGE( "Running FindTPLs" )
@@ -63,6 +54,14 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
 
     # Include project install directory
     INCLUDE_DIRECTORIES( "${${PROJ}_INSTALL_DIR}/include" )
+
+    # Check that PROJ and ${PROJ}_INSTALL_DIR have been set
+    IF ( NOT PROJ )
+        MESSAGE( FATAL_ERROR "PROJ must be set before calling FindTPLs")
+    ENDIF()
+    IF ( NOT ${PROJ}_INSTALL_DIR )
+        MESSAGE( FATAL_ERROR "${PROJ}_INSTALL_DIR must be set before calling FindTPLs")
+    ENDIF()
 
     # Initialize the include paths / libraries
     SET( TPLs_INCLUDE_DIRS )
