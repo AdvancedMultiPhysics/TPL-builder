@@ -26,33 +26,36 @@ Users should pre-download all TPLs into a common folder and then specify their
 locate using TPL_URL.  
 
 The current TPL list and last tested versions are:
-    BLAS/LAPACK:
-        MKL
-        OpenBLAS (0.2.18) - https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.2.18/OpenBLAS-0.2.18.tar.gz
-        Netlib (3.10.0) - https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.10.0.tar.gz
-        ScaLAPACK (2.0.2) - http://www.netlib.org/scalapack/scalapack-2.0.2.tgz
-    CABANA (0.6.1) - https://github.com/ECP-copa/Cabana/archive/refs/tags/0.6.1.tar.gz
-    Cppcheck (2.10) - https://github.com/danmar/cppcheck/archive/refs/tags/2.10.tar.gz
-    GKlib 
-    FFTW (3.3.8) - https://www.fftw.org/fftw-3.3.8.tar.gz
-    HDF5 (1.12.0) - https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/src/hdf5-1.12.0.tar.bz2
-    HYPRE (2.30.0) - https://github.com/hypre-space/hypre/archive/refs/tags/v2.31.0.tar.gz
-    KOKKOS (4.1.00) - https://github.com/kokkos/kokkos/archive/refs/tags/4.1.00.tar.gz
-    LIBMESH (1.7.1) - https://github.com/libMesh/libmesh/releases/download/v1.7.1/libmesh-1.7.1.tar.gz
-    LMDB - https://www.openldap.org
-    MUMPS (5.0.1)
-    METIS (5.1.0)
-https://github.com/OGRECave/ogre/archive/refs/tags/ogre-1.11.0.zip
-    NETCDF (4.6.1) - https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.6.1.tar.gz
-    PARMETIS (4.0.3)
-    PETSc (3.20.0) - https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.0.tar.gz
-    RAJA (2023.06.1) - https://github.com/LLNL/RAJA/releases/download/v2023.06.1/RAJA-v2023.06.1.tar.gz
-    SAMRAI (4.2.1-modified)
-    SUNDIALS (2.6.2) - https://computing.llnl.gov/sites/default/files/inline-files/sundials-2.6.2.tar.gz
-    TRILINOS (14-4-0) - https://github.com/trilinos/Trilinos/archive/refs/tags/trilinos-release-14-4-0.tar.gz
-    UMPIRE (2024.02.1) - https://github.com/LLNL/CHAI/archive/refs/tags/v2024.02.1.tar.gz
-    SUPERLU_DIST (5.0.0)
-    ZLIB (1.2.12) - https://zlib.net/fossils/zlib-1.2.12.tar.gz
+- BLAS/LAPACK:
+    - MKL
+    - OpenBLAS (0.2.18) https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.2.18/OpenBLAS-0.2.18.tar.gz
+    - Netlib (3.10.0) https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.10.0.tar.gz
+    - ScaLAPACK (2.0.2)  http://www.netlib.org/scalapack/scalapack-2.0.2.tgz
+- CABANA (0.6.1) https://github.com/ECP-copa/Cabana/archive/refs/tags/0.6.1.tar.gz
+- Cppcheck (2.10) https://github.com/danmar/cppcheck/archive/refs/tags/2.10.tar.gz
+- GKlib https://github.com/KarypisLab/GKlib
+- FFTW (3.3.8) https://www.fftw.org/fftw-3.3.8.tar.gz
+- HDF5 (1.12.0) https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/src/hdf5-1.12.0.tar.bz2
+- HYPRE (2.30.0) https://github.com/hypre-space/hypre/archive/refs/tags/v2.31.0.tar.gz
+- KOKKOS (4.1.00) https://github.com/kokkos/kokkos/archive/refs/tags/4.1.00.tar.gz
+- LIBMESH (1.7.1) https://github.com/libMesh/libmesh/releases/download/v1.7.1/libmesh-1.7.1.tar.gz
+- LMDB - https://www.openldap.org
+- MUMPS (5.0.1)
+- METIS (5.2.1) https://github.com/KarypisLab/METIS/archive/refs/tags/v5.2.1.tar.gz
+- NETCDF (4.6.1) https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.6.1.tar.gz
+- OGRE https://github.com/OGRECave/ogre/archive/refs/tags/ogre-1.11.0.zip
+- PARMETIS https://github.com/KarypisLab/ParMETIS
+- PETSc (3.20.0) https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.0.tar.gz
+- RAJA (2023.06.1) https://github.com/LLNL/RAJA/releases/download/v2023.06.1/RAJA-v2023.06.1.tar.gz
+- SAMRAI(patched) https://github.com/AdvancedMultiPhysics/SAMRAI/tree/patches5
+- SILO (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/Silo-4.10.3RC.modified.tar.gz
+- SUNDIALS (2.6.2) https://computing.llnl.gov/sites/default/files/inline-files/sundials-2.6.2.tar.gz
+- Thrust (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/thrust.tar.gz
+- TRILINOS (14-4-0) https://github.com/trilinos/Trilinos/archive/refs/tags/trilinos-release-14-4-0.tar.gz
+- UMPIRE (2024.02.1) https://github.com/LLNL/CHAI/archive/refs/tags/v2024.02.1.tar.gz
+- SUPERLU_DIST (5.0.0)
+- XBraid (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/xbraid.tar.gz
+- ZLIB (1.2.12) https://zlib.net/fossils/zlib-1.2.12.tar.gz
 
 Note:  For the purposes of the TPL builder BLAS/LAPACK are configured as one TPL (LAPACK).
 A user may still provided their own libraries to use for blas/lapack which may
@@ -79,28 +82,28 @@ To begin the configure/build process there are 4 paths that we will refer to in 
                  to the current build tree.
 
 An example folder layout is:
-root_dir
-    | -- TPL_BUILDER
-    | -- TPL_ROOT
-    |       | -- petsc-3.16.4.tar.gz
-    |       | -- SAMRAI_v4.1.0
-    |       | -- AMP
-    |       | ...
-    | -- build
-    |       | -- debug
-    |       | -- opt
-    | -- install
-            | -- debug
-            | -- opt
+root_dir                                \
+    | -- TPL_BUILDER                    \
+    | -- TPL_ROOT                       \
+    |       | -- petsc-3.16.4.tar.gz    \
+    |       | -- SAMRAI_v4.1.0          \
+    |       | -- AMP                    \
+    |       | ...                       \
+    | -- build                          \
+    |       | -- debug                  \
+    |       | -- opt                    \
+    | -- install                        \
+            | -- debug                  \
+            | -- opt                    \
 
 In this example layout if we are creating an opt installation where
-TPL_BUILDER=root_dir/TPL_BUILDER,
-TPL_SRC_DIR=root_dir/TPL_BUILDER, 
-PETSC_URL=root_dir/TPL_ROOT/petsc-3.16.4.tar.gz,
-SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v4.1.0, 
-AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
-BUILD_DIR=root_dir/build/opt, 
-and INSTALL_DIR=root_dir/install/opt.  
+- TPL_BUILDER=root_dir/TPL_BUILDER,
+- TPL_SRC_DIR=root_dir/TPL_BUILDER, 
+- PETSC_URL=root_dir/TPL_ROOT/petsc-3.16.4.tar.gz,
+- SAMRAI_SRC_DIR=root_dir/TPL_ROOT/SAMRAI_v4.1.0, 
+- AMP_SRC_DIR=root_dir/TPL_ROOT/AMP, 
+- BUILD_DIR=root_dir/build/opt, 
+- INSTALL_DIR=root_dir/install/opt.  
 
 We would be operating from root_dir/build/opt.
 
@@ -171,29 +174,29 @@ More sample script may be found in the scripts subdirectory.
 There are a number of variables that can be passed to the configure process.
 Unless otherwise noted, all variables are optional.
 The important variables are:
-    CMAKE_BUILD_TYPE - The type of build we are performing (Debug,Release,...) (Required)
+   - CMAKE_BUILD_TYPE - The type of build we are performing (Debug,Release,...) (Required)
                        Note that we will automatically set default flags based on 
                        the build type.
-    C_COMPILER       - The compiler to use for compiling C code
-    CXX_COMPILER     - The compiler to use for compiling C++ code
-    Fortran_COMPILER - The compiler to use for compiling Fortran code
-    CFLAGS           - Any user-defined flags for C code
-    CXXFLAGS         - Any user-defined flags for C++ code
-    CXX_STD          - Specify the C++ standard to use (98, 11, 14, 17, NONE)
-    FFLAGS           - Any user-defined flags for Fortran code
-    LDFLAGS          - Any user-defined flags for linking
-    ENABLE_STATIC    - Do we want to compile static libraries (default)
-    ENABLE_SHARED    - Do we want to compile shared libraries
+   - C_COMPILER       - The compiler to use for compiling C code
+   - CXX_COMPILER     - The compiler to use for compiling C++ code
+   - Fortran_COMPILER - The compiler to use for compiling Fortran code
+   - CFLAGS           - Any user-defined flags for C code
+   - CXXFLAGS         - Any user-defined flags for C++ code
+   - CXX_STD          - Specify the C++ standard to use (98, 11, 14, 17, NONE)
+   - FFLAGS           - Any user-defined flags for Fortran code
+   - LDFLAGS          - Any user-defined flags for linking
+   - ENABLE_STATIC    - Do we want to compile static libraries (default)
+   - ENABLE_SHARED    - Do we want to compile shared libraries
                        Note: we can only build one type of library (shared or static) at this time
-    ENABLE_GXX_DEBUG - Do we want to enable GLIBCXX_DEBUG flags (disabled by default)
-    USE_OPENMP       - Turn on OpenMP
-    USE_CUDA         - Turn on CUDA
-    USE_HIP         - Turn on HIP
-    CMAKE_SYSTEM_NAME - The system type: Linux, Generic, etc.
-    CMAKE_SHARED_LINKER_FLAGS - Linker flags for shared libraries
-    INSTALL_DIR      - The install path where we want to install the libraries
-    DISABLE_ALL_TESTS - Disable building and running of tests for TPLs
-    TPL_LIST         - The list of TPLs to build.  By default all required TPLs will be built. 
+   - ENABLE_GXX_DEBUG - Do we want to enable GLIBCXX_DEBUG flags (disabled by default)
+   - USE_OPENMP       - Turn on OpenMP
+   - USE_CUDA         - Turn on CUDA
+   - USE_HIP         - Turn on HIP
+   - CMAKE_SYSTEM_NAME - The system type: Linux, Generic, etc.
+   - CMAKE_SHARED_LINKER_FLAGS - Linker flags for shared libraries
+   - INSTALL_DIR      - The install path where we want to install the libraries
+   - DISABLE_ALL_TESTS - Disable building and running of tests for TPLs
+   - TPL_LIST         - The list of TPLs to build.  By default all required TPLs will be built. 
                        Note: if provided the TPL_LIST must be in order of the required dependencies.
                        Failure to do so will result in a cmake error at configure time:
                            CMake Error at ExternalProject.cmake (get_property):
@@ -205,95 +208,93 @@ The final argument must always point to the TPL_BUILDER directory.
 
 For each TPL, there are additional arguments that may be provided.  These arguments control
 how that that TPL is built.
-    TPL_URL          - URL specifying the location to download the TPL.
+   - TPL_URL          - URL specifying the location to download the TPL.
                        This URL may be a URL of the form 
                           http://zlib.net/zlib-1.2.8.tar.gz
                        or may point to a local .tar.gz file or directory where the files have been 
                        untared.  By default all TPLs will be downloaded from bitbucket.
-    TPL_SRC_DIR      - User specified directory for the TPL.  This is useful if the user
+   - TPL_SRC_DIR      - User specified directory for the TPL.  This is useful if the user
                        wants to use a different version, or pre-download the TPL for 
                        performance or firewall reasons.  
-    TPL_INSTALL_DIR  - Directory where an existing TPL is located.  This should
+   - TPL_INSTALL_DIR  - Directory where an existing TPL is located.  This should
                        be used by advanced users who wish to reuse libraries.
                        It is the responsibility of the user to ensure the TPL was installed
                        properly with the correct complier and compiler options to be 
                        compatible with the other software that will be installed.  
-    TPL_TEST         - Run the TPL tests as part of the build (if they exist).  Default is false. 
+   - TPL_TEST         - Run the TPL tests as part of the build (if they exist).  Default is false. 
 
 
 
 Special TPL FLAGS:
-DISABLE_CLEAN - If set this will disable individual TPLs from running their "make clean"
+- DISABLE_CLEAN - If set this will disable individual TPLs from running their "make clean"
     as part of the regular build process.  This can save time building the TPLs at the cost
     of additional storage.  Commonly set for nightly builds.  Default value is FALSE (do not disable clean)
-BOOST:
-    BOOST_ONLY_COPY_HEADERS - Only copy the headers from the URL/SRC/INSTALL location.
+- BOOST:
+   - BOOST_ONLY_COPY_HEADERS - Only copy the headers from the URL/SRC/INSTALL location.
                        If this flag is set, we will copy the include directory and will not 
                        configure or compile boost.  Note that the headers must exist in the 
                        include directory for this to work, and should not be used if boost
                        libraries are needed.
-ZLIB:
-    ZLIB_INCLUDE_DIR - If ZLIB_INSTALL_DIR is specified, this indicates an alternative path for zlib.h
-    ZLIB_LIB_DIR     - If ZLIB_INSTALL_DIR is specified, this indicates an alternative path for libz
-LAPACK:
-    LAPACK_INSTALL_DIR - This specifies the directory to search for blas/lapack/acml/mkl/etc.  
-    BLAS_INSTALL_DIR - If LAPACK_INSTALL_DIR is specified, this indicates an alternative path for blas
-    BLAS_LIB         - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. libblas.a)
-    LAPACK_LIB       - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. liblapack.a)
-HDF5:
-    HDF5_ENABLE_CXX - Enable cxx support in hdf5 (default is disabled)
-    HDF5_ENABLE_UNSUPPORTED - Enable unsupported options in hdf5
-    HDF5_VERSION    - Specify HDF5 version being used (required)
-KOKKOS:
-    KOKKOS_ARCH_FLAGS - Specify CUDA/HIP architecture to use
-    KOKKOS_CXX_STD -- specify what C++ standard to use (11, 14,17) etc
-CABANA:
-    CABANA_VERSION - Specify Cabana version
-UMPIRE
-    UMPIRE_USE_CUDA - Bool to enable CUDA
-    UMPIRE_USE_HIP - Bool to enable HIP
-    UMPIRE_USE_OPENMP - Bool to enable OpenMP
-RAJA
-    RAJA_USE_CUDA - Bool to enable CUDA
-    RAJA_USE_HIP - Bool to enable HIP
-    RAJA_USE_OPENMP - Bool to enable OpenMP
-    RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use (sm_70, sm_80) etc
-    RAJA_HIP_ARCH_FLAGS - Specify HIP architecture to use (sm_70, sm_80) etc
-HYPRE
-    HYPRE_USE_CUDA - Bool to enable CUDA
-    HYPRE_USE_HIP - Bool to enable HIP
-    HYPRE_USE_OPENMP - Bool to enable OpenMP
-    HYPRE_USE_UMPIRE - bool whether Umpire should be used
-    HYPRE_CUDA_HOME - Root directory for CUDA install
-    HYPRE_HIP_HOME - Root directory for HIP install
-TRILINOS:
-    TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
-    TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
-    TRILINOS_EXTRA_REPOSITORIES - List of extra repositories
-    TRILINOS_EXTRA_FLAGS - List of extra flags (e.g. "-DBUILD_SHARED_LIBS=OFF;-DTPL_ENABLE_MPI=ON" )
-    TRILINOS_EXTRA_LAPACK_LIBRARIES - Semicolon separated list of extra libraries required for eg with Intel ifcore, ifport etc
-SAMRAI:
-    SAMRAI_TEST - Enable samrai tests (may take a while to complete)
-    SAMRAI_DOCS - Enable/disable building and installing the SAMRAI doxygen documentation (enabled by default)
-    SAMRAI_USE_CUDA - Bool to enable CUDA
-    SAMRAI_USE_HIP - Bool to enable HIP
-    SAMRAI_USE_OPENMP - Bool to enable OpenMP
-    SAMRAI_USE_UMPIRE - Enable use of Umpire with SAMRAI
-    SAMRAI_USE_RAJA   - Enable use of Raja with SAMRAI
-    SAMRAI_CUDA_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
-    SAMRAI_HIP_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
-SAMRUTILS:
-    DISABLE_THREAD_CHANGES - Disable all threading support
-    TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
-AMP:
-    AMP_Data         - Path to the data directory for AMP
-LIBMESH:
-    LIBMESH_MPI_PATH - path to mpi that needs to be explicitly specified for libmesh
+- ZLIB:
+  - ZLIB_INCLUDE_DIR - If ZLIB_INSTALL_DIR is specified, this indicates an alternative path for zlib.h
+  - ZLIB_LIB_DIR     - If ZLIB_INSTALL_DIR is specified, this indicates an alternative path for libz
+- LAPACK:
+   - LAPACK_INSTALL_DIR - This specifies the directory to search for blas/lapack/acml/mkl/etc.  
+   - BLAS_INSTALL_DIR - If LAPACK_INSTALL_DIR is specified, this indicates an alternative path for blas
+   - BLAS_LIB         - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. libblas.a)
+   - LAPACK_LIB       - If LAPACK_INSTALL_DIR is specified, this indicates the library to use (e.g. liblapack.a)
+- HDF5:
+   - HDF5_ENABLE_CXX - Enable cxx support in hdf5 (default is disabled)
+   - HDF5_ENABLE_UNSUPPORTED - Enable unsupported options in hdf5
+   - HDF5_VERSION    - Specify HDF5 version being used (required)
+- KOKKOS:
+   - KOKKOS_ARCH_FLAGS - Specify CUDA/HIP architecture to use
+   - KOKKOS_CXX_STD -- specify what C++ standard to use (11, 14,17) etc
+- UMPIRE
+   - UMPIRE_USE_CUDA - Bool to enable CUDA
+   - UMPIRE_USE_HIP - Bool to enable HIP
+   - UMPIRE_USE_OPENMP - Bool to enable OpenMP
+- RAJA
+   - RAJA_USE_CUDA - Bool to enable CUDA
+   - RAJA_USE_HIP - Bool to enable HIP
+   - RAJA_USE_OPENMP - Bool to enable OpenMP
+   - RAJA_CUDA_ARCH_FLAGS - Specify CUDA architecture to use (sm_70, sm_80) etc
+   - RAJA_HIP_ARCH_FLAGS - Specify HIP architecture to use (sm_70, sm_80) etc
+- HYPRE
+   - HYPRE_USE_CUDA - Bool to enable CUDA
+   - HYPRE_USE_HIP - Bool to enable HIP
+   - HYPRE_USE_OPENMP - Bool to enable OpenMP
+   - HYPRE_USE_UMPIRE - bool whether Umpire should be used
+   - HYPRE_CUDA_HOME - Root directory for CUDA install
+   - HYPRE_HIP_HOME - Root directory for HIP install
+- TRILINOS:
+   - TRILINOS_PACKAGES - List of packages to add (will default to Trilinos_ENABLE_ALL if not specified)
+   - TRILINOS_EXTRA_PACKAGES - List of extra pacakges (e.g. EPETRA)
+   - TRILINOS_EXTRA_REPOSITORIES - List of extra repositories
+   - TRILINOS_EXTRA_FLAGS - List of extra flags (e.g. "-DBUILD_SHARED_LIBS=OFF;-DTPL_ENABLE_MPI=ON" )
+   - TRILINOS_EXTRA_LAPACK_LIBRARIES - Semicolon separated list of extra libraries required for eg with Intel ifcore, ifport etc
+- SAMRAI:
+   - SAMRAI_TEST - Enable samrai tests (may take a while to complete)
+   - SAMRAI_DOCS - Enable/disable building and installing the SAMRAI doxygen documentation (enabled by default)
+   - SAMRAI_USE_CUDA - Bool to enable CUDA
+   - SAMRAI_USE_HIP - Bool to enable HIP
+   - SAMRAI_USE_OPENMP - Bool to enable OpenMP
+   - SAMRAI_USE_UMPIRE - Enable use of Umpire with SAMRAI
+   - SAMRAI_USE_RAJA   - Enable use of Raja with SAMRAI
+   - SAMRAI_CUDA_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
+   - SAMRAI_HIP_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
+- SAMRUTILS:
+   - DISABLE_THREAD_CHANGES - Disable all threading support
+   - TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
+- AMP:
+   - AMP_Data         - Path to the data directory for AMP
+- LIBMESH:
+   - LIBMESH_MPI_PATH - path to mpi that needs to be explicitly specified for libmesh
 
 To build:
-    cd to the build directory
-    run the configure script
-    run "make"
+   - cd to the build directory
+   - run the configure script
+   - run "make"
 Note that "make" will build all TPLs.
 To build a specific TPL the command "make TPL" can be used.  This will build the specified 
     TPL and any required dependencies. 
