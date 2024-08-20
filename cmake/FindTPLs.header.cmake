@@ -34,15 +34,6 @@ CMAKE_POLICY( SET CMP0074 NEW )
 CMAKE_POLICY( SET CMP0110 NEW )
 
 
-# Check that PROJ and ${PROJ}_INSTALL_DIR have been set
-IF ( NOT PROJ )
-    MESSAGE( FATAL_ERROR "PROJ must be set before calling FindTPLs")
-ENDIF()
-IF ( NOT ${PROJ}_INSTALL_DIR )
-    MESSAGE( FATAL_ERROR "${PROJ}_INSTALL_DIR must be set before calling FindTPLs")
-ENDIF()
-
-
 # Print a message to indicate we started looking for TPLs
 IF ( NOT TPLs_FIND_QUIETLY )
     MESSAGE( "Running FindTPLs" )
@@ -63,6 +54,14 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
 
     # Include project install directory
     INCLUDE_DIRECTORIES( "${${PROJ}_INSTALL_DIR}/include" )
+
+    # Check that PROJ and ${PROJ}_INSTALL_DIR have been set
+    IF ( NOT PROJ )
+        MESSAGE( FATAL_ERROR "PROJ must be set before calling FindTPLs")
+    ENDIF()
+    IF ( NOT ${PROJ}_INSTALL_DIR )
+        MESSAGE( FATAL_ERROR "${PROJ}_INSTALL_DIR must be set before calling FindTPLs")
+    ENDIF()
 
     # Initialize the include paths / libraries
     SET( TPLs_INCLUDE_DIRS )
@@ -137,9 +136,9 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         SET( CMAKE_CUDA_STANDARD @CMAKE_CUDA_STANDARD@ CACHE STRING "Cuda C++ standard" )
         SET( CMAKE_CUDA_ARCHITECTURES "@CMAKE_CUDA_ARCHITECTURES@" CACHE STRING "Cuda architectures" )
         SET( CMAKE_CUDA_FLAGS  "@CMAKE_CUDA_FLAGS@" CACHE STRING "Cuda flags" )
+        SET( CMAKE_CUDA_SEPARABLE_COMPILATION TRUE CACHE BOOL "Enable Cuda Relocatable Device Code" )
         ENABLE_LANGUAGE( CUDA )
         ADD_DEFINITIONS( -DUSE_CUDA )
-        SET( CMAKE_CUDA_SEPARABLE_COMPILATION TRUE )
         # Enable CUDA toolkit
         FIND_PACKAGE( CUDAToolkit )
         SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
