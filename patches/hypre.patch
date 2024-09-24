@@ -1,5 +1,5 @@
---- hypre/src/utilities/memory.c	2024-05-17 14:33:20
-+++ hypre-patch/src/utilities/memory.c	2024-09-19 12:58:47
+--- src/utilities/memory.c	2024-05-17 14:33:20
++++ src/utilities/memory.c	2024-09-19 12:58:47
 @@ -1136,7 +1136,7 @@
  #if defined(HYPRE_USING_HIP)
  
