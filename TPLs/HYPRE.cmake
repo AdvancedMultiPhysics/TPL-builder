@@ -56,6 +56,7 @@ IF ( CMAKE_BUILD_HYPRE )
     MACRO( ADD_HYPRE_OPTION VAL )
         FILE( APPEND "${HYPRE_CONFIG}" "SET( OPTIONS $\{OPTIONS} ${VAL} ${ARGN} )\n" )
     ENDMACRO()
+    ADD_HYPRE_OPTION( --enable-mixedint )
     IF( HYPRE_USE_CUDA )
         MESSAGE( "Enabling CUDA support for HYPRE" )
         IF ( HYPRE_CUDA_HOME )
@@ -131,6 +132,7 @@ IF ( CMAKE_BUILD_HYPRE )
     IF ( NOT USE_MPI )
         ADD_HYPRE_OPTION( --without-MPI )
     ENDIF()
+    SET( HYPRE_PATCH_FILE "hypre.patch" )
     FILE( APPEND "${HYPRE_CONFIG}" "SET( ENV_VARS \"${ENV_VARS}\" )\n" )
     FILE( APPEND "${HYPRE_CONFIG}" "FOREACH ( tmp $\{ENV_VARS} )\n" )
     FILE( APPEND "${HYPRE_CONFIG}" "    STRING( REPLACE \"=\" \";\" tmp2 \"$\{tmp}\" )\n" )
@@ -154,6 +156,7 @@ IF ( CMAKE_BUILD_HYPRE )
         URL                 "${HYPRE_CMAKE_URL}"
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${HYPRE_CMAKE_SOURCE_DIR}"
+	PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/${HYPRE_PATCH_FILE}
         CONFIGURE_COMMAND   ${CMAKE_COMMAND} -P ${HYPRE_CONFIG}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     1
