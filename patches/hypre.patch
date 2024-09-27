@@ -1,0 +1,15 @@
+--- /src/utilities/memory.c	2024-02-14 12:17:26.000000000 -0700
++++ /src/utilities/memory.c	2024-09-27 11:32:35.292718726 -0600
+@@ -1171,6 +1171,12 @@
+    {
+       *memory_location = hypre_MEMORY_HOST_PINNED;
+    }
++#if (HIP_VERSION_MAJOR >= 6)
++   else if (attr.type == hipMemoryTypeUnregistered)
++   {
++      *memory_location = hypre_MEMORY_HOST;
++   }
++#endif
+ #endif // defined(HYPRE_USING_HIP)
+ 
+ #if defined(HYPRE_USING_SYCL)
