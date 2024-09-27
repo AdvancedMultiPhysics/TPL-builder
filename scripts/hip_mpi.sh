@@ -56,7 +56,7 @@ cmake -S ~/src/xcap/solvers/tpl-builder             \
     -D ENABLE_STATIC:BOOL=ON                                     \
     -D ENABLE_SHARED:BOOL=OFF                                    \
     -D INSTALL_DIR:PATH=${INSTALL_DIR}                           \
-    -D TPL_LIST:STRING="CATCH2;BOOST;LAPACK;ZLIB;CPPCHECK;KOKKOS;CABANA;HDF5;FFTW;PETSC;HYPRE;UMPIRE;RAJA;LIBMESH;SUNDIALS;XBRAID" \
+    -D TPL_LIST:STRING="CATCH2;BOOST;LAPACK;ZLIB;KOKKOS;CABANA;HDF5;FFTW;PETSC;HYPRE;UMPIRE;RAJA;LIBMESH;SUNDIALS;XBRAID" \
     -D THRUST_URL="${ARCHIVE_DIR}/thrust-2.1.0.tar.gz"                 \
     -D BOOST_URL="${ARCHIVE_DIR}/boost_1_84_0.tar.gz"            \
     -D BOOST_ONLY_COPY_HEADERS:BOOL=ON                           \
@@ -78,7 +78,7 @@ cmake -S ~/src/xcap/solvers/tpl-builder             \
     -D HYPRE_URL="${ARCHIVE_DIR}/hypre-2.31.0.tar.gz"            \
     -D LIBMESH_URL="${ARCHIVE_DIR}/libmesh-1.7.1.tar.gz"         \
     -D SUNDIALS_URL="${ARCHIVE_DIR}/sundials-2.6.2.tar.gz"       \
-    -D TRILINOS_URL="${ARCHIVE_DIR}/trilinos-13-4-1.tar.gz"      \
+    -D TRILINOS_URL="${ARCHIVE_DIR}/trilinos-14-4-1.tar.gz"      \
     -D TRILINOS_PACKAGES="Epetra;EpetraExt;Thyra;ML;Kokkos;Amesos;Ifpack;Ifpack2;Belos;NOX;Stratimikos" \
     -D PETSC_VERSION="3.19.0"                                    \
     -D PETSC_URL="${ARCHIVE_DIR}/petsc-3.20.0.tar.gz"            \
