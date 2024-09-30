@@ -149,7 +149,7 @@ IF ( CMAKE_BUILD_HYPRE )
         SET( HYPRE_VERSION "0.0.0" )
     ENDIF()
     IF ( "${HYPRE_VERSION}" VERSION_EQUAL "2.31.0" )
-      SET( HYPRE_PATCH_FILE "hypre.patch" )
+        SET( HYPRE_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.patch" )
     ENDIF()
 ENDIF()
 
@@ -161,7 +161,7 @@ IF ( CMAKE_BUILD_HYPRE )
         URL                 "${HYPRE_CMAKE_URL}"
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${HYPRE_CMAKE_SOURCE_DIR}"
-	PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/${HYPRE_PATCH_FILE}
+	    ${HYPRE_PATCH_COMMAND}
         CONFIGURE_COMMAND   ${CMAKE_COMMAND} -P ${HYPRE_CONFIG}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     1
