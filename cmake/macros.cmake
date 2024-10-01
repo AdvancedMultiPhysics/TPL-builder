@@ -538,7 +538,6 @@ MACRO( SET_WARNINGS )
     # SET the Fortran compiler
     IF ( CMAKE_Fortran_COMPILER_WORKS )
         IF ( CMAKE_COMPILER_IS_GNUG77 OR (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU") )
-            SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffixed-line-length-none" )
             IF ( NOT USING_GCC )
                 LIST( REMOVE_ITEM CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES gcc )
             ENDIF()
