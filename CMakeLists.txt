@@ -56,16 +56,15 @@ MESSAGE("Installing TPLs in: ${CMAKE_INSTALL_PREFIX}")
 
 
 # Enable the desired languages
-IF ( LANGUAGES )
-    STRING( REPLACE "," ";" LANGUAGES "${LANGUAGES}" )
-    FOREACH( lang ${LANGUAGES} )
-        ENABLE_LANGUAGE(${lang})
-    ENDFOREACH()
-ELSE()
-    ENABLE_LANGUAGE(C)
-    ENABLE_LANGUAGE(CXX)
-    ENABLE_LANGUAGE(Fortran)
+IF ( NOT LANGUAGES )
+    SET( LANGUAGES "C" "CXX" "Fortran" )
 ENDIF()
+STRING( REPLACE "," ";" LANGUAGES "${LANGUAGES}" )
+FOREACH( lang ${LANGUAGES} )
+    IF ( NOT DISABLE_${lang} )
+        ENABLE_LANGUAGE( ${lang} )
+    ENDIF()
+ENDFOREACH()
 
 
 # Include CMake files
