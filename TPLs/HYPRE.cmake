@@ -148,10 +148,13 @@ IF ( CMAKE_BUILD_HYPRE )
     FILE( APPEND "${HYPRE_CONFIG}" "ENDIF()\n" )
     MESSAGE("   HYPRE configure options: ${HYPRE_CONFIGURE_OPTIONS}")
     IF ( NOT HYPRE_VERSION )
+        MESSAGE( WARNING "HYPRE_VERSION is not set" )
         SET( HYPRE_VERSION "0.0.0" )
     ENDIF()
     IF ( "${HYPRE_VERSION}" VERSION_EQUAL "2.31.0" )
-        SET( HYPRE_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.patch" )
+        SET( HYPRE_PATCH_COMMAND patch -p2 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.patch" )
+    ELSE()
+        SET( HYPRE_PATCH_COMMAND ${CMAKE_COMMAND} -E echo "Skipping patch for version ${HYPRE_VERSION}" )
     ENDIF()
 ENDIF()
 
@@ -163,7 +166,7 @@ IF ( CMAKE_BUILD_HYPRE )
         URL                 "${HYPRE_CMAKE_URL}"
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${HYPRE_CMAKE_SOURCE_DIR}"
-	    ${HYPRE_PATCH_COMMAND}
+	    PATCH_COMMAND       ${HYPRE_PATCH_COMMAND}
         CONFIGURE_COMMAND   ${CMAKE_COMMAND} -P ${HYPRE_CONFIG}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     1

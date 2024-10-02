@@ -263,6 +263,18 @@ FUNCTION( ADD_TPL TPL )
             ENDIF()
         ENDFOREACH()
         EXTERNALPROJECT_ADD( ${TPL} ${TPL_OPTIONS} )
+        # Add a pause if patch step is being used
+        IF ( ADD_TPL_PATCH_COMMAND )
+            EXTERNALPROJECT_ADD_STEP(
+                ${TPL}
+                pause
+                INDEPENDENT         TRUE
+                COMMAND             ${CMAKE_COMMAND} -E sleep 1
+                DEPENDEES           download
+                DEPENDERS           patch
+                LOG                 0
+            )
+        ENDIF()
         # Add the logs and TPL-clean
         ADD_TPL_RECONFIGURE( ${TPL} )
         ADD_TPL_SAVE_LOGS( ${TPL} )
