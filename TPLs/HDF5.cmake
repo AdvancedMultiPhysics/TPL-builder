@@ -40,8 +40,11 @@ CONFIGURE_DEPENDENCIES( HDF5 OPTIONAL ZLIB )
 # Configure hdf5
 IF ( CMAKE_BUILD_HDF5 )
     IF ( "${HDF5_VERSION}" VERSION_LESS "1.12.0" )
-        MESSAGE ( FATAL_ERROR "HDF5 1.12.0 or greater required" )
-    ENDIF()    
+        MESSAGE( FATAL_ERROR "HDF5 1.12.0 or greater required" )
+    ENDIF()
+    IF ( NOT CMAKE_Fortran_COMPILER )
+        MESSAGE( FATAL_ERROR "HDF5 requires Fortran" )
+    ENDIF()
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory "${HDF5_INSTALL_DIR}/include" )
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory "${HDF5_INSTALL_DIR}/lib" )
 

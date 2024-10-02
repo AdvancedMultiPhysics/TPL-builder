@@ -50,8 +50,12 @@ SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}" )
 SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}" )
 SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}" )
 SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}" )
-SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}" )
-SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_Fortran_FLAGS=${CMAKE_Fortran_FLAGS}" )   
+IF ( CMAKE_Fortran_COMPILER )
+    SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}" )
+    SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_Fortran_FLAGS=${CMAKE_Fortran_FLAGS}" )
+ELSE()
+    SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DTrilinos_ENABLE_Fortran:BOOL=OFF" )
+ENDIF()
 SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_CUDA_FLAGS=${CMAKE_CUDA_FLAGS}" )
 SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_SHARED_LINKER_FLAGS=${CMAKE_SHARED_LINKER_FLAGS}" )
 SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/trilinos" )
@@ -59,6 +63,15 @@ SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREF
 
 # Configure trilinos
 IF ( CMAKE_BUILD_TRILINOS )
+    # Trilinos has issues with certain characters in the install/build paths
+    IF ( "${TRILINOS_SRC_DIR}" MATCHES "[\*\+\?]" )
+        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in src path" )
+    ELSEIF ( "${TRILINOS_BUILD_DIR}" MATCHES "[\*\+\?]" )
+        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in build path" )
+    ELSEIF ( "${TRILINOS_INSTALL_DIR}" MATCHES "[\*\+\?]" )
+        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in install path" )
+    ENDIF()
+
     # Helper function to write variable to config file
     SET( TRILINOS_CMAKE_CONFIGURE "${CMAKE_BINARY_DIR}/TRILINOS-prefix/src/TrilinosConfigure.cmake" )
     FILE( WRITE  "${TRILINOS_CMAKE_CONFIGURE}" "# Include file to configure Trilinos\n" )
