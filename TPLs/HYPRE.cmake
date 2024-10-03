@@ -152,7 +152,7 @@ IF ( CMAKE_BUILD_HYPRE )
         SET( HYPRE_VERSION "0.0.0" )
     ENDIF()
     IF ( "${HYPRE_VERSION}" VERSION_EQUAL "2.31.0" )
-        SET( HYPRE_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.patch" )
+        SET( HYPRE_PATCH_COMMAND patch -p2 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.patch" )
     ELSE()
         SET( HYPRE_PATCH_COMMAND ${CMAKE_COMMAND} -E echo "Skipping patch for version ${HYPRE_VERSION}" )
     ENDIF()
@@ -167,6 +167,7 @@ IF ( CMAKE_BUILD_HYPRE )
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${HYPRE_CMAKE_SOURCE_DIR}"
 	    PATCH_COMMAND       ${HYPRE_PATCH_COMMAND}
+        UPDATE_COMMAND      ""
         CONFIGURE_COMMAND   ${CMAKE_COMMAND} -P ${HYPRE_CONFIG}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     1
@@ -176,12 +177,13 @@ IF ( CMAKE_BUILD_HYPRE )
     EXTERNALPROJECT_ADD_STEP(
         HYPRE
         pre-configure
+        INDEPENDENT         TRUE
         COMMAND             ${CMAKE_COMMAND} -E copy_directory "${HYPRE_CMAKE_SOURCE_DIR}/src" "HYPRE-tmp" 
         COMMAND             ${CMAKE_COMMAND} -E remove_directory "${HYPRE_CMAKE_SOURCE_DIR}"
         COMMAND             ${CMAKE_COMMAND} -E rename "HYPRE-tmp" "${HYPRE_CMAKE_SOURCE_DIR}"
         COMMENT             ""
         DEPENDEES           download
-        DEPENDERS           configure
+        DEPENDERS           patch
         WORKING_DIRECTORY   "${HYPRE_CMAKE_SOURCE_DIR}/.."
         LOG                 0
     )
