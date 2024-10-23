@@ -546,6 +546,7 @@ MACRO( SET_WARNINGS )
         ELSEIF ( (${CMAKE_Fortran_COMPILER_ID} MATCHES "CRAY") OR (${CMAKE_Fortran_COMPILER_ID} MATCHES "Cray") )
         ELSEIF ( (${CMAKE_Fortran_COMPILER_ID} MATCHES "CLANG") OR (${CMAKE_Fortran_COMPILER_ID} MATCHES "Clang") OR
                  (${CMAKE_Fortran_COMPILER_ID} MATCHES "FLANG") OR (${CMAKE_Fortran_COMPILER_ID} MATCHES "Flang") )
+        ELSEIF ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "XL" )
         ELSE()
             MESSAGE( "CMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}")
             MESSAGE( "CMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}")
