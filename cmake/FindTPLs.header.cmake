@@ -198,6 +198,8 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         SET( DISABLE_LTO @DISABLE_LTO@ )
     ENDIF()
 
+    # Set up MPI compiler
+    SET( USE_MPI @USE_MPI@ )
     IF ( USE_MPI )
         # Set user flags that control the behavior of FindMPI.cmake (or are used by subsequent projects)
         SET( USE_MPI_FOR_SERIAL_TESTS   @USE_MPI_FOR_SERIAL_TESTS@   )
