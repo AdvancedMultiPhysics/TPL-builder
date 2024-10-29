@@ -131,12 +131,16 @@ IF ( CMAKE_BUILD_HDF5 )
         "SOURCE:\n"   "${HDF5_CMAKE_SOURCE_DIR}\n\n"
         "ARGS:\n"     "${HDF5_CONFIGURE_OPTIONS}\n\n" )
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${HDF5_TMP_DIR}/configure_args.tmp" "${HDF5_TMP_DIR}/configure_args" )
+    SET( HDF5_CONFIGURE_DEPENDS "${HDF5_TMP_DIR}/configure_args" )
+    FOREACH( TPL ${HDF5_DEPENDS} )
+        LIST( APPEND HDF5_CONFIGURE_DEPENDS "${CMAKE_BINARY_DIR}/${TPL}-prefix/src/${TPL}-stamp/${TPL}-done" )
+    ENDFOREACH()
     EXTERNALPROJECT_ADD_STEP(
         HDF5
         clean-configure
         COMMENT             "Cleaning existing configure"
         COMMAND             ${CMAKE_COMMAND} -E remove CMakeCache.txt
-        DEPENDS             "${HDF5_TMP_DIR}/configure_args"
+        DEPENDS             "${HDF5_TMP_DIR}/configure_args" "${CMAKE_BINARY_DIR}/ZLIB-prefix/src/ZLIB-stamp/ZLIB-done"
         DEPENDERS           configure
         WORKING_DIRECTORY   "${HDF5_BUILD_DIR}"
         LOG                 1
