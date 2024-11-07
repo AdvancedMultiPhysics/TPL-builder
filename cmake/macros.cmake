@@ -505,34 +505,37 @@ MACRO( SET_WARNINGS )
         #    /usr/bin/ld: cannot find gical-op: No such file or directory
         SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat-security -Wformat-overflow=2 -Wformat-nonliteral" ) 
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat-security -Wformat-overflow=2 -Wformat-nonliteral -Woverloaded-virtual -Wsign-compare -pedantic" )
+        # Note: avx512 causes changes in answers and some tests to fail, disable avx
+        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -mno-avx" )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-avx" )
     ELSEIF ( MSVC OR MSVC_IDE OR MSVC60 OR MSVC70 OR MSVC71 OR MSVC80 OR CMAKE_COMPILER_2005 OR MSVC90 OR MSVC10 )
         # Add Microsoft specifc compiler options
         SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _ITERATOR_DEBUG_LEVEL=0 /wd4267" )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _ITERATOR_DEBUG_LEVEL=0 /wd4267" )
     ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "Intel") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel") )
         # Add Intel specifc compiler options
-        SET( CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall" )
-        SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall" )
+        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall" )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
     ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "CRAY") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "CRAY") OR
              (${CMAKE_C_COMPILER_ID} MATCHES "Cray") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Cray") )
         # Add Cray specifc compiler options
-        SET( CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS}" )
-        SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}" )
+        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS}" )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
     ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "PGI") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "PGI") )
         # Add PGI specifc compiler options
-        SET( CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -lpthread" )
-        SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -lpthread -Minform=inform -Mlist --display_error_number" )
+        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -lpthread" )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -Minform=inform -Mlist --display_error_number" )
         # Suppress unreachable code warning, it causes non-useful warnings with some tests/templates
-        SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} --diag_suppress 111,128,185")
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --diag_suppress 111,128,185")
     ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "CLANG") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "CLANG") OR
              (${CMAKE_C_COMPILER_ID} MATCHES "Clang") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") )
         # Add CLANG specifc compiler options
-        SET( CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall -Wextra" )
-        SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-missing-braces -Wmissing-field-initializers -ftemplate-depth=1024" )
+        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra" )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-missing-braces -Wmissing-field-initializers -ftemplate-depth=1024" )
     ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "XL") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "XL") )
         # Add XL specifc compiler options
-        SET( CMAKE_C_FLAGS     " ${CMAKE_C_FLAGS} -Wall" )
-        SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -ftemplate-depth=512" )
+        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall" )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -ftemplate-depth=512" )
     ELSE ( )
         MESSAGE("Compiler specific features are not set for this compiler")
     ENDIF()

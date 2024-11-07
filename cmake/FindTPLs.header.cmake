@@ -48,6 +48,19 @@ MACRO( SET_TPL_VAR VAR )
 ENDMACRO()
 
 
+# Define some basic usage
+SET( USE_MPI @USE_MPI@ )
+IF ( NOT DEFINED DISABLE_CUDA AND NOT DEFINED USE_CUDA )
+    SET( USE_CUDA       @USE_CUDA@ )
+ENDIF()
+IF ( NOT DEFINED DISABLE_HIP AND NOT DEFINED USE_HIP )
+    SET( USE_HIP       @USE_HIP@ )
+ENDIF()
+IF ( NOT DEFINED DISABLE_OPENMP AND NOT DEFINED USE_OPENMP )
+    SET( USE_OPENMP     @USE_OPENMP@ )
+ENDIF()
+
+
 # Set some basic information (should only be called once regardless of the number of calls to find_package(FindTPLs)
 IF ( NOT TPLs_COMPILERS_INITIALIZED )
 
@@ -102,15 +115,6 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         SET( LIB_TYPE SHARED )
     ELSE()
         SET( LIB_TYPE STATIC )
-    ENDIF()
-    IF ( NOT DEFINED DISABLE_CUDA AND NOT DEFINED USE_CUDA )
-        SET( USE_CUDA       @USE_CUDA@ )
-    ENDIF()
-    IF ( NOT DEFINED DISABLE_HIP AND NOT DEFINED USE_HIP )
-        SET( USE_HIP       @USE_HIP@ )
-    ENDIF()
-    IF ( NOT DEFINED DISABLE_OPENMP AND NOT DEFINED USE_OPENMP )
-        SET( USE_OPENMP     @USE_OPENMP@ )
     ENDIF()
     SET( CXX_STD_FLAG ${CMAKE_CXX${CXX_STD}_STANDARD_COMPILE_OPTION} )
     ADD_DEFINITIONS( -DCXX_STD=${CMAKE_CXX_STANDARD} )
@@ -199,7 +203,6 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
     ENDIF()
 
     # Set up MPI compiler
-    SET( USE_MPI @USE_MPI@ )
     IF ( USE_MPI )
         # Set user flags that control the behavior of FindMPI.cmake (or are used by subsequent projects)
         SET( USE_MPI_FOR_SERIAL_TESTS   @USE_MPI_FOR_SERIAL_TESTS@   )
@@ -395,7 +398,6 @@ ENDIF()
 
 
 # Configure MPI
-SET( USE_MPI @USE_MPI@ )
 IF ( USE_MPI AND NOT TPLs_MPI_FOUND )
     MESSAGE( "Configuring MPI" )
     SET( TPLs_LIST MPI ${TPLs_LIST} )
