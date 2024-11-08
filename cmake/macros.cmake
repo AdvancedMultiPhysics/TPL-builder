@@ -516,6 +516,9 @@ MACRO( SET_WARNINGS )
         # Add Intel specifc compiler options
         SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall" )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
+        # Note: avx512 causes changes in answers and some tests to fail, disable avx
+        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -mno-avx" )
+        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-avx" )
     ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "CRAY") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "CRAY") OR
              (${CMAKE_C_COMPILER_ID} MATCHES "Cray") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "Cray") )
         # Add Cray specifc compiler options
