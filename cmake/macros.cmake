@@ -506,8 +506,10 @@ MACRO( SET_WARNINGS )
         SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat-security -Wformat-overflow=2 -Wformat-nonliteral" ) 
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat-security -Wformat-overflow=2 -Wformat-nonliteral -Woverloaded-virtual -Wsign-compare -pedantic" )
         # Note: avx512 causes changes in answers and some tests to fail, disable avx
-        SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -mno-avx" )
-        SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-avx" )
+        IF ( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" )
+            SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -mno-avx" )
+            SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-avx" )
+        ENDIF()
     ELSEIF ( MSVC OR MSVC_IDE OR MSVC60 OR MSVC70 OR MSVC71 OR MSVC80 OR CMAKE_COMPILER_2005 OR MSVC90 OR MSVC10 )
         # Add Microsoft specifc compiler options
         SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} /D _SCL_SECURE_NO_WARNINGS /D _CRT_SECURE_NO_WARNINGS /D _ITERATOR_DEBUG_LEVEL=0 /wd4267" )
