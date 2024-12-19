@@ -1,3 +1,15 @@
+# Verify that a path has been set
+FUNCTION( VERIFY_PATH PATH_NAME )
+    IF ("${PATH_NAME}" STREQUAL "")
+        MESSAGE( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
+    ENDIF()
+    IF ( NOT EXISTS "${PATH_NAME}" )
+        MESSAGE( FATAL_ERROR "Path does not exist: ${PATH_NAME}" )
+    ENDIF()
+ENDFUNCTION()
+
+
+# Set the include paths for libmesh
 FUNCTION ( LIBMESH_SET_INCLUDES  LIBMESH_DIRECTORY )
     VERIFY_PATH ( ${LIBMESH_DIRECTORY} )
     # Include the libmesh directories
@@ -7,6 +19,7 @@ FUNCTION ( LIBMESH_SET_INCLUDES  LIBMESH_DIRECTORY )
 ENDFUNCTION()
 
 
+# Set the libraries for libmesh
 FUNCTION ( LIBMESH_SET_LIBRARIES  LIBMESH_DIRECTORY )
     VERIFY_PATH ( ${LIBMESH_DIRECTORY} )
     # Find the libmesh libaries
@@ -52,8 +65,6 @@ FUNCTION ( LIBMESH_SET_LIBRARIES  LIBMESH_DIRECTORY )
     ADD_LIBMESH_LIB( LIBMESH_MPI_LIB )
     SET ( LIBMESH_LIBS ${LIBMESH_LIBS} PARENT_SCOPE )
 ENDFUNCTION()
-
-
 MACRO( ADD_LIBMESH_LIB LIBNAME )
     IF ( ${LIBNAME} )
         SET( LIBMESH_LIBS ${LIBMESH_LIBS} ${${LIBNAME}} )
