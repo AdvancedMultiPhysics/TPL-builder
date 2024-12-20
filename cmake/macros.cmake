@@ -926,7 +926,7 @@ ENDFUNCTION()
 MACRO( PARSE_TEST_ARGUMENTS )
     # Parse the input arguments
     SET( optionalArgs WEEKLY TESTBUILDER GPU RUN_SERIAL EXAMPLE MATLAB NO_RESOURCES CATCH2 )
-    SET( oneValueArgs TESTNAME PROCS THREADS TIMEOUT MAIN )
+    SET( oneValueArgs TESTNAME PROCS THREADS TIMEOUT MAIN COST )
     SET( multiValueArgs RESOURCES LIBRARIES DEPENDS ARGS LABELS )
     CMAKE_PARSE_ARGUMENTS( TEST "${optionalArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
     # Set default values for threads/procs/GPUs
@@ -1012,6 +1012,7 @@ ENDFUNCTION()
 #                   RESOURCES resources
 #                   GPU
 #                   TIMEOUT seconds
+#                   COST seconds
 #                   RUN_SERIAL
 #                   DEPENDS depends
 #                   ARGS arguments )
@@ -1145,6 +1146,11 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
     # Add timeout
     IF ( TEST_TIMEOUT )
         SET_PROPERTY( TEST ${TESTNAME} PROPERTY TIMEOUT ${TEST_TIMEOUT} )
+    ENDIF()
+
+    # Add cost data
+    IF ( TEST_COST )
+        SET_PROPERTY( TEST ${TESTNAME} PROPERTY COST ${TEST_COST} )
     ENDIF()
 
     # Run the test by itself
