@@ -927,7 +927,7 @@ MACRO( PARSE_TEST_ARGUMENTS )
     # Parse the input arguments
     SET( optionalArgs WEEKLY TESTBUILDER GPU RUN_SERIAL EXAMPLE MATLAB NO_RESOURCES CATCH2 )
     SET( oneValueArgs TESTNAME PROCS THREADS TIMEOUT MAIN COST )
-    SET( multiValueArgs RESOURCES LIBRARIES DEPENDS ARGS LABELS )
+    SET( multiValueArgs RESOURCES LIBRARIES DEPENDS ARGS LABELS REQUIRES )
     CMAKE_PARSE_ARGUMENTS( TEST "${optionalArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
     # Set default values for threads/procs/GPUs
     SET_DEFAULT( TEST_THREADS 1 )
@@ -1032,10 +1032,19 @@ FUNCTION( CALL_ADD_TEST EXEFILE )
     # Parse the input arguments
     PARSE_TEST_ARGUMENTS( ${ARGN} )
 
+    # Check dependencies
+    FOREACH( tmp ${TEST_REQUIRES} )
+        IF ( NOT ${tmp} )
+            MESSAGE( "Disabling \"${TESTNAME}\" because ${tmp} was required and not found" ) 
+            RETURN()    
+        ENDIF()
+    ENDFOREACH()
+
+
     # Add example to list
     IF ( TEST_EXAMPLE )
         SET( VALUE 0 )
-        FOREACH (_variableName ${EXAMPLE_LIST})
+        FOREACH ( _variableName ${EXAMPLE_LIST} )
             IF ( "${_variableName}" STREQUAL "${EXEFILE}" )
                 SET( VALUE 1 )
             ENDIF()
