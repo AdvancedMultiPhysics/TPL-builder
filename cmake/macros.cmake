@@ -352,6 +352,7 @@ MACRO( ADD_ASSEMBLY PACKAGE SOURCE )
         IF ( MAKE_TARGETS )
             ADD_CUSTOM_TARGET( ${PACKAGE}-assembly )
             ADD_CUSTOM_COMMAND( TARGET ${PACKAGE}-assembly
+                 PRE_LINK
                  COMMAND $(MAKE) ${MAKE_TARGETS}
                  ${COPY_COMMANDS}
                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
@@ -382,10 +383,10 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
             SET( DST_FILE "${${PROJ}_INSTALL_DIR}/include/${${PROJ}_INC}/${HFILE}" )
             # Only copy the headers if they exist in the project source directory
             IF ( EXISTS "${SRC_FILE}" )
-                ADD_CUSTOM_COMMAND(TARGET ${COPY_TARGET} 
-                    PRE_BUILD 
+                ADD_CUSTOM_COMMAND(
+                    TARGET ${COPY_TARGET}
+                    PRE_LINK
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC_FILE}" "${DST_FILE}"
-                    DEPENDS "${SRC_FILE}"
                 )
             ENDIF()
         ENDFOREACH()
@@ -641,10 +642,10 @@ FUNCTION( COPY_DATA_FILE SRC_FILE DST_FILE )
     IF ( NOT SRC_FILE OR NOT DST_FILE )
         MESSAGE( FATAL_ERROR "COPY_DATA_FILE( ${SRC_FILE} ${DST_FILE} )" )
     ENDIF()
-    ADD_CUSTOM_COMMAND( TARGET ${COPY_TARGET}
+    ADD_CUSTOM_COMMAND(
+        TARGET ${COPY_TARGET}
         PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC_FILE}" "${DST_FILE}"
-        DEPENDS "${SRC_FILE}"
     )
 ENDFUNCTION()
 
@@ -1505,14 +1506,12 @@ FUNCTION( ADD_DISTCLEAN ${ARGN} )
         TPLs.h
         ${ARGN}
     )
-    ADD_CUSTOM_TARGET(distclean @echo cleaning for source distribution)
     IF (UNIX)
-        ADD_CUSTOM_COMMAND(
-            DEPENDS clean
+        ADD_CUSTOM_TARGET(
+            distclean
             COMMENT "distribution clean"
-            COMMAND rm
-            ARGS    -Rf ${DISTCLEANED}
-            TARGET  distclean
+            COMMAND rm -Rf ${DISTCLEANED}
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BUILD_DIR}"
         )
     ELSE()
         SET( DISTCLEANED
@@ -1527,11 +1526,11 @@ FUNCTION( ADD_DISTCLEAN ${ARGN} )
         APPEND_LIST( "${DISTCLEAN_FILE}" "${DISTCLEANED}" " " " " )
         FILE( APPEND "${DISTCLEAN_FILE}" "\n" )
         APPEND_LIST( "${DISTCLEAN_FILE}" "${DISTCLEANED}" "for /d %%x in ("   ") do rd /s /q \"%%x\"\n" )
-        ADD_CUSTOM_COMMAND(
-            DEPENDS clean
+        ADD_CUSTOM_TARGET(
+            distclean
             COMMENT "distribution clean"
             COMMAND distclean.bat & del /s/q/f distclean.bat
-            TARGET  distclean
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BUILD_DIR}"
         )
     ENDIF()
 ENDFUNCTION()
