@@ -385,7 +385,7 @@ MACRO( INSTALL_${PROJ}_TARGET PACKAGE )
             IF ( EXISTS "${SRC_FILE}" )
                 ADD_CUSTOM_COMMAND(
                     TARGET ${COPY_TARGET}
-                    PRE_LINK
+                    PRE_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SRC_FILE}" "${DST_FILE}"
                 )
             ENDIF()
