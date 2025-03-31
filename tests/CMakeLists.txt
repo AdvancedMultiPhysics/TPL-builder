@@ -55,6 +55,13 @@ MESSAGE("  Libraries: ${TPLs_LIBRARIES}")
 SET( TPL_LIBS ${TPLs_LIBRARIES} )
 
 
+# Fix issues with Kokkos
+IF ( USE_KOKKOS )
+    SET( COMPILE_CXX_AS_CUDA TRUE )
+    SET( COMPILE_CXX_AS_HIP TRUE )
+ENDIF()
+
+
 # Add the tests
 ADD_TPLS_Tests_EXECUTABLE( hello_world )
 ADD_TPLS_Tests_EXECUTABLE( test_all_libraries )
