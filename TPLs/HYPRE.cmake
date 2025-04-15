@@ -78,15 +78,27 @@ IF ( CMAKE_BUILD_HYPRE )
         MESSAGE( "Enabling HIP support for HYPRE" )
         ADD_HYPRE_OPTION( --with-hip )
         ADD_HYPRE_OPTION( --enable-unified-memory )
-        IF ( HYPRE_HIP_ARCH )
-            ADD_HYPRE_OPTION( --with-gpu-arch=${HYPRE_HIP_ARCH} )
-        ELSEIF ( CMAKE_HIP_ARCHITECTURES )
-            ADD_HYPRE_OPTION( --with-gpu-arch=${CMAKE_HIP_ARCHITECTURES} )
-        ELSE()
-            MESSAGE( FATAL_ERROR "The HYPRE_HIP_ARCH must be set" )
+	# Ensure that HYPRE_HIP_ARCH is defined. This is different from the
+	# CUDA case above because patches need to be chosen based on this
+        IF ( NOT DEFINED HYPRE_HIP_ARCH AND NOT DEFINED CMAKE_HIP_ARCHITECTURES )
+            MESSAGE( FATAL_ERROR "At least one of HYPRE_HIP_ARCH or CMAKE_HIP_ARCHITECTURES must be defined" )
+        ELSEIF( NOT DEFINED HYPRE_HIP_ARCH )
+	    # If user does not specify an architecture choose a decent default
+	    # If gfx942 is available we probably want that, otherwise
+	    # just take first arch from list
+	    IF( "gfx942" IN_LIST CMAKE_HIP_ARCHITECTURES )
+	    ELSE()
+	        LIST ( GET CMAKE_HIP_ARCHITECTURES 0 HYPRE_HIP_ARCH )
+	    ENDIF()
         ENDIF()
-	    SET(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -std=c++${CMAKE_HIP_STANDARD}")
+	SET(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -std=c++${CMAKE_HIP_STANDARD}")
+	ADD_HYPRE_OPTION( --with-gpu-arch=${HYPRE_HIP_ARCH} )
         ADD_HYPRE_OPTION( "\"--with-extra-CUFLAGS=${CMAKE_HIP_FLAGS}\"" )
+
+        # Async memcpy bug only needs patching on gfx942 architectures
+	IF ( HYPRE_HIP_ARCH STREQUAL "gfx942" )
+	    SET( HYPRE_PATCH_COMMAND patch -p2 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.memcpyasync.patch" )
+	ENDIF()
     ENDIF()
       
     # Appears hypre only uses Umpire with CUDA/HIP
@@ -156,8 +168,13 @@ IF ( CMAKE_BUILD_HYPRE )
         SET( HYPRE_VERSION "0.0.0" )
     ENDIF()
     IF ( "${HYPRE_VERSION}" VERSION_EQUAL "2.31.0" )
-        SET( HYPRE_PATCH_COMMAND patch -p2 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.patch" )
-    ELSE()
+        IF ( HYPRE_PATCH_COMMAND )
+	    # patch command already defined means that we are on gfx942
+	    MESSAGE( FATAL_ERROR "Hypre version must be 2.32.0 or newer to work on selected HIP architecture" )
+	ENDIF()
+        SET( HYPRE_PATCH_COMMAND patch -p2 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.ptrtype.patch" )
+    ENDIF()
+    IF ( NOT DEFINED HYPRE_PATCH_COMMAND )
         SET( HYPRE_PATCH_COMMAND ${CMAKE_COMMAND} -E echo "Skipping patch for version ${HYPRE_VERSION}" )
     ENDIF()
 ENDIF()
@@ -170,7 +187,7 @@ IF ( CMAKE_BUILD_HYPRE )
         URL                 "${HYPRE_CMAKE_URL}"
         DOWNLOAD_DIR        "${HYPRE_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${HYPRE_CMAKE_SOURCE_DIR}"
-	    PATCH_COMMAND       ${HYPRE_PATCH_COMMAND}
+	PATCH_COMMAND       ${HYPRE_PATCH_COMMAND}
         UPDATE_COMMAND      ""
         CONFIGURE_COMMAND   ${CMAKE_COMMAND} -P ${HYPRE_CONFIG}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
