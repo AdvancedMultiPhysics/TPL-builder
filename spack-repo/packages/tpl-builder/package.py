@@ -15,6 +15,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     version("master", branch="master")
 
     variant("stacktrace", default=False, description="Build with support for Stacktrace")
+    variant("timerutility", default=False, description="Build with support for TimerUtility")
     variant("lapack", default=False, description="Build with support for lapack")
     variant("hypre", default=False, description="Build with support for hypre")
     variant("kokkos", default=False, description="Build with support for Kokkos")
@@ -24,8 +25,13 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
 
     depends_on("git", type="build")
 
-    depends_on("stacktrace", when="+stacktrace")
+    depends_on("stacktrace~shared", when="~shared+stacktrace")
+    depends_on("stacktrace+shared", when="+shared+stacktrace")
     depends_on("stacktrace+mpi", when="+stacktrace+mpi")
+
+    depends_on("timerutility~shared", when="~shared+timerutility")
+    depends_on("timerutility+shared", when="+shared+timerutility")
+    depends_on("timerutility+mpi", when="+timerutility+mpi")
 
     depends_on("hypre", when="+hypre")
     depends_on("kokkos", when="+kokkos")
@@ -126,10 +132,11 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
                 ]
             )
 
-        for vname in ("stacktrace", "hypre", "kokkos"):
+        for vname in ("stacktrace", "hypre", "kokkos", "timerutility"):
             if "+" + vname in spec:
-                tpl_list.append(vname.upper())
-                options.append(self.define(f"{vname.upper()}_INSTALL_DIR", spec[vname].prefix))
+                tpl_name = "TIMER" if vname == "timerutility" else vname.upper()
+                tpl_list.append(tpl_name)
+                options.append(self.define(f"{tpl_name}_INSTALL_DIR", spec[vname].prefix))
 
         options.append(self.define("TPL_LIST", ";".join(tpl_list)))
         return options
