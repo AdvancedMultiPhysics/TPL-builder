@@ -7,12 +7,17 @@ from spack.package import *
 
 
 class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
+    """A CMake wrapper for dependencies used by SAMRApps and AMP."""
+
     homepage = "https://github.com/AdvancedMultiPhysics/TPL-builder"
     git = "https://github.com/AdvancedMultiPhysics/TPL-builder.git"
 
     maintainers("bobby-philip", "gllongo", "rbberger")
 
+    license("UNKNOWN")
+
     version("master", branch="master")
+    version("2.1.0", tag="2.1.0", commit="f2018b32623ea4a2f61fd0e7f7087ecb9b955eb5")
 
     variant("stacktrace", default=False, description="Build with support for Stacktrace")
     variant("timerutility", default=False, description="Build with support for TimerUtility")
@@ -22,6 +27,8 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     variant("mpi", default=False, description="Build with MPI support")
     variant("openmp", default=False, description="Build with OpenMP support")
     variant("shared", default=False, description="Build shared libraries")
+    variant("libmesh", default=False, description="Build with support for libmesh")
+    variant("petsc", default=False, description="Build with support for petsc")
 
     depends_on("git", type="build")
 
@@ -39,7 +46,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("kokkos+cuda+cuda_constexpr", when="+kokkos+cuda")
     depends_on("kokkos+rocm", when="+kokkos+rocm")
     depends_on("hypre+cuda+unified-memory", when="+hypre+cuda")
-    depends_on("hypre+rocm", when="+hypre+rocm")
+    depends_on("hypre+rocm+unified-memory", when="+hypre+rocm")
 
     depends_on("hypre~shared", when="~shared+hypre")
     depends_on("hypre+shared", when="+shared+hypre")
@@ -48,18 +55,35 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
 
     requires("+lapack", when="+hypre")
 
+    depends_on("libmesh+exodusii+netcdf+metis", when="+libmesh")
+
+    depends_on("petsc", when="+petsc")
+
     for _flag in list(CudaPackage.cuda_arch_values):
-        depends_on("hypre cuda_arch=" + _flag, when="+hypre+cuda cuda_arch=" + _flag)
-        depends_on("kokkos cuda_arch=" + _flag, when="+kokkos+cuda cuda_arch=" + _flag)
+        depends_on(f"hypre cuda_arch={_flag}", when=f"+hypre+cuda cuda_arch={_flag}")
+        depends_on(f"kokkos cuda_arch={_flag}", when=f"+kokkos+cuda cuda_arch={_flag}")
 
     for _flag in ROCmPackage.amdgpu_targets:
-        depends_on("hypre amdgpu_target=" + _flag, when="+hypre+rocm amdgpu_target=" + _flag)
-        depends_on("kokkos amdgpu_target=" + _flag, when="+kokkos+rocm amdgpu_target=" + _flag)
+        depends_on(f"hypre amdgpu_target={_flag}", when=f"+hypre+rocm amdgpu_target={_flag}")
+        depends_on(f"kokkos amdgpu_target={_flag}", when=f"+kokkos+rocm amdgpu_target={_flag}")
 
     # MPI related dependencies
     depends_on("mpi", when="+mpi")
 
     phases = ["cmake", "build"]
+
+    def flag_handler(self, name, flags):
+        wrapper_flags = []
+        build_system_flags = []
+        if self.spec.satisfies("+mpi+cuda") or self.spec.satisfies("+mpi+rocm"):
+            if self.spec.satisfies("^cray-mpich"):
+                gtl_lib = self.spec["cray-mpich"].package.gtl_lib
+                build_system_flags.extend(gtl_lib.get(name) or [])
+            # we need to pass the flags via the build system.
+            build_system_flags.extend(flags)
+        else:
+            wrapper_flags.extend(flags)
+        return (wrapper_flags, [], build_system_flags)
 
     def cmake_args(self):
         spec = self.spec
@@ -75,6 +99,9 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
             self.define("MPI_SKIP_SEARCH", False),
             self.define_from_variant("USE_OPENMP", "openmp"),
             self.define("DISABLE_GOLD", True),
+            self.define("CFLAGS", self.compiler.cc_pic_flag),
+            self.define("CXXFLAGS", self.compiler.cxx_pic_flag),
+            self.define("FFLAGS", self.compiler.fc_pic_flag),
         ]
 
         if spec.satisfies("+cuda"):
@@ -111,9 +138,9 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
 
         if spec.satisfies("+lapack"):
             tpl_list.append("LAPACK")
-            if spec.satisfies("^intel-mkl"):
+            if spec.satisfies("^[virtuals=lapack] intel-mkl"):
                 options.append(self.define("LAPACK_INSTALL_DIR", spec["lapack"].prefix.mkl))
-            elif spec.satisfies("^intel-oneapi-mkl"):
+            elif spec.satisfies("^[virtuals=lapack] intel-oneapi-mkl"):
                 options.append(
                     self.define(
                         "LAPACK_INSTALL_DIR", spec["intel-oneapi-mkl"].package.component_prefix
