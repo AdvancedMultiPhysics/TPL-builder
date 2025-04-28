@@ -34,11 +34,13 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
 
     depends_on("stacktrace~shared", when="~shared+stacktrace")
     depends_on("stacktrace+shared", when="+shared+stacktrace")
-    depends_on("stacktrace+mpi", when="+stacktrace+mpi")
+    depends_on("stacktrace+mpi", when="+mpi+stacktrace")
+    depends_on("stacktrace~mpi", when="~mpi+stacktrace")
 
     depends_on("timerutility~shared", when="~shared+timerutility")
     depends_on("timerutility+shared", when="+shared+timerutility")
-    depends_on("timerutility+mpi", when="+timerutility+mpi")
+    depends_on("timerutility+mpi", when="+mpi+timerutility")
+    depends_on("timerutility~mpi", when="~mpi+timerutility")
 
     depends_on("hypre", when="+hypre")
     depends_on("kokkos", when="+kokkos")
