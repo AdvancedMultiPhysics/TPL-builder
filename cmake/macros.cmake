@@ -1271,6 +1271,8 @@ FUNCTION( FINALIZE_TESTBUILDER )
         ENDFOREACH()
         SET_TARGET_PROPERTIES( ${TB_TARGET} PROPERTIES LINKER_LANGUAGE HIP )
     ENDIF()
+    # Sort the sources
+    LIST( SORT TESTBUILDER_SOURCES )
     # Finish generating TestBuilder.cpp
     SET( TB_FILE "${CMAKE_CURRENT_BINARY_DIR}/TestBuilder-tmp.cpp" )
     FILE( WRITE "${TB_FILE}" "// Auto generated file\n\n" )
