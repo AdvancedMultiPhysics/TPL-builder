@@ -1,7 +1,7 @@
 This project is a CMake wrapper that will download and build the
 dependencies for SAMRApps and AMP.  
 This may include AMP or SAMRAI and it's dependencies.
-Note: the user can choose to build or not build AMP/SAMRUtils in addition to the TPLs.
+Note: the user can choose to build or not build AMP/SAMRSolvers in addition to the TPLs.
 
 This help file can be viewed by any text editor or by passing "-D HELP=1"
 to CMake as one of the arguments in the configure scripts (discussed later).
@@ -283,7 +283,7 @@ Special TPL FLAGS:
    - SAMRAI_USE_RAJA   - Enable use of Raja with SAMRAI
    - SAMRAI_CUDA_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
    - SAMRAI_HIP_ARCH_FLAGS - arch to use (sm_70, sm_80 ) etc
-- SAMRUTILS:
+- SAMRSOLVERS:
    - DISABLE_THREAD_CHANGES - Disable all threading support
    - TEST_MAX_PROCS   - Disables all tests that require more than TEST_MAX_PROCS processors
 - AMP:
@@ -311,4 +311,4 @@ parallel (e.g. Debug and Release) without corrupting the build or src trees.
 Once the TPLs are successfully built it is time to build 
 AMP: https://bitbucket.org/AdvancedMultiPhysics/amp/wiki/AMP_Build_Instructions
 or 
-SAMRUtils: https://bitbucket.org/SAMRApps/samrutils
+SAMRSolvers: https://bitbucket.org/SAMRApps/samrsolvers

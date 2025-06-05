@@ -350,17 +350,6 @@ bool test<TPL_Enum::SAMRSOLVERS>()
 #endif
 
 
-// Test SAMRUTILS
-#ifdef TPLS_Tests_USE_SAMRUTILS
-template<>
-bool test<TPL_Enum::SAMRUTILS>()
-{
-    std::cout << "   -- No tests defined for SAMRUtils\n";
-    return true;
-}
-#endif
-
-
 // Test SILO
 #ifdef TPLS_Tests_USE_SILO
 template<>
@@ -486,7 +475,6 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::RAJA: return test<TPL_Enum::RAJA>();
     case TPL_Enum::SAMRAI: return test<TPL_Enum::SAMRAI>();
     case TPL_Enum::SAMRSOLVERS: return test<TPL_Enum::SAMRSOLVERS>();
-    case TPL_Enum::SAMRUTILS: return test<TPL_Enum::SAMRUTILS>();
     case TPL_Enum::SILO: return test<TPL_Enum::SILO>();
     case TPL_Enum::STACKTRACE: return test<TPL_Enum::STACKTRACE>();
     case TPL_Enum::SUNDIALS: return test<TPL_Enum::SUNDIALS>();

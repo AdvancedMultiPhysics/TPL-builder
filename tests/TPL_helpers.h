@@ -34,7 +34,6 @@ enum class TPL_Enum {
     RAJA,
     SAMRAI,
     SAMRSOLVERS,
-    SAMRUTILS,
     SILO,
     STACKTRACE,
     SUNDIALS,
@@ -82,7 +81,6 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::RAJA: return "RAJA";
     case TPL_Enum::SAMRAI: return "SAMRAI";
     case TPL_Enum::SAMRSOLVERS: return "SAMRSOLVERS";
-    case TPL_Enum::SAMRUTILS: return "SAMRUTILS";
     case TPL_Enum::SILO: return "SILO";
     case TPL_Enum::STACKTRACE: return "STACKTRACE";
     case TPL_Enum::SUNDIALS: return "SUNDIALS";
@@ -126,7 +124,6 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "OPENBLAS" ) { return TPL_Enum::OPENBLAS; }
     if ( tpl == "SAMRAI" ) { return TPL_Enum::SAMRAI; }
     if ( tpl == "SAMRSOLVERS" ) { return TPL_Enum::SAMRSOLVERS; }
-    if ( tpl == "SAMRUTILS" ) { return TPL_Enum::SAMRUTILS; }
     if ( tpl == "SILO" ) { return TPL_Enum::SILO; }
     if ( tpl == "STACKTRACE" ) { return TPL_Enum::STACKTRACE; }
     if ( tpl == "SUNDIALS" ) { return TPL_Enum::SUNDIALS; }
