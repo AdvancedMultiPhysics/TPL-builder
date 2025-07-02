@@ -69,7 +69,7 @@ MACRO( ADD_DISTCLEAN )
         COMMAND ${CMAKE_COMMAND} -E remove_directory LAPACK_WRAPPERS-prefix
         COMMAND ${CMAKE_COMMAND} -E remove_directory TPLS_Test-prefix
         COMMAND ${CMAKE_COMMAND} -E remove_directory NVCC-build
-                COMMAND ${CMAKE_COMMAND} -E remove_directory Matlab
+        COMMAND ${CMAKE_COMMAND} -E remove_directory Matlab
         COMMAND ${CMAKE_COMMAND} -E remove CMakeCache.txt cmake_install.cmake CTestTestfile.cmake DartConfiguration.tcl Makefile TPLs.cmake.in
         ${DISTCLEAN_CMDS}
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" 
