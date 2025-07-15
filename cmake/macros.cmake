@@ -540,6 +540,9 @@ MACRO( SET_WARNINGS )
         # Add CLANG specifc compiler options
         SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wextra" )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-missing-braces -Wmissing-field-initializers -ftemplate-depth=1024" )
+        IF ( USE_HIP )
+            SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-anonymous-struct -Wno-nested-anon-types" )
+        ENDIF()
     ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "XL") OR (${CMAKE_CXX_COMPILER_ID} MATCHES "XL") )
         # Add XL specifc compiler options
         SET( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall" )
