@@ -581,7 +581,7 @@ MACRO ( CONFIGURE_HIP )
         ENDIF()
         # Set COMPILE_CXX_AS_HIP
         IF ( NOT DEFINED COMPILE_CXX_AS_HIP )
-            SET( COMPILE_CXX_AS_HIP TRUE )
+            SET( COMPILE_CXX_AS_HIP FALSE )
         ENDIF()
         # Detect the number of GPUs available
         IF ( NOT DEFINED NUMBER_OF_GPUS )

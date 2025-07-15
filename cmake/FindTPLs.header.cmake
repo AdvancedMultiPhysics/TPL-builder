@@ -409,12 +409,17 @@ ENDIF()
 
 # Add HIP libraries
 IF ( USE_HIP )
-    # Enable ROCm API Libraries
-    FIND_PACKAGE( rocprim REQUIRED)
-    FIND_PACKAGE( rocthrust REQUIRED )
+    # Enable hip API libraries
+    # Note this will force the use of COMPILE_CXX_AS_HIP
+    #    hiprand includes target hip::device, hip::device forces the --offload flag which is not supported be GNU
+    #    Hopefully this behavior will change in the future
     FIND_PACKAGE( hipblas REQUIRED )
     FIND_PACKAGE( hiprand REQUIRED )
     FIND_PACKAGE( hipcub REQUIRED )
+    SET( COMPILE_CXX_AS_HIP TRUE )
+    # Enable ROCm API Libraries
+    FIND_PACKAGE( rocprim REQUIRED)
+    FIND_PACKAGE( rocthrust REQUIRED )
     FIND_PACKAGE( rocrand REQUIRED )
     FIND_PACKAGE( rocsparse REQUIRED )
     SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} roc::rocthrust roc::hipblas hip::hiprand hip::hipcub roc::rocrand roc::rocsparse)
