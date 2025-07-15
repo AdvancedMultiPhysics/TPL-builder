@@ -207,6 +207,10 @@ IF ( USE_CUDA )
             SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -I${tmp}" )
         ENDFOREACH()
     ENDIF()
+    # Set COMPILE_CXX_AS_CUDA
+    IF ( NOT DEFINED COMPILE_CXX_AS_CUDA )
+        SET( COMPILE_CXX_AS_CUDA FALSE )
+    ENDIF()
     # Detect the number of GPUs available
     IF ( NOT DEFINED NUMBER_OF_GPUS )
         TRY_RUN( RUN_RESULT_VAR COMPILE_RESULT_VAR
@@ -276,6 +280,10 @@ IF ( USE_HIP )
         FOREACH( tmp ${MPI_HIP_INCLUDE_DIRS} )
             SET( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -I${tmp}" )
         ENDFOREACH()
+    ENDIF()
+    # Set COMPILE_CXX_AS_HIP
+    IF ( NOT DEFINED COMPILE_CXX_AS_HIP )
+        SET( COMPILE_CXX_AS_HIP TRUE )
     ENDIF()
     # Detect the number of GPUs available
     IF ( NOT DEFINED NUMBER_OF_GPUS )
