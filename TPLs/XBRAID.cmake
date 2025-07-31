@@ -50,7 +50,7 @@ IF ( CMAKE_BUILD_XBRAID )
         SOURCE_DIR          "${XBRAID_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
 	CONFIGURE_COMMAND   echo xbraid doesn't configure like the rest of the world
-        BUILD_COMMAND       $(MAKE) braid ${XBRAID_CONFIGURE_OPTIONS}
+        BUILD_COMMAND       $(MAKE) braid ${XBRAID_CONFIGURE_OPTIONS} MPICC=${CMAKE_C_COMPILER} MPICXX=${CMAKE_CXX_COMPILER} MPIF90=${CMAKE_Fortran_COMPILER}  CFLAGS=${CMAKE_C_FLAGS} CXXFLAGS=${CMAKE_CXX_FLAGS} FORTFLAGS=${CMAKE_Fortran_FLAGS} LDFLAGS=${ENV_LDFLAGS} 
         BUILD_IN_SOURCE     1
         INSTALL_COMMAND     echo doesn't support installation like the rest of the world
         LOG_DOWNLOAD 1   LOG_UPDATE 1   LOG_CONFIGURE 1   LOG_BUILD 1   LOG_TEST 1   LOG_INSTALL 1
