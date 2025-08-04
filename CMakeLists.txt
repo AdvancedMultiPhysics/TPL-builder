@@ -1,8 +1,6 @@
 # Set some CMake properties
-CMAKE_MINIMUM_REQUIRED( VERSION 3.21 )
-IF ( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
-CMAKE_POLICY( SET CMP0135 OLD )
-ENDIF()
+CMAKE_MINIMUM_REQUIRED( VERSION 3.28.3 )
+CMAKE_POLICY( SET CMP0135 NEW )
 
 
 MESSAGE("================")
@@ -10,14 +8,8 @@ MESSAGE("Configuring TPLS")
 MESSAGE("================")
 
 
-# Check if we are asking for help
-IF ( HELP )
-    UNSET( HELP CACHE )
-    FILE(READ README.txt TMP )
-    MESSAGE("")
-    MESSAGE("${TMP}")
-    MESSAGE(FATAL_ERROR)
-ENDIF()
+# Print the CMake version
+MESSAGE( "CMake Version: ${CMAKE_VERSION}" )
 
 
 # Set the compilers (must be done before PROJECT)
