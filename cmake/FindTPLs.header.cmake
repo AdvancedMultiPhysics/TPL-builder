@@ -398,6 +398,7 @@ IF ( USE_CUDA )
     # Enable CUDA toolkit
     FIND_PACKAGE( CUDAToolkit )
     SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
+    SET( USE_DEVICE TRUE )
 ENDIF()
 
 
@@ -417,6 +418,7 @@ IF ( USE_HIP )
     FIND_PACKAGE( rocrand REQUIRED )
     FIND_PACKAGE( rocsparse REQUIRED )
     SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} roc::rocthrust roc::hipblas hip::hiprand hip::hipcub roc::rocrand roc::rocsparse)
+    SET( USE_DEVICE TRUE )
 ENDIF()
 
 
