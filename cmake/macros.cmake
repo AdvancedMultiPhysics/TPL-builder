@@ -557,7 +557,9 @@ MACRO( SET_WARNINGS )
     # SET the Fortran compiler
     IF ( CMAKE_Fortran_COMPILER_WORKS )
         IF ( CMAKE_COMPILER_IS_GNUG77 OR (${CMAKE_Fortran_COMPILER_ID} MATCHES "GNU") )
-            IF ( NOT USING_GCC )
+            IF ( NOT ( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR
+                     (${CMAKE_C_COMPILER_ID} MATCHES "GNU") OR 
+                     (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") ) )
                 LIST( REMOVE_ITEM CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES gcc )
             ENDIF()
         ELSEIF ( (${CMAKE_Fortran_COMPILER_ID} MATCHES "Intel") ) 
