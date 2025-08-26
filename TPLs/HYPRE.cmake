@@ -98,7 +98,7 @@ IF ( CMAKE_BUILD_HYPRE )
 	    SET( HYPRE_PATCH_COMMAND patch -p2 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/hypre.memcpyasync.patch" )
 	ENDIF()
     ENDIF()
-    IF( NOT DEFINED HYPRE_DISABLE_UNIFIED_MEMORY AND ( HYPRE_USE_CUDA OR HYPRE_USE_HIP ) )
+    IF( ( NOT DEFINED HYPRE_DISABLE_UNIFIED_MEMORY ) AND ( HYPRE_USE_CUDA OR HYPRE_USE_HIP ) )
         ADD_HYPRE_OPTION( --enable-unified-memory )
         # Appears hypre only uses Umpire with CUDA/HIP
         IF ( HYPRE_USE_UMPIRE )
