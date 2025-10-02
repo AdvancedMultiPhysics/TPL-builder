@@ -278,16 +278,20 @@ MACRO ( CONFIGURE_MPI )
         IF ( MPIEXEC )
             SET( MPIEXEC_EXECUTABLE ${MPIEXEC} )
         ENDIF()
+        # Write mpi test
+        SET( MPI_TEST_SRC "${CMAKE_CURRENT_BINARY_DIR}/test_mpi.cpp" )
+        FILE(WRITE  ${MPI_TEST_SRC} "#include <mpi.h>\n" )
+        FILE(APPEND ${MPI_TEST_SRC} "int main(int argc, char** argv) {\n" )
+        FILE(APPEND ${MPI_TEST_SRC} "    MPI_Init(NULL, NULL);\n")
+        FILE(APPEND ${MPI_TEST_SRC} "    MPI_Finalize();\n" )
+        FILE(APPEND ${MPI_TEST_SRC} "}\n" )
+        # Search for MPI
         IF ( NOT MPI_SKIP_SEARCH )
             FIND_PACKAGE( MPI )
+            IF ( NOT MPI_FOUND )
+                MESSAGE( FATAL_ERROR "CMake did not find MPI, if building without MPI set USE_MPI to false (default is true)" )
+            ENDIF()
         ELSE()
-            # Write mpi test
-            SET( MPI_TEST_SRC "${CMAKE_CURRENT_BINARY_DIR}/test_mpi.cpp" )
-            FILE(WRITE  ${MPI_TEST_SRC} "#include <mpi.h>\n" )
-            FILE(APPEND ${MPI_TEST_SRC} "int main(int argc, char** argv) {\n" )
-            FILE(APPEND ${MPI_TEST_SRC} "    MPI_Init(NULL, NULL);\n")
-            FILE(APPEND ${MPI_TEST_SRC} "    MPI_Finalize();\n" )
-            FILE(APPEND ${MPI_TEST_SRC} "}\n" )
             # Test the compile
             FOREACH ( tmp C CXX Fortran )
                 IF ( CMAKE_${tmp}_COMPILER )
@@ -297,7 +301,7 @@ MACRO ( CONFIGURE_MPI )
                         LINK_OPTIONS ${MPI_CXX_LINK_FLAGS}
                         LINK_LIBRARIES ${MPI_CXX_LIBRARIES}
                         OUTPUT_VARIABLE OUT_TXT)
-                    IF ( NOT ${MPI_TEST} )
+                    IF ( NOT ${MPI_TEST_${tmp}} )
                         MESSAGE( FATAL_ERROR "Skipping MPI search and default compile fails:\n${OUT_TXT}" )
                     ENDIF()
                     SET( MPI_C_FOUND TRUE )
@@ -328,6 +332,16 @@ MACRO ( CONFIGURE_MPI )
         MESSAGE( "   MPIEXEC_POSTFLAGS = ${MPIEXEC_POSTFLAGS}" )
         IF ( NOT MPI_C_FOUND AND NOT MPI_CXX_FOUND AND NOT MPI_Fortran_FOUND )
             MESSAGE( FATAL_ERROR "MPI not found" )
+        ENDIF()
+        # Perform a final test compilation
+        SET( TMP_FLAGS -DINCLUDE_DIRECTORIES=${MPI_CXX_INCLUDE_DIRS} )
+        TRY_COMPILE( MPI_TEST ${CMAKE_CURRENT_BINARY_DIR} ${MPI_TEST_SRC}
+            CMAKE_FLAGS ${TMP_FLAGS}
+            LINK_OPTIONS ${MPI_CXX_LINK_FLAGS}
+            LINK_LIBRARIES ${MPI_CXX_LIBRARIES}
+            OUTPUT_VARIABLE OUT_TXT )
+        IF ( NOT MPI_TEST )
+            MESSAGE( FATAL_ERROR "Compiling MPI test fails:\n${OUT_TXT}" )
         ENDIF()
     ENDIF()
     IF ( USE_MPI AND NOT MPIEXEC )
