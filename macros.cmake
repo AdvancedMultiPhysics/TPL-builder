@@ -282,7 +282,7 @@ MACRO ( CONFIGURE_MPI )
         SET( MPI_TEST_SRC "${CMAKE_CURRENT_BINARY_DIR}/test_mpi.cpp" )
         FILE(WRITE  ${MPI_TEST_SRC} "#include <mpi.h>\n" )
         FILE(APPEND ${MPI_TEST_SRC} "int main(int argc, char** argv) {\n" )
-        FILE(APPEND ${MPI_TEST_SRC} "    MPI_Init(NULL, NULL);\n")
+        FILE(APPEND ${MPI_TEST_SRC} "    MPI_Init(&argc,&argv);\n")
         FILE(APPEND ${MPI_TEST_SRC} "    MPI_Finalize();\n" )
         FILE(APPEND ${MPI_TEST_SRC} "}\n" )
         # Search for MPI
