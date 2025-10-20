@@ -67,11 +67,11 @@ SET( TRILINOS_OPTS "${TRILINOS_OPTS};-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREF
 IF ( CMAKE_BUILD_TRILINOS )
     # Trilinos has issues with certain characters in the install/build paths
     IF ( "${TRILINOS_SRC_DIR}" MATCHES "[\*\+\?]" )
-        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in src path" )
+	    MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in src path: ${TRILINOS_SRC_DIR}" )
     ELSEIF ( "${TRILINOS_BUILD_DIR}" MATCHES "[\*\+\?]" )
-        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in build path" )
+        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in build path: ${TRILINOS_BUILD_DIR}" )
     ELSEIF ( "${TRILINOS_INSTALL_DIR}" MATCHES "[\*\+\?]" )
-        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in install path" )
+        MESSAGE( FATAL_ERROR "Trilinos has issues with certain special characters in install path: ${TRILINOS_INSTALL_DIR}" )
     ENDIF()
 
     # Helper function to write variable to config file
