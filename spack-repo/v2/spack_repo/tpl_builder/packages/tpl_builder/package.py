@@ -36,7 +36,6 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     variant("petsc", default=False, description="Build with support for petsc")
     variant("trilinos", default=False, description="Build with support for trilinos")
     variant("test_gpus", default=-1, values=int, description="Build with NUMBER_OF_GPUs setting, defaults to use the number of gpus available")
-    variant("unified-memory", default=True, description="Build hypre with uniied memory")
     variant(
         "cxxstd",
         default="17",
@@ -47,7 +46,6 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
 
     conflicts("cxxstd=20", when="@:2.1.2") #c++ 20 is only compatible with tpl-builder 2.1.3 and up
     conflicts("cxxstd=23", when="@:2.1.2") #c++ 23 is only compatible with tpl-builder 2.1.3 and up
-    conflicts("+unified-memory", when="~rocm~cuda")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -182,9 +180,6 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
             options.extend( [self.define('CMAKE_HIP_HOST_COMPILER', spec['mpi'].mpicxx),
                              self.define('CMAKE_HIP_FLAGS', spec['mpi'].headers.include_flags),
                              ] )
-
-        if spec.satisfies("+hypre~unified-memory"):
-            options.extend( [self.define('HYPRE_DISABLE_UNIFIED_MEMORY', True)] )
 
         tpl_list = []
 
