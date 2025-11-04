@@ -147,8 +147,19 @@ IF ( CMAKE_BUILD_LIBMESH )
     # even if pthreads is disabled   
     SET( LIBMESH_LD_FLAGS -pthread )
 
-    # patch file
-#    SET( LIBMESH_PATCH_FILE "libmesh-1.7.6.patch" )
+    # In version 1.7.1 there is an error that can trigger on newer compilers
+    # particularly clang-19. If this version is specified apply a patch to
+    # fix it. Users that don't care about the patch can just leave the version
+    # unset
+    SET( LIBMESH_PATCH_FILE "" )
+    SET( LIBMESH_PATCH_COMMAND "" )
+    IF ( LIBMESH_VERSION )
+        IF( "${LIBMESH_VERSION}" VERSION_LESS_EQUAL "1.7.2" )
+            SET( LIBMESH_PATCH_FILE "libmesh.paramproxy.patch" )
+            SET( LIBMESH_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/${LIBMESH_PATCH_FILE}" )
+        ENDIF()
+    ENDIF()
+    
     # Build libmesh
     ADD_TPL( 
         LIBMESH
@@ -156,7 +167,7 @@ IF ( CMAKE_BUILD_LIBMESH )
         DOWNLOAD_DIR        "${LIBMESH_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${LIBMESH_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-#        PATCH_COMMAND       patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/${LIBMESH_PATCH_FILE}
+        PATCH_COMMAND       ${LIBMESH_PATCH_COMMAND}
         CONFIGURE_COMMAND   ${LIBMESH_CMAKE_SOURCE_DIR}/configure ${LIBMESH_CONFIGURE_OPTIONS} CPPFLAGS=${LIBMESH_CPP_FLAGS} CXXFLAGS=${LIBMESH_CXX_FLAGS} LDFLAGS=${LIBMESH_LD_FLAGS}   timpi_CPPFLAGS=${LIBMESH_CPP_FLAGS} timpi_CXXFLAGS=${LIBMESH_CXX_FLAGS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1 ${LIBMESH_IGNORE_LINK_ERRORS}
         BUILD_IN_SOURCE     0
