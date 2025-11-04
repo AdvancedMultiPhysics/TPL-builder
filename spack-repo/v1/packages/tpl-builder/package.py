@@ -66,30 +66,18 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("lapackwrappers~shared", when="~shared+lapackwrappers")
     depends_on("lapackwrappers+shared", when="+shared+lapackwrappers")
 
-    depends_on("hypre+mixedint", when="+hypre")
-    depends_on("kokkos", when="+kokkos")
-
-#    depends_on("kokkos+openmp", when="+kokkos+openmp")
-#    depends_on("kokkos+cuda+cuda_constexpr", when="+kokkos+cuda")
-#    depends_on("kokkos+rocm", when="+kokkos+rocm")
-
-
-#    hypre_depends = ["shared", "cuda", "rocm", "openmp"]
-
-#    for v in hypre_depends:
-#        depends_on(f"hypre+{v}", when=f"+{v}+hypre")
-#        depends_on(f"hypre~{v}", when=f"~{v}+hypre")
-    
-
-    depends_on("blas", when="+lapack")
     depends_on("lapack", when="+lapack")
 
+    depends_on("hypre+mixedint", when="+hypre")
     requires("+lapack", when="+hypre")
+
+    depends_on("kokkos", when="+kokkos")
+
+    depends_on("blas", when="+lapack")
 
     depends_on("libmesh+exodusii+netcdf+metis", when="+libmesh")
 
     depends_on("petsc", when="+petsc")
-#    depends_on("trilinos+epetra+epetraext+thyra+tpetra+ml+muelu+kokkos+amesos+ifpack+ifpack2+belos+nox+stratimikos gotype=int", when="+trilinos")
     depends_on("trilinos", when="+trilinos")
 
     requires("+lapack", when="+trilinos")
