@@ -153,12 +153,11 @@ IF ( CMAKE_BUILD_LIBMESH )
     # unset
     SET( LIBMESH_PATCH_FILE "" )
     SET( LIBMESH_PATCH_COMMAND "" )
-    IF ( NOT LIBMESH_VERSION )
-        SET( LIBMESH_VERSION "0.0.0" )
-    ENDIF()
-    IF( "${LIBMESH_VERSION}" VERSION_EQUAL "1.7.1" )
-        SET( LIBMESH_PATCH_FILE "libmesh.paramproxy.patch" )
-        SET( LIBMESH_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/${LIBMESH_PATCH_FILE}" )
+    IF ( LIBMESH_VERSION )
+        IF( "${LIBMESH_VERSION}" VERSION_LESS_EQUAL "1.7.2" )
+            SET( LIBMESH_PATCH_FILE "libmesh.paramproxy.patch" )
+            SET( LIBMESH_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/${LIBMESH_PATCH_FILE}" )
+        ENDIF()
     ENDIF()
     
     # Build libmesh
