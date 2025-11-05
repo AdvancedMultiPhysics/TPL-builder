@@ -162,6 +162,17 @@ bool test<TPL_Enum::KOKKOS>()
 #endif
 
 
+// Test KOKKOS
+#ifdef TPLS_Tests_USE_KOKKOSKERNELS
+template<>
+bool test<TPL_Enum::KOKKOSKERNELS>()
+{
+    std::cout << "   -- No tests defined for Kokkos Kernels\n";
+    return true;
+}
+#endif
+
+
 // Test CABANA
 #ifdef TPLS_Tests_USE_CABANA
 template<>

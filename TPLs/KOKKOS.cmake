@@ -6,9 +6,13 @@
 
 # Check if we have an external Trilinos (we will build Kokkos through it)
 SET( TRILINOS_KOKKOS )
-LIST( FIND TPL_LIST "TRILINOS" index_trilinos )
-IF ( ${index_trilinos} GREATER -1 )
-    SET( TRILINOS_KOKKOS TRUE )
+IF ( KOKKOS_INSTALL_DIR )
+    SET( TRILINOS_KOKKOS FALSE )
+ELSE()  
+    LIST( FIND TPL_LIST "TRILINOS" index_trilinos )
+   IF ( ${index_trilinos} GREATER -1 )
+       SET( TRILINOS_KOKKOS TRUE )
+     ENDIF()
 ENDIF()
 IF ( ( KOKKOS_URL OR KOKKOS_SRC_DIR ) AND TRILINOS_KOKKOS )
     MESSAGE( FATAL_ERROR "Cannot build Trilinos and external Kokkos."
