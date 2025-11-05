@@ -18,6 +18,7 @@ enum class TPL_Enum {
     HDF5,
     HYPRE,
     KOKKOS,
+    KOKKOSKERNELS,
     LAPACK,
     LAPACK_WRAPPERS,
     LIBMESH,
@@ -65,6 +66,7 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::HDF5: return "HDF5";
     case TPL_Enum::HYPRE: return "HYPRE";
     case TPL_Enum::KOKKOS: return "KOKKOS";
+    case TPL_Enum::KOKKOSKERNELS: return "KOKKOSKERNELS";
     case TPL_Enum::LAPACK: return "LAPACK";
     case TPL_Enum::LAPACK_WRAPPERS: return "LAPACK_WRAPPERS";
     case TPL_Enum::LIBMESH: return "LIBMESH";
@@ -108,6 +110,7 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "HDF5" ) { return TPL_Enum::HDF5; }
     if ( tpl == "HYPRE" ) { return TPL_Enum::HYPRE; }
     if ( tpl == "KOKKOS" ) { return TPL_Enum::KOKKOS; }
+    if ( tpl == "KOKKOSKERNELS" ) { return TPL_Enum::KOKKOSKERNELS; }
     if ( tpl == "LAPACK" ) { return TPL_Enum::LAPACK; }
     if ( tpl == "LAPACK_WRAPPERS" ) { return TPL_Enum::LAPACK_WRAPPERS; }
     if ( tpl == "LIBMESH" ) { return TPL_Enum::LIBMESH; }
