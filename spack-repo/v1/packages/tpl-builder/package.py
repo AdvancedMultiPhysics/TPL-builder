@@ -29,6 +29,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     variant("lapackwrappers", default=False, description="Build with support for lapackwrappers")
     variant("hypre", default=False, description="Build with support for hypre")
     variant("kokkos", default=False, description="Build with support for Kokkos")
+    variant("kokkoskernels", default=False, description="Build with support for KokkosKernels")
     variant("mpi", default=False, description="Build with MPI support")
     variant("openmp", default=False, description="Build with OpenMP support")
     variant("shared", default=False, description="Build shared libraries")
