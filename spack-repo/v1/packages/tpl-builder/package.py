@@ -188,8 +188,6 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
                     self.define("LAPACK_LIBRARY_DIRS", ";".join(lapack.directories)),
                 ]
             )
-        if spec.satisfies("+trilinos"):
-            options.append(self.define("TRILINOS_PACKAGES", "Epetra;EpetraExt;Thyra;Xpetra;Tpetra;ML;Kokkos;Amesos;Ifpack;Ifpack2;Belos;NOX;Stratimikos"))
 
         if spec.variants["test_gpus"].value != "-1":
             options.append(self.define("NUMBER_OF_GPUS", spec.variants["test_gpus"].value))
