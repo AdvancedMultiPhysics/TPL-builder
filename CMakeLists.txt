@@ -120,13 +120,14 @@ STRING( REPLACE "," ";" TPL_LIST "${TPL_LIST}" )
 # Add KOKKOS if needed
 LIST( FIND TPL_LIST "TRILINOS" index_trilinos )
 LIST( FIND TPL_LIST "KOKKOS" index_kokkos )
-IF ( ${index_trilinos} GREATER -1 )
-    SET( TRILINOS_KOKKOS TRUE )
+IF ( NOT DISABLE_TRILINOS_KOKKOS )
+    IF ( ${index_trilinos} GREATER -1 )
+        SET( TRILINOS_KOKKOS TRUE )
+    ENDIF()
+    IF ( ${index_trilinos} GREATER -1 AND ${index_kokkos} EQUAL -1 )
+        STRING( REPLACE "TRILINOS" "KOKKOS;TRILINOS" TPL_LIST "${TPL_LIST}" )
+    ENDIF()
 ENDIF()
-IF ( ${index_trilinos} GREATER -1 AND ${index_kokkos} EQUAL -1 )
-    STRING( REPLACE "TRILINOS" "KOKKOS;TRILINOS" TPL_LIST "${TPL_LIST}" )
-ENDIF()
-
 
 # Disable LTO for certain configurations
 IF ( ";${TPL_LIST};" MATCHES ";MATLAB;" )
