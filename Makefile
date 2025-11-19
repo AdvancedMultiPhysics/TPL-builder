@@ -25,7 +25,6 @@ PERL_CMD := s/"[^"]*"(*SKIP)(*F)|\(([^[:space:]])/(\ \1/g;  \
             s/"[^"]*"(*SKIP)(*F)|FOREACH \(/FOREACH\(/g;    \
             s/"[^"]*"(*SKIP)(*F)|ELSE \(/ELSE\(/g;          \
             s/"[^"]*"(*SKIP)(*F)|ENDIF \(/ENDIF\(/g;        \
-            s/"[^"]*"(*SKIP)(*F)|\^\( /\^\(/g;              \
             s/"[^"]*"(*SKIP)(*F)| \)\$$"/\)\$$"/g;          \
             s/"[^"]*"(*SKIP)(*F)| \)\$$"/\"\)\\" \)/g;      \
             s/"[^"]*"(*SKIP)(*F)|\( \\r\?\\n \)/\(\\r\?\\n\)/g; \
@@ -41,6 +40,9 @@ cmake_format:
 %.format: % cmake_format
 	cmake-format -i --enable-markup --literal-comment-pattern='^#' $<
 	perl -i -pe '$(PERL_CMD)' "$<"
+	sed -E -i \
+	    -e '/^[^#]/s/\^\( /\^\(/g' \
+	    $<
 
 format: $(REFORMAT)
 	@echo "Formatting CMake files"; 
