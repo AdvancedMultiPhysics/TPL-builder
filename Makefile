@@ -5,7 +5,7 @@
 # Find all cmake files we want to format
 EXCLUDE_FORMAT = $(shell find cmake -type f \( -name 'FindTPLs.*.cmake' \) )
 #CMAKE_FORMAT := $(shell find . -type f \( -name '*.cmake' -o -name 'CMakeLists.txt' \) )
-CMAKE_FORMAT := $(shell find cmake -type f \( -name '*.cmake' -o -name 'CMakeLists.txt' \) )
+CMAKE_FORMAT := $(shell find cmake -type f \( -name '*.cmake' -o -name 'CMakeLists.txt' \) ) CMakeLists.txt macros.cmake
 CMAKE_FORMAT := $(filter-out $(EXCLUDE_FORMAT),$(CMAKE_FORMAT))
 REFORMAT = $(CMAKE_FORMAT:=.format)
 
