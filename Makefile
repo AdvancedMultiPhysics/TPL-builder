@@ -3,12 +3,33 @@
 .PHONY: format
 
 # Find all cmake files we want to format
-CMAKE_FORMAT := $(shell find . -type f \( -name '*.cmake' -o -name 'CMakeLists.txt' \) )
+EXCLUDE_FORMAT = $(shell find cmake -type f \( -name 'FindTPLs.*.cmake' \) )
+#CMAKE_FORMAT := $(shell find . -type f \( -name '*.cmake' -o -name 'CMakeLists.txt' \) )
+CMAKE_FORMAT := $(shell find cmake -type f \( -name '*.cmake' -o -name 'CMakeLists.txt' \) )
+CMAKE_FORMAT := $(filter-out $(EXCLUDE_FORMAT),$(CMAKE_FORMAT))
 REFORMAT = $(CMAKE_FORMAT:=.format)
+
 
 ifndef VERBOSE
 .SILENT:
 endif
+
+# Perl command string
+PERL_CMD := s/"[^"]*"(*SKIP)(*F)|\(([^[:space:]])/(\ \1/g;  \
+            s/"[^"]*"(*SKIP)(*F)|([^[:space:]])\)/\1 \)/g;  \
+            s/"[^"]*"(*SKIP)(*F)|\)\)/\) \)/g;              \
+            s/"[^"]*"(*SKIP)(*F)|\( \)/\(\)/g;              \
+            s/"[^"]*"(*SKIP)(*F)|\$\(\ MAKE \)/\$\(MAKE\)/g; \
+            s/"[^"]*"(*SKIP)(*F)|MACRO \(/MACRO\(/g;        \
+            s/"[^"]*"(*SKIP)(*F)|FUNCTION \(/FUNCTION\(/g;  \
+            s/"[^"]*"(*SKIP)(*F)|FOREACH \(/FOREACH\(/g;    \
+            s/"[^"]*"(*SKIP)(*F)|ELSE \(/ELSE\(/g;          \
+            s/"[^"]*"(*SKIP)(*F)|ENDIF \(/ENDIF\(/g;        \
+            s/"[^"]*"(*SKIP)(*F)|\^\( /\^\(/g;              \
+            s/"[^"]*"(*SKIP)(*F)| \)\$$"/\)\$$"/g;          \
+            s/"[^"]*"(*SKIP)(*F)| \)\$$"/\"\)\\" \)/g;      \
+            s/"[^"]*"(*SKIP)(*F)|\( \\r\?\\n \)/\(\\r\?\\n\)/g; \
+            s/\"\)/\" \)/g;
 
 # Format target
 cmake_format:
@@ -19,20 +40,7 @@ cmake_format:
 	}
 %.format: % cmake_format
 	cmake-format -i --enable-markup --literal-comment-pattern='^#' $<
-	sed -E -i \
-	    -e '/^[^#]/s/\(([^[:space:]])/(\ \1/g' \
-	    -e '/^[^#]/s/([^[:space:]])\)/\1\ )/g' \
-	    -e '/^[^#]/s/\( \)/\(\)/g' \
-	    -e '/^[^#]/s/\$\( MAKE \)/\$\(MAKE\)/g' \
-	    -e '/^[^#]/s/MACRO \(/MACRO\(/g' \
-	    -e '/^[^#]/s/FUNCTION \(/FUNCTION\(/g' \
-	    -e '/^[^#]/s/FOREACH \(/FOREACH\(/g' \
-	    -e '/^[^#]/s/ELSE \(/ELSE\(/g' \
-	    -e '/^[^#]/s/ENDIF \(/ENDIF\(/g' \
-	    -e '/^[^#]/s/\^\( /\^\(/g' \
-	    -e '/^[^#]/s/ \)\$$\"/\)\$$\"/g' \
-        -e '/^[^#]/s/\( \\r\?\\n \)/\(\\r\?\\n\)/g' \
-	    $<
+	perl -i -pe '$(PERL_CMD)' "$<"
 
 format: $(REFORMAT)
 	@echo "Formatting CMake files"; 

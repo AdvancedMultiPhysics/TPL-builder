@@ -15,7 +15,11 @@ separate_ctrl_name_with_space: true
 literal_comment_pattern: "^#"
 
 # If arglists are longer than this, break them always.
-max_subgroups_hwrap: 6
+max_subgroups_hwrap: 5
+
+# Line endings
+line_ending: 'unix'
+
 
 # Additional FLAGS and KWARGS for custom commands
 additional_commands:
