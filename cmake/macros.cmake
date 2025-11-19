@@ -491,8 +491,7 @@ MACRO( SET_WARNINGS )
         # Note: avx512 causes changes in answers and some tests to fail, disable avx
         SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mno-avx" )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-avx" )
-    ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "CRAY" ) OR ( ${CMAKE_CXX_COMPILER_ID} MATCHES "CRAY" ) OR ( ${CMAKE_C_COMPILER_ID} MATCHES "Cray" ) OR ( ${CMAKE_CXX_COMPILER_ID} MATCHES
-                                                                                                                                                "Cray" ) )
+    ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "(CRAY|Cray)" ) OR ( ${CMAKE_CXX_COMPILER_ID} MATCHES "(CRAY|Cray)" ) )
         # Add Cray specifc compiler options
         SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
@@ -502,8 +501,7 @@ MACRO( SET_WARNINGS )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -Minform=inform -Mlist --display_error_number" )
         # Suppress unreachable code warning, it causes non-useful warnings with some tests/templates
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --diag_suppress 111,128,185" )
-    ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "CLANG" ) OR ( ${CMAKE_CXX_COMPILER_ID} MATCHES "CLANG" ) OR ( ${CMAKE_C_COMPILER_ID} MATCHES "Clang" ) OR ( ${CMAKE_CXX_COMPILER_ID} MATCHES
-                                                                                                                                                   "Clang" ) )
+    ELSEIF ( (${CMAKE_C_COMPILER_ID} MATCHES "(CLANG|Clang)" ) OR ( ${CMAKE_CXX_COMPILER_ID} MATCHES "(CLANG|Clang)" ) )
         # Add CLANG specifc compiler options
         SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra" )
         SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-missing-braces -Wmissing-field-initializers -ftemplate-depth=1024" )

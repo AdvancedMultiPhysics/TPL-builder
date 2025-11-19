@@ -9,7 +9,6 @@ CMAKE_FORMAT := $(shell find cmake -type f \( -name '*.cmake' -o -name 'CMakeLis
 CMAKE_FORMAT := $(filter-out $(EXCLUDE_FORMAT),$(CMAKE_FORMAT))
 REFORMAT = $(CMAKE_FORMAT:=.format)
 
-
 ifndef VERBOSE
 .SILENT:
 endif
@@ -39,7 +38,7 @@ cmake_format:
 	}
 %.format: % cmake_format
 	cmake-format -i --enable-markup --literal-comment-pattern='^#' $<
-	perl -i -pe '$(PERL_CMD)' "$<"
+	perl -i -pe 'next if /^\s*(?:"[^"]*"(*SKIP)(*F))*#/; $(PERL_CMD)' "$<"
 	sed -E -i \
 	    -e '/^[^#]/s/\^\( /\^\(/g' \
 	    $<
