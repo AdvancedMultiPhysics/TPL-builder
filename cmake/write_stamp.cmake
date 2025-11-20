@@ -4,5 +4,3 @@ IF ( ${append} )
 ELSE()
     FILE( WRITE "${filename}" "${time}\n" )
 ENDIF()
-
-

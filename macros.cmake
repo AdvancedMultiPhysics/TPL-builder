@@ -1,13 +1,11 @@
-INCLUDE(CheckCCompilerFlag)
-INCLUDE(CheckCSourceCompiles)
-INCLUDE(CheckCXXCompilerFlag)
-INCLUDE(CheckCXXSourceCompiles)
-IF ( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18.0")
-    INCLUDE(CheckLinkerFlag)
+INCLUDE( CheckCCompilerFlag )
+INCLUDE( CheckCSourceCompiles )
+INCLUDE( CheckCXXCompilerFlag )
+INCLUDE( CheckCXXSourceCompiles )
+IF ( ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18.0" )
+    INCLUDE( CheckLinkerFlag )
 ENDIF()
 INCLUDE( ADD_TPL.cmake )
-
-
 
 # Dummy use to prevent unused cmake variable warning
 MACRO( NULL_USE VAR )
@@ -19,21 +17,18 @@ MACRO( NULL_USE VAR )
 ENDMACRO()
 NULL_USE( CMAKE_C_FLAGS )
 
-
 # Macro to set a global variable
 MACRO( GLOBAL_SET VARNAME )
-    SET(${VARNAME} ${ARGN} CACHE INTERNAL "")
+    SET( ${VARNAME} ${ARGN} CACHE INTERNAL "" )
 ENDMACRO()
-
 
 # Macro to print all variables
 MACRO( PRINT_ALL_VARIABLES )
-    GET_CMAKE_PROPERTY(_variableNames VARIABLES)
-    FOREACH ( _variableName ${_variableNames} )
+    GET_CMAKE_PROPERTY( _variableNames VARIABLES )
+    FOREACH( _variableName ${_variableNames} )
         MESSAGE( STATUS "${_variableName}=${${_variableName}}" )
     ENDFOREACH()
 ENDMACRO()
-
 
 # Macro to clean whitespace
 MACRO( CLEAN_WHITESPACE VAR )
@@ -48,22 +43,19 @@ MACRO( CLEAN_WHITESPACE VAR )
     ENDIF()
 ENDMACRO()
 
-
 # CMake assert
 MACRO( ASSERT test comment )
-    IF (NOT ${test})
-        MESSSAGE(FATAL_ERROR "Assertion failed: ${comment}")
-    ENDIF(NOT ${test})
-ENDMACRO(ASSERT)
-
+    IF ( NOT ${test} )
+        MESSSAGE( FATAL_ERROR "Assertion failed: ${comment}" )
+    ENDIF( NOT ${test} )
+ENDMACRO( ASSERT )
 
 # Macro to set the compile/link flags
 MACRO( SET_DEFAULT_TPL TPL VAR VAL )
-    IF ( (NOT ${TPL}_URL) AND (NOT ${TPL}_SRC_DIR) AND (NOT ${TPL}_INSTALL_DIR) )
+    IF ( (NOT ${TPL}_URL ) AND ( NOT ${TPL}_SRC_DIR ) AND ( NOT ${TPL}_INSTALL_DIR ) )
         SET( ${TPL}_${VAR} "${VAL}" )
     ENDIF()
 ENDMACRO()
-
 
 # Macro to verify that a variable has been set
 MACRO( VERIFY_VARIABLE VARIABLE_NAME )
@@ -72,19 +64,17 @@ MACRO( VERIFY_VARIABLE VARIABLE_NAME )
     ENDIF()
 ENDMACRO()
 
-
 # Macro to verify that a path has been set
 MACRO( VERIFY_PATH PATH_NAME )
-    IF ("${PATH_NAME}" STREQUAL "")
-        MESSAGE ( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
+    IF ( "${PATH_NAME}" STREQUAL "" )
+        MESSAGE( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
     ENDIF()
     IF ( NOT EXISTS "${PATH_NAME}" )
         MESSAGE( FATAL_ERROR "Path does not exist: ${PATH_NAME}" )
     ENDIF()
 ENDMACRO()
 
-
-# Macro to add user c++ std 
+# Macro to add user c++ std
 MACRO( SET_CXX_STD )
     # Set the C++ standard
     SET( CMAKE_CXX_EXTENSIONS OFF )
@@ -134,17 +124,16 @@ MACRO( SET_CXX_STD )
     ADD_DEFINITIONS( -DCXX_STD=${CXX_STD} )
 ENDMACRO()
 
-
 # Macro to set the compile/link flags
 MACRO( SET_COMPILER_DEFAULTS )
     # Set the behavior of GLIBCXX flags
     CHECK_ENABLE_FLAG( ENABLE_GXX_DEBUG 0 )
     IF ( ${CMAKE_BUILD_TYPE} MATCHES "Debug" AND ENABLE_GXX_DEBUG )
-        IF ( NOT ("${CMAKE_CXX_FLAGS}" MATCHES "-D_GLIBCXX_DEBUG") ) 
+        IF ( NOT ( "${CMAKE_CXX_FLAGS}" MATCHES "-D_GLIBCXX_DEBUG" ) )
             SET( CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC" )
             SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC" )
         ENDIF()
-        IF ( NOT ("${CMAKE_CXX_FLAGS_DEBUG}" MATCHES "-D_GLIBCXX_DEBUG") ) 
+        IF ( NOT ( "${CMAKE_CXX_FLAGS_DEBUG}" MATCHES "-D_GLIBCXX_DEBUG" ) )
             SET( CMAKE_C_FLAGS_DEBUG " ${CMAKE_C_FLAGS_DEBUG} -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC" )
             SET( CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC" )
         ENDIF()
@@ -152,9 +141,9 @@ MACRO( SET_COMPILER_DEFAULTS )
         SET( ENABLE_GXX_DEBUG 0 )
     ENDIF()
     # Add the user flags
-    SET(CMAKE_C_FLAGS   " ${CMAKE_C_FLAGS} ${CFLAGS} ${CFLAGS_EXTRA}" )
-    SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CXXFLAGS} ${CXXFLAGS_EXTRA}" )
-    SET(CMAKE_Fortran_FLAGS " ${CMAKE_Fortran_FLAGS} ${FFLAGS} ${FFLAGS_EXTRA}" )
+    SET( CMAKE_C_FLAGS " ${CMAKE_C_FLAGS} ${CFLAGS} ${CFLAGS_EXTRA}" )
+    SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CXXFLAGS} ${CXXFLAGS_EXTRA}" )
+    SET( CMAKE_Fortran_FLAGS " ${CMAKE_Fortran_FLAGS} ${FFLAGS} ${FFLAGS_EXTRA}" )
     # Add the c++ standard flags
     SET_CXX_STD()
     # Test the compile flags
@@ -167,11 +156,11 @@ MACRO( SET_COMPILER_DEFAULTS )
         MESSAGE( FATAL_ERROR "Invalid CXX flags detected: ${CHECK_CXX_FLAGS}" )
     ENDIF()
     # Add the shared/static flags
-    IF ( (NOT ENABLE_SHARED) AND (NOT ENABLE_STATIC) ) 
+    IF ( (NOT ENABLE_SHARED ) AND ( NOT ENABLE_STATIC ) )
         SET( ENABLE_STATIC )
     ELSEIF ( ENABLE_SHARED AND ENABLE_STATIC )
-        MESSAGE(FATAL_ERROR "Building both static and shared libraries simultaneously is not currently supported")
-    ELSEIF ( ENABLE_SHARED ) 
+        MESSAGE( FATAL_ERROR "Building both static and shared libraries simultaneously is not currently supported" )
+    ELSEIF ( ENABLE_SHARED )
         SET( BUILD_SHARED_LIBS TRUE )
         SET( CMAKE_ARGS "-DBUILD_SHARED_LIBS:BOOL=TRUE;-DLIB_TYPE=SHARED" )
         SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" )
@@ -189,14 +178,13 @@ MACRO( SET_COMPILER_DEFAULTS )
     ENDIF()
 ENDMACRO()
 
-
 # Set ENV_VARS and CMAKE_ARGS
 MACRO( SET_CMAKE_ARGS )
     # Load/Set the language flags
     STRING( TOUPPER ${CMAKE_BUILD_TYPE} CONFIG )
-	FOREACH ( LANG C CXX Fortran CUDA HIP )
+    FOREACH( LANG C CXX Fortran CUDA HIP )
         SET( ENV_${LANG}_FLAGS "${CMAKE_${LANG}_FLAGS} ${CMAKE_${LANG}_FLAGS_${CONFIG}} ${MPI_${LANG}_COMPILE_FLAGS}" )
-        FOREACH ( tmp ${MPI_${LANG}_INCLUDE_PATH} )
+        FOREACH( tmp ${MPI_${LANG}_INCLUDE_PATH} )
             SET( ENV_${LANG}_FLAGS "${ENV_${LANG}_FLAGS} -I${tmp}" )
         ENDFOREACH()
         CLEAN_WHITESPACE( ENV_${LANG}_FLAGS )
@@ -209,21 +197,21 @@ MACRO( SET_CMAKE_ARGS )
     # Set the linker flags
     SET( ENV_LDFLAGS "${LDFLAGS} ${LDLIBS} ${MPI_CXX_LINK_FLAGS}" )
     SET( ENV_LIBS "${OpenMP_CXX_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES}" )
-    STRING( REGEX REPLACE ";" " " ENV_LDFLAGS "${ENV_LDFLAGS}")
-    STRING( REGEX REPLACE ";" " " ENV_LIBS "${ENV_LIBS}")
+    STRING( REGEX REPLACE ";" " " ENV_LDFLAGS "${ENV_LDFLAGS}" )
+    STRING( REGEX REPLACE ";" " " ENV_LIBS "${ENV_LIBS}" )
     SET( LDFLAGS "${LDFLAGS} ${ENV_LDFLAGS}" )
-    check_linker_flag( C -ldl test_dl )
+    CHECK_LINKER_FLAG( C -ldl test_dl )
     IF ( test_dl )
         SET( ENV_LIBS "${ENV_LIBS} -ldl" )
         SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -ldl" )
     ENDIF()
-    check_linker_flag( C -Wl,--undefined-version test_undefined_version )
+    CHECK_LINKER_FLAG( C -Wl,--undefined-version test_undefined_version )
     IF ( test_undefined_version )
         SET( ENV_LIBS "${ENV_LIBS} -Wl,--undefined-version" )
         SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--undefined-version" )
     ENDIF()
     IF ( MSVC )
-        check_linker_flag( CXX "/INCREMENTAL:NO" test_incremental )
+        CHECK_LINKER_FLAG( CXX "/INCREMENTAL:NO" test_incremental )
         IF ( test_incremental )
             SET( ENV_LIBS "${ENV_LIBS} /INCREMENTAL:NO" )
             SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /INCREMENTAL:NO" )
@@ -234,13 +222,13 @@ MACRO( SET_CMAKE_ARGS )
     SET( ENV_VARS ${ENV_VARS} LD=${CMAKE_LINKER} LDFLAGS=${ENV_LDFLAGS} LIBS=${ENV_LIBS} )
     MESSAGE( "ENV_VARS=${ENV_VARS}" )
     # Set the cmake arguments
-    FOREACH ( LANG C CXX Fortran CUDA HIP )
+    FOREACH( LANG C CXX Fortran CUDA HIP )
         SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_${LANG}_COMPILER=${CMAKE_${LANG}_COMPILER}" )
         SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_${LANG}_FLAGS=${CMAKE_${LANG}_FLAGS}" )
         SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_${LANG}_FLAGS_DEBUG=${CMAKE_${LANG}_FLAGS_DEBUG}" )
         SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_${LANG}_FLAGS_RELEASE=${CMAKE_${LANG}_FLAGS_RELEASE}" )
     ENDFOREACH()
-    FOREACH ( LANG CUDA HIP )
+    FOREACH( LANG CUDA HIP )
         SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_${LANG}_HOST_COMPILER=${CMAKE_CXX_COMPILER}" )
     ENDFOREACH()
     SET( CMAKE_ARGS "${CMAKE_ARGS};-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}" )
@@ -250,27 +238,25 @@ MACRO( SET_CMAKE_ARGS )
     SET( CMAKE_ARGS "${CMAKE_ARGS};-DMPIEXEC=${MPIEXEC}" )
 ENDMACRO()
 
-
 # Macro to check if a flag is enabled
 MACRO( CHECK_ENABLE_FLAG FLAG DEFAULT )
-    IF( NOT DEFINED ${FLAG} )
+    IF ( NOT DEFINED ${FLAG} )
         SET( ${FLAG} ${DEFAULT} )
-    ELSEIF( ${FLAG}  STREQUAL "" )
+    ELSEIF ( ${FLAG} STREQUAL "" )
         SET( ${FLAG} ${DEFAULT} )
-    ELSEIF( ( ${${FLAG}} STREQUAL "false" ) OR ( ${${FLAG}} STREQUAL "0" ) OR ( ${${FLAG}} STREQUAL "OFF" ) )
+    ELSEIF ( (${${FLAG}} STREQUAL "false" ) OR ( ${${FLAG}} STREQUAL "0" ) OR ( ${${FLAG}} STREQUAL "OFF" ) )
         SET( ${FLAG} 0 )
-    ELSEIF( ( ${${FLAG}} STREQUAL "true" ) OR ( ${${FLAG}} STREQUAL "1" ) OR ( ${${FLAG}} STREQUAL "ON" ) )
+    ELSEIF ( (${${FLAG}} STREQUAL "true" ) OR ( ${${FLAG}} STREQUAL "1" ) OR ( ${${FLAG}} STREQUAL "ON" ) )
         SET( ${FLAG} 1 )
     ELSE()
-        MESSAGE( "Bad value for ${FLAG} (${${FLAG}}); use true or false" )
+        MESSAGE( "Bad value for ${FLAG} ( ${${FLAG}}); use true or false" )
     ENDIF()
 ENDMACRO()
 
-
 # Macro to configure MPI
-MACRO ( CONFIGURE_MPI )
+MACRO( CONFIGURE_MPI )
     CHECK_ENABLE_FLAG( USE_MPI 1 )
-    MESSAGE("MPIEXEC = ${MPIEXEC}")
+    MESSAGE( "MPIEXEC = ${MPIEXEC}" )
     IF ( USE_MPI )
         MESSAGE( "Configuring MPI" )
         IF ( MPIEXEC )
@@ -278,11 +264,11 @@ MACRO ( CONFIGURE_MPI )
         ENDIF()
         # Write mpi test
         SET( MPI_TEST_SRC "${CMAKE_CURRENT_BINARY_DIR}/test_mpi.cpp" )
-        FILE(WRITE  ${MPI_TEST_SRC} "#include <mpi.h>\n" )
-        FILE(APPEND ${MPI_TEST_SRC} "int main(int argc, char** argv) {\n" )
-        FILE(APPEND ${MPI_TEST_SRC} "    MPI_Init(&argc,&argv);\n")
-        FILE(APPEND ${MPI_TEST_SRC} "    MPI_Finalize();\n" )
-        FILE(APPEND ${MPI_TEST_SRC} "}\n" )
+        FILE( WRITE ${MPI_TEST_SRC} "#include <mpi.h>\n" )
+        FILE( APPEND ${MPI_TEST_SRC} "int main(int argc, char** argv) {\n" )
+        FILE( APPEND ${MPI_TEST_SRC} "    MPI_Init(&argc,&argv);\n" )
+        FILE( APPEND ${MPI_TEST_SRC} "    MPI_Finalize();\n" )
+        FILE( APPEND ${MPI_TEST_SRC} "}\n" )
         # Search for MPI
         IF ( NOT MPI_SKIP_SEARCH )
             FIND_PACKAGE( MPI )
@@ -291,14 +277,16 @@ MACRO ( CONFIGURE_MPI )
             ENDIF()
         ELSE()
             # Test the compile
-            FOREACH ( tmp C CXX Fortran )
+            FOREACH( tmp C CXX Fortran )
                 IF ( CMAKE_${tmp}_COMPILER )
                     SET( TMP_FLAGS -DINCLUDE_DIRECTORIES=${MPI_CXX_INCLUDE_PATH} )
-                    TRY_COMPILE( MPI_TEST_${tmp} ${CMAKE_CURRENT_BINARY_DIR} ${MPI_TEST_SRC}
+                    TRY_COMPILE(
+                        MPI_TEST_${tmp} ${CMAKE_CURRENT_BINARY_DIR}
+                        ${MPI_TEST_SRC}
                         CMAKE_FLAGS ${TMP_FLAGS}
                         LINK_OPTIONS ${MPI_CXX_LINK_FLAGS}
                         LINK_LIBRARIES ${MPI_CXX_LIBRARIES}
-                        OUTPUT_VARIABLE OUT_TXT)
+                        OUTPUT_VARIABLE OUT_TXT )
                     IF ( NOT ${MPI_TEST_${tmp}} )
                         MESSAGE( FATAL_ERROR "Skipping MPI search and default compile fails:\n${OUT_TXT}" )
                     ENDIF()
@@ -333,11 +321,8 @@ MACRO ( CONFIGURE_MPI )
         ENDIF()
         # Perform a final test compilation
         SET( TMP_FLAGS ${MPI_${tmp}_COMPILE_FLAGS} -DINCLUDE_DIRECTORIES=${MPI_CXX_INCLUDE_DIRS} )
-        TRY_COMPILE( MPI_TEST ${CMAKE_CURRENT_BINARY_DIR} ${MPI_TEST_SRC}
-            CMAKE_FLAGS ${TMP_FLAGS}
-            -D"LINK_OPTIONS=${MPI_CXX_LINK_FLAGS}"
-            LINK_LIBRARIES ${MPI_CXX_LIBRARIES}
-            OUTPUT_VARIABLE OUT_TXT )
+        TRY_COMPILE( MPI_TEST ${CMAKE_CURRENT_BINARY_DIR} ${MPI_TEST_SRC} CMAKE_FLAGS ${TMP_FLAGS} -D"LINK_OPTIONS=${MPI_CXX_LINK_FLAGS}" LINK_LIBRARIES ${MPI_CXX_LIBRARIES}
+                    OUTPUT_VARIABLE OUT_TXT )
         IF ( NOT MPI_TEST )
             MESSAGE( FATAL_ERROR "Compiling MPI test fails:\n${OUT_TXT}" )
         ENDIF()
@@ -347,22 +332,26 @@ MACRO ( CONFIGURE_MPI )
     ENDIF()
 ENDMACRO()
 
-
 # Function to try and add MPI include flags
-FUNCTION ( ADD_MPI_FLAGS )
+FUNCTION( ADD_MPI_FLAGS )
     IF ( MPI_CXX_INCLUDE_DIRS )
         RETURN()
     ENDIF()
     SET( MPI_ARGS )
     # Test if we are using cray wrappers
-    EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} --cray-print-opts RESULT_VARIABLE flag ERROR_QUIET OUTPUT_VARIABLE out )
+    EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} --cray-print-opts RESULT_VARIABLE flag ERROR_QUIET OUTPUT_VARIABLE out )
     IF ( "${flag}" STREQUAL "0" )
-        separate_arguments( MPI_ARGS NATIVE_COMMAND ${out} )
+        SEPARATE_ARGUMENTS( MPI_ARGS NATIVE_COMMAND ${out} )
     ENDIF()
     # Test if we can use mpi --show
-    EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} --show RESULT_VARIABLE flag ERROR_QUIET OUTPUT_VARIABLE out )
+    EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} --show RESULT_VARIABLE flag ERROR_QUIET OUTPUT_VARIABLE out )
     IF ( "${flag}" STREQUAL "0" )
-        separate_arguments( MPI_ARGS NATIVE_COMMAND ${out} )
+        SEPARATE_ARGUMENTS( MPI_ARGS NATIVE_COMMAND ${out} )
+    ENDIF()
+    # Test if we can use mpi -show
+    EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} -show RESULT_VARIABLE flag ERROR_QUIET OUTPUT_VARIABLE out )
+    IF ( "${flag}" STREQUAL "0" )
+        SEPARATE_ARGUMENTS( MPI_ARGS NATIVE_COMMAND ${out} )
     ENDIF()
     IF ( NOT MPI_ARGS )
         RETURN()
@@ -388,19 +377,18 @@ FUNCTION ( ADD_MPI_FLAGS )
     ENDIF()
 ENDFUNCTION()
 
-
 # Configure CUDA
-MACRO ( CONFIGURE_CUDA )
+MACRO( CONFIGURE_CUDA )
     CHECK_ENABLE_FLAG( USE_CUDA FALSE )
-    # Set CUDA standard (always required in case down-stream packages enable CUDA)
+    # Set CUDA standard ( always required in case down-stream packages enable CUDA )
     IF ( NOT DEFINED CMAKE_CUDA_STANDARD )
-        IF ( (${CXX_STD} STREQUAL "98") OR (${CXX_STD} STREQUAL "03") )
+        IF ( (${CXX_STD} STREQUAL "98" ) OR ( ${CXX_STD} STREQUAL "03" ) )
             SET( CMAKE_CUDA_STANDARD 03 )
         ELSEIF ( ${CXX_STD} STREQUAL "11" )
             SET( CMAKE_CUDA_STANDARD 11 )
         ELSEIF ( ${CXX_STD} STREQUAL "14" )
             SET( CMAKE_CUDA_STANDARD 14 )
-        ELSEIF ( ( ${CXX_STD} STREQUAL "17" ) OR ( ${CXX_STD} STREQUAL "20" ) OR ( ${CXX_STD} STREQUAL "23" ) )
+        ELSEIF ( (${CXX_STD} STREQUAL "17" ) OR ( ${CXX_STD} STREQUAL "20" ) OR ( ${CXX_STD} STREQUAL "23" ) )
             SET( CMAKE_CUDA_STANDARD 17 )
         ELSE()
             MESSAGE( FATAL_ERROR "Unknown C++ standard" )
@@ -413,15 +401,15 @@ MACRO ( CONFIGURE_CUDA )
         IF ( ${CMAKE_VERSION} VERSION_LESS "3.17" )
             MESSAGE( FATAL_ERROR "We require CMake 3.17 or newer when compiling with CUDA" )
         ENDIF()
-        SET( CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} )  
+        SET( CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} )
         ENABLE_LANGUAGE( CUDA )
         IF ( NOT DEFINED CUDA_HOME )
             GET_FILENAME_COMPONENT( CUDA_HOME "${CMAKE_CUDA_COMPILER}" DIRECTORY )
             GET_FILENAME_COMPONENT( CUDA_HOME "${CUDA_HOME}/.." REALPATH )
-            MESSAGE( "CUDA_HOME = ${CUDA_HOME}")
+            MESSAGE( "CUDA_HOME = ${CUDA_HOME}" )
         ENDIF()
         IF ( NOT DEFINED CUDA_ARCH_FLAGS )
-            FOREACH ( arch ${CMAKE_CUDA_ARCHITECTURES} )
+            FOREACH( arch ${CMAKE_CUDA_ARCHITECTURES} )
                 SET( CUDA_ARCH_FLAGS ${CUDA_ARCH_FLAGS} sm_${arch} )
             ENDFOREACH()
             SET( CUDA_ARCH_FLAGS "${CUDA_ARCH_FLAGS}" )
@@ -429,7 +417,7 @@ MACRO ( CONFIGURE_CUDA )
         SET( CMAKE_CUDA_STANDARD_REQUIRED ON )
         SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} ${CUDA_FLAGS_EXTRA}" )
         IF ( USE_OPENMP )
-           SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler -fopenmp" )
+            SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler -fopenmp" )
         ENDIF()
         IF ( USE_MPI )
             SET( MPI_CUDA_INCLUDE_DIRS ${MPI_CXX_INCLUDE_DIRS} )
@@ -438,22 +426,17 @@ MACRO ( CONFIGURE_CUDA )
                 SET( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -I${tmp}" )
             ENDFOREACH()
         ENDIF()
-        MESSAGE( "CMAKE_CUDA_FLAGS=${CMAKE_CUDA_FLAGS}")  
-        MESSAGE( "CUDA_FLAGS_EXTRA=${CUDA_FLAGS_EXTRA}")  
+        MESSAGE( "CMAKE_CUDA_FLAGS=${CMAKE_CUDA_FLAGS}" )
+        MESSAGE( "CUDA_FLAGS_EXTRA=${CUDA_FLAGS_EXTRA}" )
         # Set COMPILE_CXX_AS_CUDA
         IF ( NOT DEFINED COMPILE_CXX_AS_CUDA )
             SET( COMPILE_CXX_AS_CUDA FALSE )
         ENDIF()
         # Detect the number of GPUs available
         IF ( NOT DEFINED NUMBER_OF_GPUS )
-            TRY_RUN( RUN_RESULT_VAR COMPILE_RESULT_VAR
-                ${CMAKE_BINARY_DIR} 
-                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCudaGPUs.cu
-                CMAKE_FLAGS 
-                    -DINCLUDE_DIRECTORIES:STRING=${CUDA_TOOLKIT_INCLUDE}
-                    -DLINK_LIBRARIES:STRING=${CUDA_CUDART_LIBRARY}
-                COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
-                RUN_OUTPUT_VARIABLE NUMBER_OF_GPUS )
+            TRY_RUN( RUN_RESULT_VAR COMPILE_RESULT_VAR ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindCudaGPUs.cu
+                    CMAKE_FLAGS -DINCLUDE_DIRECTORIES:STRING=${CUDA_TOOLKIT_INCLUDE} -DLINK_LIBRARIES:STRING=${CUDA_CUDART_LIBRARY} COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+                    RUN_OUTPUT_VARIABLE NUMBER_OF_GPUS )
             IF ( NOT NUMBER_OF_GPUS )
                 MESSAGE( FATAL_ERROR "NUMBER_OF_GPUS was not set and not CUDA capable GPUs were detected:\n${COMPILE_OUTPUT}" )
             ENDIF()
@@ -463,19 +446,18 @@ MACRO ( CONFIGURE_CUDA )
     ENDIF()
 ENDMACRO()
 
-
 # Configure HIP
-MACRO ( CONFIGURE_HIP )
+MACRO( CONFIGURE_HIP )
     CHECK_ENABLE_FLAG( USE_HIP FALSE )
-    # Set HIP standard (always required in case down-stream packages enable HIP)
+    # Set HIP standard ( always required in case down-stream packages enable HIP )
     IF ( NOT DEFINED CMAKE_HIP_STANDARD )
-        IF ( (${CXX_STD} STREQUAL "98") OR (${CXX_STD} STREQUAL "03") )
+        IF ( (${CXX_STD} STREQUAL "98" ) OR ( ${CXX_STD} STREQUAL "03" ) )
             SET( CMAKE_HIP_STANDARD 03 )
         ELSEIF ( ${CXX_STD} STREQUAL "11" )
             SET( CMAKE_HIP_STANDARD 11 )
         ELSEIF ( ${CXX_STD} STREQUAL "14" )
             SET( CMAKE_HIP_STANDARD 14 )
-        ELSEIF ( ( ${CXX_STD} STREQUAL "17" ) OR ( ${CXX_STD} STREQUAL "20" ) OR ( ${CXX_STD} STREQUAL "23" ) )
+        ELSEIF ( (${CXX_STD} STREQUAL "17" ) OR ( ${CXX_STD} STREQUAL "20" ) OR ( ${CXX_STD} STREQUAL "23" ) )
             SET( CMAKE_HIP_STANDARD 17 )
         ELSE()
             MESSAGE( FATAL_ERROR "Unknown C++ standard" )
@@ -492,10 +474,10 @@ MACRO ( CONFIGURE_HIP )
         IF ( NOT DEFINED HIP_HOME )
             GET_FILENAME_COMPONENT( HIP_HOME "${CMAKE_HIP_COMPILER}" DIRECTORY )
             GET_FILENAME_COMPONENT( HIP_HOME "${HIP_HOME}/.." REALPATH )
-            MESSAGE( "HIP_HOME = ${HIP_HOME}")
+            MESSAGE( "HIP_HOME = ${HIP_HOME}" )
         ENDIF()
         IF ( NOT DEFINED HIP_ARCH_FLAGS )
-            FOREACH ( arch ${CMAKE_HIP_ARCHITECTURES} )
+            FOREACH( arch ${CMAKE_HIP_ARCHITECTURES} )
                 SET( HIP_ARCH_FLAGS ${HIP_ARCH_FLAGS} sm_${arch} )
             ENDFOREACH()
             SET( HIP_ARCH_FLAGS "${HIP_ARCH_FLAGS}" )
@@ -503,7 +485,7 @@ MACRO ( CONFIGURE_HIP )
         SET( CMAKE_HIP_STANDARD_REQUIRED ON )
         SET( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} ${HIP_FLAGS_EXTRA}" )
         IF ( USE_OPENMP )
-           SET( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -Xcompiler -fopenmp" )
+            SET( CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -Xcompiler -fopenmp" )
         ENDIF()
         IF ( USE_MPI )
             SET( MPI_HIP_INCLUDE_DIRS ${MPI_CXX_INCLUDE_DIRS} )
@@ -518,10 +500,12 @@ MACRO ( CONFIGURE_HIP )
         ENDIF()
         # Detect the number of GPUs available
         IF ( NOT DEFINED NUMBER_OF_GPUS )
-            TRY_RUN( RUN_RESULT_VAR COMPILE_RESULT_VAR
-                ${CMAKE_BINARY_DIR} 
+            TRY_RUN(
+                RUN_RESULT_VAR
+                COMPILE_RESULT_VAR
+                ${CMAKE_BINARY_DIR}
                 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHIPGPUs.hip
-                # CMAKE_FLAGS 
+                # CMAKE_FLAGS
                 #     -DINCLUDE_DIRECTORIES:STRING=${HIP_TOOLKIT_INCLUDE}
                 #     -DLINK_LIBRARIES:STRING=${HIP_HIPRT_LIBRARY}
                 COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
@@ -537,4 +521,3 @@ MACRO ( CONFIGURE_HIP )
         SET( NUMBER_OF_GPUS 0 )
     ENDIF()
 ENDMACRO()
-

@@ -1,6 +1,6 @@
 # Verify that a path has been set
 FUNCTION( VERIFY_PATH PATH_NAME )
-    IF ("${PATH_NAME}" STREQUAL "")
+    IF ( "${PATH_NAME}" STREQUAL "" )
         MESSAGE( FATAL_ERROR "Path is not set: ${PATH_NAME}" )
     ENDIF()
     IF ( NOT EXISTS "${PATH_NAME}" )
@@ -8,19 +8,18 @@ FUNCTION( VERIFY_PATH PATH_NAME )
     ENDIF()
 ENDFUNCTION()
 
-
 # Set the include paths for libmesh
-FUNCTION ( LIBMESH_SET_INCLUDES  LIBMESH_DIRECTORY )
-    VERIFY_PATH ( ${LIBMESH_DIRECTORY} )
+FUNCTION( LIBMESH_SET_INCLUDES LIBMESH_DIRECTORY )
+    VERIFY_PATH( ${LIBMESH_DIRECTORY} )
     # Include the libmesh directories
     SET( LIBMESH_INCLUDE )
     SET( LIBMESH_INCLUDE ${LIBMESH_INCLUDE} ${LIBMESH_DIRECTORY}/include/ )
     SET( LIBMESH_INCLUDE ${LIBMESH_INCLUDE} PARENT_SCOPE )
 ENDFUNCTION()
 
-
 # Set the libraries for libmesh
-FUNCTION ( LIBMESH_SET_LIBRARIES  LIBMESH_DIRECTORY )
+FUNCTION( LIBMESH_SET_LIBRARIES LIBMESH_DIRECTORY )
+    # cmake-format: off
     VERIFY_PATH ( ${LIBMESH_DIRECTORY} )
     # Find the libmesh libaries
     FIND_LIBRARY( LIBMESH_MESH_LIB     NAMES mesh_dbg  PATHS ${LIBMESH_DIRECTORY}/lib ${LIBMESH_DIRECTORY}/lib64  NO_DEFAULT_PATH )
@@ -41,12 +40,12 @@ FUNCTION ( LIBMESH_SET_LIBRARIES  LIBMESH_DIRECTORY )
     #IF ( ${CMAKE_SYSTEM} MATCHES ^Linux.* )
     #    IF ( ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL x86_64 )
     #        SET ( LIBMESH_TECIO_LIB  ${LIBMESH_DIRECTORY}/contrib/tecplot/lib/x86_64-unknown-linux-gnu/tecio.a )
-    #    ENDIF ()
-    #ENDIF ()
+    #    ENDIF()
+    #ENDIF()
     # Check that the required libraries exist
     IF ( NOT LIBMESH_MESH_LIB )
         MESSAGE( FATAL_ERROR "Libmesh library (libmesh_opt/dbg) not found in ${LIBMESH_DIRECTORY}/${CMAKE_INSTALL_LIBDIR}" )
-    ENDIF ()
+    ENDIF()
     # Add the libraries in the appropriate order
     SET( LIBMESH_LIBS )
     ADD_LIBMESH_LIB( LIBMESH_MESH_LIB )
@@ -64,11 +63,10 @@ FUNCTION ( LIBMESH_SET_LIBRARIES  LIBMESH_DIRECTORY )
     ADD_LIBMESH_LIB( LIBMESH_TECIO_LIB )
     ADD_LIBMESH_LIB( LIBMESH_MPI_LIB )
     SET ( LIBMESH_LIBS ${LIBMESH_LIBS} PARENT_SCOPE )
+    # cmake-format: on
 ENDFUNCTION()
 MACRO( ADD_LIBMESH_LIB LIBNAME )
     IF ( ${LIBNAME} )
         SET( LIBMESH_LIBS ${LIBMESH_LIBS} ${${LIBNAME}} )
     ENDIF()
 ENDMACRO()
-
-

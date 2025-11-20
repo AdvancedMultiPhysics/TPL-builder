@@ -79,12 +79,11 @@ ENDMACRO()
 
 # Create a TPL-clean target
 MACRO( ADD_TPL_CLEAN TPL )
-    SET( tpl_cmds ${TPL}-build ${TPL}-pre-configure ${TPL}-configure ${TPL}-done 
-        ${TPL}-download ${TPL}-download-impl ${TPL}-mkdir ${TPL}-patch ${TPL}-install 
-        ${TPL}-build-test ${TPL}-test ${TPL}-check-test ${TPL}-update ${TPL}-post-install )
+    SET( tpl_cmds build pre-configure configure done download download-impl mkdir 
+        patch install build-test test check-test update post-install )
     SET( RM_LIST )
     FOREACH( tmp ${tpl_cmds} )
-        SET( RM_LIST ${RM_LIST} ${tmp} ${tmp}-err.log ${tmp}-out.log )
+        SET( RM_LIST ${RM_LIST} ${TPL}-${tmp} ${TPL}-${tmp}-err.log ${TPL}-${tmp}-out.log )
     ENDFOREACH()
     IF ( ${TPL}_INSTALL_DIR )
         ADD_CUSTOM_TARGET( 
