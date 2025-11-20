@@ -58,11 +58,19 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("stacktrace+shared", when="+shared+stacktrace")
     depends_on("stacktrace+mpi", when="+mpi+stacktrace")
     depends_on("stacktrace~mpi", when="~mpi+stacktrace")
+    depends_on("stacktrace+timerutility", when="+timerutility+stacktrace")
+    depends_on("stacktrace~timerutility", when="~timerutility+stacktrace")
+    depends_on(f"stacktrace cxxstd=17", when=f"+stacktrace cxxstd=17")
+    depends_on(f"stacktrace cxxstd=20", when=f"+stacktrace cxxstd=20")
+    depends_on(f"stacktrace cxxstd=23", when=f"+stacktrace cxxstd=23")
 
     depends_on("timerutility~shared", when="~shared+timerutility")
     depends_on("timerutility+shared", when="+shared+timerutility")
     depends_on("timerutility+mpi", when="+mpi+timerutility")
     depends_on("timerutility~mpi", when="~mpi+timerutility")
+    depends_on(f"timerutility cxxstd=17", when=f"+timerutility cxxstd=17")
+    depends_on(f"timerutility cxxstd=20", when=f"+timerutility cxxstd=20")
+    depends_on(f"timerutility cxxstd=23", when=f"+timerutility cxxstd=23")
 
     depends_on("lapackwrappers~shared", when="~shared+lapackwrappers")
     depends_on("lapackwrappers+shared", when="+shared+lapackwrappers")
@@ -117,7 +125,6 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
             self.define("DISABLE_ALL_TESTS", True),
             self.define_from_variant("CMAKE_CXX_STANDARD", "cxxstd"),
             self.define_from_variant("ENABLE_SHARED", "shared"),
-            self.define("ENABLE_STATIC", not spec.variants["shared"].value),
             self.define_from_variant("USE_MPI", "mpi"),
             self.define("MPI_SKIP_SEARCH", False),
             self.define_from_variant("USE_OPENMP", "openmp"),
@@ -128,13 +135,13 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
             self.define('CMAKE_C_COMPILER',   spack_cc),
             self.define('CMAKE_CXX_COMPILER', spack_cxx),
             self.define('CMAKE_Fortran_COMPILER', spack_fc),
-            self.define_from_variant("CMAKE_CXX_STANDARD", "cxxstd")
         ]
+
 
         if spec.satisfies("+trilinos"):
             if '~kokkos' in spec['trilinos']:
                 options.extend( [ self.define("DISABLE_TRILINOS_KOKKOS", True) ] )
-            
+
         if spec.satisfies("+cuda"):
             cuda_arch = spec.variants["cuda_arch"].value
             cuda_flags = ["-extended-lambda", "--expt-relaxed-constexpr"]
@@ -147,6 +154,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
                         ),
                         self.define("CMAKE_CUDA_ARCHITECTURES", cuda_arch),
                         self.define("CMAKE_CUDA_FLAGS", " ".join(cuda_flags)),
+                        self.define_from_variant("CMAKE_CUDA_STANDARD", "cxxstd"),
                     ]
                 )
 
@@ -162,6 +170,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
                         ),
                         self.define("CMAKE_HIP_ARCHITECTURES", amdgpu_target),
                         self.define("CMAKE_HIP_FLAGS", ""),
+                        self.define_from_variant("CMAKE_HIP_STANDARD", "cxxstd"),
                     ]
                 )
                 
@@ -198,7 +207,7 @@ class TplBuilder(CMakePackage, CudaPackage, ROCmPackage):
         if spec.variants["test_gpus"].value != "-1":
             options.append(self.define("NUMBER_OF_GPUS", spec.variants["test_gpus"].value))
 
-        for vname in ("stacktrace", "hypre", "kokkos", "kokkos-kernels",  "libmesh", "petsc", "timerutility", "lapackwrappers", "trilinos"):
+        for vname in ("stacktrace", "hypre", "kokkos", "kokkos-kernels", "libmesh", "petsc", "timerutility", "lapackwrappers", "trilinos"):
             if spec.satisfies(f"+{vname}"):
                 tpl_name = "TIMER" if vname == "timerutility" else "LAPACK_WRAPPERS" if vname == "lapackwrappers" else "KOKKOSKERNELS" if vname == "kokkos-kernels" else vname.upper()
                 tpl_list.append(tpl_name)
