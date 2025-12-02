@@ -58,10 +58,6 @@ FOREACH( lang ${LANGUAGES} )
     ENDIF()
 ENDFOREACH()
 
-IF ( DISABLE_IMPLICIT_LINK )
-  SET( DISABLE_IMPLICIT_LINK=${DISABLE_IMPLICIT_LINK} )
-ENDIF()
-
 # Include CMake files
 INCLUDE( ExternalProject )
 INCLUDE( macros.cmake )
