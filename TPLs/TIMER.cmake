@@ -79,7 +79,7 @@ IF ( CMAKE_BUILD_TIMER )
             MESSAGE(FATAL_ERROR "Please specify QT_VERSION and QWT_URL")
         ENDIF()
     ENDIF()
-
+    MESSAGE( "   Timer configure options: ${TIMER_CONFIGURE_OPTIONS}" )
     # Build Timer
     ADD_TPL(
         TIMER
