@@ -71,9 +71,14 @@ ENDMACRO()
 
 # Check for gold linker
 IF ( UNIX AND NOT APPLE AND NOT DISABLE_GOLD AND NOT DEFINED CMAKE_LINKER_TYPE )
-    EXECUTE_PROCESS( COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE LD_VERSION )
-    IF ( "${LD_VERSION}" MATCHES "GNU gold" )
-        SET( CMAKE_LINKER_TYPE GOLD )
+    INCLUDE( CheckLinkerFlag )
+    SET( CMAKE_LINKER_TYPE GOLD )
+    CHECK_LINKER_FLAG( CXX "-fuse-ld=gold" test_gold )
+    IF ( test_gold )
+        MESSAGE( "-- Using gold linker" )
+    ELSE()
+        MESSAGE( "-- Using default linker" )
+        SET( CMAKE_LINKER_TYPE DEFAULT )
     ENDIF()
 ENDIF()
 
@@ -530,10 +535,9 @@ MACRO( SET_WARNINGS )
 
         ELSEIF ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "NVHPC" )
 
-        ELSEIF ( (${CMAKE_Fortran_COMPILER_ID} MATCHES "CRAY" ) OR ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "Cray" ) )
+        ELSEIF ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "(CRAY|Cray)" )
 
-        ELSEIF ( (${CMAKE_Fortran_COMPILER_ID} MATCHES "CLANG" ) OR ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "Clang" ) OR ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "FLANG" )
-                OR ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "Flang" ) )
+        ELSEIF ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "(CLANG|Clang|FLANG|Flang)" )
 
         ELSEIF ( ${CMAKE_Fortran_COMPILER_ID} MATCHES "XL" )
 
