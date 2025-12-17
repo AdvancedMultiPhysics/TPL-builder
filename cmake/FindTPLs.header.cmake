@@ -60,12 +60,6 @@ IF ( NOT DEFINED DISABLE_OPENMP AND NOT DEFINED USE_OPENMP )
     SET( USE_OPENMP     @USE_OPENMP@ )
   ENDIF()
 
-# flag for GPU aware MPI - requires user to provide
-# vendor specific compile and link flags for GPU aware MPI
-IF ( ( USE_CUDA OR USE_HIP ) AND NOT DEFINED DISABLE_GPU_AWARE_MPI AND NOT DEFINED ENABLE_GPU_AWARE_MPI )
-    SET( ENABLE_GPU_AWARE_MPI     @ENABLE_GPU_AWARE_MPI@ )
-ENDIF()
-
 # Set some basic information (should only be called once regardless of the number of calls to find_package(FindTPLs)
 IF ( NOT TPLs_COMPILERS_INITIALIZED )
 
@@ -265,6 +259,12 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
             SET( TPLs_INCLUDE_DIRS ${TPLs_INCLUDE_DIRS} ${MPI_${lang}_INCLUDE_DIRS} )
             SET( MPI_LINK_FLAGS "${MPI_${lang}_LINK_FLAGS} ${MPI_LINK_FLAGS}" )
         ENDFOREACH()
+
+        # flag for GPU aware MPI - requires user to provide
+        # vendor specific compile and link flags for GPU aware MPI
+        IF ( ( USE_CUDA OR USE_HIP ) AND NOT DEFINED DISABLE_GPU_AWARE_MPI AND NOT DEFINED ENABLE_GPU_AWARE_MPI )
+            SET( ENABLE_GPU_AWARE_MPI     @ENABLE_GPU_AWARE_MPI@ )
+        ENDIF()
     ENDIF()
 
     # Include additional cmake files
