@@ -311,6 +311,15 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         LIST( REMOVE_ITEM CMAKE_Fortran_IMPLICIT_INCLUDE_DIRECTORIES "${dir}")
     ENDFOREACH()
 
+    # Disable incremental linking
+    IF ( MSVC )
+        CHECK_LINKER_FLAG( CXX "/INCREMENTAL:NO" test_incremental )
+        IF ( test_incremental )
+            SET( ENV_LIBS "${ENV_LIBS} /INCREMENTAL:NO" )
+            SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /INCREMENTAL:NO" )
+        ENDIF()
+    ENDIF()
+
     # Add user include paths / libraries
     SET( TPLs_INCLUDE_DIRS ${TPLs_INCLUDE_DIRS} ${USER_INCLUDE_DIRS} )
     SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} ${USER_LIBRARIES} )

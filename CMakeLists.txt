@@ -159,6 +159,7 @@ ENDFOREACH()
 # Add build-test target to print results of build process
 ENABLE_TESTING()
 INCLUDE( CTest )
+ADD_TEST( TPLsConfig ${CMAKE_COMMAND} -E cat "${CMAKE_INSTALL_PREFIX}/TPLsConfig.cmake" )
 ADD_TEST( echo-build ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/echo_last_build.cmake" )
 SET_TESTS_PROPERTIES( echo-build PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" )
 FOREACH( TPL ${TPL_LIST} )
