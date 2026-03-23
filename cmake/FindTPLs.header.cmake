@@ -313,6 +313,7 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
 
     # Disable incremental linking
     IF ( MSVC )
+        INCLUDE( CheckLinkerFlag )
         CHECK_LINKER_FLAG( CXX "/INCREMENTAL:NO" test_incremental )
         IF ( test_incremental )
             SET( ENV_LIBS "${ENV_LIBS} /INCREMENTAL:NO" )
