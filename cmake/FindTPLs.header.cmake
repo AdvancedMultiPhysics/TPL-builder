@@ -423,7 +423,7 @@ ENDMACRO()
 IF ( USE_CUDA )
     # Enable CUDA toolkit
     FIND_PACKAGE( CUDAToolkit REQUIRED )
-    SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
+    SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cusolver CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
     SET( USE_DEVICE TRUE )
 ENDIF()
 
