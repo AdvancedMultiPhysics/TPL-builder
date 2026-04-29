@@ -1,0 +1,26 @@
+diff --git a/src/utilities/_hypre_utilities.hpp b/src/utilities/_hypre_utilities.hpp
+index eb3f2dadc..741fddb20 100644
+--- a/src/utilities/_hypre_utilities.hpp
++++ b/src/utilities/_hypre_utilities.hpp
+@@ -451,6 +451,8 @@ using hypre_DeviceItem = void*;
+ #define HYPRE_THRUST_IDENTITY(type) thrust::identity<type>()
+ #elif defined(HYPRE_USING_CUDA)
+ #define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
++#elif defined(HYPRE_USING_HIP)
++#define HYPRE_THRUST_IDENTITY(type) ::internal::identity()
+ #endif
+ 
+ using namespace thrust::placeholders;
+diff --git a/src/utilities/device_utils.h b/src/utilities/device_utils.h
+index feca41719..927626bc0 100644
+--- a/src/utilities/device_utils.h
++++ b/src/utilities/device_utils.h
+@@ -233,6 +233,8 @@ using hypre_DeviceItem = void*;
+ #define HYPRE_THRUST_IDENTITY(type) thrust::identity<type>()
+ #elif defined(HYPRE_USING_CUDA)
+ #define HYPRE_THRUST_IDENTITY(type) cuda::std::identity()
++#elif defined(HYPRE_USING_HIP)
++#define HYPRE_THRUST_IDENTITY(type) ::internal::identity()
+ #endif
+ 
+ using namespace thrust::placeholders;
