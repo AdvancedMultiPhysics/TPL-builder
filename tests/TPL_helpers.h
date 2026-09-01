@@ -15,6 +15,7 @@ enum class TPL_Enum {
     CATCH2,
     FFTW,
     GKLIB,
+    GSL,
     HDF5,
     HYPRE,
     KOKKOS,
@@ -32,6 +33,7 @@ enum class TPL_Enum {
     PETSC,
     QT,
     QWT,
+    QUO,
     RAJA,
     SAMRAI,
     SAMRSOLVERS,
@@ -63,6 +65,7 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::CATCH2: return "CATCH2";
     case TPL_Enum::FFTW: return "FFTW";
     case TPL_Enum::GKLIB: return "GKLIB";
+    case TPL_Enum::GSL: return "GSL";
     case TPL_Enum::HDF5: return "HDF5";
     case TPL_Enum::HYPRE: return "HYPRE";
     case TPL_Enum::KOKKOS: return "KOKKOS";
@@ -80,6 +83,7 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::PETSC: return "PETSC";
     case TPL_Enum::QT: return "QT";
     case TPL_Enum::QWT: return "QWT";
+    case TPL_Enum::QUO: return "QUO";
     case TPL_Enum::RAJA: return "RAJA";
     case TPL_Enum::SAMRAI: return "SAMRAI";
     case TPL_Enum::SAMRSOLVERS: return "SAMRSOLVERS";
@@ -107,6 +111,7 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "CATCH2" ) { return TPL_Enum::CATCH2; }
     if ( tpl == "FFTW" ) { return TPL_Enum::FFTW; }
     if ( tpl == "GKLIB" ) { return TPL_Enum::GKLIB; }
+    if ( tpl == "GSL" ) { return TPL_Enum::GSL; }
     if ( tpl == "HDF5" ) { return TPL_Enum::HDF5; }
     if ( tpl == "HYPRE" ) { return TPL_Enum::HYPRE; }
     if ( tpl == "KOKKOS" ) { return TPL_Enum::KOKKOS; }
@@ -123,6 +128,7 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "PETSC" ) { return TPL_Enum::PETSC; }
     if ( tpl == "QT" ) { return TPL_Enum::QT; }
     if ( tpl == "QWT" ) { return TPL_Enum::QWT; }
+    if ( tpl == "QUO" ) { return TPL_Enum::QUO; }
     if ( tpl == "RAJA" ) { return TPL_Enum::RAJA; }
     if ( tpl == "OPENBLAS" ) { return TPL_Enum::OPENBLAS; }
     if ( tpl == "SAMRAI" ) { return TPL_Enum::SAMRAI; }

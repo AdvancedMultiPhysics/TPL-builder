@@ -18,11 +18,17 @@
 #ifdef TPLS_Tests_USE_HDF5
 #include "hdf5.h"
 #endif
+#ifdef TPLS_Tests_USE_GSL
+#include "gsl/gsl_sf_bessel.h"
+#endif
 #ifdef TPLS_Tests_USE_LAPACK_WRAPPERS
 #include "LapackWrappers.h"
 #endif
 #ifdef TPLS_Tests_USE_PETSC
 #include "petsc.h"
+#endif
+#ifdef TPLS_Tests_USE_QUO
+#include "quo.h"
 #endif
 #ifdef TPLS_Tests_USE_STACKTRACE
 #include "StackTrace/StackTrace.h"
@@ -103,6 +109,16 @@ bool test<TPL_Enum::FFTW>()
 {
     std::cout << "   -- No tests defined for fftw\n";
     return true;
+}
+#endif
+
+
+// Test GSL
+#ifdef TPLS_Tests_USE_GSL
+template<>
+bool test<TPL_Enum::GSL>()
+{
+    return gsl_sf_bessel_J0( 0.0 ) == 1.0;
 }
 #endif
 
@@ -339,6 +355,18 @@ bool test<TPL_Enum::QWT>()
 #endif
 
 
+// Test QUO
+#ifdef TPLS_Tests_USE_QUO
+template<>
+bool test<TPL_Enum::QUO>()
+{
+    int version = 0;
+    int subversion = 0;
+    return QUO_version( &version, &subversion ) == QUO_SUCCESS && version > 0;
+}
+#endif
+
+
 // Test SAMRAI
 #ifdef TPLS_Tests_USE_SAMRAI
 template<>
@@ -467,6 +495,7 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::CATCH2: return test<TPL_Enum::CATCH2>();
     case TPL_Enum::FFTW: return test<TPL_Enum::FFTW>();
     case TPL_Enum::GKLIB: return test<TPL_Enum::GKLIB>();
+    case TPL_Enum::GSL: return test<TPL_Enum::GSL>();
     case TPL_Enum::HDF5: return test<TPL_Enum::HDF5>();
     case TPL_Enum::HYPRE: return test<TPL_Enum::HYPRE>();
     case TPL_Enum::KOKKOS: return test<TPL_Enum::KOKKOS>();
@@ -483,6 +512,7 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::PETSC: return test<TPL_Enum::PETSC>();
     case TPL_Enum::QT: return test<TPL_Enum::QT>();
     case TPL_Enum::QWT: return test<TPL_Enum::QWT>();
+    case TPL_Enum::QUO: return test<TPL_Enum::QUO>();
     case TPL_Enum::RAJA: return test<TPL_Enum::RAJA>();
     case TPL_Enum::SAMRAI: return test<TPL_Enum::SAMRAI>();
     case TPL_Enum::SAMRSOLVERS: return test<TPL_Enum::SAMRSOLVERS>();

@@ -35,6 +35,7 @@ The current TPL list and last tested versions are:
 - Cppcheck (2.10) https://github.com/danmar/cppcheck/archive/refs/tags/2.10.tar.gz
 - GKlib https://github.com/KarypisLab/GKlib
 - FFTW (3.3.8) https://www.fftw.org/fftw-3.3.8.tar.gz
+- GSL https://www.gnu.org/software/gsl/
 - HDF5 (1.12.0) https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.0/src/hdf5-1.12.0.tar.bz2
 - HYPRE (2.30.0) https://github.com/hypre-space/hypre/archive/refs/tags/v2.31.0.tar.gz
 - KOKKOS (4.1.00) https://github.com/kokkos/kokkos/archive/refs/tags/4.1.00.tar.gz
@@ -46,6 +47,7 @@ The current TPL list and last tested versions are:
 - OGRE https://github.com/OGRECave/ogre/archive/refs/tags/ogre-1.11.0.zip
 - PARMETIS https://github.com/KarypisLab/ParMETIS
 - PETSc (3.20.0) https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.0.tar.gz
+- QUO (1.4.1) https://lanl.github.io/libquo/
 - RAJA (2023.06.1) https://github.com/LLNL/RAJA/releases/download/v2023.06.1/RAJA-v2023.06.1.tar.gz
 - SAMRAI(patched) https://github.com/AdvancedMultiPhysics/SAMRAI/tree/patches5
 - SILO (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/Silo-4.10.3RC.modified.tar.gz
@@ -247,6 +249,15 @@ Special TPL FLAGS:
    - HDF5_ENABLE_CXX - Enable cxx support in hdf5 (default is disabled)
    - HDF5_ENABLE_UNSUPPORTED - Enable unsupported options in hdf5
    - HDF5_VERSION    - Specify HDF5 version being used (required)
+- GSL:
+   - GSL_URL         - URL or local archive/source path for GSL.
+   - GSL_SRC_DIR     - Source directory for GSL.
+   - GSL_INSTALL_DIR - Existing GSL installation directory.
+- QUO:
+   - QUO_URL         - URL or local archive/source path for QUO.
+   - QUO_SRC_DIR     - Source directory for QUO.
+   - QUO_INSTALL_DIR - Existing QUO installation directory.
+   - USE_MPI         - QUO requires MPI support.
 - KOKKOS:
    - KOKKOS_ARCH_FLAGS - Specify CUDA/HIP architecture to use
    - KOKKOS_CXX_STD -- specify what C++ standard to use (11, 14,17) etc
