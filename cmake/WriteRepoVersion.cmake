@@ -37,7 +37,7 @@ FUNCTION( WRITE_REPO_VERSION )
     # Save the version info
     SAVE_VERSION_INFO()
 
-    # Load the version info ( should already exist in install folder
+    # Load the version info (should already exist in install folder)
     INCLUDE( "${${PROJ}_INSTALL_DIR}/${PROJ}_Version.cmake" )
     MESSAGE( "${PROJ} Version = ${${PROJ}_MAJOR_VERSION}.${${PROJ}_MINOR_VERSION}.${${PROJ}_BUILD_VERSION}" )
 
@@ -82,7 +82,7 @@ FUNCTION( WRITE_REPO_VERSION )
     # Close the file
     FILE( APPEND "${tmp_file}" "}\n\n#endif\n" )
 
-    # Copy the file only if it is different ( to avoid rebuilding project )
+    # Copy the file only if it is different (to avoid rebuilding project)
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${tmp_file}" "${filename}" )
 
 ENDFUNCTION()
@@ -133,7 +133,7 @@ FUNCTION( SAVE_VERSION_INFO )
     FILE( APPEND "${tmp_file}" "SET( ${PROJ}_LONG_HASH_VERSION  \"${${PROJ}_LONG_HASH}\" )\n" )
     FILE( APPEND "${tmp_file}" "SET( ${PROJ}_BRANCH  \"${${PROJ}_BRANCH}\" )\n" )
 
-    # Copy the file only if it is different ( to avoid rebuilding project )
+    # Copy the file only if it is different (to avoid rebuilding project)
     EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different "${tmp_file}" "${filename}" )
 
 ENDFUNCTION()
@@ -150,7 +150,7 @@ FUNCTION( GET_VERSION_INFO PROJ SOURCE_DIR )
     ENDIF()
     SET( ${PROJ}_REVISION 0 )
 
-    # Get default version info from source version file ( if it exists )
+    # Get default version info from source version file (if it exists)
     IF ( EXISTS "${SOURCE_DIR}/${PROJ}_Version.cmake" )
         INCLUDE( "${SOURCE_DIR}/${PROJ}_Version.cmake" )
     ENDIF()

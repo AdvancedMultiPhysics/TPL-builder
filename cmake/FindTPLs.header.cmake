@@ -288,7 +288,7 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
         SET_STATIC_FLAGS()
     ENDIF()
     IF ( USE_CUDA )
-         INCLUDE_DIRECTORIES( "${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}" )
+         INCLUDE_DIRECTORIES( ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES} )
          SET( CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}" )
     ENDIF()
 
@@ -329,6 +329,10 @@ IF ( NOT TPLs_COMPILERS_INITIALIZED )
     IF ( NOT DEFINED CTEST_RESOURCE_SPEC_FILE )
         SET( CTEST_RESOURCE_SPEC_FILE "@CMAKE_INSTALL_PREFIX@/resources.json" )
     ENDIF()
+
+    # List the enabled languages
+    GET_PROPERTY( _languages GLOBAL PROPERTY ENABLED_LANGUAGES )
+    MESSAGE( STATUS "Enabled Languages: ${_languages}" )
 ENDIF()
 
 # Check which TPLs we want to include and if they are required
