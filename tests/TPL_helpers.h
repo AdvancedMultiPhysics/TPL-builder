@@ -13,6 +13,7 @@ enum class TPL_Enum {
     BOOST,
     CABANA,
     CATCH2,
+    DRACO,
     FFTW,
     GKLIB,
     GSL,
@@ -63,6 +64,7 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::BOOST: return "BOOST";
     case TPL_Enum::CABANA: return "CABANA";
     case TPL_Enum::CATCH2: return "CATCH2";
+    case TPL_Enum::DRACO: return "DRACO";
     case TPL_Enum::FFTW: return "FFTW";
     case TPL_Enum::GKLIB: return "GKLIB";
     case TPL_Enum::GSL: return "GSL";
@@ -109,6 +111,7 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "BOOST" ) { return TPL_Enum::BOOST; }
     if ( tpl == "CABANA" ) { return TPL_Enum::CABANA; }
     if ( tpl == "CATCH2" ) { return TPL_Enum::CATCH2; }
+    if ( tpl == "DRACO" ) { return TPL_Enum::DRACO; }
     if ( tpl == "FFTW" ) { return TPL_Enum::FFTW; }
     if ( tpl == "GKLIB" ) { return TPL_Enum::GKLIB; }
     if ( tpl == "GSL" ) { return TPL_Enum::GSL; }

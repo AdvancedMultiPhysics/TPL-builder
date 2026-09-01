@@ -113,6 +113,17 @@ bool test<TPL_Enum::FFTW>()
 #endif
 
 
+// Test DRACO
+#ifdef TPLS_Tests_USE_DRACO
+template<>
+bool test<TPL_Enum::DRACO>()
+{
+    std::cout << "   -- No tests defined for Draco\n";
+    return true;
+}
+#endif
+
+
 // Test GSL
 #ifdef TPLS_Tests_USE_GSL
 template<>
@@ -493,6 +504,7 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::BOOST: return test<TPL_Enum::BOOST>();
     case TPL_Enum::CABANA: return test<TPL_Enum::CABANA>();
     case TPL_Enum::CATCH2: return test<TPL_Enum::CATCH2>();
+    case TPL_Enum::DRACO: return test<TPL_Enum::DRACO>();
     case TPL_Enum::FFTW: return test<TPL_Enum::FFTW>();
     case TPL_Enum::GKLIB: return test<TPL_Enum::GKLIB>();
     case TPL_Enum::GSL: return test<TPL_Enum::GSL>();

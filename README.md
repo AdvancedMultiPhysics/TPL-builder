@@ -33,6 +33,7 @@ The current TPL list and last tested versions are:
     - ScaLAPACK (2.0.2)  http://www.netlib.org/scalapack/scalapack-2.0.2.tgz
 - CABANA (0.6.1) https://github.com/ECP-copa/Cabana/archive/refs/tags/0.6.1.tar.gz
 - Cppcheck (2.10) https://github.com/danmar/cppcheck/archive/refs/tags/2.10.tar.gz
+- DRACO https://github.com/lanl/Draco
 - GKlib https://github.com/KarypisLab/GKlib
 - FFTW (3.3.8) https://www.fftw.org/fftw-3.3.8.tar.gz
 - GSL https://www.gnu.org/software/gsl/
@@ -49,6 +50,7 @@ The current TPL list and last tested versions are:
 - PETSc (3.20.0) https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.0.tar.gz
 - QUO (1.4.1) https://lanl.github.io/libquo/
 - RAJA (2023.06.1) https://github.com/LLNL/RAJA/releases/download/v2023.06.1/RAJA-v2023.06.1.tar.gz
+- Random123 https://github.com/DEShawResearch/random123
 - SAMRAI(patched) https://github.com/AdvancedMultiPhysics/SAMRAI/tree/patches5
 - SILO (patched) https://bitbucket.org/AdvancedMultiPhysics/tpl-builder/downloads/Silo-4.10.3RC.modified.tar.gz
 - SUNDIALS (2.6.2) https://computing.llnl.gov/sites/default/files/inline-files/sundials-2.6.2.tar.gz
@@ -249,6 +251,12 @@ Special TPL FLAGS:
    - HDF5_ENABLE_CXX - Enable cxx support in hdf5 (default is disabled)
    - HDF5_ENABLE_UNSUPPORTED - Enable unsupported options in hdf5
    - HDF5_VERSION    - Specify HDF5 version being used (required)
+- DRACO:
+   - DRACO_URL         - URL or local archive/source path for Draco. Defaults to the draco-7_22_0 release archive when no source or installation is specified.
+   - DRACO_SRC_DIR     - Source directory for Draco.
+   - DRACO_INSTALL_DIR - Existing Draco installation directory.
+   - USE_MPI           - Draco with QUO requires MPI support.
+   - GSL, QUO, and Random123 are required dependencies.
 - GSL:
    - GSL_URL         - URL or local archive/source path for GSL.
    - GSL_SRC_DIR     - Source directory for GSL.
@@ -258,6 +266,10 @@ Special TPL FLAGS:
    - QUO_SRC_DIR     - Source directory for QUO.
    - QUO_INSTALL_DIR - Existing QUO installation directory.
    - USE_MPI         - QUO requires MPI support.
+- RANDOM123:
+   - RANDOM123_URL         - URL or local archive/source path for Random123.
+   - RANDOM123_SRC_DIR     - Source directory for Random123.
+   - RANDOM123_INSTALL_DIR - Existing Random123 installation directory.
 - KOKKOS:
    - KOKKOS_ARCH_FLAGS - Specify CUDA/HIP architecture to use
    - KOKKOS_CXX_STD -- specify what C++ standard to use (11, 14,17) etc
