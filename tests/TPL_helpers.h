@@ -32,6 +32,7 @@ enum class TPL_Enum {
     OPENBLAS,
     PARMETIS,
     PETSC,
+    PYBIND11,
     QT,
     QWT,
     QUO,
@@ -83,6 +84,7 @@ inline std::string getName( TPL_Enum tpl )
     case TPL_Enum::OPENBLAS: return "OPENBLAS";
     case TPL_Enum::PARMETIS: return "PARMETIS";
     case TPL_Enum::PETSC: return "PETSC";
+    case TPL_Enum::PYBIND11: return "PYBIND11";
     case TPL_Enum::QT: return "QT";
     case TPL_Enum::QWT: return "QWT";
     case TPL_Enum::QUO: return "QUO";
@@ -129,6 +131,7 @@ inline TPL_Enum getTPL( const std::string& tpl )
     if ( tpl == "OGRE" ) { return TPL_Enum::OGRE; }
     if ( tpl == "PARMETIS" ) { return TPL_Enum::PARMETIS; }
     if ( tpl == "PETSC" ) { return TPL_Enum::PETSC; }
+    if ( tpl == "PYBIND11" ) { return TPL_Enum::PYBIND11; }
     if ( tpl == "QT" ) { return TPL_Enum::QT; }
     if ( tpl == "QWT" ) { return TPL_Enum::QWT; }
     if ( tpl == "QUO" ) { return TPL_Enum::QUO; }

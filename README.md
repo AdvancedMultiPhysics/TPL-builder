@@ -48,6 +48,7 @@ The current TPL list and last tested versions are:
 - OGRE https://github.com/OGRECave/ogre/archive/refs/tags/ogre-1.11.0.zip
 - PARMETIS https://github.com/KarypisLab/ParMETIS
 - PETSc (3.20.0) https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-3.20.0.tar.gz
+- PYBIND11 https://github.com/pybind/pybind11
 - QUO (1.4.1) https://lanl.github.io/libquo/
 - RAJA (2023.06.1) https://github.com/LLNL/RAJA/releases/download/v2023.06.1/RAJA-v2023.06.1.tar.gz
 - Random123 https://github.com/DEShawResearch/random123

@@ -27,6 +27,9 @@
 #ifdef TPLS_Tests_USE_PETSC
 #include "petsc.h"
 #endif
+#ifdef TPLS_Tests_USE_PYBIND11
+#include "pybind11/pybind11.h"
+#endif
 #ifdef TPLS_Tests_USE_QUO
 #include "quo.h"
 #endif
@@ -152,6 +155,16 @@ bool test<TPL_Enum::HYPRE>()
 {
     std::cout << "   -- No tests defined for hypre\n";
     return true;
+}
+#endif
+
+
+// Test PYBIND11
+#ifdef TPLS_Tests_USE_PYBIND11
+template<>
+bool test<TPL_Enum::PYBIND11>()
+{
+    return PYBIND11_VERSION_MAJOR > 0;
 }
 #endif
 
@@ -522,6 +535,7 @@ bool callTest( TPL_Enum tpl )
     case TPL_Enum::OPENBLAS: return test<TPL_Enum::OPENBLAS>();
     case TPL_Enum::PARMETIS: return test<TPL_Enum::PARMETIS>();
     case TPL_Enum::PETSC: return test<TPL_Enum::PETSC>();
+    case TPL_Enum::PYBIND11: return test<TPL_Enum::PYBIND11>();
     case TPL_Enum::QT: return test<TPL_Enum::QT>();
     case TPL_Enum::QWT: return test<TPL_Enum::QWT>();
     case TPL_Enum::QUO: return test<TPL_Enum::QUO>();
