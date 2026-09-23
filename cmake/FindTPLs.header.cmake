@@ -427,7 +427,11 @@ ENDMACRO()
 IF ( USE_CUDA )
     # Enable CUDA toolkit
     FIND_PACKAGE( CUDAToolkit REQUIRED )
-    SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cusolver CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver )
+    FIND_PACKAGE( CCCL REQUIRED )
+    SET( TPLs_LIBRARIES ${TPLs_LIBRARIES} CUDA::cusparse CUDA::cusolver CUDA::cublas CUDA::curand CUDA::cudart CUDA::cuda_driver CCCL::CCCL )
+    if(EXISTS "${CUDAToolkit_TARGET_DIR}/include/cccl")
+      SET( TPLs_INCLUDE_DIRS ${TPLs_INCLUDE_DIRS} "${CUDAToolkit_TARGET_DIR}/include/cccl" )
+    endif()
     SET( USE_DEVICE TRUE )
 ENDIF()
 
