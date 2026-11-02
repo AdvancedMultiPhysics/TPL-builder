@@ -1,0 +1,13 @@
+diff --git a/config/setupMPI.cmake b/config/setupMPI.cmake
+index 9793d8068..59f6e95cb 100644
+--- a/config/setupMPI.cmake
++++ b/config/setupMPI.cmake
+@@ -46,7 +46,7 @@ function(setMPIflavorVer)
+     OR "${MPIEXEC_EXECUTABLE}" MATCHES "smpi"
+     OR ("${MPIEXEC_EXECUTABLE}" MATCHES "srun" AND "${MPI_C_COMPILER}" MATCHES "openmpi"))
+     set(MPI_FLAVOR "openmpi")
+-  elseif("${MPIEXEC_EXECUTABLE}" MATCHES "mpich" OR "${MPI_C_HEADER_DIR}" MATCHES "mpich")
++  elseif("${MPIEXEC_EXECUTABLE}" MATCHES "mpich" OR "${MPI_C_COMPILER}" MATCHES "mpich")
+     set(MPI_FLAVOR "mpich")
+   elseif("${MPIEXEC_EXECUTABLE}" MATCHES "impi" OR "${MPIEXEC_EXECUTABLE}" MATCHES "clusterstudio")
+     set(MPI_FLAVOR "intel")
