@@ -50,13 +50,19 @@ IF ( CMAKE_BUILD_QUO )
         LIST( APPEND QUO_CONFIGURE_OPTIONS --enable-shared=no --enable-static=yes )
     ENDIF()
 
+    # Fix configure errors when intel -R options clash libtool parsing them as rpath
+    SET( QUO_ENV_VARS "${ENV_VARS}" )
+    IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
+        string(REPLACE "-Rno-debug-disables-optimization" "-O0" QUO_ENV_VARS "${QUO_ENV_VARS}")
+    ENDIF()
+
     ADD_TPL(
         QUO
         URL                 "${QUO_CMAKE_URL}"
         DOWNLOAD_DIR        "${QUO_CMAKE_DOWNLOAD_DIR}"
         SOURCE_DIR          "${QUO_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND      ""
-        CONFIGURE_COMMAND   ${QUO_CMAKE_SOURCE_DIR}/configure ${QUO_CONFIGURE_OPTIONS} ${ENV_VARS}
+        CONFIGURE_COMMAND   ${QUO_CMAKE_SOURCE_DIR}/configure ${QUO_CONFIGURE_OPTIONS} ${QUO_ENV_VARS}
         BUILD_COMMAND       $(MAKE) VERBOSE=1
         BUILD_IN_SOURCE     0
         INSTALL_COMMAND     $(MAKE) install

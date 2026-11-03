@@ -32,13 +32,19 @@ IF ( CMAKE_BUILD_GSL )
         LIST( APPEND GSL_CONFIGURE_OPTIONS --enable-shared=no --enable-static=yes )
     ENDIF()
 
+    # Fix configure errors when intel -R options clash libtool parsing them as rpath
+    SET( GSL_ENV_VARS "${ENV_VARS}" )
+    IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
+        string(REPLACE "-Rno-debug-disables-optimization" "-O0" GSL_ENV_VARS "${GSL_ENV_VARS}")
+    ENDIF()
+    
     ADD_TPL(
         GSL
         URL "${GSL_CMAKE_URL}"
 		DOWNLOAD_DIR "${GSL_CMAKE_DOWNLOAD_DIR}"
 		SOURCE_DIR "${GSL_CMAKE_SOURCE_DIR}"
         UPDATE_COMMAND ""
-        CONFIGURE_COMMAND ${GSL_CMAKE_SOURCE_DIR}/configure ${GSL_CONFIGURE_OPTIONS} ${ENV_VARS}
+        CONFIGURE_COMMAND ${GSL_CMAKE_SOURCE_DIR}/configure ${GSL_CONFIGURE_OPTIONS} ${GSL_ENV_VARS}
         BUILD_COMMAND $(MAKE) VERBOSE=1
 		BUILD_IN_SOURCE 0
 		INSTALL_COMMAND $(MAKE) install
