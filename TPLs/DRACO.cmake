@@ -125,7 +125,7 @@ IF ( CMAKE_BUILD_DRACO )
     ENDIF()
     LIST( APPEND DRACO_CONFIGURE_COMMAND <SOURCE_DIR> ${DRACO_CONFIGURE_OPTIONS} )
 
-    IF ( ${CMAKE_BUILD_TYPE} STREQUAL "Debug" )
+    IF ( (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") )
         SET( DRACO_EXTRA_LINK_LIBS "-fsanitize=bounds-strict,float-divide-by-zero,float-cast-overflow,signed-integer-overflow" )
     ENDIF()
 
