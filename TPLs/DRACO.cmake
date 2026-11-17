@@ -127,7 +127,10 @@ IF ( CMAKE_BUILD_DRACO )
         SET( DRACO_EXTRA_LINK_LIBS "-fsanitize=bounds-strict,float-divide-by-zero,float-cast-overflow,signed-integer-overflow" )
     ENDIF()
 
-    SET( DRACO_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/draco.setupMPI.patch" )
+    # Patch only if installing from .tar file
+    IF ( DRACO_URL )
+        SET( DRACO_PATCH_COMMAND patch -p1 -i "${CMAKE_CURRENT_SOURCE_DIR}/patches/draco.setupMPI.patch" )
+    ENDIF()
 
     ADD_TPL(
         DRACO
